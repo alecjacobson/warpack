@@ -4,9 +4,9 @@ Sparse eigenvalue problems computed in **NVIDIA Warp**, with an optional **cuDSS
 
 This is a first implementation, not an API-compatible drop-in replacement for Spectra or ARPACK. It covers their main eigenproblem families. Performance varies by problem: the measurements below include cases where Spectra or CuPy wins.
 
-[Watch the dragon's first 20 elastic modes](results/dragon_modes.mp4) · [Download the editable Blender scene and numerical data](https://github.com/alecjacobson/warpack/releases/tag/v0.1.0)
+[Download the animated teaser and editable Blender scene](https://github.com/alecjacobson/warpack/releases/tag/v0.1.1) · [Original movie and numerical data](https://github.com/alecjacobson/warpack/releases/tag/v0.1.0)
 
-![Dragon vibration mode](results/dragon_modes.png)
+![Dragon elastic modes 1–20: eased motion with instantaneous striped displacement coloring](results/dragon_teaser.gif)
 
 ## Supported problems
 
@@ -95,7 +95,9 @@ The reference geometry is normalized to a longest bounding-box extent of one met
 
 Here λ and μ are the physical Lamé constants. The assembled Hessian is the stress-free tangent at `F=I`, checked independently by finite differences of this energy. Mass is **lumped**, not consistent. The body is free: six rigid modes are checked and omitted from the film. We solve `M⁻¹/² H M⁻¹/²`, using a positive unit shift for the inverse, then recover mass-orthonormal physical displacements. The first elastic frequency is approximately **0.898 Hz**.
 
-The film has a white studio background and displacement-magnitude pseudocolor, normalized separately per mode. Each mode plays one cycle in two seconds, with its physical frequency labelled. The maximum displayed surface displacement is 2.5% of body length. An analytic cubic-volume check over the **entire sinusoidal cycle**, on every tetrahedron in every mode, found no inversions. Display amplitude and playback speed are illustration choices, not a physical forcing amplitude or real-time playback.
+The README GIF exercises all 20 elastic modes in order, from rest to peak amplitude and back using gptoolbox's `squease` function. Peak poses are scaled independently to fit within a centered box twice the original dimensions, with 5% margin; the entire animation occupies at most **1.93×** the original box dimensions. The camera stays fixed. The exact gptoolbox jet-range palette is `okloop(256,-4*pi/3,-pi/2)`, with Polyscope-style alternating scalar stripes. Color represents **instantaneous displacement norm**, divided by the largest displayed displacement anywhere in the whole sequence; the color scale stays fixed as each mode grows and returns to rest. See the [style/scale metadata](results/dragon_teaser.json) and [evaluated scene validation](results/teaser_validation.json).
+
+The original v0.1.0 film has a white studio background and displacement-magnitude pseudocolor, normalized separately per mode. Each mode plays one cycle in two seconds, with its physical frequency labelled. The maximum displayed surface displacement is 2.5% of body length. An analytic cubic-volume check over the **entire sinusoidal cycle**, on every tetrahedron in every mode, found no inversions. Display amplitude and playback speed are illustration choices, not a physical forcing amplitude or real-time playback.
 
 ```bash
 # The original workspace keeps this dataset in a sibling directory.
@@ -108,7 +110,20 @@ blender -b --python examples/render_modes.py -- --preview --render
 python examples/validate_animation.py
 ```
 
-Download `dragon.mesh.gz` from the release and decompress it to the `--mesh` path above. The release includes the exact input mesh, the mass-normalized numerical results and physical modes, and the editable `.blend` scene. Dataset provenance and licensing are in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
+To reproduce the current README teaser with Blender 4.5 and [gifski](https://gif.ski/):
+
+```bash
+# Generate the optimized numerical modes; the previous command also builds the studio base scene.
+python -m examples.dragon_modes --out results/dragon_optimized.npz
+blender -b --python examples/render_teaser.py -- --render
+blender -b results/dragon_teaser.blend --python examples/validate_teaser.py
+gifski --fps 20 --quality 85 --width 720 --repeat 0 \
+  --output results/dragon_teaser.gif build/teaser_frames/frame_*.png
+```
+
+The GIF contains 33 frames per mode at 20 fps (33 seconds total), on a white studio background. The editable teaser scene has baked geometry and color-amplitude curves and a packed colormap, so it does not depend on custom Python drivers.
+
+Download `dragon.mesh.gz` from the [v0.1.0 release](https://github.com/alecjacobson/warpack/releases/tag/v0.1.0) and decompress it to the `--mesh` path above. That release includes the exact input mesh, the mass-normalized numerical results and physical modes, and the editable `.blend` scene. Dataset provenance and licensing are in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
 
 ## Validation and benchmarking
 
