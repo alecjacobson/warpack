@@ -1,0 +1,97 @@
+{
+  "n": 125000,
+  "k": 20,
+  "ncv": 48,
+  "warp": [
+    {
+      "tol": 1e-09,
+      "host_enqueue_ms": 0.8012279868125916,
+      "device_elapsed_ms": 517.7784423828125,
+      "wall_ms": 517.935786396265,
+      "restarts": 59,
+      "converged": 20,
+      "residual": 4.562211688588787e-09,
+      "relative_residual": 3.790420361264773e-10,
+      "orthogonality": 4.376499163072367e-13
+    },
+    {
+      "tol": 1e-10,
+      "host_enqueue_ms": 0.3693103790283203,
+      "device_elapsed_ms": 552.7041625976562,
+      "wall_ms": 552.8282821178436,
+      "restarts": 63,
+      "converged": 20,
+      "residual": 4.176972431499471e-10,
+      "relative_residual": 3.470352196150411e-11,
+      "orthogonality": 4.412026299860372e-13
+    },
+    {
+      "tol": 1e-11,
+      "host_enqueue_ms": 0.35965442657470703,
+      "device_elapsed_ms": 587.2684936523438,
+      "wall_ms": 587.3617753386497,
+      "restarts": 67,
+      "converged": 20,
+      "residual": 5.690508113155332e-11,
+      "relative_residual": 4.7278423910044855e-12,
+      "orthogonality": 4.409805853811122e-13
+    }
+  ],
+  "cupy": [
+    {
+      "tol": 1e-09,
+      "wall_ms": 438.8633854687214,
+      "ritz_solves": 90,
+      "matvecs": 2540,
+      "residual": 9.949610854866058e-10,
+      "relative_residual": 8.26643087721893e-11,
+      "orthogonality": 2.6867397195928788e-14
+    },
+    {
+      "tol": 1e-10,
+      "wall_ms": 474.4814448058605,
+      "ritz_solves": 98,
+      "matvecs": 2764,
+      "residual": 8.752037035241464e-11,
+      "relative_residual": 7.2714511393478624e-12,
+      "orthogonality": 2.7977620220553945e-14
+    }
+  ],
+  "restart_stage_ms": {
+    "expand_and_reorthogonalize": 3.560159921646118,
+    "last_operator_product": 0.008927999995648861,
+    "projected_gram": 1.3372479677200317,
+    "projected_eigensolve": 2.809119939804077,
+    "rotate_basis": 0.5077760219573975,
+    "rotate_operator_products": 0.5130239725112915,
+    "copy_and_residual": 0.17219200730323792
+  },
+  "instrumented_uncaptured_kernel_ms": {
+    "forward kernel csr_mm_c505f833": 0.2399040013551712,
+    "forward kernel basis_norm_a5731055": 0.3909760043025017,
+    "forward kernel basis_dots_f49eeab1": 1.7109120022505522,
+    "forward kernel basis_subtract_726711d5": 0.5960960006341338,
+    "forward kernel mark_breakdown_b4375cd8": 0.09014400094747543,
+    "forward kernel fallback_seed_dd83961e": 0.09232000028714538,
+    "forward kernel fallback_dots_b6dd21bb": 0.6392000010237098,
+    "forward kernel fallback_subtract_ccdaf2f1": 0.19251200091093779,
+    "forward kernel basis_scale_ddebb6df": 0.18294399976730347,
+    "forward kernel gram_tiled_73bb8709": 1.3362239599227905,
+    "forward kernel jacobi_kernel__locals__compute_379e54db": 2.995392084121704,
+    "forward kernel sort_diagonal_af34bc2a": 0.1178240031003952,
+    "forward kernel rotation_coefficients_e7feb018": 0.008768000174313784,
+    "forward kernel rotate_tiled_f2d42ba0": 1.0163840055465698
+  },
+  "graph_audit": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 335,
+      "KERNEL": 722,
+      "MEMCPY": 51,
+      "CONDITIONAL": 1
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 51
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  }
+}

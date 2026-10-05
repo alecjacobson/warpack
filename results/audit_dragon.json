@@ -1,0 +1,78 @@
+{
+  "n": 990618,
+  "k": 26,
+  "backend": "cuDSS shared factors",
+  "warp": [
+    {
+      "ncv": 48,
+      "cycles": 2,
+      "host_enqueue_ms": 397.9051783680916,
+      "device_elapsed_ms": 716.5725708007812,
+      "wall_ms": 716.6181840002537,
+      "inverse_applications": 67,
+      "max_original_residual": 2.218573231416024e-08
+    },
+    {
+      "ncv": 48,
+      "cycles": 3,
+      "host_enqueue_ms": 614.392600953579,
+      "device_elapsed_ms": 932.5524291992188,
+      "wall_ms": 932.6538108289242,
+      "inverse_applications": 86,
+      "max_original_residual": 2.256156800902939e-08
+    },
+    {
+      "ncv": 64,
+      "cycles": 2,
+      "host_enqueue_ms": 772.6287730038166,
+      "device_elapsed_ms": 1091.69140625,
+      "wall_ms": 1091.734517365694,
+      "inverse_applications": 99,
+      "max_original_residual": 2.16809805610815e-08
+    },
+    {
+      "ncv": 64,
+      "cycles": 3,
+      "host_enqueue_ms": 1177.2227995097637,
+      "device_elapsed_ms": 1496.2264404296875,
+      "wall_ms": 1496.3011741638184,
+      "inverse_applications": 134,
+      "max_original_residual": 2.393152745800074e-08
+    }
+  ],
+  "cupy": [
+    {
+      "ncv": 48,
+      "wall_ms": 644.3719007074833,
+      "inverse_applications": 70,
+      "max_original_residual": 2.5840801588523746e-07
+    },
+    {
+      "ncv": 64,
+      "wall_ms": 591.1833755671978,
+      "inverse_applications": 64,
+      "max_original_residual": 7.17914334384378e-08
+    }
+  ],
+  "restart_stage_ms": {
+    "expand_and_reorthogonalize": 181.7323455810547,
+    "last_operator_product": 8.30508804321289,
+    "projected_gram": 11.837663650512695,
+    "projected_eigensolve": 2.6548800468444824,
+    "rotate_basis": 5.625728130340576,
+    "rotate_operator_products": 5.636864185333252,
+    "copy_and_residual": 2.8357760906219482
+  },
+  "graph_audit": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 1968,
+      "KERNEL": 4635,
+      "MEMCPY": 435
+    },
+    "memcpy_kinds": {
+      "HtoD (HOST PAGEABLE to DEVICE)": 172,
+      "DtoD (DEVICE to DEVICE)": 263
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  }
+}
