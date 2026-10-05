@@ -43,6 +43,11 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--out", default="results/benchmarks.json")
     p.add_argument("--repeat", type=int, default=3)
+    p.add_argument(
+        "--same-start",
+        action="store_true",
+        help="Use Warp's initial vector for all single-vector solvers",
+    )
     args = p.parse_args()
     rng = np.random.default_rng(123)
     dense = rng.normal(size=(1000, 1000))
@@ -73,6 +78,8 @@ def main():
         cupy=cp.__version__,
         warp=wp.__version__,
         repeats=args.repeat,
+        shared_starting_vector=args.same_start,
+        starting_vector_reset_per_trial=True,
         cases=[],
     )
     for name, a, which, iters in cases:
@@ -103,6 +110,14 @@ def main():
         capture_start = time.perf_counter()
         graph = s.capture(iters if inv else 100, adaptive=not bool(inv))
         capture_seconds = time.perf_counter() - capture_start
+        initial_host = initial_device = None
+        initial_path = Path("build") / (name + ".v0.bin")
+        if args.same_start:
+            s.initialize()
+            wp.synchronize()
+            initial_device = cp.asarray(s.q[0]).copy()
+            initial_host = cp.asnumpy(initial_device)
+            initial_host.tofile(initial_path)
         timings = []
         for i in range(args.repeat + 1):
             t = time.perf_counter()
@@ -128,12 +143,20 @@ def main():
             timings = []
             try:
                 for repeat in range(args.repeat + 1):
+                    # CuPy 14.2 aliases v0 as a mutable Lanczos work buffer.
+                    # Restore identical input outside the timed region.
+                    device_start = initial_device.copy() if initial_device is not None else None
+                    host_start = initial_host.copy() if initial_host is not None else None
                     cp.cuda.get_current_stream().synchronize()
                     t = time.perf_counter()
                     if method == "scipy.eigsh":
-                        w, v = sla.eigsh(a, k=k, which=which, tol=1.0e-10, ncv=m, maxiter=10000)
+                        w, v = sla.eigsh(
+                            a, k=k, which=which, tol=1.0e-10, ncv=m, maxiter=10000, v0=host_start
+                        )
                     elif method == "cupy.eigsh":
-                        w, v = csl.eigsh(d, k=k, which=which, tol=1.0e-9, ncv=m, maxiter=10000)
+                        w, v = csl.eigsh(
+                            d, k=k, which=which, tol=1.0e-9, ncv=m, maxiter=10000, v0=device_start
+                        )
                     else:
                         if which == "LM":
                             break
@@ -168,7 +191,9 @@ def main():
             runs = [
                 json.loads(
                     subprocess.check_output(
-                        ["build/spectra_bench", str(path), str(k), which], text=True
+                        ["build/spectra_bench", str(path), str(k), which]
+                        + ([str(initial_path)] if args.same_start else []),
+                        text=True,
                     )
                 )
                 for _ in range(args.repeat)
@@ -193,6 +218,8 @@ def main():
                     row["spectrum_error"] = float(
                         np.max(np.abs(np.sort(row["eigenvalues"]) - reference))
                     )
+        if args.same_start:
+            np.testing.assert_array_equal(cp.asnumpy(initial_device), initial_host)
         report["cases"].append(
             dict(name=name, n=a.shape[0], nnz=a.nnz, k=k, which=which, results=rows)
         )

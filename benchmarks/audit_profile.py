@@ -90,17 +90,21 @@ def profile_restart(s):
         mark("expand_and_reorthogonalize")
         s.op.apply(s.views[-1], s.zviews[-1])
         mark("last_operator_product")
-        s.gram(s.q, s.z)
+        s.complete_projection() if hasattr(s, "complete_projection") else s.gram(s.q, s.z)
         mark("projected_gram")
         s.diagonalize()
         mark("projected_eigensolve")
         s.rotate(s.q, s.retained)
         mark("rotate_basis")
-        s.rotate(s.z, s.retained_ax)
+        s.update_retained_products() if hasattr(s, "update_retained_products") else s.rotate(
+            s.z, s.retained_ax
+        )
         mark("rotate_operator_products")
         wp.copy(s.q, s.retained, count=s.keep * s.n)
         wp.copy(s.z, s.retained_ax, count=s.keep * s.n)
         s.finalize()
+        if hasattr(s, "reset_projection"):
+            s.reset_projection()
         mark("copy_and_residual")
     samples = []
     for _ in range(6):
@@ -116,13 +120,26 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--matrix", default="build/heterogeneous_laplacian_125000.mtx")
     p.add_argument("--out", default="results/audit_profile.json")
+    p.add_argument("--same-start", action="store_true")
     args = p.parse_args()
     a = scipy.io.mmread(args.matrix).tocsr()
     op = SparseOperator(wp_matrix(a))
-    report = {"n": a.shape[0], "k": 20, "ncv": 48, "warp": [], "cupy": []}
+    report = {
+        "n": a.shape[0],
+        "k": 20,
+        "ncv": 48,
+        "warp": [],
+        "cupy": [],
+        "shared_starting_vector": args.same_start,
+        "starting_vector_reset_per_trial": True,
+    }
+    starting_vector = None
     for tol in [1e-9, 1e-10, 1e-11]:
         s = KrylovSchur(op, 20, ncv=48, which="LA", tol=tol)
         graph = s.capture(100)
+        if args.same_start and starting_vector is None:
+            s.initialize()
+            starting_vector = cp.asarray(s.views[0].numpy().ravel())
         row = {
             "tol": tol,
             **replay_timing(graph),
@@ -172,9 +189,10 @@ def main():
             for _ in range(4):
                 counter.update(lanczos_matvecs=0, ritz_solves=0)
                 cp.random.seed(42)
+                v0 = starting_vector.copy() if starting_vector is not None else None
                 cp.cuda.get_current_stream().synchronize()
                 t0 = time.perf_counter()
-                w, v = csl.eigsh(d, k=20, ncv=48, which="LA", tol=tol, maxiter=10000)
+                w, v = csl.eigsh(d, k=20, ncv=48, which="LA", tol=tol, maxiter=10000, v0=v0)
                 cp.cuda.get_current_stream().synchronize()
                 samples.append(1000 * (time.perf_counter() - t0))
             report["cupy"].append(

@@ -5,6 +5,7 @@ import math
 import warp as wp
 
 from . import kernels as K
+from . import krylov_kernels as KR
 from . import linalg_tiles as KT
 
 
@@ -211,7 +212,7 @@ class SymmetricEigensolver:
             )
             wp.launch(
                 K.sort_diagonal,
-                1,
+                self.m,
                 [self.g, self.ritz, self.order, self.which],
                 device=self.device,
             )
@@ -255,7 +256,7 @@ class SymmetricEigensolver:
                 )
         wp.launch(
             K.sort_diagonal,
-            1,
+            self.m,
             [self.g, self.ritz, self.order, self.which],
             device=self.device,
         )
@@ -325,6 +326,14 @@ class SymmetricEigensolver:
         self.finalize()
         return self
 
+    def _update_loop(self, max_iterations):
+        wp.launch(
+            K.loop_update,
+            1,
+            [self.converged, self.status, self.iterations, self.running, self.k, max_iterations],
+            device=self.device,
+        )
+
     def capture(self, max_iterations=100, adaptive=None, finalizer=None):
         """Capture a GPU-controlled convergence loop (CUDA 12.4+).
 
@@ -346,19 +355,7 @@ class SymmetricEigensolver:
         def body():
             self.step()
             self.finalize()
-            wp.launch(
-                K.loop_update,
-                1,
-                [
-                    self.converged,
-                    self.status,
-                    self.iterations,
-                    self.running,
-                    self.k,
-                    max_iterations,
-                ],
-                device=self.device,
-            )
+            self._update_loop(max_iterations)
 
         with wp.ScopedCapture(device=self.device) as capture:
             self.initialize()
@@ -388,12 +385,24 @@ class KrylovSchur(SymmetricEigensolver):
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9):
         super().__init__(operator, k, ncv=ncv, which=which, tol=tol)
         self.keep = min(k + 4, self.m - 1)
+        # Sparse products can be cheaper and more accurate than a dense basis
+        # rotation. Keep cached products for dense operators and inverses.
+        self._reapply_after_restart = (
+            isinstance(operator, SparseOperator)
+            and operator.matrix.nnz / operator.matrix.nrow * operator.matrix.block_shape[1]
+            <= self.m // 2
+        )
         if self.m <= k:
             raise ValueError("Krylov restart requires ncv > k")
         self.dots = wp.zeros((self.m, 1), dtype=wp.float64, device=self.device)
         self.norm = wp.zeros((1, 1), dtype=wp.float64, device=self.device)
         self.source_norm = wp.zeros_like(self.norm)
         self.breakdown = wp.zeros(1, dtype=wp.int32, device=self.device)
+        self.recoveries = wp.zeros_like(self.breakdown)
+        self.dot_parts = wp.empty(
+            (self.m, (self.n + 1023) // 1024), dtype=wp.float64, device=self.device
+        )
+        self.norm_parts = wp.empty((self.n + 1023) // 1024, dtype=wp.float64, device=self.device)
         self.retained = wp.empty((self.keep, self.n), dtype=wp.float64, device=self.device)
         self.retained_ax = wp.empty_like(self.retained)
         self.views = [self.q[j : j + 1] for j in range(self.m)]
@@ -404,41 +413,86 @@ class KrylovSchur(SymmetricEigensolver):
             raise ValueError("Krylov iteration needs at least one restart cycle")
         return super().solve(iterations, seed)
 
-    def expand(self, j):
-        self.op.apply(self.views[j - 1], self.zviews[j - 1])
-        wp.copy(self.views[j], self.zviews[j - 1])
-        self.source_norm.zero_()
-        wp.launch_tiled(
-            K.basis_norm,
-            dim=(self.n + 255) // 256,
-            inputs=[self.q, self.source_norm, j],
-            block_dim=128,
+    def _update_loop(self, max_iterations):
+        wp.launch(
+            KR.loop_update,
+            1,
+            [
+                self.converged,
+                self.status,
+                self.iterations,
+                self.running,
+                self.recoveries,
+                self.k,
+                max_iterations,
+            ],
             device=self.device,
         )
-        for _ in range(2):
-            self.dots.zero_()
+
+    def _orthogonalize_column(self, j, check):
+        for pass_index in range(2):
+            rows = j + int(pass_index == 0)
             wp.launch_tiled(
-                K.basis_dots,
-                dim=(j, (self.n + 255) // 256),
-                inputs=[self.q, self.dots, j],
+                KR.dot_partials,
+                dim=(rows, self.dot_parts.shape[1]),
+                inputs=[self.q, self.dot_parts, j],
                 block_dim=128,
                 device=self.device,
             )
-            wp.launch(K.basis_subtract, self.n, [self.q, self.dots, j], device=self.device)
-        self.norm.zero_()
+            wp.launch_tiled(
+                KR.finish_dots,
+                dim=rows,
+                inputs=[
+                    self.dot_parts,
+                    self.dots,
+                    self.source_norm,
+                    self.g,
+                    j,
+                    check and pass_index == 0,
+                ],
+                block_dim=128,
+                device=self.device,
+            )
+            wp.launch_tiled(
+                KR.subtract,
+                dim=self.norm_parts.size,
+                inputs=[self.q, self.dots, self.norm_parts, j, pass_index == 1],
+                block_dim=128,
+                device=self.device,
+            )
         wp.launch_tiled(
-            K.basis_norm,
-            dim=(self.n + 255) // 256,
-            inputs=[self.q, self.norm, j],
+            KR.finish_norm,
+            dim=1,
+            inputs=[
+                self.norm_parts,
+                self.norm,
+                self.source_norm,
+                self.breakdown,
+                self.recoveries,
+                check,
+            ],
             block_dim=128,
             device=self.device,
         )
-        wp.launch(
-            K.mark_breakdown,
-            1,
-            [self.norm, self.source_norm, self.breakdown],
-            device=self.device,
-        )
+
+    def expand(self, j):
+        self.op.apply(self.views[j - 1], self.zviews[j - 1])
+        wp.copy(self.views[j], self.zviews[j - 1])
+        self._orthogonalize_column(j, True)
+
+        def recover():
+            wp.launch(K.fallback_seed, self.n, [self.q, self.breakdown, j], device=self.device)
+            self._orthogonalize_column(j, False)
+
+        if wp.get_stream(self.device).is_capturing:
+            wp.capture_if(self.breakdown, recover)
+        else:
+            # Eager execution also keeps the decision on device.
+            self._recover_eager(j)
+        wp.launch(K.basis_scale, self.n, [self.q, self.norm, j], device=self.device)
+
+    def _recover_eager(self, j):
+        # Gated kernels are only used outside captured replay.
         wp.launch(K.fallback_seed, self.n, [self.q, self.breakdown, j], device=self.device)
         for _ in range(2):
             self.dots.zero_()
@@ -463,9 +517,10 @@ class KrylovSchur(SymmetricEigensolver):
             block_dim=128,
             device=self.device,
         )
-        wp.launch(K.basis_scale, self.n, [self.q, self.norm, j], device=self.device)
 
     def initialize(self, seed=42):
+        self.recoveries.zero_()
+        self.g.zero_()
         self.status.zero_()
         wp.launch(K.random_block, (1, self.n), [self.q, seed], device=self.device)
         self.norm.zero_()
@@ -484,12 +539,45 @@ class KrylovSchur(SymmetricEigensolver):
         for j in range(self.keep, self.m):
             self.expand(j)
         self.op.apply(self.views[-1], self.zviews[-1])
-        self.gram(self.q, self.z)
+        # Orthogonalization supplied every new projected column except the last.
+        self.complete_projection()
         self.diagonalize()
         self.rotate(self.q, self.retained)
-        self.rotate(self.z, self.retained_ax)
+        self.update_retained_products()
         wp.copy(self.q, self.retained, count=self.keep * self.n)
         wp.copy(self.z, self.retained_ax, count=self.keep * self.n)
+        self.reset_projection()
+
+    def update_retained_products(self):
+        if self._reapply_after_restart:
+            self.op.apply(self.retained, self.retained_ax)
+        else:
+            self.rotate(self.z, self.retained_ax)
+
+    def reset_projection(self):
+        # The retained Ritz block is diagonal; future columns start at zero.
+        wp.launch(
+            KR.restart_projection,
+            self.g.shape,
+            [self.g, self.ritz, self.order, self.keep],
+            device=self.device,
+        )
+
+    def complete_projection(self):
+        wp.launch_tiled(
+            KR.last_projection,
+            dim=(self.m, self.dot_parts.shape[1]),
+            inputs=[self.q, self.z, self.dot_parts],
+            block_dim=128,
+            device=self.device,
+        )
+        wp.launch_tiled(
+            KR.finish_projection,
+            dim=self.m,
+            inputs=[self.dot_parts, self.g],
+            block_dim=128,
+            device=self.device,
+        )
 
     def finalize(self):
         # The retained rows already are Ritz vectors. Remaining old basis rows

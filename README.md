@@ -101,7 +101,7 @@ The film has a white studio background and displacement-magnitude pseudocolor, n
 # The original workspace keeps this dataset in a sibling directory.
 python examples/dragon_modes.py \
   --mesh ../bbw-comparison/dragon-H/dragon.mesh \
-  --method krylov --width 48 --iterations 3
+  --method krylov --width 64 --iterations 1
 
 # Blender 4.5 is used for the published scene.
 blender -b --python examples/render_modes.py -- --preview --render
@@ -127,7 +127,47 @@ OPENBLAS_NUM_THREADS=4 python benchmarks/cusolver_single.py
 OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python benchmarks/dragon.py
 ```
 
-The 43 GPU tests cover rectangular SVD, buckling/Cayley transforms, FP64 fractional shifts, real symmetric and nonsymmetric spectra, complex Hermitian and general spectra, repeated/zero eigenvalues, both spectrum ends, interior real/complex shifts, non-diagonal mass, device convergence limits, graph replay with changed matrix values, FEM energy derivatives, rigid modes, and graph-captured FEM assembly. These are representative Spectra-style tests, not a complete port of every upstream test.
+The 88 GPU tests cover rectangular SVD, buckling/Cayley transforms, FP64 fractional shifts, real symmetric and nonsymmetric spectra, complex Hermitian and general spectra, repeated/zero eigenvalues, both spectrum ends, interior real/complex shifts, non-diagonal mass, device convergence limits, graph replay with changed matrix values, FEM energy derivatives, rigid modes, and graph-captured FEM assembly. Additional tests independently compare the incremental projected matrix with `Q A Qᵀ`, exercise captured breakdown recovery and small projected eigenproblems, and inspect pure-Warp graphs for host nodes/transfers. These are representative Spectra-style tests, not a complete port of every upstream test.
+
+## v0.1.1 optimization results
+
+All numerical solver work remains in Warp; cuDSS is used only by the optional sparse inverse. The changes replace contended dot-product atomics with two-stage reductions, fuse norm calculation with reorthogonalization, construct the projected matrix incrementally, run breakdown recovery through device conditionals, rank Ritz values in parallel, and stop projected Jacobi sweeps on device. Cheap sparse products are recomputed after restart when they cost less than rotating cached products. Captured breakdown cases also defer early termination until enough independent chains have been explored to recover repeated eigenvalues.
+
+The current comparison uses the same starting vector for single-vector solvers, restored before **every** trial. CuPy 14.2 aliases its supplied `v0` as a mutable work buffer; each call receives a fresh copy outside the timer. Reusing that buffer produced misleading preliminary timings and is not the protocol used in these reports. Block iteration and LOBPCG use block starts. Original v0.1.0 measurements below used different default starting vectors and are retained as historical results.
+
+Median seconds on the same L40, with three timed trials after warmup:
+
+| Problem | Warp replay | CuPy eigsh | SciPy ARPACK | Spectra |
+|---|---:|---:|---:|---:|
+| dense_sym_1000 | 0.0394 | 0.0756 | 0.3309 | 0.2383 |
+| sparse_sym_10000 | 0.0819 | 0.1608 | 0.3759 | 0.3765 |
+| poisson_4096 | 0.0751 | 0.1284 | 0.1782 | 0.0390 |
+| heterogeneous_laplacian_125000 | 0.3110 | 0.4485 | 5.0099 | 15.1581 |
+
+Poisson uses cuDSS, with 0.0451 s additional setup; the other three Warp cases use only Warp kernels. Setup/JIT, capture, residuals, spectrum errors, and nonconverged LOBPCG results are in the [full benchmark report](results/optimized_benchmarks.json). The requested tolerances differ between implementations; achieved original-problem residuals are reported rather than assuming tolerance parameters mean the same thing. These results cover four workloads, not a universal performance claim.
+
+The largest pure-Warp case improved from 587 ms to 311 ms (1.89×). Its maximum normalized residual is 4.45e-12. Host enqueue takes 0.14 ms, and graph inspection finds only device kernels, memsets, device-to-device copies, and conditionals: no host callbacks or host/device transfers. Setup synchronization and explicit result readback are outside replay. This is an event/source/graph audit, not a full CUDA API trace.
+
+The remaining GPU costs per representative restart are 1.92 ms for expansion/reorthogonalization, 1.79 ms for the projected eigensolve, 0.027 ms for completing the projected matrix, and 0.51 ms for basis rotation. Further speedups should target the first two. Householder/QL and register-batched Jacobi prototypes were accurate but slower and are not used in production. See the [current profile](results/optimized_profile.json).
+
+For the full dragon, the validated default is now **64 vectors and one cycle**, with 64 cuDSS inverse applications. The [standalone showcase run](results/dragon_optimized.json) takes **0.658 s**, plus 4.052 s factor setup, versus 0.934 s replay originally. Its maximum original-problem normalized residual is 2.03e-08, elastic-mode residual is 5.00e-09, and mass orthogonality error is 1.64e-14. The existing v0.1.0 animation and editable scene remain available above.
+
+The separate [shared-factor comparison](results/dragon_tuning.json) uses five timed trials, identical restored starting vectors, and a 1e-7 original-problem residual threshold. Warp takes 0.657 s; the fastest accepted CuPy setting takes 0.591 s (`ncv=64`, `tol=1e-10`, 64 inverse applications, residual 2.40e-08). The report includes rejected subspace sizes and the CuPy tolerance sweep. This budget is validated for this mesh and material, not prescribed for arbitrary inputs.
+
+The cuDSS graph still includes backend-owned host-to-device metadata copies and needs a fixed outer iteration budget. In the optimized shared-factor run, the host launch call takes 279 ms, overlapping the 657 ms GPU solve; these times must not be added. No cuDSS metadata rewrite workaround is installed. The pure-Warp graph has no such copies.
+
+All **88 GPU tests pass**, with package build, lint, and formatting checks recorded in [optimization validation](results/optimization_validation.json). Reproduce after building the Spectra baseline as below:
+
+```bash
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m benchmarks.compare --same-start --out results/optimized_benchmarks.json
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m benchmarks.audit_profile --same-start --out results/optimized_profile.json
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m benchmarks.tune_dragon --same-start
+python -m examples.dragon_modes --out results/dragon_optimized.npz
+```
+
+### Original v0.1.0 measurements
+
+The following tables preserve the original release measurements. Current results and the stricter shared-start protocol are reported separately below.
 
 Benchmark inputs and requested modes are identical across implementations. The synthetic GPU/SciPy suite uses one warmup and three timed repetitions; Spectra uses three fresh-process timed runs. GPU timings synchronize completion and start with resident input data; library JIT and host-to-device transfers are excluded. Warpack factor setup and warmup/capture costs are reported separately. Spectra timings include factor setup where used; its setup component is also reported. Spectra and SciPy are CPU baselines on an Intel Xeon Platinum 8362; this is a cross-hardware comparison. Full-dragon CPU/CuPy measurements are single runs, while the final warpack dragon solve reports three replay timings. Residuals and spectrum differences accompany timings; nonconverged results are not speedup claims.
 
@@ -159,9 +199,9 @@ Raw reports: [synthetic suite](results/benchmarks.json), [dragon](results/dragon
 The [cuSOLVERSp `csreigvsi` routine](https://docs.nvidia.com/cuda/cusolver/index.html#cusolverSp-t-csreigvsi) computes one eigenpair near a shift and is deprecated. It is therefore benchmarked as a separate one-eigenpair workload, not relabelled as a 20-mode solver. [CuPy `eigsh`](https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.eigsh.html) and CuPy LOBPCG are additional GPU comparisons. PRIMME/MAGMA GPU variants have not been benchmarked here.
 
 
-## Follow-up performance and synchronization audit
+## Pre-optimization performance and synchronization audit
 
-The [audit scripts](benchmarks/audit_profile.py) separate host enqueue time from CUDA-event elapsed time and inspect captured graph nodes. This is a source/graph/event audit, **not** a full Nsight CUDA API trace. Nsight Systems was unavailable in the test environment.
+These historical measurements motivated the v0.1.1 changes. The [audit scripts](benchmarks/audit_profile.py) separate host enqueue time from CUDA-event elapsed time and inspect captured graph nodes. This is a source/graph/event audit, **not** a full Nsight CUDA API trace. Nsight Systems was unavailable in the test environment.
 
 The pure-Warp 125,000-variable solve took **587.27 ms on device**, **587.36 ms wall time**, and **0.36 ms to enqueue**. The graph contains only kernels, memsets, device-to-device copies, and a device conditional loop. There are no host callbacks or host/device copies. Explicit setup synchronization and final benchmark completion waits are outside the numerical iteration. The representative restart costs are:
 
@@ -173,7 +213,7 @@ The pure-Warp 125,000-variable solve took **587.27 ms on device**, **587.36 ms w
 | Rotate basis and cached operator products | 1.02 |
 | Copy results and compute residuals | 0.17 |
 
-These are separate instrumented stage measurements, not an exact decomposition of an entire converged run. The main optimization targets are a cheaper Warp projected eigensolve, incremental Lanczos/arrowhead projection instead of rebuilding the full Gram matrix, more efficient orthogonalization reductions, and device-conditional breakdown recovery. Ten fixed Jacobi sweeps and thousands of shared-memory barriers are expensive even for a small projected problem. Reducing accuracy alone does not close the gap: Warp at tolerance 1e-10 took 553 ms with a maximum absolute residual of 4.18e-10. The fixed-seed CuPy run at tolerance 1e-9 took 439 ms with residual 9.95e-10. [CuPy 14.2.0's small projected eigensolve](https://github.com/cupy/cupy/blob/v14.2.0/cupyx/scipy/sparse/linalg/_eigen.py#L300) uses CPU NumPy; reproducing that choice would violate this project's device-computation requirement.
+These are separate instrumented stage measurements, not an exact decomposition of an entire converged run. The optimization targets identified at that point were a cheaper Warp projected eigensolve, incremental Lanczos/arrowhead projection instead of rebuilding the full Gram matrix, more efficient orthogonalization reductions, and device-conditional breakdown recovery. Ten fixed Jacobi sweeps and thousands of shared-memory barriers are expensive even for a small projected problem. Reducing accuracy alone does not close the gap: Warp at tolerance 1e-10 took 553 ms with a maximum absolute residual of 4.18e-10. The fixed-seed CuPy run at tolerance 1e-9 took 439 ms with residual 9.95e-10. [CuPy 14.2.0's small projected eigensolve](https://github.com/cupy/cupy/blob/v14.2.0/cupyx/scipy/sparse/linalg/_eigen.py#L300) uses CPU NumPy; reproducing that choice would violate this project's device-computation requirement.
 
 **The optional cuDSS path has a separate caveat.** Its dragon graph contains **172 pageable host-to-device metadata copies of 8 bytes each**, two per inverse application. `capture_launch` itself takes about **614 ms**, overlapping a **933 ms** GPU solve. This is blocking host submission, despite no Python-level readback. Replacing those sources with pinned memory or device memory in a diagnostic graph experiment left total solve time essentially unchanged (933–934 ms), and the launch call still took about 600 ms. The copy nodes therefore do not explain the elapsed-time gap by themselves. The experiment is not a production workaround: the metadata belongs to cuDSS internals. A CUDA API timeline is still needed to distinguish driver submission/backpressure from other backend serialization. Host enqueue time must **not** be added to device time because they overlap.
 

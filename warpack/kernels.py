@@ -310,26 +310,34 @@ def sort_diagonal(
     order: wp.array[wp.int32],
     which: int,
 ):
-    m = h.shape[0]
-    for i in range(m):
-        values[i] = h[i, i]
-        order[i] = i
-    for i in range(m):
-        best = i
-        for j in range(i + 1, m):
-            a = values[order[j]]
-            b = values[order[best]]
-            if which == 0 and a < b:
-                best = j
-            if which == 1 and a > b:
-                best = j
-            if which == 2 and wp.abs(a) > wp.abs(b):
-                best = j
-            if which == 3 and wp.abs(a) < wp.abs(b):
-                best = j
-        tmp = order[i]
-        order[i] = order[best]
-        order[best] = tmp
+    i = wp.tid()
+    value = h[i, i]
+    values[i] = value
+    key = value
+    if which == 1:
+        key = -value
+    elif which == 2:
+        key = -wp.abs(value)
+    elif which == 3:
+        key = wp.abs(value)
+    if wp.isnan(key):
+        key = wp.float64(wp.inf)
+    rank = int(0)
+    for j in range(h.shape[0]):
+        other = h[j, j]
+        if which == 1:
+            other = -other
+        elif which == 2:
+            other = -wp.abs(other)
+        elif which == 3:
+            other = wp.abs(other)
+        if wp.isnan(other):
+            other = wp.float64(wp.inf)
+        if other < key or (other == key and j < i):
+            rank += 1
+    if which >= 4:
+        rank = i
+    order[rank] = i
 
 
 @wp.kernel

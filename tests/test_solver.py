@@ -103,12 +103,16 @@ def test_device_convergence_loop():
         assert np.linalg.norm(a @ v - v * w, axis=0).max() < 1.0e-8
 
 
+@pytest.mark.parametrize("captured", [False, True])
 @pytest.mark.parametrize("diag", [np.ones(80), np.zeros(80), np.repeat(np.arange(1.0, 9.0), 10)])
-def test_repeated_and_zero_spectrum(diag):
+def test_repeated_and_zero_spectrum(diag, captured):
     from warpack import KrylovSchur
 
     s = KrylovSchur(SparseOperator(sparse(np.diag(diag))), 6, ncv=32, which="LA", tol=1.0e-10)
-    s.solve(8)
+    if captured:
+        wp.capture_launch(s.capture(8))
+    else:
+        s.solve(8)
     w = s.eigenvalues.numpy()
     v = s.eigenvectors.numpy().T
     np.testing.assert_allclose(w, np.sort(diag)[-6:][::-1], atol=1.0e-9)
@@ -232,3 +236,35 @@ def test_fractional_shift_preserves_double_precision():
     y = wp.empty_like(x)
     op.apply(x, y)
     np.testing.assert_allclose(y.numpy()[0], sign * np.diag(a) + shift, rtol=1e-15)
+
+
+def test_incremental_projection_matches_original_operator():
+    from warpack import KrylovSchur
+
+    rng = np.random.default_rng(921)
+    a = rng.normal(size=(120, 120))
+    a += a.T
+
+    class CheckedProjection(KrylovSchur):
+        def diagonalize(self):
+            q = self.q.numpy()
+            np.testing.assert_allclose(self.g.numpy(), q @ a @ q.T, atol=2e-11)
+            super().diagonalize()
+
+    solver = CheckedProjection(SparseOperator(sparse(a)), 7, ncv=32, tol=1e-11)
+    solver.solve(8)
+    assert solver.residuals.numpy().max() < 1e-9
+
+
+def test_pure_warp_graph_has_no_host_nodes_or_transfers(tmp_path):
+    from warpack import KrylovSchur
+
+    a = np.diag(np.arange(1.0, 81.0))
+    solver = KrylovSchur(SparseOperator(sparse(a)), 5, ncv=24)
+    graph = solver.capture(10)
+    path = tmp_path / "graph.dot"
+    wp.capture_debug_dot_print(graph, str(path))
+    text = path.read_text()
+    assert "HtoD" not in text and "DtoH" not in text
+    assert 'label="{HOST' not in text
+    assert "CONDITIONAL" in text

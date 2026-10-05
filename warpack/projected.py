@@ -19,7 +19,8 @@ def pair_right(i: int, r: int, n: int):
 
 
 @functools.lru_cache(None)
-def jacobi_kernel(size):
+def jacobi_kernel(size, block_dim=256):
+    threads = wp.constant(block_dim)
     n = wp.constant(size)
     half = wp.constant(size // 2)
 
@@ -43,7 +44,7 @@ def jacobi_kernel(size):
                 aqq = wp.tile_extract(h, q, q)
                 c = wp.float64(1.0)
                 s = wp.float64(0.0)
-                if wp.abs(apq) > wp.float64(1.0e-16) * (wp.abs(app) + wp.abs(aqq)):
+                if lane < half and wp.abs(apq) > wp.float64(1.0e-16) * (wp.abs(app) + wp.abs(aqq)):
                     tau = (aqq - app) / (wp.float64(2.0) * apq)
                     t = wp.float64(1.0) / (wp.abs(tau) + wp.sqrt(wp.float64(1.0) + tau * tau))
                     if tau < wp.float64(0.0):
@@ -52,8 +53,8 @@ def jacobi_kernel(size):
                     s = t * c
                 wp.tile_scatter_masked(cc, ip, c, lane < half)
                 wp.tile_scatter_masked(ss, ip, s, lane < half)
-                for batch in range((half * half + 255) // 256):
-                    ix = batch * 256 + lane
+                for batch in range((half * half + threads - 1) // threads):
+                    ix = batch * threads + lane
                     safe = wp.min(ix, half * half - 1)
                     i = safe // half
                     j = safe % half
@@ -77,8 +78,8 @@ def jacobi_kernel(size):
                     wp.tile_scatter_masked(h, p, w, t * b00 + d * b01, ix < half * half)
                     wp.tile_scatter_masked(h, q, u, d * b10 - t * b11, ix < half * half)
                     wp.tile_scatter_masked(h, q, w, t * b10 + d * b11, ix < half * half)
-                for batch in range((n * half + 255) // 256):
-                    ix = batch * 256 + lane
+                for batch in range((n * half + threads - 1) // threads):
+                    ix = batch * threads + lane
                     safe = wp.min(ix, n * half - 1)
                     i = safe // half
                     j = safe % half
@@ -90,6 +91,23 @@ def jacobi_kernel(size):
                     a1 = wp.tile_extract(v, i, q)
                     wp.tile_scatter_masked(v, i, p, c * a0 - s * a1, ix < n * half)
                     wp.tile_scatter_masked(v, i, q, s * a0 + c * a1, ix < n * half)
+            off = wp.float64(0.0)
+            diagonal = wp.float64(0.0)
+            for batch in range((n * n + threads - 1) // threads):
+                ix = batch * threads + lane
+                i, j = wp.min(ix // n, n - 1), ix % n
+                value = wp.abs(wp.tile_extract(h, i, j))
+                if ix < n * n:
+                    if i == j:
+                        diagonal = wp.max(diagonal, value)
+                    else:
+                        off = wp.max(off, value)
+            max_off = wp.tile_max(wp.tile(off))
+            max_diagonal = wp.tile_max(wp.tile(diagonal))
+            if wp.tile_extract(max_off, 0) <= wp.float64(2.0e-15) * wp.tile_extract(
+                max_diagonal, 0
+            ):
+                break
         wp.tile_store(a, h)
         wp.tile_store(vectors, v)
 

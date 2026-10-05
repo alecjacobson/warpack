@@ -1,5 +1,6 @@
 """Compare the same cuDSS factors and count inverse applications on dragon."""
 
+import argparse
 import json
 import time
 from pathlib import Path
@@ -15,6 +16,9 @@ from warpack.fem import assemble_rest, mass_normalized, read_mesh
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", default="results/audit_dragon.json")
+    args = parser.parse_args()
     x, t = read_mesh("../bbw-comparison/dragon-H/dragon.mesh")
     x = (x - x.mean(0)) / np.ptp(x, axis=0).max()
     h, _, mass = assemble_rest(x, t)
@@ -23,7 +27,7 @@ def main():
     inverse = CuDSSInverse(shifted, 1)
     report = {"n": a.shape[0], "k": 26, "backend": "cuDSS shared factors", "warp": [], "cupy": []}
     for ncv in [48, 64]:
-        for cycles in [2, 3]:
+        for cycles in [1, 2, 3]:
             s = KrylovSchur(inverse, 26, ncv=ncv, which="LA", tol=1e-12)
             evaluation = EigenpairEvaluation(SparseOperator(a), s.eigenvectors, tol=1e-7)
             graph = s.capture(cycles, adaptive=False, finalizer=evaluation.run)
@@ -77,7 +81,7 @@ def main():
             }
             report["cupy"].append(row)
             print(row, flush=True)
-    Path("results/audit_dragon.json").write_text(json.dumps(report, indent=2) + "\n")
+    Path(args.out).write_text(json.dumps(report, indent=2) + "\n")
     inverse.close()
 
 
