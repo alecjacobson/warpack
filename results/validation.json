@@ -1,0 +1,39 @@
+{
+  "date_utc": "2026-10-05",
+  "python": "3.10.12",
+  "gpu": "NVIDIA L40 (48 GB)",
+  "cpu": "Intel Xeon Platinum 8362",
+  "cuda_driver": "570.158.01",
+  "packages": {
+    "warp-lang": "1.15.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10",
+    "pytest": "9.1.1"
+  },
+  "spectra_revision": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
+  "warp_cudss_revision": "e73e3bc8db7943c7dfccea2624f32d5dc044f599",
+  "mesh_sha256": "45c5fa0da1df6fd4d3e143435a035779d243d02167af6a80073ffc458e090f3b",
+  "mesh_bytes": 46619296,
+  "numerical_tests": {
+    "command": "OPENBLAS_NUM_THREADS=4 pytest -q",
+    "passed": 43,
+    "failed": 0,
+    "elapsed_seconds": 27.67,
+    "device": "cuda:0"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "package": "python -m pip wheel . --no-deps: passed",
+  "blender": "4.5.3",
+  "render": {
+    "engine": "Cycles OptiX",
+    "samples": 16,
+    "width": 960,
+    "height": 720,
+    "fps": 24,
+    "frames": 960,
+    "validation": "960 frames, 24 fps, 960x720; decoded first/last frames and samples from modes 1, 11, 20"
+  },
+  "animation_minimum_volume_ratio": 0.8465096953148312
+}

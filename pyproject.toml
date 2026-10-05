@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "warpack"
+version = "0.1.0"
+description = "Device-resident sparse eigenproblems in NVIDIA Warp"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = ["warp-lang>=1.15", "numpy>=1.24"]
+
+[project.optional-dependencies]
+test = ["pytest", "scipy"]
+cudss = ["nvidia-cudss-cu12==0.8.0.10", "warp-cudss @ git+https://github.com/alecjacobson/warp-cuDSS.git@e73e3bc8db7943c7dfccea2624f32d5dc044f599"]
+benchmark = ["scipy", "cupy-cuda12x>=14", "matplotlib"]
+
+[tool.setuptools.packages.find]
+include = ["warpack*"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"warpack/kernels.py" = ["E741"]
