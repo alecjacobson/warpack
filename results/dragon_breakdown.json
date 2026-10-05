@@ -1,0 +1,39 @@
+{
+  "backend": "same cuDSS factorization, 64 inverse applications each",
+  "n": 990618,
+  "ncv": 64,
+  "k": 26,
+  "warp_solve_only": {
+    "host_enqueue_ms": 277.312945574522,
+    "device_elapsed_ms": 634.4058227539062,
+    "wall_ms": 634.4921961426735,
+    "graph_launch_call_ms": 277.1911025047302,
+    "end_event_call_ms": 0.04810839891433716
+  },
+  "warp_original_problem_validation": {
+    "host_enqueue_ms": 0.024672597646713257,
+    "device_elapsed_ms": 22.8656005859375,
+    "wall_ms": 22.87871390581131,
+    "graph_launch_call_ms": 0.010035932064056396,
+    "end_event_call_ms": 0.00432133674621582
+  },
+  "warp_residual": 2.026480638350652e-08,
+  "warp_instrumented_ms": {
+    "inverse": 531.182653427124,
+    "expand": 603.8328332901001,
+    "initialize": 258.07623291015625,
+    "complete_projection": 0.6245759725570679,
+    "diagonalize": 4.211967945098877,
+    "rotate": 14.848896026611328,
+    "finalize": 1.6679999828338623,
+    "original_problem_validation": 22.718080520629883
+  },
+  "note": "initialize/expand include inverse events; these overlapping totals must not be added",
+  "cupy_solve_only_ms": 591.6039869189262,
+  "cupy_instrumented": {
+    "wall_ms": 591.9547788798809,
+    "inverse_ms": 533.6621427536011,
+    "inverse_applications": 64
+  },
+  "cupy_residual": 2.3482936944368424e-08
+}
