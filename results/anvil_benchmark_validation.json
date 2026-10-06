@@ -1,0 +1,27 @@
+{
+  "base_commit": "f0e93569aea4fb5b8f889087789200d246eed856",
+  "tests": {
+    "passed": 104,
+    "seconds": 115.15,
+    "command": "PYTHONPATH=\"$PWD/build/warp-upstream:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "warp_runtime": "official 1.18.0+cu12",
+  "upstream_linear_revision": "5a0c33d17d847d0be07ae1003263b572aae0729a",
+  "upstream_linear_sha256": "054a911b3a333dc9d94d656040df309f703157ae04ede0416cdca31afe1f031d",
+  "uses_unmodified_upstream_block_jacobi": true,
+  "custom_block_jacobi_kernels": false,
+  "benchmark_report_sha256": "42d7ec5798bec50400c2fc17c42edec77ec55675abd0dbe991b47dcca4b225bc",
+  "native_spectra": true,
+  "warmup_and_solve_timing_separate": true,
+  "final_original_residual_outside_timing": true,
+  "ruff_check": "passed",
+  "ruff_format_check": "passed",
+  "wheel_build": "passed",
+  "default_warp_1_15_compatibility": {
+    "command": "OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_solver.py::test_pure_warp_cg_inverse tests/test_block_jacobi.py",
+    "passed": 1,
+    "skipped": 2,
+    "seconds": 2.92,
+    "skip_reason": "Stock Warp 1.15 lacks upstream block-Jacobi support"
+  }
+}

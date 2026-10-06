@@ -7,27 +7,67 @@ from . import kernels as K
 from .solver import SymmetricEigensolver
 
 
-class CGInverse:
-    """Pure-Warp SPD inverse via preallocated CG with device convergence checks.
+@wp.kernel
+def accumulate_cg_statistics(
+    iterations: wp.array[wp.int32],
+    residual_sq: wp.array[wp.float64],
+    tolerance_sq: wp.array[wp.float64],
+    stats: wp.array[wp.int32],
+):
+    wp.atomic_add(stats, 0, iterations[0])
+    wp.atomic_max(stats, 1, iterations[0])
+    if residual_sq[0] > tolerance_sq[0] or not wp.isfinite(residual_sq[0]):
+        wp.atomic_add(stats, 2, 1)
+    wp.atomic_add(stats, 3, 1)
 
-    Accuracy depends on the inner solve: choose a tighter inner tolerance than
-    the eigenpair tolerance and inspect the original-problem residuals.
+
+class CGInverse:
+    """Pure-Warp SPD inverse with optional upstream Warp preconditioning.
+
+    Pass a Warp ``preconditioner`` name, such as ``"block_jacobi_sequential"``
+    on versions supporting it. Unsupported names raise Warp's own ValueError.
+    Recreate the inverse when matrix values change to refresh this preconditioner.
+    ``stats`` holds device counters (total iterations, maximum iterations per RHS,
+    unconverged RHSs, number of RHSs); reset explicitly before a measured replay.
+    Inner stopping uses device convergence checks. Always verify the original
+    eigenproblem residual: a converged recursive CG residual can be optimistic.
     """
 
     requires_static_outer_capture = True
 
-    def __init__(self, matrix, tol=1.0e-12, maxiter=1000):
+    def __init__(self, matrix, tol=1.0e-12, maxiter=1000, preconditioner=None):
         self.n, self.device = matrix.shape[0], matrix.device
         self.b = wp.zeros(self.n, dtype=wp.float64, device=self.device)
         self.x = wp.zeros_like(self.b)
+        self.stats = wp.zeros(4, dtype=wp.int32, device=self.device)
+        self.preconditioner = None
+        if preconditioner is not None:
+            # Use Warp's upstream implementation; no local factorization kernels.
+            self.preconditioner = linear.preconditioner(matrix, ptype=preconditioner)
         self.state = linear.cg(
-            matrix, self.b, self.x, tol=tol, maxiter=maxiter, check_every=0, run=False
+            matrix,
+            self.b,
+            self.x,
+            M=self.preconditioner,
+            tol=tol,
+            maxiter=maxiter,
+            check_every=0,
+            run=False,
         )
+
+    def reset_stats(self):
+        self.stats.zero_()
 
     def apply(self, x, y):
         for j in range(x.shape[0]):
             y[j].zero_()
-            self.state(b=x[j], x=y[j])
+            iterations, residual_sq, tolerance_sq = self.state(b=x[j], x=y[j])
+            wp.launch(
+                accumulate_cg_statistics,
+                1,
+                [iterations, residual_sq, tolerance_sq, self.stats],
+                device=self.device,
+            )
 
 
 @wp.kernel
