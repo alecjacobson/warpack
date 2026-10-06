@@ -1,0 +1,43 @@
+{
+  "base_commit": "619c7e5fcc602950eac2f1c383ae640d354d2eec",
+  "tests": {
+    "passed": 102,
+    "seconds": 12.21,
+    "command": "OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "energy_models_checked": [
+    "polynomial stable Neo-Hookean",
+    "stable Neo-Hookean with regularized origin barrier and recalibrated parameters",
+    "St Venant-Kirchhoff",
+    "log Neo-Hookean"
+  ],
+  "poisson_ratios": [
+    -0.2,
+    0.3,
+    0.49
+  ],
+  "checks": [
+    "complex-step energy to PK1 at deformed F",
+    "zero stress at F=I",
+    "complex-step nodal gradients to all 12x12 rest-Hessian entries",
+    "reversed element orientation",
+    "independent Warp StVK stiffness on both complete meshes",
+    "captured production stiffness reassembly",
+    "independent StVK eigenmode solve on both meshes",
+    "exact quadrature of consistent mass and its lumped row sums",
+    "consistent-mass generalized Warp/cuDSS solve on fTetWild",
+    "face connectivity and nonmanifold-face counts",
+    "mode-09 mass-weighted displacement localization",
+    "saved scientific amplitude-comparison figure visually inspected"
+  ],
+  "source_paper": "https://www.tkim.graphics/NEO/StableNeoHookean2018.pdf",
+  "source_paper_sections": [
+    "3.2-3.4, equations 13-16"
+  ],
+  "mesh_sha256": {
+    "../bbw-comparison/dragon-H/dragon.mesh": "45c5fa0da1df6fd4d3e143435a035779d243d02167af6a80073ffc458e090f3b",
+    "xyzrgb_dragon-720K-ftetwild.mesh": "c84319e8f0ed1fcf88fad2ba8d88a517b39264169924ca551a64b19b1cc74f05"
+  },
+  "report_sha256": "ae698d07cf42aceb6288a35f0a4fb64b89c26fdf8d932fe4fb6197515746d021",
+  "production_solver_or_hessian_modified": false
+}

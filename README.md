@@ -170,6 +170,38 @@ OPENBLAS_NUM_THREADS=4 python -m benchmarks.mesh_quality \
 OPENBLAS_NUM_THREADS=4 python -m benchmarks.dragon_mesh_physics
 ```
 
+### Mode 09: constitutive and mass audit
+
+Mode 09's large whisker motion survives an independent **StVK** assembly and a **consistent-mass** solve. We found no rest-Hessian error. The audit uses face-cross-product shape gradients and Green-strain directional derivatives, independently of the production inverse-reference-matrix/block formula. Both full meshes, including graph-reassembled production stiffness, agree with this reference to **4.0e-16 relative Frobenius error**. Recomputed frequencies differ by at most **7.2e-13 relative**, and all 20 elastic mode shapes agree to roundoff.
+
+At the stress-free rest state, StVK, ordinary log Neo-Hookean, and the implemented polynomial stable Neo-Hookean energy have the same tangent for matching physical Lamé constants:
+
+```text
+P(I) = 0
+DP(I)[D] = μ (D + Dᵀ) + λ tr(D) I
+H_ij = V [ μ (g_i · g_j) I + λ g_i g_jᵀ + μ g_j g_iᵀ ]
+```
+
+Here `g_i` is the reference shape-function gradient. The polynomial energy's volumetric coefficient is **λ+μ**, not the physical λ alone. This is the parameter conversion in §3.4 of [Smith, de Goes, and Kim (2018)](https://www.tkim.graphics/NEO/StableNeoHookean2018.pdf). Our formula is the polynomial variant, without the paper's optional regularized origin-barrier term; correctly calibrating that variant also gives the same rest tangent. Changing the energy family therefore does not change these infinitesimal rest modes. Finite-amplitude nonlinear trajectories or modes about a predeformed equilibrium are different problems.
+
+Complex-step checks independently differentiate the energy to obtain stress, then differentiate nodal energy gradients to check every element-Hessian entry. They cover all four energy variants, skewed tets, reversed vertex ordering, and Poisson ratios −0.2, 0.3, and 0.49. A separate exact tetrahedral quadrature check verifies consistent mass and its lumped row sums. **102 tests pass**; see [audit validation](results/elasticity_audit_validation.json), [test source](tests/test_elasticity_reference.py), and [raw full-mesh results](results/elasticity_audit.json).
+
+On fTetWild, switching from lumped to consistent mass changes Mode 09 from **1.42311 to 1.42603 Hz (+0.205%)**, with mode-shape MAC **0.9999946**. Its peak/RMS displacement ratio remains **52.6**. In an explicitly defined region within 0.08 body lengths along mesh edges from the tip, **0.0572% of total mass carries 73.8% of this mode's kinetic energy**. The original mesh shows the same localization (0.0528% of mass, 60.9% of modal kinetic energy). Both meshes have one face-connected tetrahedral component and no faces shared by more than two tets. These findings support a localized vibration of a slender appendage in the discrete elastic model, rather than a constitutive, lumping, or disconnected-element artifact. They do not establish continuum convergence at the appendage.
+
+The README's bounding-box-based display scaling moves this tip by **76.8% of the entire body's length**. A twice-size bounding box is a weak amplitude limit for a thin feature: this is **30.7×** a 2.5%-of-body-length display cap. The figure below changes only the display amplitude of the same verified eigenvector; the large pose should not be interpreted as a nonlinear deformation prediction.
+
+![Mode 09 at rest, with a 2.5% displacement cap, and with the current README amplitude](results/mode09_amplitude_comparison.png)
+
+Reproduce after generating both mode archives:
+
+```bash
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m benchmarks.audit_elasticity
+OPENBLAS_NUM_THREADS=4 python -m pytest -q tests/test_elasticity_reference.py
+python -m examples.plot_mode09_audit
+```
+
+The alternate StVK and consistent-mass assembly and solves use Warp kernels and cuDSS. Host NumPy/SciPy are used only for explicit audit diagnostics and reference differentiation, not production eigensolver computation.
+
 ## Validation and benchmarking
 
 ```bash
