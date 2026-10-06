@@ -4,9 +4,9 @@ Sparse eigenvalue problems computed in **NVIDIA Warp**, with an optional **cuDSS
 
 This is a first implementation, not an API-compatible drop-in replacement for Spectra or ARPACK. It covers their main eigenproblem families. Performance varies by problem: the measurements below include cases where Spectra or CuPy wins.
 
-[Download the animated teaser and editable Blender scene](https://github.com/alecjacobson/warpack/releases/tag/v0.1.2) · [Original movie and numerical data](https://github.com/alecjacobson/warpack/releases/tag/v0.1.0)
+[Download the animated teaser and editable Blender scene](https://github.com/alecjacobson/warpack/releases/tag/v0.1.3) · [Original movie and numerical data](https://github.com/alecjacobson/warpack/releases/tag/v0.1.0)
 
-![Dragon elastic modes 1–20: eased motion with instantaneous striped displacement coloring](results/dragon_ftetwild_teaser.gif)
+![Anvil elastic modes 1–20: 5% bounding-box-diagonal peak displacement with continuous instantaneous coloring](results/anvil_teaser.gif)
 
 ## Supported problems
 
@@ -82,9 +82,36 @@ For a zero shift and SPD A, `which="SA"` selects the lowest modes. For an interi
 
 cuDSS analysis and first factorization are setup operations outside graph capture. cuDSS may use host work during that setup. A retained Warp workspace allocator avoids `cudaMalloc` inside captured cuDSS solves. Its setup also finalizes Warp's exact BSR nonzero count before scalar CSR expansion.
 
-## Dragon showcase
+## Anvil showcase
 
-The current GIF uses the supplied [`xyzrgb_dragon-720K-ftetwild.mesh`](xyzrgb_dragon-720K-ftetwild.mesh): **24,776 vertices, 93,354 tetrahedra, and 74,328 degrees of freedom**. The tetrahedra are read directly from that file; this project does not invoke a mesher. Despite its filename, this volume mesh has 93,354 tets. No mesh decimation or modal reduction is used in the solve.
+The current README GIF uses the supplied [`anvil for export-ftetwild.mesh`](anvil%20for%20export-ftetwild.mesh), read directly from disk: **94,619 vertices, 508,903 tetrahedra, and 283,857 degrees of freedom**. No mesher is invoked. The longest rest extent is normalized to one metre; the same illustrative material as the dragon is used (`E = 100,000 Pa`, `ν = 0.3`, `ρ = 1,000 kg/m³`), with a free body, stable Neo-Hookean rest Hessian, and lumped mass. Six rigid modes are checked and omitted, then the first 20 elastic modes are shown in order.
+
+Each mode's maximum displacement is **5% of the rest bounding-box diagonal**, checked over **all vertices**, including the interior. The normalized diagonal is 1.18974049 m, so every peak displacement is 0.05948702 m. The smooth, continuous gptoolbox `okloop(256,-4*pi/3,-pi/2)` palette has **no isoline stripes**. Color follows instantaneous displacement with one fixed scale for the entire sequence. Each mode eases from rest to peak and back with `squease`; the camera stays fixed against a white studio background. The GIF has 660 frames at 20 fps, lasting 33 seconds.
+
+The maximum original-problem normalized residual is **2.62e-9**, and the mass-orthogonality error is **1.91e-14**. Frequencies span **1.811–9.166 Hz** under the illustrative material parameters. These are exaggerated linear mode shapes. See the [numerical report](results/anvil_modes.json), [scale and style metadata](results/anvil_teaser.json), and [evaluated scene validation](results/anvil_teaser_validation.json). Historical dragon performance and reference comparisons below still describe the dragon meshes.
+
+Reproduce with Blender 4.5 and [gifski](https://gif.ski/):
+
+```bash
+python -m examples.dragon_modes --mesh "anvil for export-ftetwild.mesh" \
+  --out results/anvil_modes.npz
+blender -b --python examples/render_modes.py -- \
+  --input results/anvil_modes.npz --output results/anvil_base.blend \
+  --name Anvil --up-axis Y --yaw-degrees 90
+blender -b --python examples/render_teaser.py -- \
+  --base results/anvil_base.blend --input results/anvil_modes.npz \
+  --output results/anvil_teaser.blend --name Anvil --up-axis Y --yaw-degrees 90 \
+  --amplitude-bbd 0.05 --frames build/anvil_frames --render
+blender -b results/anvil_teaser.blend --python-exit-code 1 --python examples/validate_teaser.py
+gifski --fps 20 --quality 85 --width 720 --repeat 0 \
+  --output results/anvil_teaser.gif build/anvil_frames/frame_*.png
+```
+
+The mesh name, orientation, and displacement cap are rendering options; the eigensolver and Hessian are unchanged. The [`v0.1.3` release](https://github.com/alecjacobson/warpack/releases/tag/v0.1.3) includes the input mesh, modes, editable Blender scene, GIF, and validation metadata. Use `--stripes` only to reproduce the older striped dragon style.
+
+## Dragon validation and earlier showcases
+
+The [v0.1.2 GIF](https://github.com/alecjacobson/warpack/releases/tag/v0.1.2) uses the supplied [`xyzrgb_dragon-720K-ftetwild.mesh`](xyzrgb_dragon-720K-ftetwild.mesh): **24,776 vertices, 93,354 tetrahedra, and 74,328 degrees of freedom**. The tetrahedra are read directly from that file; this project does not invoke a mesher. Despite its filename, this volume mesh has 93,354 tets. No mesh decimation or modal reduction is used in the solve.
 
 The original `dragon-H/dragon.mesh` has **330,206 vertices, 1,187,670 tetrahedra, and 990,618 degrees of freedom**, with **3,881,370 stiffness blocks**. All full-dragon performance measurements below refer to that original, larger mesh. Its animation remains in the [v0.1.1 release](https://github.com/alecjacobson/warpack/releases/tag/v0.1.1).
 
@@ -97,7 +124,7 @@ The reference geometry is normalized to a longest bounding-box extent of one met
 
 Here λ and μ are the physical Lamé constants. The assembled Hessian is the stress-free tangent at `F=I`, checked independently by finite differences of this energy. Mass is **lumped**, not consistent. The body is free: six rigid modes are checked and omitted from the film. We solve `M⁻¹/² H M⁻¹/²`, using a positive unit shift for the inverse, then recover mass-orthonormal physical displacements. The first elastic frequency is **0.90917 Hz** for fTetWild, versus **0.89756 Hz** for the original mesh.
 
-The README GIF exercises all 20 elastic modes in order, from rest to peak amplitude and back using gptoolbox's `squease` function. Peak poses are scaled independently to fit within a centered box twice the original dimensions, with 5% margin; the entire animation occupies at most **1.95×** the original box dimensions. The camera stays fixed. The exact gptoolbox jet-range palette is `okloop(256,-4*pi/3,-pi/2)`, with Polyscope-style alternating scalar stripes. Color represents **instantaneous displacement norm**, divided by the largest displayed displacement anywhere in the whole sequence; the color scale stays fixed as each mode grows and returns to rest. See the [style/scale metadata](results/dragon_ftetwild_teaser.json) and [evaluated scene validation](results/dragon_ftetwild_teaser_validation.json).
+The v0.1.2 dragon GIF exercises all 20 elastic modes in order, from rest to peak amplitude and back using gptoolbox's `squease` function. Peak poses are scaled independently to fit within a centered box twice the original dimensions, with 5% margin; the entire animation occupies at most **1.95×** the original box dimensions. The camera stays fixed. The exact gptoolbox jet-range palette is `okloop(256,-4*pi/3,-pi/2)`, with Polyscope-style alternating scalar stripes. Color represents **instantaneous displacement norm**, divided by the largest displayed displacement anywhere in the whole sequence; the color scale stays fixed as each mode grows and returns to rest. See the [style/scale metadata](results/dragon_ftetwild_teaser.json) and [evaluated scene validation](results/dragon_ftetwild_teaser_validation.json).
 
 These are exaggerated linear mode shapes, not nonlinear deformation trajectories. At the requested large display amplitudes, some tetrahedra invert on both meshes; this does not indicate an invalid rest mesh or an eigensolver error.
 
@@ -114,7 +141,7 @@ blender -b --python examples/render_modes.py -- --preview --render
 python examples/validate_animation.py
 ```
 
-To reproduce the current README teaser with Blender 4.5 and [gifski](https://gif.ski/):
+To reproduce the historical v0.1.2 dragon teaser with Blender 4.5 and [gifski](https://gif.ski/):
 
 ```bash
 python -m examples.dragon_modes --mesh xyzrgb_dragon-720K-ftetwild.mesh \
@@ -124,7 +151,7 @@ blender -b --python examples/render_modes.py -- \
   --output results/dragon_ftetwild_base.blend
 blender -b --python examples/render_teaser.py -- \
   --base results/dragon_ftetwild_base.blend --input results/dragon_ftetwild_modes.npz \
-  --output results/dragon_ftetwild_teaser.blend --up-axis Z \
+  --output results/dragon_ftetwild_teaser.blend --up-axis Z --stripes \
   --frames build/ftetwild_frames --render
 blender -b results/dragon_ftetwild_teaser.blend --python examples/validate_teaser.py
 gifski --fps 20 --quality 85 --width 720 --repeat 0 \
@@ -135,7 +162,7 @@ The GIF contains 33 frames per mode at 20 fps (33 seconds total), on a white stu
 
 For the original benchmark mesh, download `dragon.mesh.gz` from the [v0.1.0 release](https://github.com/alecjacobson/warpack/releases/tag/v0.1.0) and decompress it to `../bbw-comparison/dragon-H/dragon.mesh`. That release includes the exact input mesh, the mass-normalized numerical results and physical modes, and the editable `.blend` scene. Dataset provenance and licensing are in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
 
-## Mesh quality and independent mode verification
+## Dragon mesh quality and independent mode verification
 
 Both inputs have one connected component, no orphan vertices, and no zero-volume elements. The new mesh has substantially better element shapes:
 
@@ -188,9 +215,9 @@ Complex-step checks independently differentiate the energy to obtain stress, the
 
 On fTetWild, switching from lumped to consistent mass changes Mode 09 from **1.42311 to 1.42603 Hz (+0.205%)**, with mode-shape MAC **0.9999946**. Its peak/RMS displacement ratio remains **52.6**. In an explicitly defined region within 0.08 body lengths along mesh edges from the tip, **0.0572% of total mass carries 73.8% of this mode's kinetic energy**. The original mesh shows the same localization (0.0528% of mass, 60.9% of modal kinetic energy). Both meshes have one face-connected tetrahedral component and no faces shared by more than two tets. These findings support a localized vibration of a slender appendage in the discrete elastic model, rather than a constitutive, lumping, or disconnected-element artifact. They do not establish continuum convergence at the appendage.
 
-The README's bounding-box-based display scaling moves this tip by **76.8% of the entire body's length**. A twice-size bounding box is a weak amplitude limit for a thin feature: this is **30.7×** a 2.5%-of-body-length display cap. The figure below changes only the display amplitude of the same verified eigenvector; the large pose should not be interpreted as a nonlinear deformation prediction.
+The v0.1.2 dragon teaser's bounding-box-based display scaling moves this tip by **76.8% of the entire body's length**. A twice-size bounding box is a weak amplitude limit for a thin feature: this is **30.7×** a 2.5%-of-body-length display cap. The figure below changes only the display amplitude of the same verified eigenvector; the large pose should not be interpreted as a nonlinear deformation prediction.
 
-![Mode 09 at rest, with a 2.5% displacement cap, and with the current README amplitude](results/mode09_amplitude_comparison.png)
+![Mode 09 at rest, with a 2.5% displacement cap, and with the historical dragon README amplitude](results/mode09_amplitude_comparison.png)
 
 Reproduce after generating both mode archives:
 

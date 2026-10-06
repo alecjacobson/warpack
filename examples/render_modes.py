@@ -16,6 +16,8 @@ p = argparse.ArgumentParser()
 p.add_argument("--input", default="results/dragon_modes.npz")
 p.add_argument("--output", default="results/dragon_modes.blend")
 p.add_argument("--up-axis", choices=["Y", "Z"], default="Y")
+p.add_argument("--name", default="Dragon")
+p.add_argument("--yaw-degrees", type=float, default=0)
 p.add_argument("--render", action="store_true")
 p.add_argument("--preview", action="store_true")
 p.add_argument("--samples", type=int, default=24)
@@ -34,6 +36,12 @@ modes = modes[:, ids]
 if args.up_axis == "Y":
     x = x[:, [0, 2, 1]] * np.array([1, -1, 1])
     modes = modes[:, :, [0, 2, 1]] * np.array([1, -1, 1])
+angle = np.deg2rad(args.yaw_degrees)
+rotation = np.array(
+    [[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]]
+)
+x = x @ rotation.T
+modes = modes @ rotation.T
 x[:, 2] -= x[:, 2].min()
 x[:, 2] += 0.06
 x[:, :2] -= (x[:, :2].min(0) + x[:, :2].max(0)) / 2
@@ -65,10 +73,10 @@ scene.world = world
 world.use_nodes = True
 world.node_tree.nodes["Background"].inputs[0].default_value = (1, 1, 1, 1)
 world.node_tree.nodes["Background"].inputs[1].default_value = 0.35
-mesh = bpy.data.meshes.new("Original dragon-H boundary")
+mesh = bpy.data.meshes.new(f"{args.name} boundary")
 mesh.from_pydata(x.tolist(), [], faces.tolist())
 mesh.update()
-obj = bpy.data.objects.new("Dragon | twenty elastic eigenmodes", mesh)
+obj = bpy.data.objects.new(f"{args.name} | twenty elastic eigenmodes", mesh)
 scene.collection.objects.link(obj)
 for poly in mesh.polygons:
     poly.use_smooth = True
@@ -200,7 +208,7 @@ def text_obj(name, body, position, size):
     return ob
 
 
-text_obj("Title", "DRAGON / ELASTIC MODES", (0, 0.41, -1), 0.035)
+text_obj("Title", f"{args.name.upper()} / ELASTIC MODES", (0, 0.41, -1), 0.035)
 text_obj(
     "Legend",
     "BLUE  0   /   DISPLACEMENT MAGNITUDE   /   MAX  RED",

@@ -1,4 +1,4 @@
-"""Build/render the striped, eased README GIF scene in Blender 4.5.
+"""Build/render the eased README GIF scene with continuous displacement color in Blender 4.5.
 
 Requires the studio scene from render_modes.py (also available in v0.1.0).
 Render PNGs, then encode with gifski; see README for the complete commands.
@@ -21,6 +21,16 @@ p.add_argument("--base", default="results/dragon_modes.blend")
 p.add_argument("--input", default="results/dragon_optimized.npz")
 p.add_argument("--output", default="results/dragon_teaser.blend")
 p.add_argument("--up-axis", choices=["Y", "Z"], default="Y")
+p.add_argument("--name", default="Dragon")
+p.add_argument("--yaw-degrees", type=float, default=0)
+p.add_argument(
+    "--amplitude-bbd",
+    type=float,
+    help="maximum displacement as a fraction of the rest bounding-box diagonal",
+)
+p.add_argument(
+    "--stripes", action="store_true", help="restore the historical alternating scalar stripes"
+)
 p.add_argument("--frames", default="build/teaser_frames")
 p.add_argument("--render", action="store_true")
 p.add_argument("--preview", type=int, nargs="*", default=[])
@@ -42,7 +52,7 @@ scene.cycles.device = "GPU"
 for light in bpy.data.lights:
     light.energy *= 0.35
 scene.world.node_tree.nodes["Background"].inputs[1].default_value = 0.25
-obj = bpy.data.objects["Dragon | twenty elastic eigenmodes"]
+obj = bpy.data.objects[f"{args.name} | twenty elastic eigenmodes"]
 mesh = obj.data
 raw = np.load(args.input)
 ids = np.unique(raw["faces"])
@@ -51,10 +61,23 @@ u = raw["modes"][6:26, ids]
 if args.up_axis == "Y":
     x = x[:, [0, 2, 1]] * [1, -1, 1]
     u = u[:, :, [0, 2, 1]] * [1, -1, 1]
+angle = np.deg2rad(args.yaw_degrees)
+rotation = np.array(
+    [[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]]
+)
+x = x @ rotation.T
+u = u @ rotation.T
 x[:, 2] -= x[:, 2].min()
 x[:, 2] += 0.06
 x[:, :2] -= (x[:, :2].min(0) + x[:, :2].max(0)) / 2
 scales, box_low, box_high = bounded_scales(x, u)
+bbd = float(np.linalg.norm(np.ptp(raw["vertices"], axis=0)))
+# The cap includes interior vertices, even though only the surface is rendered.
+all_mode_maxima = np.linalg.norm(raw["modes"][6:26], axis=2).max(axis=1)
+if args.amplitude_bbd is not None:
+    if not np.isfinite(args.amplitude_bbd) or args.amplitude_bbd <= 0:
+        raise ValueError("--amplitude-bbd must be positive and finite")
+    scales = np.minimum(scales, args.amplitude_bbd * bbd / all_mode_maxima)
 displacements = u * scales[:, None, None]
 peak = x[None, :, :] + displacements
 assert np.all(peak >= box_low - 1e-12) and np.all(peak <= box_high + 1e-12)
@@ -86,7 +109,9 @@ for j in range(20):
         mesh.attributes.remove(mesh.attributes[name])
     attr = mesh.attributes.new(name, "FLOAT", "POINT")
     attr.data.foreach_set("value", normalized[j].astype(np.float32))
-mat = bpy.data.materials.new("okloop jet | instantaneous displacement | Polyscope stripes")
+mat = bpy.data.materials.new(
+    "okloop jet | instantaneous displacement" + (" | stripes" if args.stripes else " | continuous")
+)
 mat.use_nodes = True
 nodes, links = mat.node_tree.nodes, mat.node_tree.links
 bsdf = nodes.get("Principled BSDF")
@@ -133,31 +158,36 @@ coords = nodes.new("ShaderNodeCombineXYZ")
 coords.inputs[1].default_value = 0.5
 links.new(coord_scale.outputs[0], coords.inputs[0])
 links.new(coords.outputs[0], texture.inputs["Vector"])
-# Polyscope stripe convention: darken alternating scalar bands by 0.65.
-modulo = nodes.new("ShaderNodeMath")
-modulo.operation = "MODULO"
-modulo.inputs[1].default_value = 0.1
-links.new(scalar.outputs[0], modulo.inputs[0])
-stripe = nodes.new("ShaderNodeMath")
-stripe.operation = "GREATER_THAN"
-stripe.inputs[1].default_value = 0.05
-links.new(modulo.outputs[0], stripe.inputs[0])
-darkness = nodes.new("ShaderNodeMath")
-darkness.operation = "MULTIPLY_ADD"
-darkness.inputs[1].default_value = -0.35
-darkness.inputs[2].default_value = 1
-links.new(stripe.outputs[0], darkness.inputs[0])
-shade = nodes.new("ShaderNodeMixRGB")
-shade.blend_type = "MULTIPLY"
-shade.inputs[0].default_value = 1
-links.new(texture.outputs["Color"], shade.inputs[1])
-links.new(darkness.outputs[0], shade.inputs[2])
-links.new(shade.outputs[0], bsdf.inputs["Base Color"])
+if args.stripes:
+    # Polyscope stripe convention: darken alternating scalar bands by 0.65.
+    modulo = nodes.new("ShaderNodeMath")
+    modulo.operation = "MODULO"
+    modulo.inputs[1].default_value = 0.1
+    links.new(scalar.outputs[0], modulo.inputs[0])
+    stripe = nodes.new("ShaderNodeMath")
+    stripe.operation = "GREATER_THAN"
+    stripe.inputs[1].default_value = 0.05
+    links.new(modulo.outputs[0], stripe.inputs[0])
+    darkness = nodes.new("ShaderNodeMath")
+    darkness.operation = "MULTIPLY_ADD"
+    darkness.inputs[1].default_value = -0.35
+    darkness.inputs[2].default_value = 1
+    links.new(stripe.outputs[0], darkness.inputs[0])
+    shade = nodes.new("ShaderNodeMixRGB")
+    shade.blend_type = "MULTIPLY"
+    shade.inputs[0].default_value = 1
+    links.new(texture.outputs["Color"], shade.inputs[1])
+    links.new(darkness.outputs[0], shade.inputs[2])
+    links.new(shade.outputs[0], bsdf.inputs["Base Color"])
+else:
+    links.new(texture.outputs["Color"], bsdf.inputs["Base Color"])
 mesh.materials.clear()
 mesh.materials.append(mat)
 obj["visual_scales"] = scales.tolist()
 obj["normalization"] = (
-    "Positive peak poses fit inside centered 2x rest bounding box, with 5% margin."
+    f"Maximum displacement capped at {100 * args.amplitude_bbd:g}% of rest bounding-box diagonal; includes interior vertices."
+    if args.amplitude_bbd is not None
+    else "Positive peak poses fit inside centered 2x rest bounding box, with 5% margin."
 )
 obj["playback"] = "Modes 1-20 in order; gptoolbox squease from rest to peak and back."
 obj["color_max_displacement_m"] = color_max
@@ -195,7 +225,11 @@ for name, ypos, font_size in [
     ob.location = (0, ypos * scale, -1)
     ob.data.size = font_size * scale
 bpy.data.objects["Legend"].data.body = "0    /    INSTANTANEOUS DISPLACEMENT    /    GLOBAL MAX"
-bpy.data.objects["Scale"].data.body = "okloop jet  |  squease  |  peak poses within 2x rest bounds"
+bpy.data.objects["Scale"].data.body = (
+    f"okloop jet  |  squease  |  peak displacement: {100 * args.amplitude_bbd:g}% of bounding-box diagonal"
+    if args.amplitude_bbd is not None
+    else "okloop jet  |  squease  |  peak poses within 2x rest bounds"
+)
 for j in range(20):
     ob = bpy.data.objects[f"Label {j + 1:02d}"]
     ob.location = (0, 0.290 * scale, -1)
@@ -204,10 +238,16 @@ for j in range(20):
         fc.driver.expression = (
             f"not ({j * args.frames_per_mode + 1} <= frame < {(j + 1) * args.frames_per_mode + 1})"
         )
-# Compact fixed-scale legend using the same palette and scalar stripe bands.
-bar_image = bpy.data.images.new("okloop striped legend", width=256, height=1, float_buffer=True)
+# Compact fixed-scale legend using the same palette and optional stripe bands.
+bar_image = bpy.data.images.new(
+    "okloop displacement legend", width=256, height=1, float_buffer=True
+)
 bar_image.colorspace_settings.name = "Non-Color"
-bar_shade = np.where(np.mod(np.linspace(0, 1, 256), 0.1) > 0.05, 0.65, 1.0)
+bar_shade = (
+    np.where(np.mod(np.linspace(0, 1, 256), 0.1) > 0.05, 0.65, 1.0)
+    if args.stripes
+    else np.ones(256)
+)
 bar_image.pixels.foreach_set(
     np.column_stack([palette * bar_shade[:, None], np.ones(256)]).astype(np.float32).ravel()
 )
@@ -258,11 +298,19 @@ output = Path(args.output).resolve()
 bpy.ops.wm.save_as_mainfile(filepath=str(output), compress=True)
 report = {
     "input": str(args.input),
+    "object_name": obj.name,
+    "name": args.name,
+    "yaw_degrees": args.yaw_degrees,
+    "amplitude_bbd_requested": args.amplitude_bbd,
+    "rest_bounding_box_diagonal_m": bbd,
+    "all_vertex_maximum_displacement_per_mode_m": (all_mode_maxima * scales).tolist(),
+    "all_vertex_maximum_displacement_per_mode_bbd": (all_mode_maxima * scales / bbd).tolist(),
+    "stripes": args.stripes,
     "up_axis": args.up_axis,
     "gptoolbox_revision": GPT_REVISION,
     "okloop": {"count": 256, "arc": "-4*pi/3", "shift": "-pi/2"},
-    "isoline_band_width_normalized": 0.05,
-    "isoline_darkness": 0.65,
+    "isoline_band_width_normalized": 0.05 if args.stripes else None,
+    "isoline_darkness": 0.65 if args.stripes else None,
     "modes": list(range(1, 21)),
     "frames_per_mode": args.frames_per_mode,
     "frames": frame_count,
