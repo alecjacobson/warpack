@@ -25,7 +25,8 @@ class CGInverse:
     """Pure-Warp SPD inverse with optional upstream Warp preconditioning.
 
     Pass a Warp ``preconditioner`` name, such as ``"block_jacobi_sequential"``
-    on versions supporting it. Unsupported names raise Warp's own ValueError.
+    on versions supporting it, or a prebuilt Warp linear operator (e.g. FSAI).
+    Unsupported names raise Warp's own ValueError.
     Recreate the inverse when matrix values change to refresh this preconditioner.
     ``stats`` holds device counters (total iterations, maximum iterations per RHS,
     unconverged RHSs, number of RHSs); reset explicitly before a measured replay.
@@ -43,7 +44,11 @@ class CGInverse:
         self.preconditioner = None
         if preconditioner is not None:
             # Use Warp's upstream implementation; no local factorization kernels.
-            self.preconditioner = linear.preconditioner(matrix, ptype=preconditioner)
+            self.preconditioner = (
+                linear.preconditioner(matrix, ptype=preconditioner)
+                if isinstance(preconditioner, str)
+                else preconditioner
+            )
         self.state = linear.cg(
             matrix,
             self.b,

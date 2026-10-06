@@ -1,7 +1,8 @@
 """Sparse eigenproblems computed in NVIDIA Warp kernels."""
 
 from .arnoldi import ComplexCSR, GeneralEigensolver
-from .fem import RestElasticity
+from .constraints import OrthogonalComplementOperator
+from .fem import RestElasticity, rigid_body_basis
 from .generalized import CGInverse, GeneralizedEigensolver
 from .hermitian import HermitianCSR, HermitianEigensolver
 from .shift import ComplexShiftInverse, ShiftInvertEigensolver
@@ -26,7 +27,9 @@ __all__ = [
     "HermitianCSR",
     "HermitianEigensolver",
     "KrylovSchur",
+    "OrthogonalComplementOperator",
     "RestElasticity",
+    "rigid_body_basis",
     "ShiftInvertEigensolver",
     "SparseOperator",
     "SymmetricEigensolver",

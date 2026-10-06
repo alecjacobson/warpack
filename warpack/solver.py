@@ -380,10 +380,22 @@ class KrylovSchur(SymmetricEigensolver):
     Expands the retained Ritz space by operator applications, with two-pass
     classical Gram–Schmidt. Unlike orthogonal iteration, this targets algebraic
     spectrum ends without requiring a spectral shift bound.
+
+    An optional nonzero FP64 ``initial_vector`` supplies the starting direction.
+    Initialization normalizes its current device contents, so captured replays
+    can use updated starts without recapturing. Otherwise ``seed`` controls the
+    random start.
     """
 
-    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9):
+    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
         super().__init__(operator, k, ncv=ncv, which=which, tol=tol)
+        self.initial_vector = initial_vector
+        if initial_vector is not None:
+            if initial_vector.dtype != wp.float64 or initial_vector.size != self.n:
+                raise ValueError("initial_vector must contain n FP64 entries")
+            if initial_vector.device != self.device:
+                raise ValueError("initial_vector must be on the operator device")
+            self.initial_vector = initial_vector.reshape((1, self.n))
         self.keep = min(k + 4, self.m - 1)
         # Sparse products can be cheaper and more accurate than a dense basis
         # rotation. Keep cached products for dense operators and inverses.
@@ -522,7 +534,10 @@ class KrylovSchur(SymmetricEigensolver):
         self.recoveries.zero_()
         self.g.zero_()
         self.status.zero_()
-        wp.launch(K.random_block, (1, self.n), [self.q, seed], device=self.device)
+        if self.initial_vector is None:
+            wp.launch(K.random_block, (1, self.n), [self.q, seed], device=self.device)
+        else:
+            wp.copy(self.views[0], self.initial_vector)
         self.norm.zero_()
         wp.launch_tiled(
             K.basis_norm,

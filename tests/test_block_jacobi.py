@@ -42,9 +42,13 @@ def matrix(coupling):
 
 
 @pytest.mark.parametrize("coupling", [False, True])
-def test_block_jacobi_cg_captured_rhs_replay(coupling):
+@pytest.mark.parametrize("prebuilt", [False, True])
+def test_block_jacobi_cg_captured_rhs_replay(coupling, prebuilt):
     a, dense = matrix(coupling)
-    inverse = CGInverse(a, tol=1e-13, maxiter=100, preconditioner="block_jacobi_sequential")
+    preconditioner = "block_jacobi_sequential"
+    if prebuilt:
+        preconditioner = linear.preconditioner(a, preconditioner)
+    inverse = CGInverse(a, tol=1e-13, maxiter=100, preconditioner=preconditioner)
     rhs = wp.array(np.ones((1, 24)), dtype=wp.float64)
     output = wp.empty_like(rhs)
     inverse.apply(rhs, output)

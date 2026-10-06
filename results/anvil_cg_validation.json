@@ -1,0 +1,40 @@
+{
+  "base_commit": "2e9747516988d9f001d058ef36e3aaf8d373f615",
+  "tests": {
+    "passed": 111,
+    "seconds": 14.01,
+    "environment": "official Warp 1.18.0+cu12 runtime with unmodified PR modules"
+  },
+  "stock_warp_1_15": {
+    "passed": 6,
+    "skipped": 4,
+    "seconds": 12.67
+  },
+  "checks": {
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "wheel_build": "passed"
+  },
+  "fsai_pr": "https://github.com/alecjacobson/warp/pull/16",
+  "fsai_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+  "source_sha256": {
+    "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp/_src/optim/fsai.py": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+  },
+  "source_files_verified_byte_for_byte_against_git": true,
+  "benchmark_hashes": {
+    "anvil_cg_optimized.json": "df527b762a178a8ab5c560d75f402f4b4b369d6e03324a5d3e933191906bcd64",
+    "anvil_cudss_recheck.json": "7b3807020b1fc4695675a12fdae63f35137790bec358d620ecce4f40d0a0419c",
+    "anvil_cg_search.json": "c7b010753e8a216a1f235d4f2274e8580c76cbf98d2a1419993b7fde98f1eb9e"
+  },
+  "no_custom_block_jacobi_or_fsai_factorization": true,
+  "final_cg_loop_unmodified": true,
+  "known_rigid_modes_are_analytic_not_numerically_rediscovered": true,
+  "all_final_cg_replays_pass_original_problem_validation": true,
+  "reference_used_only_for_validation": true,
+  "fresh_reference_bootstrap": {
+    "passed": true,
+    "maximum_original_residual": 2.6575203615020687e-09
+  }
+}

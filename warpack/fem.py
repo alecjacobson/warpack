@@ -12,6 +12,8 @@ import numpy as np
 import warp as wp
 import warp.sparse as ws
 
+from . import kernels as K
+
 
 @wp.kernel
 def element_triplets(
@@ -129,6 +131,55 @@ def assemble_rest(vertices, tets, young=1.0e5, poisson=0.3, density=1000.0, devi
     wp.launch(mass_triplets, n, [mass, mr, mv], device=device)
     m = ws.bsr_from_triplets(n, n, mr, mr, mv)
     return h, m, mass
+
+
+@wp.kernel
+def _rigid_body_rows(
+    positions: wp.array[wp.vec3d], mass: wp.array[wp.float64], basis: wp.array2d[wp.float64]
+):
+    mode, vertex = wp.tid()
+    axis = wp.vec3d(0.0)
+    axis[mode % 3] = wp.float64(1.0)
+    value = axis
+    if mode >= 3:
+        value = wp.cross(axis, positions[vertex])
+    value *= wp.sqrt(mass[vertex])
+    for d in range(3):
+        basis[mode, 3 * vertex + d] = value[d]
+
+
+def rigid_body_basis(positions, mass):
+    """Return six orthonormal rows in lumped-mass-normalized coordinates.
+
+    Inputs are device arrays: FP64 ``vec3d`` positions and positive FP64 nodal
+    masses. Positions must span at least a plane. Translations and infinitesimal
+    rotations are built and orthogonalized entirely in Warp; no eigensolve or
+    host numerical computation is used. This is the nullspace of a connected,
+    unconstrained, stress-free elastic body.
+    """
+    if positions.dtype != wp.vec3d or mass.dtype != wp.float64:
+        raise ValueError("positions and mass must use vec3d and FP64")
+    if positions.size != mass.size or positions.device != mass.device:
+        raise ValueError("positions and mass must have matching lengths and devices")
+    device = mass.device
+    n = 3 * mass.size
+    basis = wp.empty((6, n), dtype=wp.float64, device=device)
+    gram = wp.zeros((6, 6), dtype=wp.float64, device=device)
+    factor = wp.empty_like(gram)
+    status = wp.zeros(1, dtype=wp.int32, device=device)
+    wp.launch(_rigid_body_rows, (6, mass.size), [positions, mass, basis], device=device)
+    for _ in range(2):
+        gram.zero_()
+        wp.launch_tiled(
+            K.gram_partial,
+            dim=(6, 6, (n + 255) // 256),
+            inputs=[basis, basis, gram],
+            block_dim=128,
+            device=device,
+        )
+        wp.launch(K.cholesky, 1, [gram, factor, status], device=device)
+        wp.launch(K.triangular, n, [basis, factor], device=device)
+    return basis
 
 
 def mass_normalized(h, mass, shift=0.0):
