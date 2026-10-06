@@ -15,6 +15,7 @@ from mathutils import Vector
 p = argparse.ArgumentParser()
 p.add_argument("--input", default="results/dragon_modes.npz")
 p.add_argument("--output", default="results/dragon_modes.blend")
+p.add_argument("--up-axis", choices=["Y", "Z"], default="Y")
 p.add_argument("--render", action="store_true")
 p.add_argument("--preview", action="store_true")
 p.add_argument("--samples", type=int, default=24)
@@ -29,9 +30,10 @@ ids, remap = np.unique(faces, return_inverse=True)
 faces = remap.reshape(-1, 3)
 x = x[ids]
 modes = modes[:, ids]
-# Input Y-up -> Blender Z-up, a proper rotation.
-x = x[:, [0, 2, 1]] * np.array([1, -1, 1])
-modes = modes[:, :, [0, 2, 1]] * np.array([1, -1, 1])
+# Rotate Y-up inputs to Blender Z-up; fTetWild input is already Z-up.
+if args.up_axis == "Y":
+    x = x[:, [0, 2, 1]] * np.array([1, -1, 1])
+    modes = modes[:, :, [0, 2, 1]] * np.array([1, -1, 1])
 x[:, 2] -= x[:, 2].min()
 x[:, 2] += 0.06
 x[:, :2] -= (x[:, :2].min(0) + x[:, :2].max(0)) / 2

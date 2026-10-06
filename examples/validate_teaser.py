@@ -62,5 +62,7 @@ result = {
     "exactly_one_correct_mode_label_per_checked_frame": True,
     "continuous_bound_argument": "Every shape is a convex interpolation of rest and its bounded peak; baked keyframes use linear interpolation.",
 }
-Path("results/teaser_validation.json").write_text(json.dumps(result, indent=2) + "\n")
+report_path.with_name(report_path.stem + "_validation.json").write_text(
+    json.dumps(result, indent=2) + "\n"
+)
 print(json.dumps(result, indent=2), flush=True)

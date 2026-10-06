@@ -20,6 +20,7 @@ p = argparse.ArgumentParser()
 p.add_argument("--base", default="results/dragon_modes.blend")
 p.add_argument("--input", default="results/dragon_optimized.npz")
 p.add_argument("--output", default="results/dragon_teaser.blend")
+p.add_argument("--up-axis", choices=["Y", "Z"], default="Y")
 p.add_argument("--frames", default="build/teaser_frames")
 p.add_argument("--render", action="store_true")
 p.add_argument("--preview", type=int, nargs="*", default=[])
@@ -47,8 +48,9 @@ raw = np.load(args.input)
 ids = np.unique(raw["faces"])
 x = raw["vertices"][ids]
 u = raw["modes"][6:26, ids]
-x = x[:, [0, 2, 1]] * [1, -1, 1]
-u = u[:, :, [0, 2, 1]] * [1, -1, 1]
+if args.up_axis == "Y":
+    x = x[:, [0, 2, 1]] * [1, -1, 1]
+    u = u[:, :, [0, 2, 1]] * [1, -1, 1]
 x[:, 2] -= x[:, 2].min()
 x[:, 2] += 0.06
 x[:, :2] -= (x[:, :2].min(0) + x[:, :2].max(0)) / 2
@@ -255,6 +257,8 @@ scene.frame_set(1)
 output = Path(args.output).resolve()
 bpy.ops.wm.save_as_mainfile(filepath=str(output), compress=True)
 report = {
+    "input": str(args.input),
+    "up_axis": args.up_axis,
     "gptoolbox_revision": GPT_REVISION,
     "okloop": {"count": 256, "arc": "-4*pi/3", "shift": "-pi/2"},
     "isoline_band_width_normalized": 0.05,
