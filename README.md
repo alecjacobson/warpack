@@ -135,7 +135,7 @@ Sources: [ARPACK, Spectra, and CuPy comparison](results/anvil_benchmarks.json), 
 
 ## Validation and benchmarking
 
-The latest recorded validation has **111 passing tests** in the pinned FSAI environment, plus passing lint, formatting, and wheel-build checks. Stock Warp 1.15 compatibility checks passed six tests, with four upstream block-Jacobi cases skipped. See [validation and source provenance](results/anvil_cg_validation.json).
+Warpack's own suite has **111 passing tests** in the pinned FSAI environment, plus recorded passing lint, formatting, and wheel-build checks. The broader [pinned CuPy and Spectra conformance runs](benchmarks/upstream/RESULTS.md) expose additional numerical failures, unsupported interfaces, and timeouts; the local suite is not full upstream conformance. Stock Warp 1.15 compatibility checks passed six tests, with four upstream block-Jacobi cases skipped. See [validation and source provenance](results/anvil_cg_validation.json).
 
 The tests cover rectangular SVD, buckling/Cayley transforms, FP64 fractional shifts, real symmetric and nonsymmetric spectra, complex Hermitian and general spectra, repeated/zero eigenvalues, both spectrum ends, interior real/complex shifts, non-diagonal mass, device convergence limits, graph replay with changed matrix values, FEM energy derivatives, rigid modes, and graph-captured FEM assembly. They also check the incremental projected matrix against `Q A Qᵀ`, captured breakdown recovery, small projected eigenproblems, orthogonal-complement projection, and pure-Warp graphs for host nodes/transfers. These are representative Spectra-style tests, not a complete port of every upstream test.
 

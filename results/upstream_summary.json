@@ -1,0 +1,531 @@
+{
+  "cupy_warp": {
+    "counts": {
+      "skipped": 3172,
+      "passed": 673,
+      "failed": 31,
+      "xfailed": 72,
+      "xpassed": 36
+    },
+    "by_class": {
+      "TestEigsh": {
+        "skipped": 1458,
+        "passed": 408,
+        "failed": 6,
+        "xfailed": 72
+      },
+      "TestEigshLateNormDiscovery": {
+        "skipped": 6,
+        "passed": 2
+      },
+      "TestEigshSM": {
+        "skipped": 144,
+        "failed": 24,
+        "passed": 24
+      },
+      "TestEigshSigma": {
+        "skipped": 64,
+        "passed": 32
+      },
+      "TestEigshShiftInvertInvalid": {
+        "skipped": 6,
+        "passed": 3
+      },
+      "TestEigshTinyN": {
+        "skipped": 3,
+        "passed": 1
+      },
+      "TestEigshDegenerateHermitian": {
+        "skipped": 8,
+        "passed": 7,
+        "failed": 1
+      },
+      "TestSvdsV0": {
+        "skipped": 3
+      },
+      "TestRng": {
+        "skipped": 8
+      },
+      "TestSvds": {
+        "skipped": 862,
+        "passed": 182,
+        "xpassed": 36
+      },
+      "TestEigshSvdsSmallNcv": {
+        "skipped": 22,
+        "passed": 14
+      },
+      "TestLOBPCG": {
+        "skipped": 12
+      },
+      "TestLOBPCGForDiagInput": {
+        "skipped": 576
+      }
+    },
+    "skip_reasons": {
+      "Skipped: Warpack supports FP64/complex128 only": 1618,
+      "Skipped": 580,
+      "Skipped: HermitianEigensolver has no initial_vector API": 63,
+      "Skipped: Warpack requires ncv > k; CuPy clamps this parameter": 36,
+      "Skipped: Complex shift-invert supports nearest eigenvalues only": 16,
+      "Skipped: Warpack has no CuPy API for: M": 1,
+      "Skipped: Warpack has no CuPy API for: Minv": 1,
+      "Skipped: Warpack has no CuPy API for: mode": 2,
+      "Skipped: PartialSVD has no configurable rng/v0 API": 3,
+      "Skipped: CuPy RNG API/internal tests; no equivalent Warpack interface": 8,
+      "Skipped: PartialSVD supports real FP64 only": 256,
+      "Skipped: No LOBPCG/block-initial-guess API in Warpack": 588
+    }
+  },
+  "cupy_native_overlay": {
+    "counts": {
+      "passed": 2500,
+      "skipped": 1195,
+      "xfailed": 173,
+      "xpassed": 116
+    },
+    "by_class": {
+      "TestEigsh": {
+        "passed": 870,
+        "skipped": 930,
+        "xfailed": 144
+      },
+      "TestEigshLateNormDiscovery": {
+        "passed": 8
+      },
+      "TestEigshSM": {
+        "passed": 192
+      },
+      "TestEigshSigma": {
+        "passed": 96
+      },
+      "TestEigshShiftInvertInvalid": {
+        "passed": 9
+      },
+      "TestEigshTinyN": {
+        "passed": 4
+      },
+      "TestEigshDegenerateHermitian": {
+        "passed": 16
+      },
+      "TestSvdsV0": {
+        "passed": 3
+      },
+      "TestRng": {
+        "passed": 8
+      },
+      "TestSvds": {
+        "passed": 671,
+        "skipped": 265,
+        "xpassed": 116,
+        "xfailed": 28
+      },
+      "TestEigshSvdsSmallNcv": {
+        "passed": 36
+      },
+      "TestLOBPCG": {
+        "passed": 11,
+        "xfailed": 1
+      },
+      "TestLOBPCGForDiagInput": {
+        "passed": 576
+      }
+    },
+    "skip_reasons": {
+      "Skipped": 1195
+    }
+  },
+  "cupy_warp_failures": [
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigsh::test_degenerate[complex128-_param_5_{k=3, return_eigenvectors=True, use_linear_operator=False, which='SA'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:254: in test_degenerate\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=1e-10, atol=1e-10\nE   \nE   Mismatched elements: 3 / 3 (100%)\nE   Max absolute difference among violations: 1.\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0.])\nE    DESIRED: array([1., 1., 1.])"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigsh::test_degenerate[complex128-_param_11_{k=3, return_eigenvectors=False, use_linear_operator=False, which='SA'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:254: in test_degenerate\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=1e-10, atol=1e-10\nE   \nE   Mismatched elements: 3 / 3 (100%)\nE   Max absolute difference among violations: 1.\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0.])\nE    DESIRED: array([1., 1., 1.])"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigsh::test_degenerate[complex128-_param_17_{k=6, return_eigenvectors=True, use_linear_operator=False, which='SA'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:254: in test_degenerate\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=1e-10, atol=1e-10\nE   \nE   Mismatched elements: 6 / 6 (100%)\nE   Max absolute difference among violations: 1.\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0., 0., 0., 0.])\nE    DESIRED: array([1., 1., 1., 1., 1., 1.])"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigsh::test_degenerate[complex128-_param_23_{k=6, return_eigenvectors=False, use_linear_operator=False, which='SA'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:254: in test_degenerate\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=1e-10, atol=1e-10\nE   \nE   Mismatched elements: 6 / 6 (100%)\nE   Max absolute difference among violations: 1.\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0., 0., 0., 0.])\nE    DESIRED: array([1., 1., 1., 1., 1., 1.])"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigsh::test_degenerate[complex128-_param_29_{k=12, return_eigenvectors=True, use_linear_operator=False, which='SA'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:254: in test_degenerate\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=1e-10, atol=1e-10\nE   \nE   Mismatched elements: 12 / 12 (100%)\nE   Max absolute difference among violations: 1.\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])\nE    DESIRED: array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigsh::test_degenerate[complex128-_param_35_{k=12, return_eigenvectors=False, use_linear_operator=False, which='SA'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:254: in test_degenerate\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=1e-10, atol=1e-10\nE   \nE   Mismatched elements: 12 / 12 (100%)\nE   Max absolute difference among violations: 1.\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])\nE    DESIRED: array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csr-_param_0_{k=3, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.15019421e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csr-_param_1_{k=3, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(9.98878773e-10) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csr-_param_4_{k=6, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.3590405e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csr-_param_5_{k=6, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.58965089e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csr-_param_8_{k=12, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.85524048e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csr-_param_9_{k=12, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.86476187e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csc-_param_0_{k=3, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.20303649e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csc-_param_1_{k=3, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.18525676e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csc-_param_4_{k=6, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.23312675e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csc-_param_5_{k=6, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.43725323e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csc-_param_8_{k=12, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(2.00480982e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-csc-_param_9_{k=12, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.8674483e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-coo-_param_0_{k=3, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.01775367e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-coo-_param_1_{k=3, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.34909625e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-coo-_param_4_{k=6, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.29590742e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-coo-_param_5_{k=6, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.4102058e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-coo-_param_8_{k=12, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.68210189e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_sparse[float64-coo-_param_9_{k=12, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:564: in test_sparse\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 564, in test_sparse\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(2.25425299e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_dense[float64-_param_0_{k=3, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:573: in test_dense\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 573, in test_dense\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(9.71186304e-10) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_dense[float64-_param_1_{k=3, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:573: in test_dense\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 573, in test_dense\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.06982322e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_dense[float64-_param_4_{k=6, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:573: in test_dense\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 573, in test_dense\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.33879374e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_dense[float64-_param_5_{k=6, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:573: in test_dense\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 573, in test_dense\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(1.13654488e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_dense[float64-_param_8_{k=12, return_eigenvectors=True, use_linear_operator=True}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:573: in test_dense\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 573, in test_dense\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(2.23422506e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshSM::test_dense[float64-_param_9_{k=12, return_eigenvectors=True, use_linear_operator=False}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:573: in test_dense\n    return self._test_eigsh(a, a_norm, xp, sp)\nbuild/test_upstream_cupy_linalg.py:548: in _test_eigsh\n    assert (res < tol)\nE   AssertionError: Only cupy raises error\nE   \nE   Traceback (most recent call last):\nE     File \"/home/horde/.local/lib/python3.10/site-packages/cupy/testing/_loops.py\", line 54, in _call_func\nE       result = impl(*args, **kw)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 573, in test_dense\nE       return self._test_eigsh(a, a_norm, xp, sp)\nE     File \"/home/horde/projects/warpack/build/test_upstream_cupy_linalg.py\", line 548, in _test_eigsh\nE       assert (res < tol)\nE   AssertionError: assert array(2.30088618e-09) < 1e-12"
+    },
+    {
+      "nodeid": "build/test_upstream_cupy_linalg.py::TestEigshDegenerateHermitian::test_low_rank_gram[complex128-_param_0_{shift=0.0, which='LM'}]",
+      "native": "passed",
+      "detail": "build/test_upstream_cupy_linalg.py:746: in test_low_rank_gram\n    cupy.testing.assert_allclose(\n../../.local/lib/python3.10/site-packages/cupy/testing/_array.py:32: in assert_allclose\n    numpy.testing.assert_allclose(\nE   AssertionError: \nE   Not equal to tolerance rtol=0.0001, atol=3.78761e-10\nE   \nE   Mismatched elements: 5 / 6 (83.3%)\nE   Max absolute difference among violations: 26652.94547915\nE   Max relative difference among violations: 1.\nE    ACTUAL: array([0., 0., 0., 0., 0., 0.])\nE    DESIRED: array([    0.      ,  1157.897878,  1515.563369,  1759.714972,\nE           1952.463799, 26652.945479])"
+    }
+  ],
+  "spectra_warp": {
+    "counts": {
+      "passed": 118,
+      "failed": 63,
+      "unsupported": 176,
+      "timeout": 3
+    },
+    "by_family": {
+      "SymEigsShift": {
+        "passed": 24,
+        "failed": 6
+      },
+      "SymGEigsShift": {
+        "passed": 8,
+        "unsupported": 48,
+        "failed": 4
+      },
+      "GenEigsRealShift": {
+        "passed": 4,
+        "unsupported": 30,
+        "failed": 2
+      },
+      "Example1Shift": {
+        "failed": 3
+      },
+      "ComplexEigs": {
+        "passed": 18,
+        "unsupported": 12,
+        "failed": 5,
+        "timeout": 1
+      },
+      "DavidsonSymEigs": {
+        "failed": 4
+      },
+      "Example1": {
+        "failed": 3
+      },
+      "Example2": {
+        "passed": 3
+      },
+      "Example3": {
+        "unsupported": 2
+      },
+      "Example4": {
+        "passed": 1,
+        "failed": 1
+      },
+      "GenEigs": {
+        "passed": 18,
+        "unsupported": 12,
+        "failed": 4,
+        "timeout": 2
+      },
+      "GenEigsComplexShift": {
+        "unsupported": 36
+      },
+      "HermEigs": {
+        "passed": 14,
+        "failed": 16
+      },
+      "SVD": {
+        "failed": 4
+      },
+      "SymEigs": {
+        "passed": 26,
+        "failed": 4
+      },
+      "SymGEigsCholesky": {
+        "unsupported": 24,
+        "passed": 2,
+        "failed": 4
+      },
+      "SymGEigsRegInv": {
+        "unsupported": 12,
+        "failed": 3
+      }
+    },
+    "failed_upstream_allows_nonconvergence": 18,
+    "failed_original_residual_passes": 20,
+    "failed_only_internal_convergence": 19,
+    "failure_ids": [
+      "SymEigsShift_2",
+      "SymEigsShift_3",
+      "SymEigsShift_7",
+      "SymEigsShift_14",
+      "SymEigsShift_17",
+      "SymEigsShift_18",
+      "SymGEigsShift_5",
+      "SymGEigsShift_15",
+      "SymGEigsShift_30",
+      "SymGEigsShift_45",
+      "GenEigsRealShift_18",
+      "GenEigsRealShift_30",
+      "Example1Shift_1",
+      "Example1Shift_3",
+      "Example1Shift_5",
+      "ComplexEigs_3",
+      "ComplexEigs_12",
+      "ComplexEigs_15",
+      "ComplexEigs_21",
+      "ComplexEigs_27",
+      "DavidsonSymEigs_0",
+      "DavidsonSymEigs_1",
+      "DavidsonSymEigs_2",
+      "DavidsonSymEigs_3",
+      "Example1_0",
+      "Example1_2",
+      "Example1_4",
+      "Example4_1",
+      "GenEigs_3",
+      "GenEigs_15",
+      "GenEigs_21",
+      "GenEigs_27",
+      "HermEigs_6",
+      "HermEigs_8",
+      "HermEigs_10",
+      "HermEigs_11",
+      "HermEigs_12",
+      "HermEigs_13",
+      "HermEigs_14",
+      "HermEigs_17",
+      "HermEigs_21",
+      "HermEigs_22",
+      "HermEigs_23",
+      "HermEigs_25",
+      "HermEigs_26",
+      "HermEigs_27",
+      "HermEigs_28",
+      "HermEigs_29",
+      "SVD_0",
+      "SVD_1",
+      "SVD_2",
+      "SVD_3",
+      "SymEigs_2",
+      "SymEigs_17",
+      "SymEigs_22",
+      "SymEigs_27",
+      "SymGEigsCholesky_12",
+      "SymGEigsCholesky_17",
+      "SymGEigsCholesky_22",
+      "SymGEigsCholesky_27",
+      "SymGEigsRegInv_2",
+      "SymGEigsRegInv_7",
+      "SymGEigsRegInv_12"
+    ],
+    "timeout_ids": [
+      "ComplexEigs_33",
+      "GenEigs_12",
+      "GenEigs_33"
+    ]
+  },
+  "benchmarks": {
+    "benchmark_gen_100": {
+      "warp_passed": 10,
+      "cupy_unsupported": 10
+    },
+    "benchmark_gen_1000": {
+      "warp_passed": 9,
+      "cupy_unsupported": 9,
+      "worker_timeout": 1
+    },
+    "benchmark_sym_100": {
+      "warp_passed": 10,
+      "cupy_passed": 10
+    },
+    "benchmark_sym_1000": {
+      "warp_passed": 10,
+      "cupy_passed": 10
+    }
+  },
+  "gpu_benchmark_medians": {
+    "benchmark_gen_100_warp": {
+      "accepted_datasets": 10,
+      "median_ms": 737.808795645833,
+      "max_absolute_residual": 1.6253626100318314e-10
+    },
+    "benchmark_gen_1000_warp": {
+      "accepted_datasets": 9,
+      "median_ms": 5679.324138909578,
+      "max_absolute_residual": 1.654905191055615e-10
+    },
+    "benchmark_sym_100_warp": {
+      "accepted_datasets": 10,
+      "median_ms": 7.100116461515427,
+      "max_absolute_residual": 3.6168978923001305e-10
+    },
+    "benchmark_sym_100_cupy": {
+      "accepted_datasets": 10,
+      "median_ms": 38.42309210449457,
+      "max_absolute_residual": 2.4361290762442422e-11
+    },
+    "benchmark_sym_1000_warp": {
+      "accepted_datasets": 10,
+      "median_ms": 22.424161434173584,
+      "max_absolute_residual": 3.959536032382971e-10
+    },
+    "benchmark_sym_1000_cupy": {
+      "accepted_datasets": 10,
+      "median_ms": 64.44620992988348,
+      "max_absolute_residual": 1.1477735428755409e-11
+    }
+  },
+  "native_benchmark_medians": {
+    "eigs_sym_100_arpack": {
+      "datasets": 10,
+      "median_ms": 0.86355
+    },
+    "eigs_sym_100_spectra": {
+      "datasets": 10,
+      "median_ms": 0.7145375
+    },
+    "eigs_sym_1000_arpack": {
+      "datasets": 10,
+      "median_ms": 54.99675
+    },
+    "eigs_sym_1000_spectra": {
+      "datasets": 10,
+      "median_ms": 45.151
+    },
+    "eigs_gen_100_arpack": {
+      "datasets": 10,
+      "median_ms": 4.177
+    },
+    "eigs_gen_100_spectra": {
+      "datasets": 10,
+      "median_ms": 3.06675
+    },
+    "eigs_gen_1000_arpack": {
+      "datasets": 10,
+      "median_ms": 466.0425
+    },
+    "eigs_gen_1000_spectra": {
+      "datasets": 10,
+      "median_ms": 408.32
+    }
+  }
+}
