@@ -1,0 +1,824 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "21fc9145bec81e1896f60cbd98d6ffac44ee560c",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "A",
+      "problem": "bar_A",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "scipy",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.004600808024406433,
+      "warmup_seconds": 0.011319778859615326,
+      "samples_seconds": [
+        0.01173451542854309,
+        0.012149222195148468,
+        0.010747749358415604
+      ],
+      "solve_seconds": 0.01173451542854309,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.339597243826902e-10,
+          "max_absolute_residual": 5.882427531189727e-11,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 6.958101192887799e-10
+        },
+        {
+          "accepted": true,
+          "residual": 6.339597243826902e-10,
+          "max_absolute_residual": 5.882427531189727e-11,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 6.958101192887799e-10
+        },
+        {
+          "accepted": true,
+          "residual": 6.339597243826902e-10,
+          "max_absolute_residual": 5.882427531189727e-11,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 6.958101192887799e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "A",
+      "problem": "bar_A",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "spectra",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.004757139831781387,
+      "warmup_seconds": 0.02090069279074669,
+      "samples_seconds": [
+        0.01986129954457283,
+        0.019828803837299347,
+        0.019773822277784348
+      ],
+      "solve_seconds": 0.019828803837299347,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.651211316551781e-10,
+          "max_absolute_residual": 4.9494049483844726e-11,
+          "orthogonality": 5.329070518200751e-15,
+          "spectrum_error": 6.958138989228772e-10
+        },
+        {
+          "accepted": true,
+          "residual": 5.651211316551781e-10,
+          "max_absolute_residual": 4.9494049483844726e-11,
+          "orthogonality": 5.329070518200751e-15,
+          "spectrum_error": 6.958138989228772e-10
+        },
+        {
+          "accepted": true,
+          "residual": 5.651211316551781e-10,
+          "max_absolute_residual": 4.9494049483844726e-11,
+          "orthogonality": 5.329070518200751e-15,
+          "spectrum_error": 6.958138989228772e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "A",
+      "requested_size": 10000,
+      "problem": "bar_A",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "cupy",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "implementation": "CuPy LOBPCG + cuDSS preconditioner",
+      "reference_tolerance": 1e-08,
+      "setup_seconds": 0.28192970901727676,
+      "warmup_seconds": 0.36198001354932785,
+      "samples_seconds": [
+        0.0717836543917656,
+        0.07250506430864334,
+        0.07213706523180008
+      ],
+      "solve_seconds": 0.07213706523180008,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.0729657472350137e-09,
+          "max_absolute_residual": 1.4026134073641394e-10,
+          "orthogonality": 1.2101430968414206e-14,
+          "spectrum_error": 3.4557993673731166e-09
+        },
+        {
+          "accepted": true,
+          "residual": 1.0728492416921768e-09,
+          "max_absolute_residual": 1.52264721664519e-10,
+          "orthogonality": 4.6629367034256575e-15,
+          "spectrum_error": 3.870139595492476e-09
+        },
+        {
+          "accepted": true,
+          "residual": 1.1029194393957108e-09,
+          "max_absolute_residual": 1.494052416506353e-10,
+          "orthogonality": 4.551914400963142e-15,
+          "spectrum_error": 3.6971426831578673e-09
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "previous_attempts": [
+        {
+          "api_class": "A",
+          "problem": "bar_A",
+          "n": 10000,
+          "columns": 10000,
+          "nnz": 29998,
+          "mass_nnz": 29998,
+          "k": 4,
+          "ncv": 32,
+          "method": "cupy",
+          "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+          "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+          "target": [
+            -1.0,
+            0.0
+          ],
+          "seed": 2026,
+          "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+          "implementation": "CuPy LOBPCG + cuDSS preconditioner",
+          "setup_seconds": 0.4041988253593445,
+          "warmup_seconds": 1.4465739466249943,
+          "samples_seconds": [
+            0.9283083416521549,
+            0.9247136488556862,
+            0.9329177476465702
+          ],
+          "solve_seconds": 0.9283083416521549,
+          "validation": [
+            {
+              "accepted": false,
+              "residual": 0.999999928415813,
+              "max_absolute_residual": 0.4049227698600927,
+              "orthogonality": 0.9999999999997179,
+              "spectrum_error": 1.033059592675132
+            },
+            {
+              "accepted": false,
+              "residual": 0.8863273378834281,
+              "max_absolute_residual": 112.69761675496267,
+              "orthogonality": 0.999998842895876,
+              "spectrum_error": 2691.7841341617673
+            },
+            {
+              "accepted": false,
+              "residual": 0.3513573474012088,
+              "max_absolute_residual": 0.01625906943745902,
+              "orthogonality": 0.9999999999917878,
+              "spectrum_error": 2.229387449514462
+            }
+          ],
+          "accepted": false,
+          "other_gpu_processes": [],
+          "timing_uncontended": true,
+          "outcome": "failed",
+          "contract_accepted": false,
+          "reference_tolerance": 1e-10
+        }
+      ]
+    },
+    {
+      "api_class": "A",
+      "problem": "bar_A",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "setup_seconds": 0.25292912498116493,
+      "capture_seconds": 0.322572972625494,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.05282546579837799,
+      "samples_seconds": [
+        0.02048056200146675,
+        0.020477794110774994,
+        0.02050107717514038
+      ],
+      "solve_seconds": 0.02048056200146675,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.6536521942236993e-10,
+          "max_absolute_residual": 2.6142608910983967e-11,
+          "orthogonality": 9.769962616701378e-15,
+          "spectrum_error": 5.776180813467719e-12
+        },
+        {
+          "accepted": true,
+          "residual": 4.572707522811373e-10,
+          "max_absolute_residual": 2.644740936669221e-11,
+          "orthogonality": 9.992007221626409e-15,
+          "spectrum_error": 6.9750447525980116e-12
+        },
+        {
+          "accepted": true,
+          "residual": 4.799320764789385e-10,
+          "max_absolute_residual": 2.6115630491485575e-11,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 9.236704664052898e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 0,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "B",
+      "problem": "bar_B",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "scipy",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        1090.6022862280074,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.005831912159919739,
+      "warmup_seconds": 0.012734446674585342,
+      "samples_seconds": [
+        0.013069666922092438,
+        0.01101948693394661,
+        0.010777682065963745
+      ],
+      "solve_seconds": 0.01101948693394661,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.1966530022133765e-10,
+          "max_absolute_residual": 1.9876483237091236e-09,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 1.6718726032352465e-11
+        },
+        {
+          "accepted": true,
+          "residual": 1.1966530022133765e-10,
+          "max_absolute_residual": 1.9876483237091236e-09,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 1.6718726032352465e-11
+        },
+        {
+          "accepted": true,
+          "residual": 1.1966530022133765e-10,
+          "max_absolute_residual": 1.9876483237091236e-09,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 1.6718726032352465e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "B",
+      "problem": "bar_B",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "spectra",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        1090.6022862280074,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.005298767238855362,
+      "warmup_seconds": 0.02093171328306198,
+      "samples_seconds": [
+        0.02006896585226059,
+        0.019860360771417618,
+        0.019411999732255936
+      ],
+      "solve_seconds": 0.019860360771417618,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.1565516097814576e-10,
+          "max_absolute_residual": 2.1309340680897293e-09,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 1.5504551040950046e-11
+        },
+        {
+          "accepted": true,
+          "residual": 1.1565516097814576e-10,
+          "max_absolute_residual": 2.1309340680897293e-09,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 1.5504551040950046e-11
+        },
+        {
+          "accepted": true,
+          "residual": 1.1565516097814576e-10,
+          "max_absolute_residual": 2.1309340680897293e-09,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 1.5504551040950046e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "B",
+      "problem": "bar_B",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "cupy",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        1090.6022862280074,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "outcome": "unsupported",
+      "reason": "No native CuPy generalized shift/buckling or general eigs path in this adapter; do not apply Euclidean eigsh to M^-1 K",
+      "accepted": false,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "B",
+      "problem": "bar_B",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        1090.6022862280074,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "setup_seconds": 0.2074553444981575,
+      "capture_seconds": 0.34177426621317863,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.045471109449863434,
+      "samples_seconds": [
+        0.021136056631803513,
+        0.02113063633441925,
+        0.021134857088327408
+      ],
+      "solve_seconds": 0.021134857088327408,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.4762698766466238e-11,
+          "max_absolute_residual": 2.098746176848465e-11,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 1.2794517343687024e-13
+        },
+        {
+          "accepted": true,
+          "residual": 2.6971594219603913e-11,
+          "max_absolute_residual": 2.468864002125315e-11,
+          "orthogonality": 8.659739592076221e-15,
+          "spectrum_error": 8.063209925978026e-14
+        },
+        {
+          "accepted": true,
+          "residual": 2.505051676173822e-11,
+          "max_absolute_residual": 3.241640289530778e-11,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 1.0253222871880344e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 0,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "C",
+      "problem": "bar_C",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "scipy",
+      "matrix_sha256": "bbc5cf5e89aa227569c213bba16b3a65468fcbf14bad5aba8eea438004ed0181",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+      "target": [
+        -251.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.004527095705270767,
+      "warmup_seconds": 0.011617783457040787,
+      "samples_seconds": [
+        0.010567549616098404,
+        0.010454066097736359,
+        0.010899510234594345
+      ],
+      "solve_seconds": 0.010567549616098404,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.018825417542315e-10,
+          "max_absolute_residual": 5.440778730325668e-11,
+          "orthogonality": 8.881784197001252e-16,
+          "spectrum_error": 4.706939792176662e-10
+        },
+        {
+          "accepted": true,
+          "residual": 4.018825417542315e-10,
+          "max_absolute_residual": 5.440778730325668e-11,
+          "orthogonality": 8.881784197001252e-16,
+          "spectrum_error": 4.706939792176662e-10
+        },
+        {
+          "accepted": true,
+          "residual": 4.018825417542315e-10,
+          "max_absolute_residual": 5.440778730325668e-11,
+          "orthogonality": 8.881784197001252e-16,
+          "spectrum_error": 4.706939792176662e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "C",
+      "problem": "bar_C",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "spectra",
+      "matrix_sha256": "bbc5cf5e89aa227569c213bba16b3a65468fcbf14bad5aba8eea438004ed0181",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+      "target": [
+        -251.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.004831369966268539,
+      "warmup_seconds": 0.02113039419054985,
+      "samples_seconds": [
+        0.02030901610851288,
+        0.019714321941137314,
+        0.019785404205322266
+      ],
+      "solve_seconds": 0.019785404205322266,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.9046582550834846e-10,
+          "max_absolute_residual": 4.960038976764558e-11,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 4.707029298378416e-10
+        },
+        {
+          "accepted": true,
+          "residual": 3.9046582550834846e-10,
+          "max_absolute_residual": 4.960038976764558e-11,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 4.707029298378416e-10
+        },
+        {
+          "accepted": true,
+          "residual": 3.9046582550834846e-10,
+          "max_absolute_residual": 4.960038976764558e-11,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 4.707029298378416e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "requested_size": 10000
+    },
+    {
+      "api_class": "C",
+      "requested_size": 10000,
+      "problem": "bar_C",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "cupy",
+      "matrix_sha256": "bbc5cf5e89aa227569c213bba16b3a65468fcbf14bad5aba8eea438004ed0181",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+      "target": [
+        -251.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "implementation": "CuPy LOBPCG + cuDSS preconditioner",
+      "reference_tolerance": 1e-08,
+      "setup_seconds": 0.283552810549736,
+      "warmup_seconds": 0.35212332010269165,
+      "samples_seconds": [
+        0.06789450347423553,
+        0.06825736165046692,
+        0.06505360826849937
+      ],
+      "solve_seconds": 0.06789450347423553,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.8262061549688827e-09,
+          "max_absolute_residual": 1.6113106855730752e-10,
+          "orthogonality": 9.992007221626409e-15,
+          "spectrum_error": 3.5397326249882134e-10
+        },
+        {
+          "accepted": true,
+          "residual": 1.6645640073534166e-09,
+          "max_absolute_residual": 1.1651474403351347e-10,
+          "orthogonality": 1.4303218764167414e-14,
+          "spectrum_error": 2.730876864164721e-10
+        },
+        {
+          "accepted": true,
+          "residual": 3.1564180887986018e-09,
+          "max_absolute_residual": 2.2517404954514042e-10,
+          "orthogonality": 1.4876988529977098e-14,
+          "spectrum_error": 2.718641310352851e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "previous_attempts": [
+        {
+          "api_class": "C",
+          "problem": "bar_C",
+          "n": 10000,
+          "columns": 10000,
+          "nnz": 29998,
+          "mass_nnz": 29998,
+          "k": 4,
+          "ncv": 32,
+          "method": "cupy",
+          "matrix_sha256": "bbc5cf5e89aa227569c213bba16b3a65468fcbf14bad5aba8eea438004ed0181",
+          "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+          "target": [
+            -251.0,
+            0.0
+          ],
+          "seed": 2026,
+          "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+          "implementation": "CuPy LOBPCG + cuDSS preconditioner",
+          "setup_seconds": 0.28002335131168365,
+          "warmup_seconds": 1.113571509718895,
+          "samples_seconds": [
+            0.9017383232712746,
+            1.0234778225421906,
+            0.9538761302828789
+          ],
+          "solve_seconds": 0.9538761302828789,
+          "validation": [
+            {
+              "accepted": false,
+              "residual": 0.9603578044543913,
+              "max_absolute_residual": 13.461434994965755,
+              "orthogonality": 0.4858835502225636,
+              "spectrum_error": 381.5524183345765
+            },
+            {
+              "accepted": false,
+              "residual": 0.9719486602248288,
+              "max_absolute_residual": 63.57763862202596,
+              "orthogonality": 141.35302872870082,
+              "spectrum_error": 128.466774879814
+            },
+            {
+              "accepted": false,
+              "residual": 0.9960861854881654,
+              "max_absolute_residual": 35.66134184074149,
+              "orthogonality": 0.0016222625908597355,
+              "spectrum_error": 2.1410911257946665
+            }
+          ],
+          "accepted": false,
+          "other_gpu_processes": [],
+          "timing_uncontended": true,
+          "outcome": "failed",
+          "contract_accepted": false,
+          "reference_tolerance": 1e-10
+        }
+      ]
+    },
+    {
+      "api_class": "C",
+      "problem": "bar_C",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "bbc5cf5e89aa227569c213bba16b3a65468fcbf14bad5aba8eea438004ed0181",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+      "target": [
+        -251.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "setup_seconds": 0.20604730397462845,
+      "capture_seconds": 0.3449125923216343,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.04493410140275955,
+      "samples_seconds": [
+        0.020488973706960678,
+        0.02049677073955536,
+        0.020500633865594864
+      ],
+      "solve_seconds": 0.02049677073955536,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.494652512985423e-10,
+          "max_absolute_residual": 2.8413198877030865e-11,
+          "orthogonality": 9.103828801926284e-15,
+          "spectrum_error": 1.79625829632865e-10
+        },
+        {
+          "accepted": true,
+          "residual": 2.6047580682762474e-10,
+          "max_absolute_residual": 2.5196636443958198e-11,
+          "orthogonality": 9.103828801926284e-15,
+          "spectrum_error": 1.799221260248795e-10
+        },
+        {
+          "accepted": true,
+          "residual": 2.578193122331594e-10,
+          "max_absolute_residual": 2.711835270230445e-11,
+          "orthogonality": 9.325873406851315e-15,
+          "spectrum_error": 1.781610143448432e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 0,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "requested_size": 10000
+    }
+  ],
+  "implementation_commit": "adf397f6cbee04367618895dde9a7aed773bf49a",
+  "source_note": "Implementation is pinned by implementation_commit; git_head is the pre-commit base of the initial run. Corrected CuPy rows retain prior attempts. This report combines sequential runs with identical matrix hashes and acceptance gates.",
+  "reference_settings": "CuPy LOBPCG absolute tol=1e-8; CuPy eigsh/svds tol=1e-11. Connection ring n=1024 uses ncv=64 after ncv=32 exhausted its budget; all actual ncv values are per row."
+}

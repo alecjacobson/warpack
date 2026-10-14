@@ -1,5 +1,7 @@
 # Application contracts and comparisons
 
+[Recorded results and remaining failures](RESULTS.md) accompany this protocol.
+
 This suite turns the API/matrix taxonomy in [research issue #19](https://github.com/alecjacobson/warpack/issues/19)
 into reproducible numerical fixtures. These are initial representatives, not
 complete coverage of the publications or a claim of upstream conformance.
