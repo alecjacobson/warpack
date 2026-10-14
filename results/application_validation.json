@@ -1,0 +1,96 @@
+{
+  "implementation_commit": "adf397f6cbee04367618895dde9a7aed773bf49a",
+  "pytest": {
+    "passed": 128,
+    "strict_xfailed": 1,
+    "seconds": 33.77,
+    "expected_failure": "Issue #27: original damped-chain right-eigenvector residual"
+  },
+  "checks": {
+    "ruff": true,
+    "format": true,
+    "wheel": true
+  },
+  "anvil_regressions": [
+    {
+      "baseline": "anvil_cudss_recheck.json",
+      "current": "anvil_application_regression.json",
+      "matching_mesh_runtime_start_and_linear_source": true,
+      "baseline_seconds": 0.4669099934399128,
+      "current_seconds": 0.4669297970831394,
+      "time_ratio": 1.0000424142629305,
+      "numerical_accepted": true,
+      "regression": false,
+      "note": "Matching solve settings; output paths and process IDs differ.",
+      "preconditioner": "cudss"
+    },
+    {
+      "baseline": "anvil_cg_optimized.json",
+      "current": "anvil_cg_application_regression.json",
+      "matching_mesh_runtime_start_and_linear_source": true,
+      "baseline_seconds": 9.608228538185358,
+      "current_seconds": 9.586478002369404,
+      "time_ratio": 0.997736259526976,
+      "numerical_accepted": true,
+      "regression": false,
+      "note": "CG baseline enabled profiling; current run disables profiling. No speedup claimed from this small difference.",
+      "preconditioner": "fsai64f"
+    }
+  ],
+  "cudss_graph_audit": [
+    {
+      "mtype": "spd",
+      "memcpy_kinds": {
+        "HtoD (HOST PAGEABLE to DEVICE)": 2,
+        "DtoD (DEVICE to DEVICE)": 2
+      },
+      "host_nodes": 0,
+      "solution": [
+        [
+          0.4999999999999999,
+          0.3333333333333334,
+          0.25,
+          0.19999999999999998
+        ]
+      ]
+    },
+    {
+      "mtype": "symmetric",
+      "memcpy_kinds": {
+        "HtoD (HOST PAGEABLE to DEVICE)": 2,
+        "DtoD (DEVICE to DEVICE)": 2
+      },
+      "host_nodes": 0,
+      "solution": [
+        [
+          0.5,
+          0.3333333333333333,
+          0.25,
+          0.2
+        ]
+      ]
+    },
+    {
+      "mtype": "general",
+      "memcpy_kinds": {
+        "HtoD (HOST PAGEABLE to DEVICE)": 2,
+        "DtoD (DEVICE to DEVICE)": 2
+      },
+      "host_nodes": 0,
+      "solution": [
+        [
+          0.5,
+          0.3333333333333333,
+          0.25,
+          0.2
+        ]
+      ]
+    }
+  ],
+  "source_sha256": {
+    "warpack/generalized_krylov.py": "7321a7f71e166cc9a5216bbeef8fe3faa13781363e71d8a9c0bd99c26e7918e7",
+    "benchmarks/applications/problems.py": "6cd107e1e669c57f5058c8e03fb1612f0534abace21252c5c01047adf987e9ce",
+    "benchmarks/applications/references.py": "4556be8d7a50c455fd56d6bb4885f65bfe113be89e35015884f621ba7b4322f1",
+    "tests/test_applications.py": "d3110abf1ab1eb7aa83bb5b295207972dbbf617edfd4d30ef949a6db18eb2d33"
+  }
+}
