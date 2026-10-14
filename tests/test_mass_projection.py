@@ -26,7 +26,7 @@ def orthonormal_rows(raw, mass):
 
 @pytest.mark.parametrize("alias", [False, True])
 @pytest.mark.parametrize("normalize", [False, True])
-def test_weighted_primal_dual_projection_and_refresh_in_graph(alias, normalize):
+def test_weighted_primal_dual_projection_and_refresh_in_graph(alias, normalize, tmp_path):
     rng = np.random.default_rng(421)
     n, rank = 31, 4
     m = rng.normal(size=(n, n))
@@ -46,6 +46,11 @@ def test_weighted_primal_dual_projection_and_refresh_in_graph(alias, normalize):
     with wp.ScopedCapture() as cap:
         projected.refresh()
         projected.apply(rhs, answer)
+    dot = tmp_path / "metric-projection.dot"
+    wp.capture_debug_dot_print(cap.graph, str(dot))
+    audit = dot.read_text()
+    assert "HOST" not in audit
+    assert "HtoD" not in audit and "DtoH" not in audit
     for scale in [1.0, 2.0]:
         current_mass = scale * m
         replacement = sparse(current_mass)
@@ -68,11 +73,18 @@ def test_weighted_primal_dual_projection_and_refresh_in_graph(alias, normalize):
     invalid = 2 * rows
     if normalize:
         invalid[1] = invalid[0]
-    wp.copy(basis, wp.array(invalid, dtype=wp.float64))
+    for bad_rows in [invalid, np.full_like(rows, np.nan), np.zeros_like(rows)]:
+        wp.copy(basis, wp.array(bad_rows, dtype=wp.float64))
+        wp.copy(rhs, wp.array(b, dtype=wp.float64))
+        wp.capture_launch(cap.graph)
+        assert projected.basis_status.numpy()[0] == 1
+        assert np.isnan(answer.numpy()).all()
+    # Invalid status is refreshed too; the same graph recovers after valid input.
+    wp.copy(basis, wp.array(rows, dtype=wp.float64))
     wp.copy(rhs, wp.array(b, dtype=wp.float64))
     wp.capture_launch(cap.graph)
-    assert projected.basis_status.numpy()[0] == 1
-    assert np.isnan(answer.numpy()).all()
+    assert projected.basis_status.numpy()[0] == 0
+    np.testing.assert_allclose(answer.numpy(), b @ expected.T, atol=2e-11, rtol=2e-12)
 
 
 @pytest.mark.parametrize("name", ["free", "disconnected"])
