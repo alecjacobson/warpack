@@ -4,6 +4,18 @@ import warp as wp
 
 
 @wp.kernel
+def linear_residual(rhs: wp.array2d[wp.float64], ax: wp.array2d[wp.float64]):
+    j, i = wp.tid()
+    ax[j, i] = rhs[j, i] - ax[j, i]
+
+
+@wp.kernel
+def add_correction(x: wp.array2d[wp.float64], correction: wp.array2d[wp.float64]):
+    j, i = wp.tid()
+    x[j, i] += correction[j, i]
+
+
+@wp.kernel
 def random_block(q: wp.array2d[wp.float64], seed: int):
     j, i = wp.tid()
     state = wp.rand_init(seed, i * q.shape[0] + j)

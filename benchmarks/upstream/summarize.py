@@ -6,6 +6,8 @@ import json
 import statistics
 from pathlib import Path
 
+from .compare_reports import contracts
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -65,12 +67,7 @@ def main():
             for r in spectra
         ),
         failed_only_internal_convergence=sum(
-            r["outcome"] == "failed"
-            and r.get("max_absolute_residual", float("inf"))
-            <= r.get("upstream_absolute_tolerance", 0)
-            and r.get("spectrum_error", 0) <= r.get("upstream_absolute_tolerance", 0)
-            and r.get("reported_converged", r["k"]) < r["k"]
-            for r in spectra
+            r["outcome"] == "failed" and contracts(r)["numerical_pass_count_short"] for r in spectra
         ),
         failure_ids=[r["id"] for r in spectra if r["outcome"] == "failed"],
         timeout_ids=[r["id"] for r in spectra if r["outcome"] == "timeout"],

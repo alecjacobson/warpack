@@ -72,7 +72,9 @@ orthogonality checks at `1e-8`; a small residual alone is insufficient. D must
 recover both zeros. H checks unit vector norms rather than orthogonality because
 its matrix is nonnormal. SVD checks both equations and both orthogonality
 conditions. Failed timings are retained as diagnostics and excluded from wins.
-The damped-chain Warp residual is currently a strict expected failure in pytest.
+The damped-chain Warp residual now passes with Warp correction of cuDSS solves;
+see the [correction report](../upstream/REFINEMENT.md) for both tested sizes and
+the measured interior-mode overhead.
 The conformal CuPy LOBPCG comparison has shown failed residuals and a projected
 Cholesky failure; that result is recorded, not treated as a Warpack speedup.
 

@@ -85,20 +85,7 @@ def test_spectra_generalized_shift_regression():
         inverse.close()
 
 
-@pytest.mark.parametrize(
-    "api_class",
-    [
-        c
-        if c != "H"
-        else pytest.param(
-            c,
-            marks=pytest.mark.xfail(
-                strict=True, reason="Issue #27: damped-chain right residual exceeds 1e-8"
-            ),
-        )
-        for c in "ABCDEFGHI"
-    ],
-)
+@pytest.mark.parametrize("api_class", list("ABCDEFGHI"))
 def test_application_graph_replay(api_class):
     p = make_problem(api_class, 80)
     solver, inverse = warp_setup(p)
