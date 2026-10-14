@@ -1,0 +1,97 @@
+diff --git a/warpack/generalized_krylov.py b/warpack/generalized_krylov.py
+index bb9f1dd..cca5973 100644
+--- a/warpack/generalized_krylov.py
++++ b/warpack/generalized_krylov.py
+@@ -136,6 +136,7 @@ class GeneralizedKrylovSchur(KrylovSchur):
+                 self.source_norm,
+                 self.breakdown,
+                 self.recoveries,
++                self.exploration,
+                 check,
+             ],
+             block_dim=128,
+diff --git a/warpack/krylov_kernels.py b/warpack/krylov_kernels.py
+index 0e39394..92daa52 100644
+--- a/warpack/krylov_kernels.py
++++ b/warpack/krylov_kernels.py
+@@ -58,6 +58,7 @@ def finish_norm(
+     source: wp.array2d[wp.float64],
+     flag: wp.array[wp.int32],
+     recoveries: wp.array[wp.int32],
++    exploration: wp.array[wp.int32],
+     check: bool,
+ ):
+     value = wp.float64(0.0)
+@@ -66,7 +67,8 @@ def finish_norm(
+         value += wp.tile_extract(wp.tile_sum(part), 0)
+     wp.tile_store(norm[0], wp.tile_from_thread(shape=1, value=value, thread_idx=0))
+     if check:
+-        result = int(value <= wp.float64(1.0e-26) * source[0, 0])
++        result = int(value <= wp.float64(1.0e-26) * source[0, 0] or exploration[0] != 0)
++        wp.tile_store(exploration, wp.tile_from_thread(shape=1, value=0, thread_idx=0))
+         wp.tile_store(flag, wp.tile_from_thread(shape=1, value=result, thread_idx=0))
+         count = recoveries[0] + result
+         wp.tile_store(recoveries, wp.tile_from_thread(shape=1, value=count, thread_idx=0))
+@@ -169,6 +171,7 @@ def loop_update(
+     iterations: wp.array[wp.int32],
+     running: wp.array[wp.int32],
+     recoveries: wp.array[wp.int32],
++    exploration: wp.array[wp.int32],
+     k: int,
+     maxiter: int,
+     full_space: bool,
+@@ -180,3 +183,7 @@ def loop_update(
+     # at least k independently seeded chains as a conservative exploration guard.
+     explore = not full_space and recoveries[0] + 1 < k
+     running[0] = int((converged[0] < k or explore) and iterations[0] < maxiter and status[0] == 0)
++    # Once all requested residuals pass, seed the next independent chain now
++    # rather than over-solving until roundoff triggers natural breakdown.
++    # Only the adaptive loop sets this flag; fixed/eager trajectories are unchanged.
++    exploration[0] = int(explore and converged[0] >= k and running[0] != 0)
+diff --git a/warpack/solver.py b/warpack/solver.py
+index fc1b8dc..94337b4 100644
+--- a/warpack/solver.py
++++ b/warpack/solver.py
+@@ -420,7 +420,9 @@ class KrylovSchur(SymmetricEigensolver):
+ 
+     Adaptive replay also waits for independent-chain exploration (unless the
+     basis spans the full problem). Thus it can continue after all ``k`` returned
+-    residuals pass. ``converged`` counts residual-passing pairs; neither that
++    residuals pass. It starts another independent chain once those residuals
++    pass instead of waiting for roundoff breakdown. ``converged`` counts
++    residual-passing pairs; neither that
+     count nor a fixed iteration budget proves global spectrum completeness.
+     """
+ 
+@@ -452,6 +454,7 @@ class KrylovSchur(SymmetricEigensolver):
+         self.source_norm = wp.zeros_like(self.norm)
+         self.breakdown = wp.zeros(1, dtype=wp.int32, device=self.device)
+         self.recoveries = wp.zeros_like(self.breakdown)
++        self.exploration = wp.zeros_like(self.breakdown)
+         self.dot_parts = wp.empty(
+             (self.m, (self.n + 1023) // 1024), dtype=wp.float64, device=self.device
+         )
+@@ -478,6 +481,7 @@ class KrylovSchur(SymmetricEigensolver):
+                 self.iterations,
+                 self.running,
+                 self.recoveries,
++                self.exploration,
+                 self.k,
+                 max_iterations,
+                 self.m == self.n,
+@@ -525,6 +529,7 @@ class KrylovSchur(SymmetricEigensolver):
+                 self.source_norm,
+                 self.breakdown,
+                 self.recoveries,
++                self.exploration,
+                 check,
+             ],
+             block_dim=128,
+@@ -586,6 +591,7 @@ class KrylovSchur(SymmetricEigensolver):
+ 
+     def initialize(self, seed=42):
+         self.recoveries.zero_()
++        self.exploration.zero_()
+         self.g.zero_()
+         self.status.zero_()
+         if self.initial_vector is None:
