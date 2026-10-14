@@ -47,6 +47,10 @@ def test_regression_gate_handles_contention_and_worker_failure():
         1.25,
     )[0]
     assert not changed_tol["comparable"]
+    changed_inner = compare_baseline(
+        [{**good, "cg_tolerance": 1e-15}], {"cases": [{**good, "cg_tolerance": 1e-13}]}, 1.25
+    )[0]
+    assert not changed_inner["comparable"]
     changed_shift = compare_baseline(
         [{**good, "target": [-1.0, 0.0]}],
         {"cases": [{**good, "target": [-0.01, 0.0]}]},

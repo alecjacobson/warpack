@@ -100,7 +100,7 @@ def accuracy(p, values, vectors, right=None, reference=None):
     return result
 
 
-def warp_setup(p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None):
+def warp_setup(p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None, cg_tol=1e-13):
     ncv = min(ncv, p.n)
     if p.api_class in "EH":
         solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=tol)
@@ -142,7 +142,7 @@ def warp_setup(p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None):
                 )
             else:
                 raise ValueError(method)
-        inv = CGInverse(shifted_device, tol=1e-13, maxiter=10000, preconditioner=preconditioner)
+        inv = CGInverse(shifted_device, tol=cg_tol, maxiter=10000, preconditioner=preconditioner)
     else:
         inv = CuDSSInverse(
             matrix(shifted),

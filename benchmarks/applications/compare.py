@@ -56,6 +56,7 @@ def run(
     problem=None,
     lobpcg_tol=1e-8,
     warp_inverse_transform=None,
+    cg_tol=1e-13,
 ):
     p = make_problem(api_class, size) if problem is None else problem
     ref = reference_values(p)
@@ -122,11 +123,13 @@ def run(
                     "cg-fsai": "upstream FSAI max_row_size=32 max_step_size=3 apply_lanes=8 factor_dtype=float32",
                 }[selected]
                 row["cg_block_size"] = p.block_size if selected != "cg" else 1
-                row["cg_tolerance"] = 1e-13
+                row["cg_tolerance"] = cg_tol
                 row["cg_maxiter"] = 10000
             row["start"] = "Warp seed 42; same start restored on every replay"
             setup, (solver, inverse) = timed(
-                lambda: warp_setup(p, selected, ncv, inverse_transform=warp_inverse_transform)
+                lambda: warp_setup(
+                    p, selected, ncv, inverse_transform=warp_inverse_transform, cg_tol=cg_tol
+                )
             )
             # Complex shift-invert wraps the real factor object twice.
             factor = getattr(inverse, "inverse", inverse)
