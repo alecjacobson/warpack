@@ -1,5 +1,9 @@
 # CuPy and Spectra conformance, 2026-10-13
 
+Subsequent fixes and focused reruns are recorded in the
+[Krylov multiplicity report](MULTIPLICITY.md). The counts below preserve this
+original baseline.
+
 This run found correctness and coverage gaps that the 111-test local suite did not expose. Production solver code stayed at `98f10fa`; the changes in this commit are test adapters, benchmark runners, and recorded results. Every inverse used cuDSS. No CG preconditioner or inner CG stopping criterion was involved.
 
 The scope is CuPy's sparse eigensolver/SVD tests, Spectra's complete native CTest suite, the exported numerical problems from its 16 solver/example source files, and its complete 40-dataset benchmark. Private Spectra factorization/implementation tests ran natively; they do not have direct Warpack equivalents. [Methodology and reproduction](README.md) describe the adapters and unsupported interfaces.

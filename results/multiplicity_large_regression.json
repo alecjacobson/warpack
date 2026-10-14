@@ -1,0 +1,261 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "8c1dbecb09dff22c8325f45bdd27b6e21722872e",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "A",
+      "requested_size": 10000,
+      "problem": "bar_A",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "setup_seconds": 0.20494268462061882,
+      "capture_seconds": 0.3349101133644581,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.04474102333188057,
+      "samples_seconds": [
+        0.02078387141227722,
+        0.02079024165868759,
+        0.02079189568758011
+      ],
+      "solve_seconds": 0.02079024165868759,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.731403270295558e-10,
+          "max_absolute_residual": 2.4561028558189868e-11,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 1.0230569588356716e-11
+        },
+        {
+          "accepted": true,
+          "residual": 4.5988779897182057e-10,
+          "max_absolute_residual": 2.2133735816387556e-11,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 2.0859980050664145e-12
+        },
+        {
+          "accepted": true,
+          "residual": 4.850825536831446e-10,
+          "max_absolute_residual": 2.3402217663726077e-11,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 3.047464977834276e-12
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 0,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false
+    },
+    {
+      "api_class": "B",
+      "requested_size": 10000,
+      "problem": "bar_B",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "24665bbb9005c1143d747ae52611f8ea562bfc5d2cfbbd1359e773e498043a66",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        1090.6022862280074,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "setup_seconds": 0.21111486852169037,
+      "capture_seconds": 0.33160587400197983,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.0456710010766983,
+      "samples_seconds": [
+        0.02123333141207695,
+        0.02122655138373375,
+        0.0212278813123703
+      ],
+      "solve_seconds": 0.0212278813123703,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.6231306723886712e-11,
+          "max_absolute_residual": 2.4683019517190985e-11,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 5.4369092315181416e-14
+        },
+        {
+          "accepted": true,
+          "residual": 2.3753916037407842e-11,
+          "max_absolute_residual": 2.4209051430190698e-11,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 8.07273118113586e-14
+        },
+        {
+          "accepted": true,
+          "residual": 2.7257708698131173e-11,
+          "max_absolute_residual": 2.2914614650204612e-11,
+          "orthogonality": 9.103828801926284e-15,
+          "spectrum_error": 1.525895720045438e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 0,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false
+    },
+    {
+      "api_class": "C",
+      "requested_size": 10000,
+      "problem": "bar_C",
+      "n": 10000,
+      "columns": 10000,
+      "nnz": 29998,
+      "mass_nnz": 29998,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "bbc5cf5e89aa227569c213bba16b3a65468fcbf14bad5aba8eea438004ed0181",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+      "target": [
+        -251.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "setup_seconds": 0.20489927753806114,
+      "capture_seconds": 0.33206867799162865,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.04478731006383896,
+      "samples_seconds": [
+        0.020785164088010788,
+        0.0207853764295578,
+        0.02078157290816307
+      ],
+      "solve_seconds": 0.020785164088010788,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.2685007527691403e-10,
+          "max_absolute_residual": 3.300539702655314e-11,
+          "orthogonality": 9.992007221626409e-15,
+          "spectrum_error": 1.7992845318741733e-10
+        },
+        {
+          "accepted": true,
+          "residual": 2.2616520417504933e-10,
+          "max_absolute_residual": 2.4563576866976078e-11,
+          "orthogonality": 9.769962616701378e-15,
+          "spectrum_error": 1.7977058276604708e-10
+        },
+        {
+          "accepted": true,
+          "residual": 2.316486797168869e-10,
+          "max_absolute_residual": 2.512682770183794e-11,
+          "orthogonality": 9.769962616701378e-15,
+          "spectrum_error": 1.8022274340594425e-10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 0,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false
+    }
+  ],
+  "regression_checks": [
+    {
+      "api_class": "A",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0151206620794226,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "B",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0044014598089839,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "C",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.01407018462176,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "performance_comparisons": 3
+}
