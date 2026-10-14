@@ -48,11 +48,13 @@ other application profiles retain their existing settings. See the
 [factorization regression report](../upstream/MATCHING.md) for the recovered
 interior-mode overhead, per-trial accuracy and remaining vendor graph copies.
 
-The new generalized Krylov path fixes the tight-budget failure of
-`SymGEigsShift_5`: a permanent fixture checks all ten requested eigenvalues,
-original residuals, mass orthogonality and invariant-subspace agreement at
-20 cycles. It does not close all of [#7](https://github.com/alecjacobson/warpack/issues/7),
-and does not establish completeness for arbitrary repeated spectra.
+The [generalized-transform report](../upstream/TRANSFORMS.md) resolves the
+remaining #7 cases with restarted Krylov iteration, including buckling and
+Cayley variants. All 21 supported generalized Spectra cases pass their original
+bounds and full counts. Additional exact fixtures check requested spectra,
+metric orthogonality and invariant subspaces. The comparison includes native
+ARPACK/Spectra and explicit fixed-budget sweeps, including failed short budgets;
+this does not establish completeness for arbitrary repeated spectra.
 
 ## Reference paths and acceptance
 

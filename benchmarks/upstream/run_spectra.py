@@ -12,11 +12,10 @@ import warp as wp
 
 from warpack import (
     BucklingEigensolver,
-    CayleyEigensolver,
     CuDSSInverse,
     EigenpairEvaluation,
     GeneralEigensolver,
-    GeneralizedEigensolver,
+    GeneralizedKrylovSchur,
     HermitianEigensolver,
     KrylovSchur,
     PartialSVD,
@@ -113,7 +112,7 @@ def run(case):
                     )
                 inv = CuDSSInverse(
                     matrix(a - sigma.real * b),
-                    ncv,
+                    1,
                     mtype="general",
                     matching=True,
                     refinement_steps=1,
@@ -127,19 +126,21 @@ def run(case):
                         sigma.real,
                         ncv=ncv,
                         tol=threshold,
+                        method="krylov",
                     )
                 elif "cayley" in case["name"]:
-                    solver = CayleyEigensolver(
+                    solver = GeneralizedKrylovSchur(
                         SparseOperator(ma),
                         SparseOperator(mb),
                         inv,
                         k,
-                        sigma.real,
                         ncv=ncv,
+                        target=sigma.real,
+                        mode="cayley",
                         tol=threshold,
                     )
                 else:
-                    solver = GeneralizedEigensolver(
+                    solver = GeneralizedKrylovSchur(
                         SparseOperator(ma),
                         SparseOperator(mb),
                         inv,
@@ -151,10 +152,10 @@ def run(case):
             else:
                 if which != "SM":
                     raise Unsupported(
-                        "GeneralizedEigensolver lacks general B-inverse extremal selection for indefinite A"
+                        "Generalized extremal selections are not mapped by this adapter"
                     )
-                inv = CuDSSInverse(ma, ncv, mtype="general", matching=True, refinement_steps=1)
-                solver = GeneralizedEigensolver(
+                inv = CuDSSInverse(ma, 1, mtype="general", matching=True, refinement_steps=1)
+                solver = GeneralizedKrylovSchur(
                     SparseOperator(ma), SparseOperator(mb), inv, k, ncv=ncv, target=0, tol=threshold
                 )
             iterations = 100
@@ -264,6 +265,8 @@ def run(case):
         factor = getattr(inv, "inverse", inv)
         factor = getattr(factor, "inverse", factor)
         return dict(
+            solver_type=type(solver).__name__,
+            iteration_method=getattr(solver, "method", None),
             cudss_mtype=getattr(factor, "mtype", None),
             cudss_reordering=getattr(factor, "reordering", None),
             cudss_matching=getattr(factor, "matching", None),

@@ -1,0 +1,815 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "protocol": "Sequential backends; setup/capture separate; every timed sample validated against requested spectrum, metric orthogonality and original residual, including absolute 1e-9 bound. Warp block uses 100 cycles, Krylov 20; both use matched general cuDSS factors and one correction. These are explicit algorithm/budget changes, not identical-iteration timing comparisons. Reference starts differ; native tolerance 1e-11, Warp 1e-12. Internal counts reported separately. CuPy generalized transformed APIs are unsupported by the comparison adapter.",
+  "cases": [
+    {
+      "problem": "SymGEigsShift_5",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "shift-invert",
+      "target": 1.2345,
+      "method": "scipy",
+      "setup_seconds": 0.0013521574437618256,
+      "warmup_seconds": 0.0058172158896923065,
+      "samples": [
+        0.005287278443574905,
+        0.00555058941245079,
+        0.005496259778738022
+      ],
+      "median": 0.005496259778738022,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 3.5503797840257553e-12,
+          "max_absolute_residual": 9.847955784181295e-13,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 3.4416913763379853e-15
+        },
+        {
+          "accepted": true,
+          "residual": 3.5503797840257553e-12,
+          "max_absolute_residual": 9.847955784181295e-13,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 3.4416913763379853e-15
+        },
+        {
+          "accepted": true,
+          "residual": 3.5503797840257553e-12,
+          "max_absolute_residual": 9.847955784181295e-13,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 3.4416913763379853e-15
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_5",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "shift-invert",
+      "target": 1.2345,
+      "method": "spectra",
+      "setup_seconds": 0.0012177787721157074,
+      "warmup_seconds": 0.0061335377395153046,
+      "samples": [
+        0.006165929138660431,
+        0.006179694086313248,
+        0.006136711686849594
+      ],
+      "median": 0.006165929138660431,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 4.288115785597896e-12,
+          "max_absolute_residual": 1.2311957009458752e-12,
+          "orthogonality": 6.661338147750939e-15,
+          "spectrum_error": 5.551115123125783e-15
+        },
+        {
+          "accepted": true,
+          "residual": 4.288115785597896e-12,
+          "max_absolute_residual": 1.2311957009458752e-12,
+          "orthogonality": 6.661338147750939e-15,
+          "spectrum_error": 5.551115123125783e-15
+        },
+        {
+          "accepted": true,
+          "residual": 4.288115785597896e-12,
+          "max_absolute_residual": 1.2311957009458752e-12,
+          "orthogonality": 6.661338147750939e-15,
+          "spectrum_error": 5.551115123125783e-15
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_5",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "shift-invert",
+      "target": 1.2345,
+      "method": "warp-block",
+      "outer_cycles": 100,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.19714093580842018,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 600,
+          "HtoD (HOST PAGEABLE to DEVICE)": 400
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.2594553269445896,
+      "warmup_seconds": 0.06099984794855118,
+      "samples": [
+        0.04554327204823494,
+        0.045549262315034866,
+        0.04555290564894676
+      ],
+      "median": 0.045549262315034866,
+      "checks": [
+        {
+          "accepted": false,
+          "residual": 1.7299031141090684e-05,
+          "max_absolute_residual": 4.850149654832617e-06,
+          "orthogonality": 4.440892098500626e-15,
+          "spectrum_error": 1.0702982944366113e-10,
+          "reported_converged": 5
+        },
+        {
+          "accepted": false,
+          "residual": 1.7299031141090684e-05,
+          "max_absolute_residual": 4.850149654832617e-06,
+          "orthogonality": 4.440892098500626e-15,
+          "spectrum_error": 1.0702982944366113e-10,
+          "reported_converged": 5
+        },
+        {
+          "accepted": false,
+          "residual": 1.7299031141090684e-05,
+          "max_absolute_residual": 4.850149654832617e-06,
+          "orthogonality": 4.440892098500626e-15,
+          "spectrum_error": 1.0702982944366113e-10,
+          "reported_converged": 5
+        }
+      ],
+      "accepted": false,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_5",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "shift-invert",
+      "target": 1.2345,
+      "method": "warp-krylov",
+      "outer_cycles": 20,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.373457882553339,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1395,
+          "HtoD (HOST PAGEABLE to DEVICE)": 916
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.012525822967290878,
+      "warmup_seconds": 0.08884615451097488,
+      "samples": [
+        0.03853865712881088,
+        0.03854716569185257,
+        0.038553740829229355
+      ],
+      "median": 0.03854716569185257,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 2.5987522085517286e-14,
+          "max_absolute_residual": 1.5367915273678534e-14,
+          "orthogonality": 1.509903313490213e-14,
+          "spectrum_error": 1.3322676295501878e-15,
+          "reported_converged": 10
+        },
+        {
+          "accepted": true,
+          "residual": 2.5987522085517286e-14,
+          "max_absolute_residual": 1.5367915273678534e-14,
+          "orthogonality": 1.509903313490213e-14,
+          "spectrum_error": 1.3322676295501878e-15,
+          "reported_converged": 10
+        },
+        {
+          "accepted": true,
+          "residual": 2.5987522085517286e-14,
+          "max_absolute_residual": 1.5367915273678534e-14,
+          "orthogonality": 1.509903313490213e-14,
+          "spectrum_error": 1.3322676295501878e-15,
+          "reported_converged": 10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_30",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "buckling",
+      "target": 1.2345,
+      "method": "scipy",
+      "setup_seconds": 0.0011029057204723358,
+      "warmup_seconds": 0.004698231816291809,
+      "samples": [
+        0.004633978009223938,
+        0.004629362374544144,
+        0.00944957509636879
+      ],
+      "median": 0.004633978009223938,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 3.0534327279743785e-12,
+          "max_absolute_residual": 5.348721465736617e-12,
+          "orthogonality": 5.009586250481563e-15,
+          "spectrum_error": 5.5293556725170086e-15
+        },
+        {
+          "accepted": true,
+          "residual": 3.0534327279743785e-12,
+          "max_absolute_residual": 5.348721465736617e-12,
+          "orthogonality": 5.009586250481563e-15,
+          "spectrum_error": 5.5293556725170086e-15
+        },
+        {
+          "accepted": true,
+          "residual": 3.0534327279743785e-12,
+          "max_absolute_residual": 5.348721465736617e-12,
+          "orthogonality": 5.009586250481563e-15,
+          "spectrum_error": 5.5293556725170086e-15
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_30",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "buckling",
+      "target": 1.2345,
+      "method": "spectra",
+      "setup_seconds": 0.0018998794257640839,
+      "warmup_seconds": 0.005543038249015808,
+      "samples": [
+        0.005536161363124847,
+        0.005782410502433777,
+        0.005554035305976868
+      ],
+      "median": 0.005554035305976868,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 4.83292622627316e-12,
+          "max_absolute_residual": 8.590780864459191e-12,
+          "orthogonality": 7.771561172376096e-15,
+          "spectrum_error": 1.420888180200344e-14
+        },
+        {
+          "accepted": true,
+          "residual": 4.83292622627316e-12,
+          "max_absolute_residual": 8.590780864459191e-12,
+          "orthogonality": 7.771561172376096e-15,
+          "spectrum_error": 1.420888180200344e-14
+        },
+        {
+          "accepted": true,
+          "residual": 4.83292622627316e-12,
+          "max_absolute_residual": 8.590780864459191e-12,
+          "orthogonality": 7.771561172376096e-15,
+          "spectrum_error": 1.420888180200344e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_30",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "buckling",
+      "target": 1.2345,
+      "method": "warp-block",
+      "outer_cycles": 100,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.052252743393182755,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 600,
+          "HtoD (HOST PAGEABLE to DEVICE)": 400
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.013891518115997314,
+      "warmup_seconds": 0.06995201110839844,
+      "samples": [
+        0.045556437224149704,
+        0.04571250081062317,
+        0.04559303820133209
+      ],
+      "median": 0.04559303820133209,
+      "checks": [
+        {
+          "accepted": false,
+          "residual": 1.9052977149250363e-08,
+          "max_absolute_residual": 3.262486369948192e-08,
+          "orthogonality": 3.006358788975477e-15,
+          "spectrum_error": 4.040682991454737e-15,
+          "reported_converged": 8
+        },
+        {
+          "accepted": false,
+          "residual": 1.9052977149250363e-08,
+          "max_absolute_residual": 3.262486369948192e-08,
+          "orthogonality": 3.006358788975477e-15,
+          "spectrum_error": 4.040682991454737e-15,
+          "reported_converged": 8
+        },
+        {
+          "accepted": false,
+          "residual": 1.9052977149250363e-08,
+          "max_absolute_residual": 3.262486369948192e-08,
+          "orthogonality": 3.006358788975477e-15,
+          "spectrum_error": 4.040682991454737e-15,
+          "reported_converged": 8
+        }
+      ],
+      "accepted": false,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_30",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "buckling",
+      "target": 1.2345,
+      "method": "warp-krylov",
+      "outer_cycles": 20,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.374065887182951,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1395,
+          "HtoD (HOST PAGEABLE to DEVICE)": 916
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.012365203350782394,
+      "warmup_seconds": 0.11667757108807564,
+      "samples": [
+        0.03885811194777489,
+        0.03883320838212967,
+        0.03886235132813454
+      ],
+      "median": 0.03885811194777489,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 2.4810248062065575e-14,
+          "max_absolute_residual": 4.490852134608758e-14,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 2.283177151767466e-15,
+          "reported_converged": 10
+        },
+        {
+          "accepted": true,
+          "residual": 2.4810248062065575e-14,
+          "max_absolute_residual": 4.490852134608758e-14,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 2.283177151767466e-15,
+          "reported_converged": 10
+        },
+        {
+          "accepted": true,
+          "residual": 2.4810248062065575e-14,
+          "max_absolute_residual": 4.490852134608758e-14,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 2.283177151767466e-15,
+          "reported_converged": 10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_45",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "cayley",
+      "target": 1.2345,
+      "method": "scipy",
+      "setup_seconds": 0.001009766012430191,
+      "warmup_seconds": 0.005891758948564529,
+      "samples": [
+        0.005773376673460007,
+        0.005879100412130356,
+        0.005882523953914642
+      ],
+      "median": 0.005879100412130356,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 1.5981417175325463e-12,
+          "max_absolute_residual": 4.349819116011844e-13,
+          "orthogonality": 4.218847493575595e-15,
+          "spectrum_error": 2.1094237467877974e-15
+        },
+        {
+          "accepted": true,
+          "residual": 1.5981417175325463e-12,
+          "max_absolute_residual": 4.349819116011844e-13,
+          "orthogonality": 4.218847493575595e-15,
+          "spectrum_error": 2.1094237467877974e-15
+        },
+        {
+          "accepted": true,
+          "residual": 1.5981417175325463e-12,
+          "max_absolute_residual": 4.349819116011844e-13,
+          "orthogonality": 4.218847493575595e-15,
+          "spectrum_error": 2.1094237467877974e-15
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_45",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "cayley",
+      "target": 1.2345,
+      "method": "spectra",
+      "setup_seconds": 0.0011143870651721954,
+      "warmup_seconds": 0.006061539053916931,
+      "samples": [
+        0.00649922713637352,
+        0.006118807941675186,
+        0.006183948367834091
+      ],
+      "median": 0.006183948367834091,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 2.2649107986861508e-12,
+          "max_absolute_residual": 6.497094529045455e-13,
+          "orthogonality": 3.774758283725532e-15,
+          "spectrum_error": 3.6637359812630166e-15
+        },
+        {
+          "accepted": true,
+          "residual": 2.2649107986861508e-12,
+          "max_absolute_residual": 6.497094529045455e-13,
+          "orthogonality": 3.774758283725532e-15,
+          "spectrum_error": 3.6637359812630166e-15
+        },
+        {
+          "accepted": true,
+          "residual": 2.2649107986861508e-12,
+          "max_absolute_residual": 6.497094529045455e-13,
+          "orthogonality": 3.774758283725532e-15,
+          "spectrum_error": 3.6637359812630166e-15
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_45",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "cayley",
+      "target": 1.2345,
+      "method": "warp-block",
+      "outer_cycles": 100,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.047519609332084656,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 600,
+          "HtoD (HOST PAGEABLE to DEVICE)": 400
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.01690245419740677,
+      "warmup_seconds": 0.05689392611384392,
+      "samples": [
+        0.04611723870038986,
+        0.04610707238316536,
+        0.04617179185152054
+      ],
+      "median": 0.04611723870038986,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 1.4158003787435483e-09,
+          "max_absolute_residual": 4.5715571606042005e-10,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 1.887379141862766e-15,
+          "reported_converged": 8
+        },
+        {
+          "accepted": true,
+          "residual": 1.4158003787435483e-09,
+          "max_absolute_residual": 4.5715571606042005e-10,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 1.887379141862766e-15,
+          "reported_converged": 8
+        },
+        {
+          "accepted": true,
+          "residual": 1.4158003787435483e-09,
+          "max_absolute_residual": 4.5715571606042005e-10,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 1.887379141862766e-15,
+          "reported_converged": 8
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "SymGEigsShift_45",
+      "n": 100,
+      "k": 10,
+      "ncv": 20,
+      "mode": "cayley",
+      "target": 1.2345,
+      "method": "warp-krylov",
+      "outer_cycles": 20,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.3599591702222824,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1395,
+          "HtoD (HOST PAGEABLE to DEVICE)": 916
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.014440525323152542,
+      "warmup_seconds": 0.07609087601304054,
+      "samples": [
+        0.039715006947517395,
+        0.03968144953250885,
+        0.03966843709349632
+      ],
+      "median": 0.03968144953250885,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 1.413270995103727e-14,
+          "max_absolute_residual": 8.049116928532385e-15,
+          "orthogonality": 1.532107773982716e-14,
+          "spectrum_error": 8.881784197001252e-16,
+          "reported_converged": 10
+        },
+        {
+          "accepted": true,
+          "residual": 1.413270995103727e-14,
+          "max_absolute_residual": 8.049116928532385e-15,
+          "orthogonality": 1.532107773982716e-14,
+          "spectrum_error": 8.881784197001252e-16,
+          "reported_converged": 10
+        },
+        {
+          "accepted": true,
+          "residual": 1.413270995103727e-14,
+          "max_absolute_residual": 8.049116928532385e-15,
+          "orthogonality": 1.532107773982716e-14,
+          "spectrum_error": 8.881784197001252e-16,
+          "reported_converged": 10
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "coupled_buckling",
+      "n": 10000,
+      "k": 4,
+      "ncv": 32,
+      "mode": "buckling",
+      "target": 5.13,
+      "method": "scipy",
+      "setup_seconds": 0.004922598600387573,
+      "warmup_seconds": 0.02111702784895897,
+      "samples": [
+        0.023322973400354385,
+        0.026822291314601898,
+        0.020811378955841064
+      ],
+      "median": 0.023322973400354385,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 3.549095818957448e-16,
+          "max_absolute_residual": 4.440892098500626e-16,
+          "orthogonality": 6.661338147750939e-16,
+          "spectrum_error": 1.735126119723649e-16
+        },
+        {
+          "accepted": true,
+          "residual": 3.549095818957448e-16,
+          "max_absolute_residual": 4.440892098500626e-16,
+          "orthogonality": 6.661338147750939e-16,
+          "spectrum_error": 1.735126119723649e-16
+        },
+        {
+          "accepted": true,
+          "residual": 3.549095818957448e-16,
+          "max_absolute_residual": 4.440892098500626e-16,
+          "orthogonality": 6.661338147750939e-16,
+          "spectrum_error": 1.735126119723649e-16
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "coupled_buckling",
+      "n": 10000,
+      "k": 4,
+      "ncv": 32,
+      "mode": "buckling",
+      "target": 5.13,
+      "method": "spectra",
+      "setup_seconds": 0.0038901865482330322,
+      "warmup_seconds": 0.015503983944654465,
+      "samples": [
+        0.015358030796051025,
+        0.015455171465873718,
+        0.015417665243148804
+      ],
+      "median": 0.015417665243148804,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 5.367843867040275e-16,
+          "max_absolute_residual": 4.805761749145331e-16,
+          "orthogonality": 5.773159728050814e-15,
+          "spectrum_error": 1.735126119723649e-16
+        },
+        {
+          "accepted": true,
+          "residual": 5.367843867040275e-16,
+          "max_absolute_residual": 4.805761749145331e-16,
+          "orthogonality": 5.773159728050814e-15,
+          "spectrum_error": 1.735126119723649e-16
+        },
+        {
+          "accepted": true,
+          "residual": 5.367843867040275e-16,
+          "max_absolute_residual": 4.805761749145331e-16,
+          "orthogonality": 5.773159728050814e-15,
+          "spectrum_error": 1.735126119723649e-16
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "coupled_buckling",
+      "n": 10000,
+      "k": 4,
+      "ncv": 32,
+      "mode": "buckling",
+      "target": 5.13,
+      "method": "warp-block",
+      "outer_cycles": 100,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.04601659998297691,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1000,
+          "HtoD (HOST PAGEABLE to DEVICE)": 400
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.025243036448955536,
+      "warmup_seconds": 0.15878888592123985,
+      "samples": [
+        0.1457730047404766,
+        0.14572397246956825,
+        0.14571401849389076
+      ],
+      "median": 0.14572397246956825,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 1.960366968357427e-16,
+          "max_absolute_residual": 8.881784197001252e-16,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 3.4649718181781673e-16,
+          "reported_converged": 4
+        },
+        {
+          "accepted": true,
+          "residual": 1.9603669683573443e-16,
+          "max_absolute_residual": 8.881784197001252e-16,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 3.4649718181781673e-16,
+          "reported_converged": 4
+        },
+        {
+          "accepted": true,
+          "residual": 1.9603669683574032e-16,
+          "max_absolute_residual": 8.881784197001252e-16,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 3.4649718181781673e-16,
+          "reported_converged": 4
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    },
+    {
+      "problem": "coupled_buckling",
+      "n": 10000,
+      "k": 4,
+      "ncv": 32,
+      "mode": "buckling",
+      "target": 5.13,
+      "method": "warp-krylov",
+      "outer_cycles": 20,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 1.2625502906739712,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3063,
+          "HtoD (HOST PAGEABLE to DEVICE)": 2028
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.025297757238149643,
+      "warmup_seconds": 0.2773507721722126,
+      "samples": [
+        0.12468874827027321,
+        0.12473135069012642,
+        0.12467392161488533
+      ],
+      "median": 0.12468874827027321,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 1.9307486935768565e-16,
+          "max_absolute_residual": 2.2520072948498433e-16,
+          "orthogonality": 9.103828801926284e-15,
+          "spectrum_error": 0.0,
+          "reported_converged": 4
+        },
+        {
+          "accepted": true,
+          "residual": 2.945118971049606e-16,
+          "max_absolute_residual": 4.440892098500626e-16,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 1.735126119723649e-16,
+          "reported_converged": 4
+        },
+        {
+          "accepted": true,
+          "residual": 2.211357165808863e-16,
+          "max_absolute_residual": 4.440892098500626e-16,
+          "orthogonality": 7.771561172376096e-15,
+          "spectrum_error": 5.205378359170947e-16,
+          "reported_converged": 4
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    }
+  ]
+}

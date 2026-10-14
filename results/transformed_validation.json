@@ -1,0 +1,4470 @@
+{
+  "tested_commit": "c5b1138",
+  "rebased_commit": "0966b20",
+  "rebased_numerical_files_identical": true,
+  "source_sha256": {
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "benchmarks/upstream/run_spectra.py": "f80c972407bc203f418b664c9876d21be550b7aabc51d2a9d1e5f1f526c1b3c5",
+    "benchmarks/applications/spectra.cpp": "90924d17d44f40d1c8a49ccc596c7eb724d32503f2cbf8d90b5c918189879db7",
+    "benchmarks/applications/references.py": "a3e259dec4b3efc017e7702ee3193f1bae70726594aa46673bce97a8eec08102",
+    "benchmarks/applications/runner.py": "1af217f95feec7cdf51d099df3c7bccb5cd58d5792a0dba58e331c5937f683d3"
+  },
+  "tests": "203 passed in 125.44s (0:02:05)",
+  "commands": [
+    {
+      "name": "spectra-sm",
+      "command": [
+        "-m",
+        "benchmarks.upstream.bounded",
+        "spectra",
+        "--timeout",
+        "150",
+        "--selection",
+        "4",
+        "--families",
+        "SymGEigsCholesky,SymGEigsRegInv",
+        "--out",
+        "results/transformed_spectra.json"
+      ],
+      "exitcode": 0
+    },
+    {
+      "name": "spectra-shift",
+      "command": [
+        "-m",
+        "benchmarks.upstream.bounded",
+        "spectra",
+        "--timeout",
+        "150",
+        "--selection",
+        "0",
+        "--families",
+        "SymGEigsShift",
+        "--out",
+        "results/transformed_spectra.json"
+      ],
+      "exitcode": 0
+    },
+    {
+      "name": "comparisons",
+      "command": [
+        "-m",
+        "benchmarks.applications.transformed_regression",
+        "--out",
+        "results/transformed_comparisons.json"
+      ],
+      "exitcode": 0
+    },
+    {
+      "name": "large",
+      "command": [
+        "-m",
+        "benchmarks.applications.compare",
+        "--methods",
+        "warp",
+        "--classes",
+        "ABC",
+        "--sizes",
+        "10000",
+        "--steps",
+        "5",
+        "--out",
+        "results/transformed_large.json",
+        "--baseline",
+        "/home/horde/projects/warpack/results/matching_large.json"
+      ],
+      "exitcode": 0
+    }
+  ],
+  "selected_contracts": {
+    "current_counts": {
+      "passed": 21
+    },
+    "checked_numerical_counts": {
+      "passed": 21
+    },
+    "numerical_pass_count_short": [],
+    "outcome_changes": [
+      {
+        "id": "SymGEigsShift_5",
+        "before": "failed",
+        "after": "passed"
+      },
+      {
+        "id": "SymGEigsShift_15",
+        "before": "failed",
+        "after": "passed"
+      },
+      {
+        "id": "SymGEigsShift_30",
+        "before": "failed",
+        "after": "passed"
+      },
+      {
+        "id": "SymGEigsShift_45",
+        "before": "failed",
+        "after": "passed"
+      }
+    ],
+    "lost_passes": [],
+    "numerical_regressions": [],
+    "missing_cases": [],
+    "new_cases": [],
+    "contradictory_successes": [],
+    "regression_free": true,
+    "contracts": {
+      "SymGEigsCholesky_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_17": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_22": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_27": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsRegInv_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsRegInv_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsRegInv_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_5": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_10": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_20": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_30": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_35": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_40": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_45": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_50": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_55": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      }
+    }
+  },
+  "composite_contracts": {
+    "current_counts": {
+      "passed": 146,
+      "unsupported": 176,
+      "failed": 36,
+      "timeout": 2
+    },
+    "checked_numerical_counts": {
+      "passed": 161,
+      "not_evaluated": 178,
+      "failed": 21
+    },
+    "numerical_pass_count_short": [
+      "ComplexEigs_3",
+      "ComplexEigs_12",
+      "ComplexEigs_16",
+      "Example1Shift_1",
+      "Example1Shift_3",
+      "Example1Shift_5",
+      "GenEigs_12",
+      "GenEigsRealShift_12",
+      "GenEigsRealShift_18",
+      "GenEigsRealShift_30",
+      "HermEigs_21",
+      "HermEigs_25",
+      "HermEigs_29",
+      "SVD_1",
+      "SymEigsShift_17"
+    ],
+    "outcome_changes": [
+      {
+        "id": "SymGEigsShift_5",
+        "before": "failed",
+        "after": "passed"
+      },
+      {
+        "id": "SymGEigsShift_15",
+        "before": "failed",
+        "after": "passed"
+      },
+      {
+        "id": "SymGEigsShift_30",
+        "before": "failed",
+        "after": "passed"
+      },
+      {
+        "id": "SymGEigsShift_45",
+        "before": "failed",
+        "after": "passed"
+      }
+    ],
+    "lost_passes": [],
+    "numerical_regressions": [],
+    "missing_cases": [],
+    "new_cases": [],
+    "contradictory_successes": [],
+    "regression_free": true,
+    "contracts": {
+      "ComplexEigs_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_2": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_4": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_5": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_6": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_9": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_10": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_13": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_16": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_17": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_18": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_19": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_20": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_21": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_22": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_23": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_24": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_26": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_27": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_28": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_29": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_30": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_31": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_32": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_33": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "ComplexEigs_34": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "ComplexEigs_35": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "DavidsonSymEigs_0": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "DavidsonSymEigs_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "DavidsonSymEigs_2": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "DavidsonSymEigs_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example1_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example1_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example1_4": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example1Shift_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "Example1Shift_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "Example1Shift_5": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "Example2_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example2_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example2_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example3_0": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "Example3_1": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "Example4_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "Example4_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual",
+          "spectrum_error"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_2": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_3": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_4": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_5": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_6": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_9": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_10": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_13": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_16": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_17": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_18": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_19": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_20": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_21": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_22": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_23": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_24": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_26": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_27": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_28": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_29": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_30": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_31": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_32": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_33": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigs_34": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigs_35": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_0": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_1": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_2": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_3": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_4": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_5": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_6": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_7": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_9": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_10": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_12": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_13": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_15": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_16": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_17": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_18": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_19": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_20": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_21": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_22": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_23": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_24": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_25": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_26": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_27": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_28": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_29": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_30": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_31": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_32": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_33": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_34": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsComplexShift_35": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigsRealShift_1": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_2": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_3": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_4": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_5": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_6": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigsRealShift_7": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_9": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_10": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigsRealShift_13": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_15": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_16": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_17": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_18": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigsRealShift_19": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_20": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_21": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_22": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_23": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_24": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigsRealShift_25": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_26": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_27": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_28": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_29": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_30": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "original_problem"
+      },
+      "GenEigsRealShift_31": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_32": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_33": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_34": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "GenEigsRealShift_35": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "HermEigs_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "HermEigs_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_4": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_5": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_6": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "HermEigs_8": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_9": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_10": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_11": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "HermEigs_13": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_14": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_16": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_17": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "HermEigs_18": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_19": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_20": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_21": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_22": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "HermEigs_23": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_24": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_26": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_27": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "HermEigs_28": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "HermEigs_29": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "realification_and_extraction"
+      },
+      "SVD_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "values",
+          "left_vectors",
+          "right_vectors"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "augmented_operator"
+      },
+      "SVD_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "values",
+          "left_vectors",
+          "right_vectors"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "augmented_operator"
+      },
+      "SVD_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "values",
+          "left_vectors",
+          "right_vectors"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "augmented_operator"
+      },
+      "SVD_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "values",
+          "left_vectors",
+          "right_vectors"
+        ],
+        "requested_spectrum_checked": true,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "augmented_operator"
+      },
+      "SymEigs_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigs_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_4": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_5": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_6": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigs_8": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_9": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_10": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_11": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigs_13": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_14": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_16": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_17": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigs_18": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_19": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_20": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_21": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_22": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigs_23": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_24": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_26": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_27": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigs_28": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigs_29": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymEigsShift_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_1": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_2": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_3": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_4": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_5": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_6": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_7": {
+        "checked_numerical_bounds_pass": false,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_8": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_9": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_10": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_11": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_13": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_14": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_16": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_17": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": false,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": true,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_18": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_19": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_20": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_21": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_22": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_23": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_24": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_26": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_27": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_28": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymEigsShift_29": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "inverse_operator"
+      },
+      "SymGEigsCholesky_0": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_1": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_3": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_4": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_5": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_6": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_9": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_10": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_13": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_15": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_16": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_17": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_18": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_19": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_20": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_21": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_22": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_23": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_24": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_25": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_26": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_27": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsCholesky_28": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsCholesky_29": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_0": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_1": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_2": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsRegInv_3": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_4": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_5": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_6": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_7": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsRegInv_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_9": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_10": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_12": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsRegInv_13": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsRegInv_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_0": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_1": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_2": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_3": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_4": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_5": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_6": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_7": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_8": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_9": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_10": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_11": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_12": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_13": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_14": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_15": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_16": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_17": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_18": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_19": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_20": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_21": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_22": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_23": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_24": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_25": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_26": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_27": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_28": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_29": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_30": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_31": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_32": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_33": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_34": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_35": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_36": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_37": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_38": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_39": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_40": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_41": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_42": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_43": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_44": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_45": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_46": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_47": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_48": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_49": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_50": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_51": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_52": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_53": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_54": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_55": {
+        "checked_numerical_bounds_pass": true,
+        "checked_fields": [
+          "max_absolute_residual"
+        ],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": true,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": true,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "original_problem"
+      },
+      "SymGEigsShift_56": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_57": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": true,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_58": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      },
+      "SymGEigsShift_59": {
+        "checked_numerical_bounds_pass": null,
+        "checked_fields": [],
+        "requested_spectrum_checked": false,
+        "reported_count_pass": null,
+        "upstream_allows_nonconvergence": false,
+        "strict_contract_pass": false,
+        "numerical_pass_count_short": false,
+        "reported_convergence_space": "unrecorded"
+      }
+    }
+  },
+  "fixture_sha256": {
+    "tests/fixtures/spectra_generalized_shift_5.npz": "6fd719d02cf7e54666b4101f2c41103d42fc0817628ce727221d59b33856f7c8",
+    "tests/fixtures/spectra_null_start.npz": "cc5be5fe5c8b9279c7f57bfb361bc5e9909f0671ff5f3c3b92eeeff5fef79eca",
+    "tests/fixtures/spectra_sparse_sm.npz": "9fa204b445a7f714e02155081261a63b967bd057934f08cee6c6564a1e3c05dd",
+    "tests/fixtures/spectra_transformed_sm.npz": "54f8151ed14512a2a1f4e421c1156ce7b4718cbb1ad0cd89364bcacc6d311550",
+    "tests/fixtures/spectra_buckling_30.npz": "96386b52405f979924a8404c92ddb9a3226c852c566676f448cabd0da7ee6038",
+    "tests/fixtures/spectra_generalized_matched.npz": "e0933863b2b2ec052457693c650abe3b744801537abf82b8c74c5fcf920a80c1"
+  },
+  "native_library_sha256": "49f69406e597fefedc25fb5e7e333f5c9342d0a160a2a1c9e3e8757b65e081a0",
+  "large_regression": [
+    {
+      "api_class": "A",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.001679455603964,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "B",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.000724033323863,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "C",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.00082564164573,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "caveats": [
+    "CuPy and unaffected upstream paths were not rerun; numerical paths unchanged.",
+    "Generic upstream generalized assertions check residual/count; permanent tests and comparison fixtures independently check requested spectra and metric orthogonality/subspaces.",
+    "Block and Krylov budgets differ in performance comparisons and are explicitly recorded; failed rows are not accepted timings.",
+    "Vendor cuDSS HtoD nodes remain visible in graph audits."
+  ],
+  "checks": {
+    "lint": "passed",
+    "formatting": "91 files formatted",
+    "wheel": "pip wheel --no-deps --no-build-isolation passed",
+    "cli_recheck": "one-cycle 10k buckling; every sample accepted with full count"
+  },
+  "initial_compare_runner_sha256": "748e571cf58d5cb146f824d361c26df7cb8e212e083a47477a8f83746ec9d242",
+  "final_compare_runner_sha256": "28e07c64a236e48ece625429bf348e2c301de50d966c91dad9e20f82dfe2b96a",
+  "budget_sweeps": "Public run() function with explicit cycles for 5/10 and 1/2/3 sweeps; current CLI exposes equivalent overrides/filters and was rechecked at one cycle. Failed 5-cycle rows retained."
+}

@@ -45,7 +45,7 @@ def spectra_setup(p, ncv):
     a, b = p.a.tocsc(), p.b.tocsc()
     a.sort_indices()
     b.sort_indices()
-    mode = {"regular": 1, "buckling": 2}.get(p.mode, 0)
+    mode = {"regular": 1, "buckling": 2, "cayley": 3}.get(p.mode, 0)
     ctx = lib.app_factor(
         p.n,
         a.nnz,

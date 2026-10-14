@@ -129,7 +129,7 @@ def warp_output(p, solver):
     return output(solver.eigenvalues), output(solver.eigenvectors).T, None
 
 
-def scipy_setup(p):
+def scipy_setup(p, ncv=None):
     """Factorization outside solve timing; every solve restores the same start."""
     rng = np.random.default_rng(2026)
     initial = rng.normal(size=p.n)
@@ -154,14 +154,16 @@ def scipy_setup(p):
     op = sla.LinearOperator(shifted.shape, matvec=lu.solve, dtype=shifted.dtype)
 
     def solve():
-        kwargs = dict(k=p.k, sigma=p.target, OPinv=op, which="LM", tol=1e-11, v0=initial.copy())
+        kwargs = dict(
+            k=p.k, sigma=p.target, OPinv=op, which="LM", tol=1e-11, v0=initial.copy(), ncv=ncv
+        )
         if p.api_class == "H":
             w, v = sla.eigs(p.a, **kwargs)
         else:
             if p.b is not None:
                 kwargs["M"] = p.b
-            if p.mode == "buckling":
-                kwargs["mode"] = "buckling"
+            if p.mode in ("buckling", "cayley"):
+                kwargs["mode"] = p.mode
             w, v = sla.eigsh(p.a, **kwargs)
         return w, v, None
 

@@ -29,3 +29,15 @@ scaling by the matrix Frobenius norm. These are generated numerical data.
 sparse indefinite matrices with predominantly zero diagonals. Regressions use
 the original 100-cycle budget and check the requested spectrum, physical
 residual, orthogonality, invariant subspace and full convergence counts.
+
+`spectra_buckling_30.npz` preserves the exact A/B arrays for `SymGEigsShift_30`
+from the pinned exporter above (n=100, k=10, ncv=20, sigma=1.2345). The stiffness
+metric is SPD; the geometric-stiffness matrix is indefinite. Tests compare
+largest buckling-transformed magnitudes, A-orthogonality and original residuals.
+
+`spectra_generalized_matched.npz` preserves exact A/B arrays for
+`SymGEigsCholesky_17/22/27` and `SymGEigsShift_45` at that same revision. These
+are generated numerical data. The former three exercise sparse indefinite
+stiffness with non-diagonal SPD mass at n=10/100/1000; the latter exercises
+Cayley selection at n=100, k=10, ncv=20 and sigma=1.2345. Independent dense
+references verify the requested invariant subspaces, not residuals alone.

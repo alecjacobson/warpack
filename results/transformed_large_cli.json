@@ -1,0 +1,65 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "protocol": "Sequential backends; setup/capture separate; every timed sample validated against requested spectrum, metric orthogonality and original residual, including absolute 1e-9 bound. Warp block uses 100 cycles; Krylov cycles are recorded per row; both use matched general cuDSS factors and one correction. These are explicit algorithm/budget changes, not identical-iteration timing comparisons. Reference starts differ; native tolerance 1e-11, Warp 1e-12. Internal counts reported separately. CuPy generalized transformed APIs are unsupported by the comparison adapter.",
+  "cases": [
+    {
+      "problem": "coupled_buckling",
+      "n": 10000,
+      "k": 4,
+      "ncv": 32,
+      "mode": "buckling",
+      "target": 5.13,
+      "method": "warp-krylov",
+      "outer_cycles": 1,
+      "cudss_matching": true,
+      "cudss_refinement_steps": 1,
+      "capture_seconds": 0.25204265862703323,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 194,
+          "HtoD (HOST PAGEABLE to DEVICE)": 128
+        },
+        "note": "DOT inspection, not a CUDA API trace; vendor HtoD copies remain visible"
+      },
+      "setup_seconds": 0.300579197704792,
+      "warmup_seconds": 0.016292046755552292,
+      "samples": [
+        0.00747792050242424,
+        0.007475040853023529,
+        0.007469154894351959
+      ],
+      "median": 0.007475040853023529,
+      "checks": [
+        {
+          "accepted": true,
+          "residual": 2.735274099143903e-16,
+          "max_absolute_residual": 8.881784197001252e-16,
+          "orthogonality": 7.549516567451064e-15,
+          "spectrum_error": 3.4649718181781673e-16,
+          "reported_converged": 4
+        },
+        {
+          "accepted": true,
+          "residual": 3.2743105101124196e-16,
+          "max_absolute_residual": 2.73683466128906e-16,
+          "orthogonality": 8.43769498715119e-15,
+          "spectrum_error": 1.7298537210661584e-16,
+          "reported_converged": 4
+        },
+        {
+          "accepted": true,
+          "residual": 3.2502727188377936e-16,
+          "max_absolute_residual": 4.440892098500626e-16,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 1.735126119723649e-16,
+          "reported_converged": 4
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true
+    }
+  ]
+}
