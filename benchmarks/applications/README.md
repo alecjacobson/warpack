@@ -10,7 +10,7 @@ implementation bugs and the remaining coverage requirements.
 
 | Class / priority | Fixture and numerical contract | Coverage issue |
 |---|---|---|
-| A / P0 | P1 axial FEM: symmetric K, non-diagonal SPD consistent M; lowest modes; analytic spectrum | [#20](https://github.com/alecjacobson/warpack/issues/20) |
+| A / P0 | Clamped/free tetrahedral FEM, disconnected bodies, material contrast, lumped/consistent mass and repeated Hermite bending; complete low-mode clusters | [#20](https://github.com/alecjacobson/warpack/issues/20) |
 | B / P1 | Same pencil, interior shift between known frequencies; nearest physical eigenvalues | [#21](https://github.com/alecjacobson/warpack/issues/21) |
 | C / P2 | Indefinite tangent stiffness, SPD M; most-negative eigenvalues via a shift below the spectrum | [#22](https://github.com/alecjacobson/warpack/issues/22) |
 | D / P0 | Sphere/disk/annulus/tori Hodge 1-Laplacians; disconnected and weak components, independent topology/subspace references, positive guard | [#23](https://github.com/alecjacobson/warpack/issues/23) |
@@ -41,7 +41,9 @@ G uses `BucklingEigensolver`. E/H use the existing complex
 use cuDSS. SVD requires no sparse inverse. `warp-block` selects the older block
 method; `warp-cg` uses upstream Warp CG with diagonal preconditioning for the
 known-SPD shifted systems A/C/D. This is a controlled comparison, not the tuned
-Anvil FSAI configuration.
+Anvil FSAI configuration. The expanded [elastic ROM suite](FEM.md) separately
+compares upstream block-Jacobi and FSAI on the natural displacement blocks,
+with per-trial inner iteration statistics and independent full-subspace gates.
 
 B/G now use explicit matched general cuDSS factors without correction; the
 other application profiles retain their existing settings. See the
@@ -68,7 +70,9 @@ this does not establish completeness for arbitrary repeated spectra.
 * CuPy uses native `eigsh` for E and `svds` for I. For A/C/D/F it uses generalized
   **LOBPCG with the mass matrix and a cuDSS preconditioner**. Those rows are not
   CuPy `eigsh`. The expanded Hodge suite separately compares native `eigsh`
-  on identity-mass fixtures. B/G/H are explicitly unsupported by this adapter. Applying
+  on identity-mass fixtures. FEM adds diagonal-mass native `eigsh` through symmetric
+  mass scaling and a `cupy-batched` LOBPCG adapter with one padded block cuDSS
+  preconditioner call, alongside the original columnwise adapter. B/G/H are explicitly unsupported by this adapter. Applying
   Euclidean `eigsh` directly to a non-symmetric `M^-1 K` would be an invalid
   reference.
 
@@ -117,6 +121,7 @@ export PYTHONPATH="$PWD/build/warp-fsai:$PWD"
 export OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 python -m pytest -q tests/test_applications.py
 python -m benchmarks.applications.generalized_regression
+python -m benchmarks.applications.fem_compare
 python -m benchmarks.applications.hodge_compare
 python -m benchmarks.applications.audit_inverse
 python -m benchmarks.applications.compare --sizes 80,1024 --repeats 3 \
