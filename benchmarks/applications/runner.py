@@ -100,7 +100,7 @@ def accuracy(p, values, vectors, right=None, reference=None):
     return result
 
 
-def warp_setup(p, method="krylov", ncv=32, tol=1e-11):
+def warp_setup(p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None):
     ncv = min(ncv, p.n)
     if p.api_class in "EH":
         solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=tol)
@@ -150,6 +150,11 @@ def warp_setup(p, method="krylov", ncv=32, tol=1e-11):
             mtype="spd" if p.api_class in "ACDF" else "general",
             matching=p.api_class not in "ACDF",
         )
+    transformed = inv
+    if inverse_transform is not None:
+        if block or p.mode != "shift-invert":
+            raise ValueError("Inverse transformation requires one-RHS generalized shift-invert")
+        transformed = inverse_transform(inv, SparseOperator(b))
     if p.mode == "buckling":
         solver = BucklingEigensolver(
             SparseOperator(a), SparseOperator(b), inv, p.k, p.target, ncv=ncv, tol=tol
@@ -165,7 +170,7 @@ def warp_setup(p, method="krylov", ncv=32, tol=1e-11):
         solver = GeneralizedKrylovSchur(
             SparseOperator(a),
             SparseOperator(b),
-            inv,
+            transformed,
             p.k,
             ncv=ncv,
             target=p.target,

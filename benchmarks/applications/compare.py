@@ -46,7 +46,17 @@ def other_gpu_processes():
         return ["GPU process inventory unavailable"]
 
 
-def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lobpcg_tol=1e-8):
+def run(
+    api_class,
+    size,
+    method,
+    repeats=3,
+    ncv=32,
+    steps=None,
+    problem=None,
+    lobpcg_tol=1e-8,
+    warp_inverse_transform=None,
+):
     p = make_problem(api_class, size) if problem is None else problem
     ref = reference_values(p)
     matrix_hash = hashlib.sha256()
@@ -115,7 +125,9 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
                 row["cg_tolerance"] = 1e-13
                 row["cg_maxiter"] = 10000
             row["start"] = "Warp seed 42; same start restored on every replay"
-            setup, (solver, inverse) = timed(lambda: warp_setup(p, selected, ncv))
+            setup, (solver, inverse) = timed(
+                lambda: warp_setup(p, selected, ncv, inverse_transform=warp_inverse_transform)
+            )
             # Complex shift-invert wraps the real factor object twice.
             factor = getattr(inverse, "inverse", inverse)
             factor = getattr(factor, "inverse", factor)
@@ -268,7 +280,8 @@ def compare_baseline(rows, baseline, limit):
         if b is None:
             continue
         same = all(
-            r.get(key) == b.get(key)
+            r.get(key, 0 if key == "projected_rigid_modes" else None)
+            == b.get(key, 0 if key == "projected_rigid_modes" else None)
             for key in [
                 "matrix_sha256",
                 "target",
@@ -281,6 +294,7 @@ def compare_baseline(rows, baseline, limit):
                 "cg_block_size",
                 "cg_tolerance",
                 "cg_maxiter",
+                "projected_rigid_modes",
             ]
         )
         eligible = (

@@ -53,6 +53,12 @@ def test_regression_gate_handles_contention_and_worker_failure():
         1.25,
     )[0]
     assert not changed_shift["comparable"]
+    unchanged_projection = compare_baseline([{**good, "projected_rigid_modes": 0}], baseline, 1.25)[
+        0
+    ]
+    assert unchanged_projection["comparable"]
+    changed_projection = compare_baseline([{**good, "projected_rigid_modes": 6}], baseline, 1.25)[0]
+    assert not changed_projection["comparable"]
     failed = dict(api_class="A", requested_size=10000, method="warp", accepted=False)
     assert compare_baseline([failed], baseline, 1.25)[0]["accuracy_regression"]
 

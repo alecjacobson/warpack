@@ -1,0 +1,381 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "c330a148d0e0bb466fd11c646493b2aaeebaa09d",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "upstream_source_sha256": {
+    "linear": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "fsai": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07"
+  },
+  "protocol": "Sequential isolated workers, every synchronized timed trial checked in the original pencil at 1e-8 for residual, spectrum, M-orthogonality, known rigid subspace and complete requested subspace. Full boundary clusters included. Reference assembly/factorization, setup/capture, output conversion and acceptance checks excluded from solve timing. cuDSS factors SPD; pure Warp CG profiles use upstream diagonal, block-Jacobi or FSAI preconditioning as recorded per row. CuPy is generalized LOBPCG+cuDSS (cupy-batched pads shrinking blocks to a single k-RHS solve); cupy-eigsh is a separate native path for positive diagonal mass with explicit scaling. Rejected/unsupported rows retained. Fixed outer budgets and stricter reported solver counts recorded separately.",
+  "cases": [
+    {
+      "api_class": "A",
+      "requested_size": 1950,
+      "problem": "fem_disconnected",
+      "n": 1950,
+      "columns": 1950,
+      "nnz": 55986,
+      "mass_nnz": 22350,
+      "k": 6,
+      "ncv": 48,
+      "method": "warp",
+      "matrix_sha256": "dec21460cf965d21f8247396e717aa86650c6eacd99ed638d3d9ea118efab62d",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 12 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included; projected solve returns only the complete positive elastic block",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 10,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.2548218183219433,
+      "capture_seconds": 0.8993954882025719,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1607,
+          "HtoD (HOST PAGEABLE to DEVICE)": 798
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.22808361053466797,
+      "samples_seconds": [
+        0.09982110187411308,
+        0.09969368949532509,
+        0.09968727082014084
+      ],
+      "solve_seconds": 0.09969368949532509,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.0234183233853335e-14,
+          "max_absolute_residual": 5.054984208996416e-15,
+          "orthogonality": 1.5987211554602254e-14,
+          "spectrum_error": 1.9806512611166523e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.932483331695525e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 4.00238460921872e-14
+        },
+        {
+          "accepted": true,
+          "residual": 5.197828221723437e-14,
+          "max_absolute_residual": 8.11156697366755e-15,
+          "orthogonality": 1.3100631690576847e-14,
+          "spectrum_error": 1.9897284896277278e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.937043189958932e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 5.224685277761923e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.0091544493690059e-13,
+          "max_absolute_residual": 9.612970142125477e-15,
+          "orthogonality": 1.6209256159527285e-14,
+          "spectrum_error": 1.9824667068188674e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.929112474537668e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.006613213379155e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "fixture": "disconnected",
+      "side": 4,
+      "requested_nontrivial_modes": 6,
+      "nontrivial_modes": 6,
+      "known_rigid_modes": 12,
+      "projected_rigid_modes": 12,
+      "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+      "reference_positive_guard": 10.852591679634049,
+      "nullspace_policy": "Analytic rigid basis from device geometry; normalize in M on device; P (K-sigma*M)^-1 P.T; return only the complete positive elastic block. No reference eigenvectors used as starts.",
+      "boundary_conditions": "Free",
+      "material": "Uniform",
+      "mass": "Consistent",
+      "tetrahedra": 2304,
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "A",
+      "requested_size": 1950,
+      "problem": "fem_disconnected",
+      "n": 1950,
+      "columns": 1950,
+      "nnz": 55986,
+      "mass_nnz": 22350,
+      "k": 6,
+      "ncv": 48,
+      "method": "warp-cg-bj",
+      "matrix_sha256": "dec21460cf965d21f8247396e717aa86650c6eacd99ed638d3d9ea118efab62d",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 12 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included; projected solve returns only the complete positive elastic block",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 10,
+      "cg_preconditioner": "upstream block_jacobi_sequential",
+      "cg_block_size": 3,
+      "cg_tolerance": 1e-13,
+      "cg_maxiter": 10000,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.18250250071287155,
+      "capture_seconds": 2.4117385149002075,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2006
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 3.842794816941023,
+      "cg_statistics": [
+        {
+          "total_iterations": 131008,
+          "max_iterations_per_rhs": 334,
+          "unconverged_rhs": 0,
+          "rhs_calls": 399
+        },
+        {
+          "total_iterations": 131036,
+          "max_iterations_per_rhs": 334,
+          "unconverged_rhs": 0,
+          "rhs_calls": 399
+        },
+        {
+          "total_iterations": 131077,
+          "max_iterations_per_rhs": 334,
+          "unconverged_rhs": 0,
+          "rhs_calls": 399
+        }
+      ],
+      "samples_seconds": [
+        3.710374254733324,
+        3.711508311331272,
+        3.71257246658206
+      ],
+      "solve_seconds": 3.711508311331272,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.2111622874349834e-11,
+          "max_absolute_residual": 1.2702061624736416e-12,
+          "orthogonality": 9.992007221626409e-15,
+          "spectrum_error": 1.9842821525210825e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 3.7604649352254703e-13,
+          "reported_converged": 4,
+          "solver_full_count": false,
+          "reported_max_residual": 1.2111591533119748e-11
+        },
+        {
+          "accepted": true,
+          "residual": 2.8595661781123958e-11,
+          "max_absolute_residual": 2.409831015293129e-12,
+          "orthogonality": 1.2878587085651816e-14,
+          "spectrum_error": 1.995174826734373e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 5.564853896118508e-13,
+          "reported_converged": 4,
+          "solver_full_count": false,
+          "reported_max_residual": 2.8595581129258337e-11
+        },
+        {
+          "accepted": true,
+          "residual": 1.507639847827384e-11,
+          "max_absolute_residual": 1.7742233463652335e-12,
+          "orthogonality": 1.3988810110276972e-14,
+          "spectrum_error": 1.9879130439255127e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.6876785295426394e-13,
+          "reported_converged": 4,
+          "solver_full_count": false,
+          "reported_max_residual": 1.5076540381147773e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 4,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "fixture": "disconnected",
+      "side": 4,
+      "requested_nontrivial_modes": 6,
+      "nontrivial_modes": 6,
+      "known_rigid_modes": 12,
+      "projected_rigid_modes": 12,
+      "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+      "reference_positive_guard": 10.852591679634049,
+      "nullspace_policy": "Analytic rigid basis from device geometry; normalize in M on device; P (K-sigma*M)^-1 P.T; return only the complete positive elastic block. No reference eigenvectors used as starts.",
+      "boundary_conditions": "Free",
+      "material": "Uniform",
+      "mass": "Consistent",
+      "tetrahedra": 2304,
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "A",
+      "requested_size": 1950,
+      "problem": "fem_disconnected",
+      "n": 1950,
+      "columns": 1950,
+      "nnz": 55986,
+      "mass_nnz": 22350,
+      "k": 6,
+      "ncv": 48,
+      "method": "warp-cg-fsai",
+      "matrix_sha256": "dec21460cf965d21f8247396e717aa86650c6eacd99ed638d3d9ea118efab62d",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 12 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included; projected solve returns only the complete positive elastic block",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 10,
+      "cg_preconditioner": "upstream FSAI max_row_size=32 max_step_size=3 apply_lanes=8 factor_dtype=float32",
+      "cg_block_size": 3,
+      "cg_tolerance": 1e-13,
+      "cg_maxiter": 10000,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.2605769708752632,
+      "capture_seconds": 2.0954496636986732,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2006
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 1.4764730371534824,
+      "cg_statistics": [
+        {
+          "total_iterations": 40719,
+          "max_iterations_per_rhs": 103,
+          "unconverged_rhs": 0,
+          "rhs_calls": 399
+        },
+        {
+          "total_iterations": 40705,
+          "max_iterations_per_rhs": 103,
+          "unconverged_rhs": 0,
+          "rhs_calls": 399
+        },
+        {
+          "total_iterations": 40728,
+          "max_iterations_per_rhs": 103,
+          "unconverged_rhs": 0,
+          "rhs_calls": 399
+        }
+      ],
+      "samples_seconds": [
+        1.3452659621834755,
+        1.3443181961774826,
+        1.3452165313065052
+      ],
+      "solve_seconds": 1.3452165313065052,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.0551585303051193e-12,
+          "max_absolute_residual": 1.0296363807369429e-13,
+          "orthogonality": 1.5987211554602254e-14,
+          "spectrum_error": 1.9860975982232976e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.301522385781036e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.0550957105057974e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.526396453403954e-12,
+          "max_absolute_residual": 1.5023225719001942e-13,
+          "orthogonality": 1.84297022087776e-14,
+          "spectrum_error": 1.9842821525210825e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.623430021513628e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.5262274869271419e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.5443836022141226e-12,
+          "max_absolute_residual": 1.9673650729357117e-13,
+          "orthogonality": 1.2434497875801753e-14,
+          "spectrum_error": 1.9806512611166523e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.81317290555086e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.5445251695564717e-12
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "fixture": "disconnected",
+      "side": 4,
+      "requested_nontrivial_modes": 6,
+      "nontrivial_modes": 6,
+      "known_rigid_modes": 12,
+      "projected_rigid_modes": 12,
+      "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+      "reference_positive_guard": 10.852591679634049,
+      "nullspace_policy": "Analytic rigid basis from device geometry; normalize in M on device; P (K-sigma*M)^-1 P.T; return only the complete positive elastic block. No reference eigenvectors used as starts.",
+      "boundary_conditions": "Free",
+      "material": "Uniform",
+      "mass": "Consistent",
+      "tetrahedra": 2304,
+      "worker_wall_limit_seconds": 180
+    }
+  ]
+}
