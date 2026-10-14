@@ -25,6 +25,7 @@ from warpack import (
 )
 
 from .adapters import complex_matrix, execute, matrix, output
+from .compare_reports import contracts
 
 ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "build/spectra-fixtures"
@@ -221,15 +222,44 @@ def run(case):
                     errors["extracted_complex_pairs"] = int(solver.count.numpy()[0])
                     count = min(count // 2, errors["extracted_complex_pairs"])
                 errors["reported_converged"] = count
-        ok = np.isfinite(err) and err <= margin
-        if errors.get("reported_converged", k) < k:
-            ok = False
+        contract = contracts(
+            dict(
+                **case,
+                **errors,
+                outcome="failed",  # Evaluated; final status is derived below.
+                upstream_absolute_tolerance=margin,
+            )
+        )
+        numerical_pass = contract["checked_numerical_bounds_pass"]
+        ok = contract["strict_contract_pass"]
+        # Keep the strict historical outcome, but do not conflate original
+        # assertions with the solver's stricter/transformed stopping test.
+        count = errors.get("reported_converged")
+        convergence_space = "original_problem"
+        physical_count = count
+        if evaluation is not None:
+            convergence_space = "inverse_operator"
+            physical_count = int(evaluation.converged.numpy()[0])
+        elif isinstance(solver, PartialSVD):
+            convergence_space = "augmented_operator"
+            physical_count = min(
+                int(solver.count_left.numpy()[0]), int(solver.count_right.numpy()[0])
+            )
+        elif isinstance(solver, HermitianEigensolver):
+            convergence_space = "realification_and_extraction"
+            physical_count = None  # No independent complex residual counter in this API.
         return dict(
             outcome="passed" if ok else "failed",
             setup_seconds=setup,
             **timing,
             iteration_budget=iterations,
             upstream_absolute_tolerance=margin,
+            checked_numerical_bounds_pass=numerical_pass,
+            requested_spectrum_checked=contract["requested_spectrum_checked"],
+            internal_tolerance=threshold,
+            reported_convergence_space=convergence_space,
+            reported_count_pass=None if count is None else count >= k,
+            original_evaluation_converged=physical_count,
             **errors,
         )
     except Unsupported as e:

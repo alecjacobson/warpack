@@ -80,6 +80,8 @@ wp.capture_launch(graph)
 
 For a zero shift and SPD A, `which="SA"` selects the lowest modes. For an interior shift, pass the matching `target=sigma`; sorting by smallest algebraic value is not equivalent to sorting by distance to an interior shift. The generalized residual uses `||Ax-λBx||₂ / max(1, ||Ax||₂+|λ| ||Bx||₂)`. Inner iterative inverses need tighter tolerances than the outer eigensolve. Verify the residual in the **original** problem after any spectral transformation; `EigenpairEvaluation` provides this for real standard problems, and `ShiftInvertEigensolver` does so automatically for complex shift-invert.
 
+`CuDSSInverse` uses one fixed Warp residual-correction step by default for symmetric-indefinite and general matrices; SPD defaults to zero. Set `refinement_steps` to override that budget. Each correction forms `b - A*x` in Warp, applies the existing cuDSS factors, and updates `x` in Warp. It is graph capturable and performs no host convergence check; original-problem residuals still determine accuracy.
+
 cuDSS analysis and first factorization are setup operations outside graph capture. cuDSS may use host work during that setup. A retained Warp workspace allocator avoids `cudaMalloc` inside captured cuDSS solves. Its setup also finalizes Warp's exact BSR nonzero count before scalar CSR expansion.
 
 `CGInverse` provides a pure-Warp SPD inverse using upstream CG and either an upstream preconditioner name or a prebuilt Warp preconditioner. For free-body elasticity, `rigid_body_basis` constructs the six rigid motions on device, and `OrthogonalComplementOperator` projects them out of the iteration operator. See the [anvil settings](#timing-and-accuracy) for the best recorded FSAI configuration.

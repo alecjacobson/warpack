@@ -48,14 +48,24 @@ class SparseOperator:
 class CuDSSInverse:
     """Factorization is setup work; apply() is graph capturable.
 
-    The matrix must already include any shift/mass normalization.
+    The matrix must already include any shift/mass normalization. General and
+    symmetric-indefinite factorizations use one Warp residual-correction step
+    by default; SPD factorizations use none. ``refinement_steps`` overrides this
+    fixed budget. Correction products and updates run in Warp, with cuDSS only
+    applying the existing factors. This does not certify accuracy for every
+    conditioning/scaling regime; check the original problem residuals.
     """
 
     requires_static_outer_capture = True
 
-    def __init__(self, matrix, width, mtype="spd"):
+    def __init__(self, matrix, width, mtype="spd", refinement_steps=None):
         if width < 1 or matrix.scalar_type != wp.float64:
             raise ValueError("cuDSS inverse needs a positive RHS width and FP64 matrix")
+        if refinement_steps is None:
+            refinement_steps = 0 if mtype in ("spd", "hpd") else 1
+        if not isinstance(refinement_steps, int) or refinement_steps < 0:
+            raise ValueError("refinement_steps must be a nonnegative integer")
+        self.refinement_steps = refinement_steps
         self.width = width
         import os
         from importlib.metadata import distribution
@@ -74,6 +84,10 @@ class CuDSSInverse:
         self.n, self.device = matrix.shape[0], matrix.device
         self.x = wp.empty((width, self.n), dtype=wp.float64, device=self.device)
         self.b = wp.empty_like(self.x)
+        if refinement_steps:
+            self._rhs = wp.empty_like(self.x)
+            self._residual = wp.empty_like(self.x)
+            self._correction = wp.empty_like(self.x)
         self.solver = CudssSolver(mtype=mtype, device=self.device)
         from .cudss_memory import Workspace
 
@@ -91,7 +105,25 @@ class CuDSSInverse:
     def apply(self, x, y):
         if x.shape != (self.width, self.n) or y.shape != x.shape:
             raise ValueError("cuDSS RHS shape must match the width used at setup")
-        self.solver.solve(x=y, b=x)
+        if not self.refinement_steps:
+            self.solver.solve(x=y, b=x)
+            return
+        # Preserve b, including when the caller requests an in-place solve.
+        wp.copy(self._rhs, x)
+        self.solver.solve(x=y, b=self._rhs)
+        # Use the wrapper's scalar expansion, including arbitrary BSR blocks.
+        # These are the same original matrix values supplied for factorization.
+        csr = self.solver._csr
+        for _ in range(self.refinement_steps):
+            wp.launch(
+                K.csr_mm,
+                y.shape,
+                [csr.row_offsets, csr.columns, csr.values, y, self._residual, 0.0, 1.0],
+                device=self.device,
+            )
+            wp.launch(K.linear_residual, y.shape, [self._rhs, self._residual], device=self.device)
+            self.solver.solve(x=self._correction, b=self._residual)
+            wp.launch(K.add_correction, y.shape, [y, self._correction], device=self.device)
 
     def close(self):
         self.solver.release()
