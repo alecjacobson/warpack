@@ -167,13 +167,14 @@ def run(case):
                 iterations = 30
             else:
                 ma = matrix(a)
-                inv = CuDSSInverse(
-                    matrix(a - sigma.real * np.eye(n)),
-                    1,
-                    mtype="general",
-                    matching=True,
-                    refinement_steps=1,
+                # Keep the established standard shifted profile: matching
+                # worsens tight inverse counts on the shifted cycle examples.
+                factor_options = (
+                    dict(mtype="symmetric")
+                    if name in ("SymEigsShift", "Example1Shift")
+                    else dict(mtype="general", matching=True, refinement_steps=1)
                 )
+                inv = CuDSSInverse(matrix(a - sigma.real * np.eye(n)), 1, **factor_options)
                 solver = KrylovSchur(
                     inv,
                     k,
