@@ -22,7 +22,7 @@ NAMES = [
     "weak_positive",
     "large_disconnected",
 ]
-METHODS = ["scipy", "spectra", "cupy", "warp", "warp-cg"]
+METHODS = ["scipy", "spectra", "cupy-eigsh", "cupy", "warp", "warp-cg"]
 
 
 def main():
@@ -71,7 +71,7 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         git_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], text=True)),
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
-        protocol="Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses upstream diagonal preconditioning. CuPy is generalized LOBPCG with a cuDSS preconditioner, not eigsh; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
+        protocol="Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses upstream diagonal preconditioning. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
         cases=[],
     )
     folder = Path("build/hodge-workers")

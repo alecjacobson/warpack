@@ -99,3 +99,12 @@ def test_large_disconnected_analytic_reference():
     np.testing.assert_allclose(p.a @ p.null_basis, 0, atol=1e-14)
     np.testing.assert_allclose(p.null_basis.T @ p.null_basis, np.eye(4), atol=1e-12)
     assert c.spectrum[4] > 1e-8
+
+
+@pytest.mark.parametrize("api_class", ["F", "I"])
+def test_explicit_reference_basis_budget_for_regular_and_svd(api_class):
+    from benchmarks.applications.problems import make_problem
+    from benchmarks.applications.runner import scipy_setup
+
+    p = make_problem(api_class, 80)
+    assert accuracy(p, *scipy_setup(p, ncv=32)())["accepted"]

@@ -130,10 +130,19 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
                 setup, solve = timed(lambda: scipy_setup(p, ncv=reference_ncv))
             elif method == "spectra":
                 setup, (solve, cleanup) = timed(lambda: spectra_setup(p, ncv))
-            elif method == "cupy":
-                setup, (solve, cleanup, label) = timed(lambda: cupy_setup(p, ncv))
+            elif method in ("cupy", "cupy-eigsh"):
+                setup, (solve, cleanup, label) = timed(
+                    lambda: cupy_setup(p, ncv, standard=method == "cupy-eigsh")
+                )
+                if method == "cupy-eigsh":
+                    row["reference_ncv"] = min(max(ncv, p.k + 2), p.n - 1)
+                elif p.api_class not in "EI":
+                    row["reference_ncv"] = None
+                    row["reference_block_size"] = p.k
                 row["implementation"] = label
-                row["reference_tolerance"] = 1e-11 if api_class in "EI" else 1e-8
+                row["reference_tolerance"] = (
+                    1e-11 if api_class in "EI" or method == "cupy-eigsh" else 1e-8
+                )
             else:
                 raise ValueError(method)
             row["setup_seconds"] = setup
@@ -142,9 +151,12 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
         row["warmup_seconds"] = warmup
         samples = []
         checks = []
+        cg_stats = []
         competing = set()
         for _ in range(repeats):
             competing.update(other_gpu_processes())
+            if method == "warp-cg":
+                inverse.reset_stats()
             elapsed, output = timed(solve)
             competing.update(other_gpu_processes())
             host_output = (
@@ -155,6 +167,22 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
             check = accuracy(p, *host_output, reference=ref)
             samples.append(elapsed)
             checks.append(check)
+            if method == "warp-cg":
+                cg_stats.append(
+                    dict(
+                        zip(
+                            (
+                                "total_iterations",
+                                "max_iterations_per_rhs",
+                                "unconverged_rhs",
+                                "rhs_calls",
+                            ),
+                            map(int, inverse.stats.numpy()),
+                        )
+                    )
+                )
+        if cg_stats:
+            row["cg_statistics"] = cg_stats
         row.update(
             samples_seconds=samples,
             solve_seconds=float(np.median(samples)),

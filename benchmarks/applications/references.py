@@ -4,6 +4,7 @@ import ctypes
 from pathlib import Path
 
 import numpy as np
+import scipy.sparse as sp
 import warp as wp
 
 from benchmarks.upstream.adapters import matrix
@@ -74,11 +75,22 @@ def spectra_setup(p, ncv):
     return solve, lambda: lib.app_free(ctx)
 
 
-def cupy_setup(p, ncv, lobpcg_tol=1e-8):
+def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
     import cupy as cp
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
 
+    if standard:
+        if p.api_class != "D" or p.b is None:
+            raise Unsupported(
+                "Explicit CuPy eigsh comparison currently requires identity-mass Hodge data"
+            )
+        delta = p.b - sp.eye(p.n, format="csr")
+        delta.eliminate_zeros()
+        if delta.nnz:
+            raise Unsupported(
+                "CuPy eigsh has no generalized mass argument; use the LOBPCG comparison"
+            )
     stream = cp.cuda.Stream.from_external(wp.get_stream())
     if p.api_class in "BGH":
         raise Unsupported(
@@ -86,6 +98,25 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8):
         )
     with stream:
         a = cs.csr_matrix(p.a)
+        if standard:
+            effective_ncv = min(max(ncv, p.k + 2), p.n - 1)
+            initial = cp.asarray(np.random.default_rng(2026).normal(size=p.n))
+
+            def solve():
+                with stream:
+                    cp.random.seed(2026)
+                    w, v = cl.eigsh(
+                        a,
+                        k=p.k,
+                        which="SA",
+                        ncv=effective_ncv,
+                        tol=1e-11,
+                        maxiter=10000,
+                        v0=initial.copy(),
+                    )
+                    return w, v, None
+
+            return solve, lambda: None, f"CuPy eigsh SA, identity mass, ncv={effective_ncv}"
         if p.api_class in "EI":
             initial = cp.asarray(
                 np.random.default_rng(2026).normal(size=min(p.a.shape)), dtype=a.dtype
