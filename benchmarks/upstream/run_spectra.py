@@ -167,8 +167,8 @@ def run(case):
                 iterations = 30
             else:
                 ma = matrix(a)
-                # Keep the established standard shifted profile: matching
-                # worsens tight inverse counts on the shifted cycle examples.
+                # Keep standard shifted profiles unchanged by this SM fix.
+                # Their tight inverse-count sensitivity is tracked separately.
                 factor_options = (
                     dict(mtype="symmetric")
                     if name in ("SymEigsShift", "Example1Shift")

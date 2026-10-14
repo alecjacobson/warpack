@@ -1,0 +1,90 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "9d21e6d2fafa0eab431349ca98eb2961eb306ef2",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "I",
+      "requested_size": 10000,
+      "problem": "snapshot_pod",
+      "n": 10000,
+      "columns": 48,
+      "nnz": 480000,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "44be744c2c2f0f196e344b0df74d72ee81415ac97d8d9c0a9a49fc9cc7867587",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "setup_seconds": 0.11767225340008736,
+      "capture_seconds": 0.2213854342699051,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.12250268459320068,
+      "samples_seconds": [
+        0.1192086711525917,
+        0.11921767517924309,
+        0.11926930397748947
+      ],
+      "solve_seconds": 0.11921767517924309,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.489958309262093e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.947351292325142e-15,
+          "captured_energy": 0.6393466566909405
+        },
+        {
+          "accepted": true,
+          "residual": 4.489725173444602e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.947351292325142e-15,
+          "captured_energy": 0.6393466566909405
+        },
+        {
+          "accepted": true,
+          "residual": 4.490354633817795e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.947351292325142e-15,
+          "captured_energy": 0.6393466566909405
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": null,
+      "status": null,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    }
+  ]
+}

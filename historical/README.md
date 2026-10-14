@@ -2,6 +2,8 @@
 
 Earlier measurements, tuning trials, and validation audits are preserved here. For the current API, anvil showcase, and best recorded timings, see the [main README](../README.md). Commands in these pages run from the repository root; test counts and environment details describe their recorded runs.
 
+- [Rejected early Krylov exploration](adaptive-exploration-rejected.md)
+- [General-solver convergence-count replays](general-count-replays.md)
 - [Anvil baseline comparison](anvil-baseline.md)
 - [Anvil CG tuning and experiments](anvil-cg-experiments.md)
 - [Dragon showcases, mesh validation, and elasticity audit](dragon.md)
