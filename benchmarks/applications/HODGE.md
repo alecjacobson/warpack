@@ -98,7 +98,8 @@ on all three trials and were uncontended.
 Both Warp paths report 6/6 converged at `1e-11`. CG performs 640 RHS solves per
 replay, 75,671–75,688 accumulated iterations, at most 207 per RHS, and zero
 unconverged inner solves. The roughly 63.5x CG/cuDSS gap is a measured remaining
-optimization target, separate from the tuned Anvil FSAI results. Warp+cuDSS is
+optimization target in [#40](https://github.com/alecjacobson/warpack/issues/40),
+separate from the tuned Anvil FSAI results. Warp+cuDSS is
 about 5.2x faster than Spectra and 2.2x faster than the accepted CuPy LOBPCG
 configuration on this fixture; this does not include setup or capture.
 
