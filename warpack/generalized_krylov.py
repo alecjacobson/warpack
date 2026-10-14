@@ -54,6 +54,24 @@ def quotients(sums: wp.array2d[wp.float64], values: wp.array[wp.float64]):
     values[j] = sums[j, 0] / sums[j, 1]
 
 
+@wp.kernel
+def add_scaled(x: wp.array2d[wp.float64], y: wp.array2d[wp.float64], scale: wp.float64):
+    i, j = wp.tid()
+    x[i, j] += scale * y[i, j]
+
+
+class _CayleyRHS:
+    def __init__(self, operator, mass, sigma):
+        self.operator, self.mass, self.sigma = operator, mass, float(sigma)
+        self.n, self.device = operator.n, operator.device
+        self.mx = wp.empty((1, self.n), dtype=wp.float64, device=self.device)
+
+    def apply(self, x, y):
+        self.operator.apply(x, y)
+        self.mass.apply(x, self.mx)
+        wp.launch(add_scaled, y.shape, [y, self.mx, self.sigma], device=self.device)
+
+
 class _Composition:
     def __init__(self, rhs_operator, inverse):
         self.rhs_operator, self.inverse = rhs_operator, inverse
@@ -76,6 +94,9 @@ class GeneralizedKrylovSchur(KrylovSchur):
     the requested pairs are nearest ``target`` (LM on the inverse operator).
     In ``mode="regular"``, supply M^-1 and select physical LM/LA/SA with
     ``which``. M^-1 A is self-adjoint in the M metric, not Euclidean space.
+    ``mode="cayley"`` uses (A-target*M)^-1 (A+target*M), with nonzero target,
+    and ranks by |(lambda+target)/(lambda-target)|. Supply the same shifted
+    inverse as in shift-invert mode; output remains in the original pencil.
 
     All products, orthogonalization, Ritz solves, Rayleigh quotients and physical
     residuals run in Warp, apart from the optional cuDSS inverse. The mass and
@@ -97,10 +118,12 @@ class GeneralizedKrylovSchur(KrylovSchur):
         which="LM",
         initial_vector=None,
     ):
-        if mode not in ("shift-invert", "regular"):
-            raise ValueError("mode must be shift-invert or regular")
-        if mode == "shift-invert" and which != "LM":
-            raise ValueError("shift-invert supports nearest-target (LM) selection only")
+        if mode not in ("shift-invert", "regular", "cayley"):
+            raise ValueError("mode must be shift-invert, regular or cayley")
+        if mode in ("shift-invert", "cayley") and which != "LM":
+            raise ValueError("transformed modes support largest transformed magnitude (LM) only")
+        if mode == "cayley" and target == 0:
+            raise ValueError("Cayley target must be nonzero")
         if mode == "regular" and which not in ("LM", "LA", "SA"):
             raise ValueError("regular mode supports LM, LA or SA")
         if any(op.n != operator.n or op.device != operator.device for op in (mass, inverse)):
@@ -109,7 +132,10 @@ class GeneralizedKrylovSchur(KrylovSchur):
             raise ValueError("generalized Krylov requires a one-RHS inverse")
         self.original, self.mass = operator, mass
         self.shift, self.mode = target, mode
-        iteration = _Composition(mass if mode == "shift-invert" else operator, inverse)
+        rhs_operator = mass if mode == "shift-invert" else operator
+        if mode == "cayley":
+            rhs_operator = _CayleyRHS(operator, mass, target)
+        iteration = _Composition(rhs_operator, inverse)
         super().__init__(iteration, k, ncv=ncv, which=which, tol=tol, initial_vector=initial_vector)
         self.metric_vector = wp.empty((1, self.n), dtype=wp.float64, device=self.device)
         self.bx = wp.empty_like(self.eigenvectors)

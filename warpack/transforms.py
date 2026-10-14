@@ -3,6 +3,7 @@
 import warp as wp
 
 from .generalized import GeneralizedEigensolver, generalized_outputs, generalized_residual
+from .generalized_krylov import GeneralizedKrylovSchur
 from .kernels import identity_order
 
 
@@ -71,22 +72,60 @@ class CayleyEigensolver(GeneralizedEigensolver):
         wp.launch(cayley_order, 1, [self.ritz, self.order, self.sigma], device=self.device)
 
 
+@wp.kernel
+def scale_inverse_result(x: wp.array2d[wp.float64], scale: wp.float64):
+    i, j = wp.tid()
+    x[i, j] *= scale
+
+
+class _ScaledInverse:
+    def __init__(self, inverse, scale):
+        self.inverse, self.scale = inverse, float(scale)
+        self.n, self.device = inverse.n, inverse.device
+        self.width = getattr(inverse, "width", 1)
+        self.requires_static_outer_capture = getattr(
+            inverse, "requires_static_outer_capture", False
+        )
+
+    def apply(self, x, y):
+        self.inverse.apply(x, y)
+        wp.launch(scale_inverse_result, y.shape, [y, self.scale], device=self.device)
+
+
 class BucklingEigensolver:
     """A x = lambda B x, A SPD and B symmetric (possibly indefinite).
 
     Supply an inverse of A-sigma B. Selects largest transformed magnitudes
     |lambda/(lambda-sigma)|, as in ARPACK buckling mode. Eigenvectors are
     A-orthonormal. This selection is not identical to nearest physical lambda.
+    ``method="krylov"`` uses mass-orthogonal restarted Krylov iteration and
+    requires a one-RHS inverse. The default block method uses ncv RHSs.
     """
 
-    def __init__(self, operator, mass, inverse, k, sigma, ncv=None, tol=1.0e-9):
+    def __init__(self, operator, mass, inverse, k, sigma, ncv=None, tol=1.0e-9, method="block"):
         if sigma == 0:
             raise ValueError("Buckling sigma must be nonzero")
+        if method not in ("block", "krylov"):
+            raise ValueError("method must be block or krylov")
         self.a, self.b, self.k, self.tol = operator, mass, k, tol
-        self.device = operator.device
-        self.core = GeneralizedEigensolver(
-            mass, operator, inverse, k, ncv=ncv, target=1.0 / sigma, tol=tol * 0.1
-        )
+        self.device, self.method = operator.device, method
+        if method == "krylov":
+            # Reciprocal pencil B x = mu A x has SPD metric A. Its nearest
+            # target mu=1/sigma selects largest |lambda/(lambda-sigma)|.
+            # (B - A/sigma)^-1 = -sigma * (A - sigma B)^-1.
+            self.core = GeneralizedKrylovSchur(
+                mass,
+                operator,
+                _ScaledInverse(inverse, -sigma),
+                k,
+                ncv=ncv,
+                target=1.0 / sigma,
+                tol=tol * 0.1,
+            )
+        else:
+            self.core = GeneralizedEigensolver(
+                mass, operator, inverse, k, ncv=ncv, target=1.0 / sigma, tol=tol * 0.1
+            )
         self.eigenvectors = self.core.eigenvectors
         self.eigenvalues = wp.empty(k, dtype=wp.float64, device=self.device)
         self.values = wp.empty_like(self.eigenvalues)

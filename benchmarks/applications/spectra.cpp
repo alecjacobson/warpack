@@ -43,6 +43,7 @@ extern "C" int app_solve(void*ptr,int k,int ncv,const double*initial,double*w,do
         auto& c=*static_cast<Context*>(ptr);Inverse inv{c};Product a{c.a},b{c.b};
         if(c.mode==1){Mass mass{{c.b},c};Spectra::SymGEigsSolver<Product,Mass,Spectra::GEigsMode::RegularInverse> s(a,mass,k,ncv);return run(s,c.a.rows(),k,initial,w,v);}
         if(c.mode==2){Spectra::SymGEigsShiftSolver<Inverse,Product,Spectra::GEigsMode::Buckling> s(inv,a,k,ncv,c.sigma);return run(s,c.a.rows(),k,initial,w,v);}
+        if(c.mode==3){Spectra::SymGEigsShiftSolver<Inverse,Product,Spectra::GEigsMode::Cayley> s(inv,b,k,ncv,c.sigma);return run(s,c.a.rows(),k,initial,w,v);}
         Spectra::SymGEigsShiftSolver<Inverse,Product,Spectra::GEigsMode::ShiftInvert> s(inv,b,k,ncv,c.sigma);return run(s,c.a.rows(),k,initial,w,v);
     }catch(...){return -1;}
 }
