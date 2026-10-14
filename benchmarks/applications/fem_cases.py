@@ -148,7 +148,9 @@ def reference(a, b, count):
     )
 
 
-def make_fem_case(name, side=2, modes=6):
+def make_fem_case(name, side=2, modes=6, shift=-0.01):
+    if not np.isfinite(shift) or shift >= 0:
+        raise ValueError("Low-mode fixture comparisons require a finite negative shift")
     if modes < 1:
         raise ValueError("Request at least one nontrivial mode")
     if name == "repeated_bending":
@@ -208,7 +210,7 @@ def make_fem_case(name, side=2, modes=6):
         a,
         b,
         k,
-        -0.01,
+        shift,
         expected=spectrum[:k],
         nullity=nullity,
         null_basis=q,

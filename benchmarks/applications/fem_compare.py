@@ -44,6 +44,7 @@ def main():
     parser.add_argument("--modes", type=int, default=6)
     parser.add_argument("--ncv", type=int, default=48)
     parser.add_argument("--steps", type=int, default=20)
+    parser.add_argument("--shift", type=float, default=-0.01)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
     parser.add_argument("--timeout", type=int, default=180)
@@ -59,7 +60,7 @@ def main():
     if args.worker:
         if len(names) != 1 or len(methods) != 1:
             parser.error("One fixture and method per worker")
-        c = make_fem_case(names[0], args.side, args.modes)
+        c = make_fem_case(names[0], args.side, args.modes, args.shift)
         p = c.problem
         row = run(
             "A",
@@ -117,7 +118,10 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     for name in names:
         for method in methods:
-            output = folder / f"{name}-{args.side}-{args.modes}-{method}.json"
+            output = (
+                folder
+                / f"{name}-{args.side}-{args.modes}-{method}-cycles{args.steps}-shift{args.shift:g}-tol{args.lobpcg_tol:g}.json"
+            )
             log = output.with_suffix(".log")
             command = [
                 sys.executable,
@@ -136,6 +140,8 @@ def main():
                 str(args.ncv),
                 "--steps",
                 str(args.steps),
+                "--shift",
+                str(args.shift),
                 "--repeats",
                 str(args.repeats),
                 "--lobpcg-tol",

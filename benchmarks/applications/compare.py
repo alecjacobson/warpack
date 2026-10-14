@@ -4,6 +4,7 @@ import argparse
 import gc
 import hashlib
 import importlib.metadata
+import inspect
 import json
 import os
 import re
@@ -14,6 +15,7 @@ from pathlib import Path
 
 import numpy as np
 import warp as wp
+import warp.optim.linear as linear
 
 from .problems import make_problem
 from .references import Unsupported, cupy_setup, spectra_setup
@@ -88,6 +90,12 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
                 raise Unsupported(
                     "Alternate Warp inverse/iteration comparison is limited to symmetric low/interior workloads"
                 )
+            if selected == "cg-fsai" and not hasattr(linear, "FSAI"):
+                raise Unsupported("Requires the pinned upstream Warp FSAI implementation")
+            if selected == "cg-bj" and "block_jacobi_sequential" not in inspect.getsource(
+                linear.preconditioner
+            ):
+                raise Unsupported("Requires upstream Warp block-Jacobi support")
             if selected.startswith("cg") and api_class == "B":
                 raise Unsupported("Interior shifted matrix is not guaranteed SPD")
             if steps is None:
@@ -259,6 +267,7 @@ def compare_baseline(rows, baseline, limit):
             r.get(key) == b.get(key)
             for key in [
                 "matrix_sha256",
+                "target",
                 "k",
                 "ncv",
                 "outer_cycles",
