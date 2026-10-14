@@ -153,10 +153,14 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
                 setup, solve = timed(lambda: scipy_setup(p, ncv=reference_ncv))
             elif method == "spectra":
                 setup, (solve, cleanup) = timed(lambda: spectra_setup(p, ncv))
-            elif method in ("cupy", "cupy-eigsh"):
+            elif method in ("cupy", "cupy-eigsh", "cupy-batched"):
                 setup, (solve, cleanup, label) = timed(
                     lambda: cupy_setup(
-                        p, ncv, lobpcg_tol=lobpcg_tol, standard=method == "cupy-eigsh"
+                        p,
+                        ncv,
+                        lobpcg_tol=lobpcg_tol,
+                        standard=method == "cupy-eigsh",
+                        batched=method == "cupy-batched",
                     )
                 )
                 if method == "cupy-eigsh":

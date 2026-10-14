@@ -135,3 +135,19 @@ def test_native_cupy_rejects_consistent_mass_without_silent_transformation():
     p = make_fem_case("clamped_consistent", side=1).problem
     with pytest.raises(Unsupported, match="diagonal mass"):
         cupy_setup(p, ncv=32, standard=True)
+
+
+def test_batched_cupy_lobpcg_preconditioner_in_original_pencil():
+    pytest.importorskip("cupy")
+    from benchmarks.applications.references import cupy_setup
+
+    p = make_fem_case("clamped_consistent", side=1).problem
+    solve, close, label = cupy_setup(p, ncv=32, batched=True, lobpcg_tol=1e-10)
+    try:
+        assert "batched cuDSS" in label
+        for _ in range(2):
+            values, vectors, _ = solve()
+            check = accuracy(p, values.get(), vectors.get())
+            assert check["accepted"], check
+    finally:
+        close()

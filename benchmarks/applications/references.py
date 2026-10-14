@@ -75,11 +75,13 @@ def spectra_setup(p, ncv):
     return solve, lambda: lib.app_free(ctx)
 
 
-def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
+def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
     import cupy as cp
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
 
+    if batched and (standard or p.api_class not in "ACDF"):
+        raise Unsupported("Batched cuDSS comparison requires a generalized CuPy LOBPCG path")
     mass_diagonal = None
     if standard:
         if p.api_class not in "AD" or p.b is None:
@@ -156,12 +158,22 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
         b = cs.csr_matrix(p.b)
         # Generalized LOBPCG preserves the mass metric. This is not eigsh.
         shifted = p.b if p.mode == "regular" else p.a - p.target * p.b
-        inv = CuDSSInverse(matrix(shifted), 1, mtype="spd")
+        inv = CuDSSInverse(matrix(shifted), p.k if batched else 1, mtype="spd")
+        rhs_block, solution_block = cp.asarray(inv.b), cp.asarray(inv.x)
 
         def precondition(x):
             with stream:
                 one = x.ndim == 1
                 xx = x[:, None] if one else x
+                if batched:
+                    count = xx.shape[1]
+                    if count > p.k:
+                        raise ValueError("LOBPCG preconditioner block exceeds setup capacity")
+                    inv.b.zero_()
+                    rhs_block[:count] = xx.T
+                    inv.apply(inv.b, inv.x)
+                    result = solution_block[:count].T.copy()
+                    return result[:, 0] if one else result
                 result = cp.empty_like(xx)
                 for j in range(xx.shape[1]):
                     rhs = cp.ascontiguousarray(xx[:, j]).reshape(1, p.n)
@@ -188,4 +200,7 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
                 )
                 return w, v, None
 
-        return solve, inv.close, "CuPy LOBPCG + cuDSS preconditioner"
+        label = "CuPy LOBPCG + cuDSS preconditioner"
+        if batched:
+            label = f"CuPy LOBPCG + batched cuDSS preconditioner, padded width={p.k}"
+        return solve, inv.close, label
