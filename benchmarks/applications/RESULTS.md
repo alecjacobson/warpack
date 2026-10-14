@@ -1,5 +1,8 @@
 # Application coverage results
 
+This is the initial application baseline. The [cuDSS correction report](../upstream/REFINEMENT.md)
+records the subsequent damped-chain fix, current tests, and interior-mode timing regression.
+
 Implementation: `adf397f`, NVIDIA L40, Warp 1.18.0+cu12, cuDSS 0.8.0.10. See the JSON files for exact library versions, matrices, samples, setup and capture times. Each solve is warmed once and measured three times. Initial contended trials were excluded from these reports.
 
 Local verification: **128 passed, 1 strict expected failure**, plus lint, formatting and wheel-build checks. The expected failure is the existing nonsymmetric solver on the new damped-chain fixture, tracked in [#27](https://github.com/alecjacobson/warpack/issues/27).
