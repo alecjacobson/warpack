@@ -182,6 +182,14 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
                 else tuple(x.get() if hasattr(x, "get") else x for x in output)
             )
             check = accuracy(p, *host_output, reference=ref)
+            if method.startswith("warp"):
+                check["reported_converged"] = (
+                    int(solver.converged.numpy()[0]) if hasattr(solver, "converged") else None
+                )
+                check["solver_full_count"] = check["reported_converged"] == p.k
+                check["reported_max_residual"] = (
+                    float(solver.residuals.numpy().max()) if hasattr(solver, "residuals") else None
+                )
             samples.append(elapsed)
             checks.append(check)
             if method.startswith("warp-cg"):
