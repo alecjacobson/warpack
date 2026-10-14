@@ -14,7 +14,7 @@ This is a first implementation, not an API-compatible drop-in replacement for Sp
 |---|---|---|
 | Real symmetric | `KrylovSchur` | Thick restart, two-pass reorthogonalization, LM/LA/SA/SM/BE selection |
 | Symmetric block inverse iteration | `SymmetricEigensolver` | CholeskyQR2 and Rayleigh–Ritz; supply an iteration operator that amplifies the requested spectrum |
-| Symmetric generalized `A x = λ B x` | `GeneralizedEigensolver` | SPD mass, including non-diagonal sparse B; B-orthonormal eigenvectors; inverse iteration and interior targeting |
+| Symmetric generalized `A x = λ B x` | `GeneralizedKrylovSchur`, `GeneralizedEigensolver` | SPD mass, including non-diagonal sparse B; B-orthonormal eigenvectors; restarted Krylov or block inverse iteration; interior targeting |
 | Complex Hermitian | `HermitianEigensolver` | Realification, block iteration, and complex basis recovery; avoids duplicate realified eigenvectors |
 | Real or complex nonsymmetric | `GeneralEigensolver` | Restarted complex Arnoldi, device Hessenberg reduction and shifted QR; LM/SM/LR/SR/LI/SI selection |
 | Real or complex shift-invert | `ShiftInvertEigensolver` | Eigenpairs nearest a real or complex shift, using cuDSS or pure-Warp GMRES |
@@ -135,7 +135,9 @@ Sources: [ARPACK, Spectra, and CuPy comparison](results/anvil_benchmarks.json), 
 
 ## Validation and benchmarking
 
-Warpack's own suite has **111 passing tests** in the pinned FSAI environment, plus recorded passing lint, formatting, and wheel-build checks. The broader [pinned CuPy and Spectra conformance runs](benchmarks/upstream/RESULTS.md) expose additional numerical failures, unsupported interfaces, and timeouts; the local suite is not full upstream conformance. Stock Warp 1.15 compatibility checks passed six tests, with four upstream block-Jacobi cases skipped. See [validation and source provenance](results/anvil_cg_validation.json).
+The [application coverage suite](benchmarks/applications/README.md) adds physics/geometry fixtures for nine API classes, independent spectrum and original-equation checks, and accuracy-gated ARPACK/Spectra/CuPy comparisons. [Coverage issues and priorities](https://github.com/alecjacobson/warpack/issues/18) track the remaining gaps. `GeneralizedKrylovSchur` adds mass-orthogonal restarted Krylov iteration for SPD-mass pencils; it supports nearest-shift solves and regular mass-inverse LM/LA/SA selection. Its required inverse has one RHS.
+
+Warpack's current local suite has **128 passing tests and one strict expected failure** in the pinned FSAI environment, with passing lint, formatting and wheel-build checks. The expected failure records the damped-chain right-eigenvector residual gap; it is tracked in [#27](https://github.com/alecjacobson/warpack/issues/27). The broader [pinned CuPy and Spectra conformance runs](benchmarks/upstream/RESULTS.md) expose additional numerical failures, unsupported interfaces, and timeouts; the local suite is not full upstream conformance. Stock Warp 1.15 compatibility checks passed six tests, with four upstream block-Jacobi cases skipped. See [validation and source provenance](results/anvil_cg_validation.json).
 
 The tests cover rectangular SVD, buckling/Cayley transforms, FP64 fractional shifts, real symmetric and nonsymmetric spectra, complex Hermitian and general spectra, repeated/zero eigenvalues, both spectrum ends, interior real/complex shifts, non-diagonal mass, device convergence limits, graph replay with changed matrix values, FEM energy derivatives, rigid modes, and graph-captured FEM assembly. They also check the incremental projected matrix against `Q A Qᵀ`, captured breakdown recovery, small projected eigenproblems, orthogonal-complement projection, and pure-Warp graphs for host nodes/transfers. These are representative Spectra-style tests, not a complete port of every upstream test.
 

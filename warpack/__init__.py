@@ -4,6 +4,7 @@ from .arnoldi import ComplexCSR, GeneralEigensolver
 from .constraints import OrthogonalComplementOperator
 from .fem import RestElasticity, rigid_body_basis
 from .generalized import CGInverse, GeneralizedEigensolver
+from .generalized_krylov import GeneralizedKrylovSchur
 from .hermitian import HermitianCSR, HermitianEigensolver
 from .shift import ComplexShiftInverse, ShiftInvertEigensolver
 from .solver import (
@@ -24,6 +25,7 @@ __all__ = [
     "EigenpairEvaluation",
     "GeneralEigensolver",
     "GeneralizedEigensolver",
+    "GeneralizedKrylovSchur",
     "HermitianCSR",
     "HermitianEigensolver",
     "KrylovSchur",
