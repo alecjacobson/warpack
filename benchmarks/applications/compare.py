@@ -280,7 +280,8 @@ def compare_baseline(rows, baseline, limit):
         if b is None:
             continue
         same = all(
-            r.get(key) == b.get(key)
+            r.get(key, 0 if key == "projected_rigid_modes" else None)
+            == b.get(key, 0 if key == "projected_rigid_modes" else None)
             for key in [
                 "matrix_sha256",
                 "target",
