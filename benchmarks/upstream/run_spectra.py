@@ -111,7 +111,13 @@ def run(case):
                     raise Unsupported(
                         "Generalized transforms expose largest transformed magnitude only"
                     )
-                inv = CuDSSInverse(matrix(a - sigma.real * b), ncv, mtype="general", matching=True)
+                inv = CuDSSInverse(
+                    matrix(a - sigma.real * b),
+                    ncv,
+                    mtype="general",
+                    matching=True,
+                    refinement_steps=1,
+                )
                 if "buckling" in case["name"]:
                     solver = BucklingEigensolver(
                         SparseOperator(ma),
@@ -147,7 +153,7 @@ def run(case):
                     raise Unsupported(
                         "GeneralizedEigensolver lacks general B-inverse extremal selection for indefinite A"
                     )
-                inv = CuDSSInverse(ma, ncv, mtype="general", matching=True)
+                inv = CuDSSInverse(ma, ncv, mtype="general", matching=True, refinement_steps=1)
                 solver = GeneralizedEigensolver(
                     SparseOperator(ma), SparseOperator(mb), inv, k, ncv=ncv, target=0, tol=threshold
                 )
@@ -162,7 +168,11 @@ def run(case):
             else:
                 ma = matrix(a)
                 inv = CuDSSInverse(
-                    matrix(a - sigma.real * np.eye(n)), 1, mtype="general", matching=True
+                    matrix(a - sigma.real * np.eye(n)),
+                    1,
+                    mtype="general",
+                    matching=True,
+                    refinement_steps=1,
                 )
                 solver = KrylovSchur(
                     inv,

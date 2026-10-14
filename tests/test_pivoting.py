@@ -12,7 +12,8 @@ from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperat
 
 
 @pytest.mark.parametrize(
-    "options", [dict(reordering="colamd", refinement_steps=0), dict(matching=True)]
+    "options",
+    [dict(reordering="colamd", refinement_steps=0), dict(matching=True, refinement_steps=1)],
 )
 @pytest.mark.parametrize(
     "key,k,ncv", [("SymEigs_17", 3, 6), ("SymEigs_22", 10, 20), ("SymEigs_27", 20, 50)]
@@ -70,6 +71,34 @@ def test_pivoted_inverse_in_place_changed_rhs(options):
             wp.copy(source, wp.array(b, dtype=wp.float64))
             wp.capture_launch(graph)
             assert np.linalg.norm(rhs.numpy() @ a - b) / np.linalg.norm(b) < 1e-13
+    finally:
+        cap.graph = graph = None
+        inv.close()
+
+
+@pytest.mark.parametrize("scale", [1e-6, 1.0, 1e6])
+def test_matching_nonsymmetric_scaling_and_changed_rhs(scale):
+    # A column permutation forces nontrivial matching; scaling must be undone
+    # in the returned solution, including captured in-place multiple RHS solves.
+    n = 24
+    a = np.diag(np.linspace(2, 3, n)) + np.diag(np.full(n - 1, 0.3), 1)
+    a = scale * a[:, np.roll(np.arange(n), 7)]
+    inv = CuDSSInverse(matrix(a), 3, mtype="general", matching=True)
+    rhs = wp.ones((3, n), dtype=wp.float64)
+    source = wp.empty_like(rhs)
+    inv.apply(rhs, rhs)
+    with wp.ScopedCapture() as cap:
+        wp.copy(rhs, source)
+        inv.apply(rhs, rhs)
+    graph = cap.graph
+    try:
+        for seed in (3, 4):
+            b = np.random.default_rng(seed).normal(size=(3, n))
+            wp.copy(source, wp.array(b, dtype=wp.float64))
+            wp.capture_launch(graph)
+            x = rhs.numpy()
+            assert np.linalg.norm(x @ a.T - b) / np.linalg.norm(b) < 1e-13
+            np.testing.assert_allclose(x, np.linalg.solve(a, b.T).T, rtol=1e-12, atol=1e-15)
     finally:
         cap.graph = graph = None
         inv.close()
