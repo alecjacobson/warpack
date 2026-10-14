@@ -1,0 +1,46 @@
+{
+  "source_commit": "c330a148d0e0bb466fd11c646493b2aaeebaa09d",
+  "tests": 256,
+  "passed": 256,
+  "failed": 0,
+  "seconds": 158.94,
+  "command": "PYTHONPATH=build/warp-fsai:$PWD OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+  "checks": {
+    "ruff": "passed",
+    "python_formatting": "passed",
+    "wheel": "passed"
+  },
+  "focused_history": [
+    {
+      "tests": 14,
+      "passed": 14,
+      "seconds": 13.29,
+      "description": "metric normalization, aliasing, refresh and physical modes"
+    },
+    {
+      "tests": 14,
+      "passed": 14,
+      "seconds": 12.56,
+      "description": "device geometric rigid basis and consistent-mass normalization"
+    }
+  ],
+  "notes": [
+    "Local GPU suite; package CI does not execute CUDA numerical tests.",
+    "Projection and normalization math in Warp; optional cuDSS sparse solve only.",
+    "Full suite includes invalid/zero/nonfinite basis recovery and pure-Warp graph audits.",
+    "No full upstream or Anvil rerun."
+  ],
+  "existing_regression": [
+    {
+      "api_class": "A",
+      "n": 10890,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.00012807385237,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false,
+      "fixture": "clamped_consistent"
+    }
+  ]
+}
