@@ -20,6 +20,10 @@ def main():
     parser.add_argument("--retry-family", help="Rerun only this family, retaining other results")
     parser.add_argument("--selection", type=int, help="Restrict to this Spectra SortRule value")
     parser.add_argument("--case", help="Restrict to this exported case ID")
+    parser.add_argument("--families", help="Comma-separated families for a focused regression run")
+    parser.add_argument(
+        "--out", type=Path, help="Separate output report; preserves published results"
+    )
     parser.add_argument("--fresh", action="store_true", help="Replace the recorded suite results")
     args = parser.parse_args()
     if args.fresh and args.retry_timeouts:
@@ -29,6 +33,9 @@ def main():
     target = ROOT / (
         "results/upstream_benchmarks.json" if benchmark else "results/upstream_spectra_warp.json"
     )
+    if args.out is not None:
+        target = ROOT / args.out
+    target.parent.mkdir(parents=True, exist_ok=True)
     module = (
         "benchmarks.upstream.run_benchmarks" if benchmark else "benchmarks.upstream.run_spectra"
     )
@@ -37,6 +44,12 @@ def main():
         for p in sorted(folder.glob("*.jsonl"))
         for line in p.read_text().splitlines()
     ]
+    if args.families:
+        selected = set(args.families.split(","))
+        unknown = selected - {c["family"] for c in cases}
+        if unknown:
+            parser.error("Unknown families: " + ", ".join(sorted(unknown)))
+        cases = [c for c in cases if c["family"] in selected]
     if args.retry_family:
         cases = [c for c in cases if c["family"] == args.retry_family]
         if not cases:
