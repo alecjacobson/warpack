@@ -86,3 +86,27 @@ def test_elastic_modes_captured_replay(name):
 def test_cluster_request_is_extended_instead_of_split():
     c = make_fem_case("repeated_bending", modes=5)
     assert c.nontrivial_modes == 6 and c.problem.k == 6
+
+
+@pytest.mark.parametrize("method", ["cg-bj", "cg-fsai"])
+def test_elastic_modes_with_upstream_preconditioners(method):
+    import inspect
+
+    import warp.optim.linear as linear
+
+    if method == "cg-bj" and "block_jacobi_sequential" not in inspect.getsource(
+        linear.preconditioner
+    ):
+        pytest.skip("requires upstream Warp block-Jacobi")
+    if method == "cg-fsai" and not hasattr(linear, "FSAI"):
+        pytest.skip("requires the pinned upstream FSAI branch")
+    c = make_fem_case("heterogeneous", side=1)
+    p = c.problem
+    solver, inverse = warp_setup(p, method=method, ncv=32, tol=1e-9)
+    graph = solver.capture(10)
+    inverse.reset_stats()
+    wp.capture_launch(graph)
+    check = accuracy(p, *warp_output(p, solver))
+    assert check["accepted"], check
+    assert solver.converged.numpy()[0] == p.k
+    assert inverse.stats.numpy()[2] == 0

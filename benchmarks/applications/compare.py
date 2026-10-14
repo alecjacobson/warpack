@@ -77,12 +77,18 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
     solver = graph = None
     try:
         if method.startswith("warp"):
-            selected = {"warp": "krylov", "warp-block": "block", "warp-cg": "cg"}[method]
+            selected = {
+                "warp": "krylov",
+                "warp-block": "block",
+                "warp-cg": "cg",
+                "warp-cg-bj": "cg-bj",
+                "warp-cg-fsai": "cg-fsai",
+            }[method]
             if method != "warp" and api_class not in "ABCD":
                 raise Unsupported(
                     "Alternate Warp inverse/iteration comparison is limited to symmetric low/interior workloads"
                 )
-            if selected == "cg" and api_class == "B":
+            if selected.startswith("cg") and api_class == "B":
                 raise Unsupported("Interior shifted matrix is not guaranteed SPD")
             if steps is None:
                 steps = (
@@ -91,6 +97,15 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
                     else (5 if api_class in "ABC" else (10 if api_class in "EH" else 30))
                 )
             row["outer_cycles"] = steps
+            if selected.startswith("cg"):
+                row["cg_preconditioner"] = {
+                    "cg": "upstream diagonal",
+                    "cg-bj": "upstream block_jacobi_sequential",
+                    "cg-fsai": "upstream FSAI max_row_size=32 max_step_size=3 apply_lanes=8 factor_dtype=float32",
+                }[selected]
+                row["cg_block_size"] = p.block_size if selected != "cg" else 1
+                row["cg_tolerance"] = 1e-13
+                row["cg_maxiter"] = 10000
             row["start"] = "Warp seed 42; same start restored on every replay"
             setup, (solver, inverse) = timed(lambda: warp_setup(p, selected, ncv))
             # Complex shift-invert wraps the real factor object twice.
@@ -157,7 +172,7 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
         competing = set()
         for _ in range(repeats):
             competing.update(other_gpu_processes())
-            if method == "warp-cg":
+            if method.startswith("warp-cg"):
                 inverse.reset_stats()
             elapsed, output = timed(solve)
             competing.update(other_gpu_processes())
@@ -169,7 +184,7 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lo
             check = accuracy(p, *host_output, reference=ref)
             samples.append(elapsed)
             checks.append(check)
-            if method == "warp-cg":
+            if method.startswith("warp-cg"):
                 cg_stats.append(
                     dict(
                         zip(
@@ -241,6 +256,10 @@ def compare_baseline(rows, baseline, limit):
                 "outer_cycles",
                 "implementation",
                 "reference_tolerance",
+                "cg_preconditioner",
+                "cg_block_size",
+                "cg_tolerance",
+                "cg_maxiter",
             ]
         )
         eligible = (

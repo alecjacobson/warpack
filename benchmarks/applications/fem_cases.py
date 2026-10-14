@@ -213,6 +213,7 @@ def make_fem_case(name, side=2, modes=6):
         nullity=nullity,
         null_basis=q,
         requested_basis=vectors[:, :k],
+        block_size=2 if name == "repeated_bending" else 3,
         notes=f"{ref}; retain {nullity} known rigid modes and {k - nullity} nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
     )
     return FEMCase(p, spectrum, vectors, vertices, tets, dofs, ref, k - nullity)
