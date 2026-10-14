@@ -1,0 +1,534 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "7b77d82faf43b58eaabf4a57d6db2c2f8cb44f90",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "protocol": "Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses upstream diagonal preconditioning. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
+  "cases": [
+    {
+      "api_class": "D",
+      "requested_size": 10086,
+      "problem": "hodge_large_disconnected",
+      "n": 10086,
+      "columns": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "method": "scipy",
+      "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+      "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+      "target": [
+        -0.001,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 32,
+      "implementation": "SciPy ARPACK explicit ncv=32",
+      "setup_seconds": 0.14567742124199867,
+      "warmup_seconds": 0.2103239744901657,
+      "samples_seconds": [
+        0.20722650736570358,
+        0.21063728258013725,
+        0.24136210605502129
+      ],
+      "solve_seconds": 0.21063728258013725,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.62645868174364e-14,
+          "max_absolute_residual": 2.377684163380918e-15,
+          "orthogonality": 1.0458300891968975e-13,
+          "spectrum_error": 5.759281940243e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356733,
+          "nullspace_subspace_error": 8.27328797220617e-14
+        },
+        {
+          "accepted": true,
+          "residual": 6.62645868174364e-14,
+          "max_absolute_residual": 2.377684163380918e-15,
+          "orthogonality": 1.0458300891968975e-13,
+          "spectrum_error": 5.759281940243e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356733,
+          "nullspace_subspace_error": 8.27328797220617e-14
+        },
+        {
+          "accepted": true,
+          "residual": 6.62645868174364e-14,
+          "max_absolute_residual": 2.377684163380918e-15,
+          "orthogonality": 1.0458300891968975e-13,
+          "spectrum_error": 5.759281940243e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356733,
+          "nullspace_subspace_error": 8.27328797220617e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "fixture": "large_disconnected",
+      "expected_nullity": 4,
+      "reference_positive_guard": 0.007823251356732452,
+      "nullity_cutoff": 1e-08,
+      "incidence_rank1": 3360,
+      "incidence_rank2": 6722,
+      "vertices": 3362,
+      "faces": 6724,
+      "boundary_composition_nnz": 0,
+      "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "D",
+      "requested_size": 10086,
+      "problem": "hodge_large_disconnected",
+      "n": 10086,
+      "columns": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "method": "spectra",
+      "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+      "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+      "target": [
+        -0.001,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.15025105327367783,
+      "warmup_seconds": 0.14948829635977745,
+      "samples_seconds": [
+        0.1499972641468048,
+        0.14802643284201622,
+        0.14859943464398384
+      ],
+      "solve_seconds": 0.14859943464398384,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.091116610338326e-12,
+          "max_absolute_residual": 1.534348379416111e-13,
+          "orthogonality": 1.2656542480726785e-13,
+          "spectrum_error": 5.377642775528102e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732966,
+          "nullspace_subspace_error": 5.63608137159693e-14
+        },
+        {
+          "accepted": true,
+          "residual": 4.091116610338326e-12,
+          "max_absolute_residual": 1.534348379416111e-13,
+          "orthogonality": 1.2656542480726785e-13,
+          "spectrum_error": 5.377642775528102e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732966,
+          "nullspace_subspace_error": 5.63608137159693e-14
+        },
+        {
+          "accepted": true,
+          "residual": 4.091116610338326e-12,
+          "max_absolute_residual": 1.534348379416111e-13,
+          "orthogonality": 1.2656542480726785e-13,
+          "spectrum_error": 5.377642775528102e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732966,
+          "nullspace_subspace_error": 5.63608137159693e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "fixture": "large_disconnected",
+      "expected_nullity": 4,
+      "reference_positive_guard": 0.007823251356732452,
+      "nullity_cutoff": 1e-08,
+      "incidence_rank1": 3360,
+      "incidence_rank2": 6722,
+      "vertices": 3362,
+      "faces": 6724,
+      "boundary_composition_nnz": 0,
+      "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "D",
+      "requested_size": 10086,
+      "problem": "hodge_large_disconnected",
+      "n": 10086,
+      "columns": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "method": "cupy-eigsh",
+      "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+      "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+      "target": [
+        -0.001,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 32,
+      "implementation": "CuPy eigsh SA, identity mass, ncv=32",
+      "reference_tolerance": 1e-11,
+      "setup_seconds": 0.36142654344439507,
+      "warmup_seconds": 0.38786473870277405,
+      "samples_seconds": [
+        0.2051663137972355,
+        0.2038845382630825,
+        0.20050369948148727
+      ],
+      "solve_seconds": 0.2038845382630825,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.725075611523514e-12,
+          "max_absolute_residual": 1.5430175603784515e-13,
+          "orthogonality": 5.950795411990839e-14,
+          "spectrum_error": 3.4916514124461173e-14,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356739506,
+          "nullspace_subspace_error": 4.6929752752208e-11
+        },
+        {
+          "accepted": true,
+          "residual": 3.725075611523514e-12,
+          "max_absolute_residual": 1.5430175603784515e-13,
+          "orthogonality": 5.950795411990839e-14,
+          "spectrum_error": 3.4916514124461173e-14,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356739506,
+          "nullspace_subspace_error": 4.6929752752208e-11
+        },
+        {
+          "accepted": true,
+          "residual": 3.725075611523514e-12,
+          "max_absolute_residual": 1.5430175603784515e-13,
+          "orthogonality": 5.950795411990839e-14,
+          "spectrum_error": 3.4916514124461173e-14,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356739506,
+          "nullspace_subspace_error": 4.6929752752208e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "fixture": "large_disconnected",
+      "expected_nullity": 4,
+      "reference_positive_guard": 0.007823251356732452,
+      "nullity_cutoff": 1e-08,
+      "incidence_rank1": 3360,
+      "incidence_rank2": 6722,
+      "vertices": 3362,
+      "faces": 6724,
+      "boundary_composition_nnz": 0,
+      "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "D",
+      "requested_size": 10086,
+      "problem": "hodge_large_disconnected",
+      "n": 10086,
+      "columns": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "method": "cupy",
+      "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+      "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+      "target": [
+        -0.001,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": null,
+      "reference_block_size": 6,
+      "implementation": "CuPy LOBPCG + cuDSS preconditioner",
+      "reference_tolerance": 1e-08,
+      "setup_seconds": 0.3644228167831898,
+      "warmup_seconds": 0.34244758635759354,
+      "samples_seconds": [
+        0.04970487952232361,
+        0.050564561039209366,
+        0.0492769293487072
+      ],
+      "solve_seconds": 0.04970487952232361,
+      "validation": [
+        {
+          "accepted": false,
+          "residual": 6.244626181272598e-09,
+          "max_absolute_residual": 2.3524323076497686e-10,
+          "orthogonality": 6.661338147750939e-15,
+          "spectrum_error": 1.0445644902819783e-15,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732359,
+          "nullspace_subspace_error": 4.1718546521331175e-08
+        },
+        {
+          "accepted": false,
+          "residual": 6.442611113056412e-09,
+          "max_absolute_residual": 2.495624778531758e-10,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 1.5005358067199381e-15,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356730952,
+          "nullspace_subspace_error": 4.171854671687183e-08
+        },
+        {
+          "accepted": false,
+          "residual": 6.65175714346044e-09,
+          "max_absolute_residual": 2.4725363973287777e-10,
+          "orthogonality": 6.661338147750939e-15,
+          "spectrum_error": 1.1657239297726744e-15,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356731998,
+          "nullspace_subspace_error": 4.171854690595038e-08
+        }
+      ],
+      "accepted": false,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "failed",
+      "contract_accepted": false,
+      "fixture": "large_disconnected",
+      "expected_nullity": 4,
+      "reference_positive_guard": 0.007823251356732452,
+      "nullity_cutoff": 1e-08,
+      "incidence_rank1": 3360,
+      "incidence_rank2": 6722,
+      "vertices": 3362,
+      "faces": 6724,
+      "boundary_composition_nnz": 0,
+      "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "D",
+      "requested_size": 10086,
+      "problem": "hodge_large_disconnected",
+      "n": 10086,
+      "columns": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+      "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+      "target": [
+        -0.001,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 20,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.26409516111016273,
+      "capture_seconds": 0.1512509472668171,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 40,
+          "DtoD (DEVICE to DEVICE)": 60
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.030717868357896805,
+      "samples_seconds": [
+        0.0286051444709301,
+        0.028576090931892395,
+        0.028521616011857986
+      ],
+      "solve_seconds": 0.028576090931892395,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.542975918921123e-13,
+          "max_absolute_residual": 1.625388124332043e-14,
+          "orthogonality": 1.596500709410975e-13,
+          "spectrum_error": 2.931682674400804e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732742,
+          "nullspace_subspace_error": 7.431006760163433e-14
+        },
+        {
+          "accepted": true,
+          "residual": 3.5489461419000684e-13,
+          "max_absolute_residual": 9.478136049449748e-15,
+          "orthogonality": 1.9673151996357774e-13,
+          "spectrum_error": 2.896988204881268e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.00782325135673274,
+          "nullspace_subspace_error": 6.749945488764247e-14
+        },
+        {
+          "accepted": true,
+          "residual": 5.509685291017719e-13,
+          "max_absolute_residual": 1.5624925398666223e-14,
+          "orthogonality": 1.2168044349891716e-13,
+          "spectrum_error": 2.96637714392034e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732742,
+          "nullspace_subspace_error": 7.302709401657254e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "fixture": "large_disconnected",
+      "expected_nullity": 4,
+      "reference_positive_guard": 0.007823251356732452,
+      "nullity_cutoff": 1e-08,
+      "incidence_rank1": 3360,
+      "incidence_rank2": 6722,
+      "vertices": 3362,
+      "faces": 6724,
+      "boundary_composition_nnz": 0,
+      "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "D",
+      "requested_size": 10086,
+      "problem": "hodge_large_disconnected",
+      "n": 10086,
+      "columns": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp-cg",
+      "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+      "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+      "target": [
+        -0.001,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 20,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.1117999367415905,
+      "capture_seconds": 1.6109926477074623,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1940
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 1.920402754098177,
+      "cg_statistics": [
+        {
+          "total_iterations": 75688,
+          "max_iterations_per_rhs": 207,
+          "unconverged_rhs": 0,
+          "rhs_calls": 640
+        },
+        {
+          "total_iterations": 75680,
+          "max_iterations_per_rhs": 207,
+          "unconverged_rhs": 0,
+          "rhs_calls": 640
+        },
+        {
+          "total_iterations": 75671,
+          "max_iterations_per_rhs": 207,
+          "unconverged_rhs": 0,
+          "rhs_calls": 640
+        }
+      ],
+      "samples_seconds": [
+        1.8148413449525833,
+        1.8146563544869423,
+        1.8144490160048008
+      ],
+      "solve_seconds": 1.8146563544869423,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.1134802643439076e-13,
+          "max_absolute_residual": 5.994729994525383e-15,
+          "orthogonality": 1.6497914145929826e-13,
+          "spectrum_error": 2.931682674400804e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732746,
+          "nullspace_subspace_error": 7.942306109554904e-14
+        },
+        {
+          "accepted": true,
+          "residual": 5.153932370914627e-13,
+          "max_absolute_residual": 1.4543555704356337e-14,
+          "orthogonality": 1.5554224574998443e-13,
+          "spectrum_error": 2.96637714392034e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732744,
+          "nullspace_subspace_error": 8.43170095555936e-14
+        },
+        {
+          "accepted": true,
+          "residual": 3.4014949059342297e-13,
+          "max_absolute_residual": 9.617591553885696e-15,
+          "orthogonality": 2.1116441928370477e-13,
+          "spectrum_error": 2.8622937353617317e-16,
+          "recovered_nullity": 4,
+          "positive_guard": 0.007823251356732733,
+          "nullspace_subspace_error": 7.816863176195748e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "fixture": "large_disconnected",
+      "expected_nullity": 4,
+      "reference_positive_guard": 0.007823251356732452,
+      "nullity_cutoff": 1e-08,
+      "incidence_rank1": 3360,
+      "incidence_rank2": 6722,
+      "vertices": 3362,
+      "faces": 6724,
+      "boundary_composition_nnz": 0,
+      "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "worker_wall_limit_seconds": 180
+    }
+  ]
+}

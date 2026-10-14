@@ -1,0 +1,202 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "405707c92f64fd81cb56ce63f827c6d932506f07",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "D",
+      "requested_size": 80,
+      "problem": "torus_harmonics",
+      "n": 75,
+      "columns": 75,
+      "nnz": 525,
+      "mass_nnz": 75,
+      "k": 2,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "315373816f0757c44b4fe077b8acb3159abcaa24343faca3c1085284237fb12b",
+      "notes": "Triangulated torus 1-form combinatorial Hodge Laplacian; retain both harmonics",
+      "target": [
+        -0.05,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 100,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.22816967964172363,
+      "capture_seconds": 0.17800093069672585,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.09283899888396263,
+      "samples_seconds": [
+        0.08340510353446007,
+        0.08340457081794739,
+        0.08335236832499504
+      ],
+      "solve_seconds": 0.08340457081794739,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 8.201487206916275e-16,
+          "max_absolute_residual": 3.178542201409912e-16,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 7.457725344036823e-17,
+          "recovered_nullity": 2,
+          "positive_guard": null
+        },
+        {
+          "accepted": true,
+          "residual": 7.462191187998101e-16,
+          "max_absolute_residual": 2.94860418933201e-16,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 5.0776394067561644e-17,
+          "recovered_nullity": 2,
+          "positive_guard": null
+        },
+        {
+          "accepted": true,
+          "residual": 9.170090647347495e-16,
+          "max_absolute_residual": 2.793841326711372e-16,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 1.4969813138777458e-17,
+          "recovered_nullity": 2,
+          "positive_guard": null
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 2,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false
+    },
+    {
+      "api_class": "D",
+      "requested_size": 1024,
+      "problem": "torus_harmonics",
+      "n": 972,
+      "columns": 972,
+      "nnz": 6804,
+      "mass_nnz": 972,
+      "k": 2,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "3822f81ce7e08ea9cd930cb5f672140949fe08352b8cadc765f254c6afccac8a",
+      "notes": "Triangulated torus 1-form combinatorial Hodge Laplacian; retain both harmonics",
+      "target": [
+        -0.05,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 100,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.2364783026278019,
+      "capture_seconds": 0.1797785758972168,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.10474646091461182,
+      "samples_seconds": [
+        0.09544285759329796,
+        0.09545579552650452,
+        0.09545578807592392
+      ],
+      "solve_seconds": 0.09545578807592392,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.0433944788829905e-15,
+          "max_absolute_residual": 1.3452252920436554e-16,
+          "orthogonality": 8.881784197001252e-16,
+          "spectrum_error": 1.7345940777580633e-17,
+          "recovered_nullity": 2,
+          "positive_guard": null
+        },
+        {
+          "accepted": true,
+          "residual": 1.0256299698065927e-15,
+          "max_absolute_residual": 1.4983397965564514e-16,
+          "orthogonality": 6.661338147750939e-16,
+          "spectrum_error": 1.4356260185074345e-17,
+          "recovered_nullity": 2,
+          "positive_guard": null
+        },
+        {
+          "accepted": true,
+          "residual": 1.0470273574807503e-15,
+          "max_absolute_residual": 1.3893318101904092e-16,
+          "orthogonality": 1.3322676295501878e-15,
+          "spectrum_error": 6.0746556215707246e-18,
+          "recovered_nullity": 2,
+          "positive_guard": null
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 2,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false
+    }
+  ],
+  "regression_checks": [
+    {
+      "api_class": "D",
+      "n": 75,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9998499917582552,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "D",
+      "n": 972,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0002254279354124,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "performance_comparisons": 2
+}
