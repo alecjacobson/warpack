@@ -70,7 +70,7 @@ def accuracy(p, values, vectors, right=None, reference=None):
         orthogonality=orth,
         spectrum_error=value_error,
     )
-    if p.nullity or p.api_class == "D":
+    if p.nullity or p.api_class == "D" or p.null_basis is not None:
         result["recovered_nullity"] = int(np.count_nonzero(abs(values) < 1e-8))
         result["accepted"] &= result["recovered_nullity"] == p.nullity
     if p.api_class == "D":
@@ -78,24 +78,32 @@ def accuracy(p, values, vectors, right=None, reference=None):
         result["positive_guard"] = float(positive.min()) if len(positive) else None
         if p.require_positive_guard:
             result["accepted"] &= result["positive_guard"] is not None
-        if p.null_basis is not None and result["recovered_nullity"] == p.nullity:
-            zeros = vectors[:, abs(values) < 1e-8]
-            overlap = p.null_basis.T @ (p.b @ zeros)
-            remainder = zeros - p.null_basis @ overlap
-            result["nullspace_subspace_error"] = float(
-                np.sqrt(max(0.0, np.sum(remainder * (p.b @ remainder))))
-            )
-            result["accepted"] &= result["nullspace_subspace_error"] < 1e-8
+    if p.null_basis is not None and result["recovered_nullity"] == p.nullity:
+        zeros = vectors[:, abs(values) < 1e-8]
+        overlap = p.null_basis.T @ (p.b @ zeros)
+        remainder = zeros - p.null_basis @ overlap
+        result["nullspace_subspace_error"] = float(
+            np.sqrt(max(0.0, np.sum(remainder * (p.b @ remainder))))
+        )
+        result["accepted"] &= result["nullspace_subspace_error"] < 1e-8
+    if p.requested_basis is not None:
+        basis = p.requested_basis
+        remainder = vectors - basis @ (basis.conj().T @ bv)
+        metric_remainder = remainder if p.b is None else p.b @ remainder
+        result["requested_subspace_error"] = float(
+            np.sqrt(max(0.0, np.sum(remainder.conj() * metric_remainder).real))
+        )
+        result["accepted"] &= result["requested_subspace_error"] < 1e-8
     return result
 
 
-def warp_setup(p, method="krylov", ncv=32):
+def warp_setup(p, method="krylov", ncv=32, tol=1e-11):
     ncv = min(ncv, p.n)
     if p.api_class in "EH":
-        solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=1e-11)
+        solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=tol)
         return solver, solver
     if p.mode == "svd":
-        return PartialSVD(matrix(p.a), p.k, ncv=ncv, tol=1e-11), None
+        return PartialSVD(matrix(p.a), p.k, ncv=ncv, tol=tol), None
     a, b = matrix(p.a), matrix(p.b)
     shifted = p.b if p.mode == "regular" else p.a - p.target * p.b
     block = method == "block" or p.api_class in "DG"
@@ -113,14 +121,14 @@ def warp_setup(p, method="krylov", ncv=32):
         )
     if p.mode == "buckling":
         solver = BucklingEigensolver(
-            SparseOperator(a), SparseOperator(b), inv, p.k, p.target, ncv=ncv, tol=1e-11
+            SparseOperator(a), SparseOperator(b), inv, p.k, p.target, ncv=ncv, tol=tol
         )
     elif block:
         if p.mode == "regular":
             inv.close()
             raise ValueError("old block API has no regular mass-inverse mode")
         solver = GeneralizedEigensolver(
-            SparseOperator(a), SparseOperator(b), inv, p.k, ncv=ncv, target=p.target, tol=1e-11
+            SparseOperator(a), SparseOperator(b), inv, p.k, ncv=ncv, target=p.target, tol=tol
         )
     else:
         solver = GeneralizedKrylovSchur(
@@ -131,7 +139,7 @@ def warp_setup(p, method="krylov", ncv=32):
             ncv=ncv,
             target=p.target,
             mode=p.mode,
-            tol=1e-11,
+            tol=tol,
         )
     return solver, inv
 

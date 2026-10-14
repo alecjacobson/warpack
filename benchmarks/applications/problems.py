@@ -21,6 +21,7 @@ class Problem:
     notes: str = ""
     null_basis: object = None
     require_positive_guard: bool = False
+    requested_basis: object = None
 
     @property
     def n(self):
