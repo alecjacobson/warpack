@@ -67,7 +67,7 @@ def fixtures():
     return cases
 
 
-def run(p, ncv, method, repeats):
+def run(p, ncv, method, repeats, cycles=None):
     inv = solver = graph = None
 
     def cleanup():
@@ -84,7 +84,7 @@ def run(p, ncv, method, repeats):
             def get(value):
                 return value
         else:
-            steps = 100 if method == "warp-block" else 20
+            steps = cycles if cycles is not None else (100 if method == "warp-block" else 20)
             row.update(outer_cycles=steps, cudss_matching=True, cudss_refinement_steps=1)
 
             def setup_warp():
@@ -180,16 +180,36 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="results/transformed_comparisons.json")
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--krylov-cycles", type=int, default=20)
+    parser.add_argument("--problems", help="Comma-separated fixture names; default all")
+    parser.add_argument("--methods", default="scipy,spectra,warp-block,warp-krylov")
     args = parser.parse_args()
+    problems = fixtures()
+    selected = set(args.problems.split(",")) if args.problems else {p.name for p, _ in problems}
+    if selected - {p.name for p, _ in problems}:
+        parser.error("Unknown problem name")
+    methods = args.methods.split(",")
+    if set(methods) - {"scipy", "spectra", "warp-block", "warp-krylov"}:
+        parser.error("Unknown method")
+    if args.krylov_cycles < 1 or args.repeats < 1:
+        parser.error("Cycle and repeat counts must be positive")
     report = dict(
         gpu=wp.get_device().name,
         warp=wp.__version__,
-        protocol="Sequential backends; setup/capture separate; every timed sample validated against requested spectrum, metric orthogonality and original residual, including absolute 1e-9 bound. Warp block uses 100 cycles, Krylov 20; both use matched general cuDSS factors and one correction. These are explicit algorithm/budget changes, not identical-iteration timing comparisons. Reference starts differ; native tolerance 1e-11, Warp 1e-12. Internal counts reported separately. CuPy generalized transformed APIs are unsupported by the comparison adapter.",
+        protocol="Sequential backends; setup/capture separate; every timed sample validated against requested spectrum, metric orthogonality and original residual, including absolute 1e-9 bound. Warp block uses 100 cycles; Krylov cycles are recorded per row; both use matched general cuDSS factors and one correction. These are explicit algorithm/budget changes, not identical-iteration timing comparisons. Reference starts differ; native tolerance 1e-11, Warp 1e-12. Internal counts reported separately. CuPy generalized transformed APIs are unsupported by the comparison adapter.",
         cases=[],
     )
-    for p, ncv in fixtures():
-        for method in ("scipy", "spectra", "warp-block", "warp-krylov"):
-            row = run(p, ncv, method, args.repeats)
+    for p, ncv in problems:
+        if p.name not in selected:
+            continue
+        for method in methods:
+            row = run(
+                p,
+                ncv,
+                method,
+                args.repeats,
+                args.krylov_cycles if method == "warp-krylov" else None,
+            )
             report["cases"].append(row)
             Path(args.out).write_text(json.dumps(report, indent=2) + "\n")
             print(p.name, method, row["accepted"], row.get("median"), row.get("error"), flush=True)

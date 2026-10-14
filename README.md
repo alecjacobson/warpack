@@ -18,7 +18,7 @@ This is a first implementation, not an API-compatible drop-in replacement for Sp
 | Complex Hermitian | `HermitianEigensolver` | Realification, block iteration, and complex basis recovery; avoids duplicate realified eigenvectors |
 | Real or complex nonsymmetric | `GeneralEigensolver` | Restarted complex Arnoldi, device Hessenberg reduction and shifted QR; LM/SM/LR/SR/LI/SI selection |
 | Real or complex shift-invert | `ShiftInvertEigensolver` | Eigenpairs nearest a real or complex shift, using cuDSS or pure-Warp GMRES |
-| Buckling / Cayley | `BucklingEigensolver`, `CayleyEigensolver` | Generalized spectral transforms, with residuals in the original problem |
+| Buckling / Cayley | `BucklingEigensolver`, `CayleyEigensolver`, `GeneralizedKrylovSchur` | Block or restarted Krylov transforms; original-problem residuals |
 | Partial rectangular SVD | `PartialSVD` | Largest nonzero real singular triplets through an augmented symmetric operator |
 | Pure-Warp SPD inverse | `CGInverse` | Preallocated Warp CG, optional upstream preconditioning, device convergence checks |
 | Tetrahedral rest elasticity | `RestElasticity` | Stable Neo-Hookean rest Hessian, lumped mass, graph-capturable value assembly |
@@ -65,14 +65,14 @@ Matrix **values** can change between replays with stable array addresses. Changi
 ## Inverse and generalized problems
 
 ```python
-from warpack import CuDSSInverse, GeneralizedEigensolver
+from warpack import CuDSSInverse, GeneralizedKrylovSchur
 
 # Kshift is A - sigma*B, assembled on device before factor setup.
 sigma = 7.3
 inverse = CuDSSInverse(
-    Kshift, width=48, mtype="general", matching=True, refinement_steps=1,
+    Kshift, width=1, mtype="general", matching=True, refinement_steps=1,
 )
-solver = GeneralizedEigensolver(
+solver = GeneralizedKrylovSchur(
     SparseOperator(A), SparseOperator(B), inverse,
     k=20, ncv=48, target=sigma, tol=1e-10,
 )
@@ -80,9 +80,11 @@ graph = solver.capture(40, adaptive=False)
 wp.capture_launch(graph)
 ```
 
-For a zero shift and SPD A, `which="SA"` selects the lowest modes. For an interior shift, pass the matching `target=sigma`; sorting by smallest algebraic value is not equivalent to sorting by distance to an interior shift. The generalized residual uses `||Ax-λBx||₂ / max(1, ||Ax||₂+|λ| ||Bx||₂)`. Inner iterative inverses need tighter tolerances than the outer eigensolve. Verify the residual in the **original** problem after any spectral transformation; `EigenpairEvaluation` provides this for real standard problems, and `ShiftInvertEigensolver` does so automatically for complex shift-invert.
+`GeneralizedKrylovSchur` uses `which="LM"` in shift-invert mode to select modes nearest `target`; with SPD A and a zero target, these are the lowest modes. For an interior shift, pass the matching `target=sigma`; sorting by smallest algebraic value is not equivalent to sorting by distance to an interior shift. The generalized residual uses `||Ax-λBx||₂ / max(1, ||Ax||₂+|λ| ||Bx||₂)`. Inner iterative inverses need tighter tolerances than the outer eigensolve. Verify the residual in the **original** problem after any spectral transformation; `EigenpairEvaluation` provides this for real standard problems, and `ShiftInvertEigensolver` does so automatically for complex shift-invert.
 
 For sparse indefinite factors, `mtype="general", matching=True` enables cuDSS column matching and scaling during setup. Matching defaults to zero correction; the example adds one fixed correction for tighter inverse accuracy. Without matching, symmetric-indefinite/general factors retain one correction by default, and SPD retains zero. Set `refinement_steps` explicitly to choose the budget. Each correction forms `b - A*x` in Warp, applies the existing cuDSS factors, and updates `x` in Warp. No host convergence check occurs. Check original-problem residuals for the chosen settings; the [factorization report](benchmarks/upstream/MATCHING.md) records accuracy, speed, and rejected alternatives.
+
+`BucklingEigensolver(..., method="krylov")` uses a one-RHS inverse and stiffness-orthogonal Krylov iteration. `GeneralizedKrylovSchur(..., mode="cayley", target=sigma)` ranks Cayley-transformed magnitudes with an SPD mass. Both return original eigenpairs; their selection differs from ordinary nearest-shift targeting. See the [generalized-transform validation and comparisons](benchmarks/upstream/TRANSFORMS.md).
 
 cuDSS analysis and first factorization are setup operations outside graph capture. cuDSS may use host work during that setup. A retained Warp workspace allocator avoids `cudaMalloc` inside captured cuDSS solves. Its setup also finalizes Warp's exact BSR nonzero count before scalar CSR expansion.
 
@@ -141,7 +143,7 @@ Sources: [ARPACK, Spectra, and CuPy comparison](results/anvil_benchmarks.json), 
 
 The [application coverage suite](benchmarks/applications/README.md) adds physics/geometry fixtures for nine API classes, independent spectrum and original-equation checks, and accuracy-gated ARPACK/Spectra/CuPy comparisons. [Coverage issues and priorities](https://github.com/alecjacobson/warpack/issues/18) track the remaining gaps. `GeneralizedKrylovSchur` adds mass-orthogonal restarted Krylov iteration for SPD-mass pencils; it supports nearest-shift solves and regular mass-inverse LM/LA/SA selection. Its required inverse has one RHS.
 
-Warpack's current local suite has **193 passing tests** in the pinned FSAI environment, with passing lint, formatting and wheel-build checks. [Warp residual correction of cuDSS inverses](benchmarks/upstream/REFINEMENT.md) fixes all 24 real CuPy SM eigenvector failures and the local damped-chain regression. That report records the full upstream rerun, strict-count regressions and correction overhead separately. The [matched-factor follow-up](benchmarks/upstream/MATCHING.md) adds sparse-indefinite regressions and recovers the interior-mode timing gap, with explicit accuracy profiles and preserved failed experiments. The broader [pinned CuPy and Spectra conformance runs](benchmarks/upstream/RESULTS.md) expose additional numerical failures, unsupported interfaces, and timeouts; the local suite is not full upstream conformance. The [Krylov restart regression report](benchmarks/upstream/MULTIPLICITY.md) records the latest fixes and remaining adaptive-performance tradeoffs. Stock Warp 1.15 compatibility checks passed six tests, with four upstream block-Jacobi cases skipped. See [validation and source provenance](results/anvil_cg_validation.json).
+Warpack's current local suite has **203 passing tests** in the pinned FSAI environment, with passing lint, formatting and wheel-build checks. [Warp residual correction of cuDSS inverses](benchmarks/upstream/REFINEMENT.md) fixes all 24 real CuPy SM eigenvector failures and the local damped-chain regression. That report records the full upstream rerun, strict-count regressions and correction overhead separately. The [matched-factor follow-up](benchmarks/upstream/MATCHING.md) adds sparse-indefinite regressions and recovers the interior-mode timing gap, with explicit accuracy profiles and preserved failed experiments. The [generalized-transform follow-up](benchmarks/upstream/TRANSFORMS.md) passes all 21 supported generalized Spectra cases, with independent spectrum/subspace regressions and native comparisons. The broader [pinned CuPy and Spectra conformance runs](benchmarks/upstream/RESULTS.md) expose additional numerical failures, unsupported interfaces, and timeouts; the local suite is not full upstream conformance. The [Krylov restart regression report](benchmarks/upstream/MULTIPLICITY.md) records the latest fixes and remaining adaptive-performance tradeoffs. Stock Warp 1.15 compatibility checks passed six tests, with four upstream block-Jacobi cases skipped. See [validation and source provenance](results/anvil_cg_validation.json).
 
 The tests cover rectangular SVD, buckling/Cayley transforms, FP64 fractional shifts, real symmetric and nonsymmetric spectra, complex Hermitian and general spectra, repeated/zero eigenvalues, both spectrum ends, interior real/complex shifts, non-diagonal mass, device convergence limits, graph replay with changed matrix values, FEM energy derivatives, rigid modes, and graph-captured FEM assembly. They also check the incremental projected matrix against `Q A Qᵀ`, captured breakdown recovery, small projected eigenproblems, orthogonal-complement projection, and pure-Warp graphs for host nodes/transfers. These are representative Spectra-style tests, not a complete port of every upstream test.
 
