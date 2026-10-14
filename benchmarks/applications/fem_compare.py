@@ -15,6 +15,7 @@ import warp.optim.linear as linear
 
 from .compare import compare_baseline, run
 from .fem_cases import make_fem_case
+from .fem_projection import physical_problem, rigid_inverse_transform
 
 NAMES = [
     "clamped_lumped",
@@ -53,17 +54,24 @@ def main():
     parser.add_argument("--out", default="results/fem_comparisons.json")
     parser.add_argument("--baseline")
     parser.add_argument("--worker", action="store_true")
+    parser.add_argument("--project-rigid", action="store_true")
     args = parser.parse_args()
     names, methods = args.cases.split(","), args.methods.split(",")
     if set(names) - set(NAMES) or set(methods) - set(METHODS):
         parser.error("Unknown fixture or method")
+    if args.project_rigid and (
+        set(names) - {"free", "disconnected"}
+        or set(methods) - {"warp", "warp-cg", "warp-cg-bj", "warp-cg-fsai"}
+    ):
+        parser.error("Rigid projection requires free/disconnected cases and a one-RHS Warp method")
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)
     if args.worker:
         if len(names) != 1 or len(methods) != 1:
             parser.error("One fixture and method per worker")
         c = make_fem_case(names[0], args.side, args.modes, args.shift)
-        p = c.problem
+        original = c.problem
+        p = physical_problem(c) if args.project_rigid else original
         row = run(
             "A",
             p.n,
@@ -73,17 +81,19 @@ def main():
             args.steps,
             problem=p,
             lobpcg_tol=args.lobpcg_tol,
+            warp_inverse_transform=rigid_inverse_transform(c) if args.project_rigid else None,
         )
         row.update(
             fixture=names[0],
             side=args.side,
             requested_nontrivial_modes=args.modes,
             nontrivial_modes=c.nontrivial_modes,
-            known_rigid_modes=p.nullity,
+            known_rigid_modes=original.nullity,
+            projected_rigid_modes=original.nullity if args.project_rigid else 0,
             reference=c.reference,
-            reference_positive_guard=float(c.spectrum[p.k]),
+            reference_positive_guard=float(c.spectrum[original.k]),
             nullspace_policy="Retain all known rigid modes in the solve, then use the nontrivial block for ROM. No automatic weighted deflation API is implied.",
-            boundary_conditions="Free" if p.nullity else "Clamped",
+            boundary_conditions="Free" if original.nullity else "Clamped",
             material="E contrast 20, density contrast 3"
             if names[0] == "heterogeneous"
             else "Uniform",
@@ -93,6 +103,10 @@ def main():
             else len(c.tets) * (2 if names[0] == "disconnected" else 1),
             worker_wall_limit_seconds=args.timeout,
         )
+        if args.project_rigid:
+            row["nullspace_policy"] = (
+                "Analytic rigid basis from device geometry; normalize in M on device; P (K-sigma*M)^-1 P.T; return only the complete positive elastic block. No reference eigenvectors used as starts."
+            )
         destination.write_text(json.dumps(row, indent=2) + "\n")
         return
     report = dict(
@@ -122,7 +136,7 @@ def main():
         for method in methods:
             output = (
                 folder
-                / f"{name}-{args.side}-{args.modes}-{method}-cycles{args.steps}-shift{args.shift:g}-tol{args.lobpcg_tol:g}.json"
+                / f"{name}-{args.side}-{args.modes}-{method}-cycles{args.steps}-shift{args.shift:g}-tol{args.lobpcg_tol:g}-project{int(args.project_rigid)}.json"
             )
             log = output.with_suffix(".log")
             command = [
@@ -153,6 +167,8 @@ def main():
                 "--timeout",
                 str(args.timeout),
             ]
+            if args.project_rigid:
+                command.append("--project-rigid")
             output.unlink(missing_ok=True)
             try:
                 with log.open("w") as f:
