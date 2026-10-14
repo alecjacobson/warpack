@@ -1,0 +1,60 @@
+{
+  "source_commit": "7b77d82",
+  "suite": "Full local pytest suite",
+  "tests": 223,
+  "passed": 223,
+  "failed": 0,
+  "seconds": 124.5,
+  "command": "PYTHONPATH=/home/horde/projects/warpack/build/warp-fsai:/tmp/warpack-hodge OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+  "environment": {
+    "gpu": "NVIDIA L40",
+    "warp": "1.18.0",
+    "cudss": "0.8.0.10"
+  },
+  "checks": {
+    "ruff_check": "passed: warpack tests benchmarks examples",
+    "ruff_format": "passed: warpack tests benchmarks examples",
+    "wheel": "passed: pip wheel --no-deps --no-build-isolation"
+  },
+  "initial_suite": {
+    "source_commit": "c6ebe65",
+    "passed": 222,
+    "failed": 1,
+    "reason": "Positive-guard counting requirement accidentally applied to legacy known-nullspace-only fixture; fixed with explicit per-fixture contract in 7b77d82."
+  },
+  "notes": [
+    "No production numerical code changed.",
+    "Fixed-k guard/cutoff checks are benchmark acceptance, not a public certified Betti-count API.",
+    "CI package/lint does not run CUDA numerical tests.",
+    "The initial small native CuPy eigsh report labels reference_tolerance=1e-8; actual native call was 1e-11. Metadata fixed in c6ebe65; original file retained."
+  ],
+  "followup": {
+    "source_commit": "405707c",
+    "change": "Explicit benchmark LOBPCG tolerance and baseline mismatch guard; no production numerical changes",
+    "focused_test": "test_regression_gate_handles_contention_and_worker_failure",
+    "passed": 1,
+    "seconds": 0.77
+  },
+  "existing_regression": [
+    {
+      "api_class": "D",
+      "n": 75,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9998499917582552,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "D",
+      "n": 972,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0002254279354124,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ]
+}

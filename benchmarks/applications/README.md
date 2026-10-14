@@ -13,7 +13,7 @@ implementation bugs and the remaining coverage requirements.
 | A / P0 | P1 axial FEM: symmetric K, non-diagonal SPD consistent M; lowest modes; analytic spectrum | [#20](https://github.com/alecjacobson/warpack/issues/20) |
 | B / P1 | Same pencil, interior shift between known frequencies; nearest physical eigenvalues | [#21](https://github.com/alecjacobson/warpack/issues/21) |
 | C / P2 | Indefinite tangent stiffness, SPD M; most-negative eigenvalues via a shift below the spectrum | [#22](https://github.com/alecjacobson/warpack/issues/22) |
-| D / P0 | Triangulated periodic torus Hodge 1-Laplacian; both harmonic modes, independent boundary-rank Betti count | [#23](https://github.com/alecjacobson/warpack/issues/23) |
+| D / P0 | Sphere/disk/annulus/tori Hodge 1-Laplacians; disconnected and weak components, independent topology/subspace references, positive guard | [#23](https://github.com/alecjacobson/warpack/issues/23) |
 | E / P2 | Complex Hermitian connection ring with nontrivial holonomy and known spectrum; standard mass | [#24](https://github.com/alecjacobson/warpack/issues/24) |
 | F / P2 | P1 Cauchy–Riemann energy and centered boundary norm; reciprocal spectral-conformal pencil with SPD regularized metric | [#25](https://github.com/alecjacobson/warpack/issues/25) |
 | G / P2 | Coupled SPD stiffness / indefinite geometric-stiffness pencil; analytic buckling factors | [#26](https://github.com/alecjacobson/warpack/issues/26) |
@@ -59,13 +59,16 @@ this does not establish completeness for arbitrary repeated spectra.
 ## Reference paths and acceptance
 
 * SciPy uses ARPACK with SuperLU factored outside solve timing, correct mass
-  operators, shift/buckling modes, or `svds`.
+  operators, shift/buckling modes, or `svds`. The harness now passes `ncv`
+  explicitly; older reference timing rows that used SciPy defaults are not
+  identical-budget baselines.
 * The native C++ Spectra adapter uses Eigen SparseLU and the real generalized
-  shift, regular-inverse and buckling APIs. E/H/I are explicitly unsupported
+  shift, regular-inverse, buckling and Cayley APIs. E/H/I are explicitly unsupported
   by this adapter; the separate upstream suite covers those Spectra APIs.
 * CuPy uses native `eigsh` for E and `svds` for I. For A/C/D/F it uses generalized
   **LOBPCG with the mass matrix and a cuDSS preconditioner**. Those rows are not
-  CuPy `eigsh`. B/G/H are explicitly unsupported by this adapter. Applying
+  CuPy `eigsh`. The expanded Hodge suite separately compares native `eigsh`
+  on identity-mass fixtures. B/G/H are explicitly unsupported by this adapter. Applying
   Euclidean `eigsh` directly to a non-symmetric `M^-1 K` would be an invalid
   reference.
 
@@ -75,8 +78,9 @@ setting over-iterated the 10,000-DOF bar cases into inaccurate results; those
 attempts are retained. All paths still face the same independent acceptance gate.
 
 Every measured trial must pass original-equation residual, spectrum and
-orthogonality checks at `1e-8`; a small residual alone is insufficient. D must
-recover both zeros. H checks unit vector norms rather than orthogonality because
+orthogonality checks at `1e-8`; a small residual alone is insufficient. The original D fixture must recover both known zeros; the expanded
+[Hodge suite](HODGE.md) also checks independently referenced nullspaces and
+positive guards for its counting contract. H checks unit vector norms rather than orthogonality because
 its matrix is nonnormal. SVD checks both equations and both orthogonality
 conditions. Failed timings are retained as diagnostics and excluded from wins.
 The damped-chain Warp residual now passes with Warp correction of cuDSS solves;
@@ -113,6 +117,7 @@ export PYTHONPATH="$PWD/build/warp-fsai:$PWD"
 export OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 python -m pytest -q tests/test_applications.py
 python -m benchmarks.applications.generalized_regression
+python -m benchmarks.applications.hodge_compare
 python -m benchmarks.applications.audit_inverse
 python -m benchmarks.applications.compare --sizes 80,1024 --repeats 3 \
   --out results/application_coverage.json

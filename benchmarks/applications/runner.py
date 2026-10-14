@@ -70,9 +70,22 @@ def accuracy(p, values, vectors, right=None, reference=None):
         orthogonality=orth,
         spectrum_error=value_error,
     )
-    if p.nullity:
+    if p.nullity or p.api_class == "D":
         result["recovered_nullity"] = int(np.count_nonzero(abs(values) < 1e-8))
         result["accepted"] &= result["recovered_nullity"] == p.nullity
+    if p.api_class == "D":
+        positive = values[values > 1e-8]
+        result["positive_guard"] = float(positive.min()) if len(positive) else None
+        if p.require_positive_guard:
+            result["accepted"] &= result["positive_guard"] is not None
+        if p.null_basis is not None and result["recovered_nullity"] == p.nullity:
+            zeros = vectors[:, abs(values) < 1e-8]
+            overlap = p.null_basis.T @ (p.b @ zeros)
+            remainder = zeros - p.null_basis @ overlap
+            result["nullspace_subspace_error"] = float(
+                np.sqrt(max(0.0, np.sum(remainder * (p.b @ remainder))))
+            )
+            result["accepted"] &= result["nullspace_subspace_error"] < 1e-8
     return result
 
 
@@ -136,7 +149,7 @@ def scipy_setup(p, ncv=None):
     if p.mode == "svd":
 
         def solve():
-            u, w, vt = sla.svds(p.a, k=p.k, which="LM", tol=1e-11, random_state=2026)
+            u, w, vt = sla.svds(p.a, k=p.k, which="LM", tol=1e-11, random_state=2026, ncv=ncv)
             return w, u, vt.T
 
         return solve
@@ -145,7 +158,9 @@ def scipy_setup(p, ncv=None):
         mi = sla.LinearOperator(p.b.shape, matvec=lu.solve)
 
         def solve():
-            w, v = sla.eigsh(p.a, k=p.k, M=p.b, Minv=mi, which="LM", tol=1e-11, v0=initial.copy())
+            w, v = sla.eigsh(
+                p.a, k=p.k, M=p.b, Minv=mi, which="LM", tol=1e-11, v0=initial.copy(), ncv=ncv
+            )
             return w, v, None
 
         return solve

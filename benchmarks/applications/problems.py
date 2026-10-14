@@ -19,6 +19,8 @@ class Problem:
     expected: object = None
     nullity: int = 0
     notes: str = ""
+    null_basis: object = None
+    require_positive_guard: bool = False
 
     @property
     def n(self):

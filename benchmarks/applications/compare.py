@@ -44,8 +44,8 @@ def other_gpu_processes():
         return ["GPU process inventory unavailable"]
 
 
-def run(api_class, size, method, repeats=3, ncv=32, steps=None):
-    p = make_problem(api_class, size)
+def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lobpcg_tol=1e-8):
+    p = make_problem(api_class, size) if problem is None else problem
     ref = reference_values(p)
     matrix_hash = hashlib.sha256()
     for mat in (p.a, p.b):
@@ -124,13 +124,27 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None):
                 "Reference seed 2026; restored per trial (algorithms have different start spaces)"
             )
             if method == "scipy":
-                setup, solve = timed(lambda: scipy_setup(p))
+                reference_ncv = min(ncv, min(p.a.shape) - 1 if p.mode == "svd" else p.n)
+                row["reference_ncv"] = reference_ncv
+                row["implementation"] = f"SciPy ARPACK explicit ncv={reference_ncv}"
+                setup, solve = timed(lambda: scipy_setup(p, ncv=reference_ncv))
             elif method == "spectra":
                 setup, (solve, cleanup) = timed(lambda: spectra_setup(p, ncv))
-            elif method == "cupy":
-                setup, (solve, cleanup, label) = timed(lambda: cupy_setup(p, ncv))
+            elif method in ("cupy", "cupy-eigsh"):
+                setup, (solve, cleanup, label) = timed(
+                    lambda: cupy_setup(
+                        p, ncv, lobpcg_tol=lobpcg_tol, standard=method == "cupy-eigsh"
+                    )
+                )
+                if method == "cupy-eigsh":
+                    row["reference_ncv"] = min(max(ncv, p.k + 2), p.n - 1)
+                elif p.api_class not in "EI":
+                    row["reference_ncv"] = None
+                    row["reference_block_size"] = p.k
                 row["implementation"] = label
-                row["reference_tolerance"] = 1e-11 if api_class in "EI" else 1e-8
+                row["reference_tolerance"] = (
+                    1e-11 if api_class in "EI" or method == "cupy-eigsh" else lobpcg_tol
+                )
             else:
                 raise ValueError(method)
             row["setup_seconds"] = setup
@@ -139,9 +153,12 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None):
         row["warmup_seconds"] = warmup
         samples = []
         checks = []
+        cg_stats = []
         competing = set()
         for _ in range(repeats):
             competing.update(other_gpu_processes())
+            if method == "warp-cg":
+                inverse.reset_stats()
             elapsed, output = timed(solve)
             competing.update(other_gpu_processes())
             host_output = (
@@ -152,6 +169,22 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None):
             check = accuracy(p, *host_output, reference=ref)
             samples.append(elapsed)
             checks.append(check)
+            if method == "warp-cg":
+                cg_stats.append(
+                    dict(
+                        zip(
+                            (
+                                "total_iterations",
+                                "max_iterations_per_rhs",
+                                "unconverged_rhs",
+                                "rhs_calls",
+                            ),
+                            map(int, inverse.stats.numpy()),
+                        )
+                    )
+                )
+        if cg_stats:
+            row["cg_statistics"] = cg_stats
         row.update(
             samples_seconds=samples,
             solve_seconds=float(np.median(samples)),
@@ -201,7 +234,14 @@ def compare_baseline(rows, baseline, limit):
             continue
         same = all(
             r.get(key) == b.get(key)
-            for key in ["matrix_sha256", "k", "ncv", "outer_cycles", "implementation"]
+            for key in [
+                "matrix_sha256",
+                "k",
+                "ncv",
+                "outer_cycles",
+                "implementation",
+                "reference_tolerance",
+            ]
         )
         eligible = (
             same
@@ -232,6 +272,7 @@ def main():
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument("--steps", type=int)
+    parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
     parser.add_argument("--out", default="results/application_coverage.json")
     parser.add_argument("--baseline")
     parser.add_argument("--regression-limit", type=float, default=1.25)
@@ -241,7 +282,15 @@ def main():
     dest = Path(args.out)
     dest.parent.mkdir(exist_ok=True, parents=True)
     if args.worker:
-        row = run(args.classes, int(args.sizes), args.methods, args.repeats, args.ncv, args.steps)
+        row = run(
+            args.classes,
+            int(args.sizes),
+            args.methods,
+            args.repeats,
+            args.ncv,
+            args.steps,
+            lobpcg_tol=args.lobpcg_tol,
+        )
         dest.write_text(json.dumps(row, indent=2) + "\n")
         return
     report = dict(
@@ -284,6 +333,8 @@ def main():
                     str(args.ncv),
                     "--out",
                     str(out),
+                    "--lobpcg-tol",
+                    str(args.lobpcg_tol),
                 ]
                 if args.steps is not None:
                     command += ["--steps", str(args.steps)]

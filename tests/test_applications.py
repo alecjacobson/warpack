@@ -41,6 +41,12 @@ def test_regression_gate_handles_contention_and_worker_failure():
     assert slow["performance_regression"]
     busy = compare_baseline([{**good, "timing_uncontended": False}], baseline, 1.25)[0]
     assert not busy["comparable"]
+    changed_tol = compare_baseline(
+        [{**good, "reference_tolerance": 1e-10}],
+        {"cases": [{**good, "reference_tolerance": 1e-8}]},
+        1.25,
+    )[0]
+    assert not changed_tol["comparable"]
     failed = dict(api_class="A", requested_size=10000, method="warp", accepted=False)
     assert compare_baseline([failed], baseline, 1.25)[0]["accuracy_regression"]
 
