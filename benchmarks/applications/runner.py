@@ -93,7 +93,10 @@ def warp_setup(p, method="krylov", ncv=32):
         inv = CGInverse(matrix(shifted), tol=1e-13, maxiter=10000, preconditioner="diag")
     else:
         inv = CuDSSInverse(
-            matrix(shifted), width, mtype="spd" if p.api_class in "ACDF" else "symmetric"
+            matrix(shifted),
+            width,
+            mtype="spd" if p.api_class in "ACDF" else "general",
+            matching=p.api_class not in "ACDF",
         )
     if p.mode == "buckling":
         solver = BucklingEigensolver(

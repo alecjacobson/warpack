@@ -24,7 +24,9 @@ def fixture():
 def test_refined_inverse_replay_and_changed_rhs(mtype, width, in_place, tmp_path):
     a, _, sigma = fixture()
     shifted = a - sigma * np.eye(len(a))
-    inv = CuDSSInverse(matrix(shifted), width, mtype=mtype)
+    inv = CuDSSInverse(
+        matrix(shifted), width, mtype=mtype, reordering="default", refinement_steps=1
+    )
     rng = np.random.default_rng(42)
     rhs = wp.array(rng.normal(size=(width, len(a))), dtype=wp.float64)
     source = wp.empty_like(rhs)
@@ -77,9 +79,10 @@ def test_refinement_accepts_block_csr():
 
 
 @pytest.mark.parametrize("k", [3, 6, 12])
-def test_cupy_sm_original_residual_and_spectrum(k):
+@pytest.mark.parametrize("options", [dict(mtype="symmetric"), dict(mtype="general", matching=True)])
+def test_cupy_sm_original_residual_and_spectrum(k, options):
     a, v0, sigma = fixture()
-    inv = CuDSSInverse(matrix(a - sigma * np.eye(len(a))), 1, mtype="symmetric")
+    inv = CuDSSInverse(matrix(a - sigma * np.eye(len(a))), 1, **options)
     solver = KrylovSchur(
         inv, k, ncv=len(a), tol=1e-14, initial_vector=wp.array(v0, dtype=wp.float64)
     )

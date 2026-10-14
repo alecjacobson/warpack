@@ -50,22 +50,39 @@ class CuDSSInverse:
 
     The matrix must already include any shift/mass normalization. General and
     symmetric-indefinite factorizations use one Warp residual-correction step
-    by default; SPD factorizations use none. ``refinement_steps`` overrides this
-    fixed budget. Correction products and updates run in Warp, with cuDSS only
-    applying the existing factors. This does not certify accuracy for every
-    conditioning/scaling regime; check the original problem residuals.
+    by default; SPD factorizations use none. ``matching=True`` enables cuDSS's
+    column matching/scaling for general factors and defaults to zero correction
+    steps. Matching is setup work, not a replay convergence decision.
+    ``refinement_steps`` overrides this fixed budget. ``reordering`` selects a
+    cuDSS factorization strategy; global
+    pivoting with ``colamd``/``btf_colamd`` should use ``mtype="general"``.
+    Correction products and updates run in Warp, with cuDSS only applying the
+    existing factors. Check original residuals for the chosen configuration.
     """
 
     requires_static_outer_capture = True
 
-    def __init__(self, matrix, width, mtype="spd", refinement_steps=None):
+    def __init__(
+        self,
+        matrix,
+        width,
+        mtype="spd",
+        refinement_steps=None,
+        reordering="default",
+        matching=False,
+    ):
         if width < 1 or matrix.scalar_type != wp.float64:
             raise ValueError("cuDSS inverse needs a positive RHS width and FP64 matrix")
+        if matching and (mtype != "general" or reordering in ("colamd", "btf_colamd")):
+            raise ValueError("matching requires general factors without COLAMD reordering")
         if refinement_steps is None:
-            refinement_steps = 0 if mtype in ("spd", "hpd") else 1
+            refinement_steps = 0 if mtype in ("spd", "hpd") or matching else 1
         if not isinstance(refinement_steps, int) or refinement_steps < 0:
             raise ValueError("refinement_steps must be a nonnegative integer")
         self.refinement_steps = refinement_steps
+        self.reordering = reordering
+        self.matching = bool(matching)
+        self.mtype = mtype
         self.width = width
         import os
         from importlib.metadata import distribution
@@ -88,7 +105,7 @@ class CuDSSInverse:
             self._rhs = wp.empty_like(self.x)
             self._residual = wp.empty_like(self.x)
             self._correction = wp.empty_like(self.x)
-        self.solver = CudssSolver(mtype=mtype, device=self.device)
+        self.solver = CudssSolver(mtype=mtype, reordering=reordering, device=self.device)
         from .cudss_memory import Workspace
 
         self.workspace = Workspace(self.solver)
@@ -96,6 +113,22 @@ class CuDSSInverse:
         # The optional wrapper expands exactly nnz blocks, so finalize it at setup.
         matrix.nnz_sync()
         try:
+            if matching:
+                import ctypes
+
+                from warp_cudss._bindings import CUDSS_CONFIG_MATCHING_ALG, _check
+
+                # cuDSS 0.8: MC64 maximum diagonal product, including scaling.
+                value = ctypes.c_int(5)
+                _check(
+                    self.solver._lib.cudssConfigSet(
+                        self.solver._config,
+                        CUDSS_CONFIG_MATCHING_ALG,
+                        ctypes.byref(value),
+                        ctypes.sizeof(value),
+                    ),
+                    "cudssConfigSet(MATCHING_ALG)",
+                )
             self.solver.setup(matrix, self.x, self.b, nrhs=width)
         except Exception:
             if self.workspace.error:
