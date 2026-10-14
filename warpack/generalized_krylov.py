@@ -177,7 +177,12 @@ class GeneralizedKrylovSchur(KrylovSchur):
         self._metric_norm(j, check)
 
     def _recover_eager(self, j):
-        wp.launch(K.fallback_seed, self.n, [self.q, self.breakdown, j], device=self.device)
+        wp.launch(
+            K.fallback_seed,
+            self.n,
+            [self.q, self.breakdown, self.recoveries, j],
+            device=self.device,
+        )
         self._orthogonalize_column(j, False)
 
     def initialize(self, seed=42):

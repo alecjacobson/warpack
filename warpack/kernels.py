@@ -393,10 +393,14 @@ def mark_breakdown(
 
 
 @wp.kernel
-def fallback_seed(q: wp.array2d[wp.float64], flag: wp.array[wp.int32], j: int):
+def fallback_seed(
+    q: wp.array2d[wp.float64], flag: wp.array[wp.int32], recoveries: wp.array[wp.int32], j: int
+):
     i = wp.tid()
     if flag[0] != 0:
-        state = wp.rand_init(971 + j, i)
+        # Reusing the same direction at the same restart index can stagnate.
+        seed = wp.uint32(971 + j) + wp.uint32(104729) * wp.uint32(recoveries[0])
+        state = wp.rand_init(wp.int32(seed), i)
         q[j, i] = wp.float64(wp.randn(state))
 
 

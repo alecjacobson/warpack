@@ -385,6 +385,11 @@ class KrylovSchur(SymmetricEigensolver):
     Initialization normalizes its current device contents, so captured replays
     can use updated starts without recapturing. Otherwise ``seed`` controls the
     random start.
+
+    Adaptive replay also waits for independent-chain exploration (unless the
+    basis spans the full problem). Thus it can continue after all ``k`` returned
+    residuals pass. ``converged`` counts residual-passing pairs; neither that
+    count nor a fixed iteration budget proves global spectrum completeness.
     """
 
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
@@ -396,7 +401,8 @@ class KrylovSchur(SymmetricEigensolver):
             if initial_vector.device != self.device:
                 raise ValueError("initial_vector must be on the operator device")
             self.initial_vector = initial_vector.reshape((1, self.n))
-        self.keep = min(k + 4, self.m - 1)
+        # Leave room to expand; retaining m-1 vectors can stagnate on clusters.
+        self.keep = min(k + 4, max(k, self.m // 2))
         # Sparse products can be cheaper and more accurate than a dense basis
         # rotation. Keep cached products for dense operators and inverses.
         self._reapply_after_restart = (
@@ -417,6 +423,8 @@ class KrylovSchur(SymmetricEigensolver):
         self.norm_parts = wp.empty((self.n + 1023) // 1024, dtype=wp.float64, device=self.device)
         self.retained = wp.empty((self.keep, self.n), dtype=wp.float64, device=self.device)
         self.retained_ax = wp.empty_like(self.retained)
+        self.restart_scores = wp.zeros((self.k, 2), dtype=wp.float64, device=self.device)
+        self.restart_seed = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.views = [self.q[j : j + 1] for j in range(self.m)]
         self.zviews = [self.z[j : j + 1] for j in range(self.m)]
 
@@ -437,6 +445,7 @@ class KrylovSchur(SymmetricEigensolver):
                 self.recoveries,
                 self.k,
                 max_iterations,
+                self.m == self.n,
             ],
             device=self.device,
         )
@@ -493,7 +502,12 @@ class KrylovSchur(SymmetricEigensolver):
         self._orthogonalize_column(j, True)
 
         def recover():
-            wp.launch(K.fallback_seed, self.n, [self.q, self.breakdown, j], device=self.device)
+            wp.launch(
+                K.fallback_seed,
+                self.n,
+                [self.q, self.breakdown, self.recoveries, j],
+                device=self.device,
+            )
             self._orthogonalize_column(j, False)
 
         if wp.get_stream(self.device).is_capturing:
@@ -505,7 +519,12 @@ class KrylovSchur(SymmetricEigensolver):
 
     def _recover_eager(self, j):
         # Gated kernels are only used outside captured replay.
-        wp.launch(K.fallback_seed, self.n, [self.q, self.breakdown, j], device=self.device)
+        wp.launch(
+            K.fallback_seed,
+            self.n,
+            [self.q, self.breakdown, self.recoveries, j],
+            device=self.device,
+        )
         for _ in range(2):
             self.dots.zero_()
             wp.launch_tiled(
@@ -570,11 +589,29 @@ class KrylovSchur(SymmetricEigensolver):
             self.rotate(self.z, self.retained_ax)
 
     def reset_projection(self):
+        # After recovery, retained Ritz residuals need not be collinear. Expand
+        # the least converged requested pair instead of an arbitrary last row.
+        # Only q/z are permuted: retained outputs stay in requested spectrum order.
+        self.restart_scores.zero_()
+        wp.launch_tiled(
+            KR.restart_residuals,
+            dim=(self.k, (self.n + 255) // 256),
+            inputs=[self.retained, self.retained_ax, self.ritz, self.order, self.restart_scores],
+            block_dim=128,
+            device=self.device,
+        )
+        wp.launch(KR.restart_seed, 1, [self.restart_scores, self.restart_seed], device=self.device)
+        wp.launch(
+            KR.restart_swap,
+            self.n,
+            [self.q, self.z, self.restart_seed, self.keep],
+            device=self.device,
+        )
         # The retained Ritz block is diagonal; future columns start at zero.
         wp.launch(
             KR.restart_projection,
             self.g.shape,
-            [self.g, self.ritz, self.order, self.keep],
+            [self.g, self.ritz, self.order, self.keep, self.restart_seed],
             device=self.device,
         )
 
