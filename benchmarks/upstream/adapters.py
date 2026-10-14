@@ -131,7 +131,7 @@ def eigsh(
         else:
             a0 = matrix(ah)
             inverse = CuDSSInverse(
-                matrix(sp.csr_matrix(ah) - sigma * sp.eye(n)), 1, mtype="symmetric"
+                matrix(sp.csr_matrix(ah) - sigma * sp.eye(n)), 1, mtype="general", matching=True
             )
             solver = KrylovSchur(
                 inverse,

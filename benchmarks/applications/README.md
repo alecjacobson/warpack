@@ -43,6 +43,11 @@ method; `warp-cg` uses upstream Warp CG with diagonal preconditioning for the
 known-SPD shifted systems A/C/D. This is a controlled comparison, not the tuned
 Anvil FSAI configuration.
 
+B/G now use explicit matched general cuDSS factors without correction; the
+other application profiles retain their existing settings. See the
+[factorization regression report](../upstream/MATCHING.md) for the recovered
+interior-mode overhead, per-trial accuracy and remaining vendor graph copies.
+
 The new generalized Krylov path fixes the tight-budget failure of
 `SymGEigsShift_5`: a permanent fixture checks all ten requested eigenvalues,
 original residuals, mass orthogonality and invariant-subspace agreement at
@@ -74,7 +79,7 @@ its matrix is nonnormal. SVD checks both equations and both orthogonality
 conditions. Failed timings are retained as diagnostics and excluded from wins.
 The damped-chain Warp residual now passes with Warp correction of cuDSS solves;
 see the [correction report](../upstream/REFINEMENT.md) for both tested sizes and
-the measured interior-mode overhead.
+the previous interior-mode overhead; the matching report above records its recovery.
 The conformal CuPy LOBPCG comparison has shown failed residuals and a projected
 Cholesky failure; that result is recorded, not treated as a Warpack speedup.
 

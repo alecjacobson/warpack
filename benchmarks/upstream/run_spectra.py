@@ -111,7 +111,13 @@ def run(case):
                     raise Unsupported(
                         "Generalized transforms expose largest transformed magnitude only"
                     )
-                inv = CuDSSInverse(matrix(a - sigma.real * b), ncv, mtype="symmetric")
+                inv = CuDSSInverse(
+                    matrix(a - sigma.real * b),
+                    ncv,
+                    mtype="general",
+                    matching=True,
+                    refinement_steps=1,
+                )
                 if "buckling" in case["name"]:
                     solver = BucklingEigensolver(
                         SparseOperator(ma),
@@ -147,7 +153,7 @@ def run(case):
                     raise Unsupported(
                         "GeneralizedEigensolver lacks general B-inverse extremal selection for indefinite A"
                     )
-                inv = CuDSSInverse(ma, ncv, mtype="symmetric")
+                inv = CuDSSInverse(ma, ncv, mtype="general", matching=True, refinement_steps=1)
                 solver = GeneralizedEigensolver(
                     SparseOperator(ma), SparseOperator(mb), inv, k, ncv=ncv, target=0, tol=threshold
                 )
@@ -161,7 +167,14 @@ def run(case):
                 iterations = 30
             else:
                 ma = matrix(a)
-                inv = CuDSSInverse(matrix(a - sigma.real * np.eye(n)), 1, mtype="symmetric")
+                # Keep standard shifted profiles unchanged by this SM fix.
+                # Their tight inverse-count sensitivity is tracked separately.
+                factor_options = (
+                    dict(mtype="symmetric")
+                    if name in ("SymEigsShift", "Example1Shift")
+                    else dict(mtype="general", matching=True, refinement_steps=1)
+                )
+                inv = CuDSSInverse(matrix(a - sigma.real * np.eye(n)), 1, **factor_options)
                 solver = KrylovSchur(
                     inv,
                     k,
@@ -248,7 +261,13 @@ def run(case):
         elif isinstance(solver, HermitianEigensolver):
             convergence_space = "realification_and_extraction"
             physical_count = None  # No independent complex residual counter in this API.
+        factor = getattr(inv, "inverse", inv)
+        factor = getattr(factor, "inverse", factor)
         return dict(
+            cudss_mtype=getattr(factor, "mtype", None),
+            cudss_reordering=getattr(factor, "reordering", None),
+            cudss_matching=getattr(factor, "matching", None),
+            cudss_refinement_steps=getattr(factor, "refinement_steps", None),
             outcome="passed" if ok else "failed",
             setup_seconds=setup,
             **timing,

@@ -35,3 +35,9 @@ To reproduce, apply the saved patch in an isolated checkout of `e0a4f58`, use
 the pinned Warp environment, and run the single test above. Do not apply it to
 a production checkout. Current production behavior retains the validated
 multiplicity fix; #31 remains open.
+
+A separate unchanged-production diagnostic extends the tall correlated POD
+fixture to 10,000 by 48 snapshots (`k=4`, `ncv=32`). Its three accurate,
+uncontended graph replays have median 0.119218 s; see the
+[raw record](../results/refinement_pod_large.json). This is a baseline only,
+not a speedup from the rejected candidate or a comparison with another library.

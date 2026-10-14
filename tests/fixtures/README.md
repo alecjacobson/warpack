@@ -22,3 +22,10 @@ count makes the upstream adapter report failure (#13).
 0.33 density mask and **elementwise** A*A.T, not a Gram product. The resulting
 30-by-30 matrix is indefinite; the original residual gate is 1e-12 after
 scaling by the matrix Frobenius norm. These are generated numerical data.
+
+`spectra_sparse_sm.npz` preserves the exact real matrices from `SymEigs_17`,
+`SymEigs_22`, and `SymEigs_27` at the same pinned Spectra revision/exporter
+(n=10/100/1000, k=3/10/20, ncv=6/20/50). These generated numerical data cover
+sparse indefinite matrices with predominantly zero diagonals. Regressions use
+the original 100-cycle budget and check the requested spectrum, physical
+residual, orthogonality, invariant subspace and full convergence counts.
