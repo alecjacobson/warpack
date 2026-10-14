@@ -1,11 +1,11 @@
 {
-  "implementation_commit": "84df32be689bae8a5918bd51e6924aff7edc7c4d",
+  "implementation_commit": "7bcc0195a0641e5d83a8d4e0d8eb4460af9af51c",
   "baseline_commit": "8c1dbecb09dff22c8325f45bdd27b6e21722872e",
   "source_note": "Raw runs collected on the implementation working tree before its commit; source hashes below identify the validated numerical code.",
   "pytest": {
-    "passed": 146,
+    "passed": 147,
     "strict_xfailed": 1,
-    "seconds": 37.95,
+    "seconds": 37.67,
     "expected_failure": "Issue #27: damped-chain right-eigenvector residual"
   },
   "spectra": {
@@ -79,6 +79,21 @@
         "before": "failed",
         "after": "passed"
       }
+    ],
+    "checked_numerical_bounds_regressions": [],
+    "checked_numerical_bounds_improvements": [
+      "Example1_0",
+      "Example1_2",
+      "Example1_4",
+      "Example1Shift_1",
+      "Example1Shift_3",
+      "Example4_1",
+      "SVD_0",
+      "SVD_1",
+      "SVD_2",
+      "SVD_3",
+      "SymEigsShift_3",
+      "SymEigsShift_14"
     ]
   },
   "cupy": {
@@ -364,12 +379,13 @@
     }
   ],
   "source_sha256": {
-    "warpack/solver.py": "6b0847ef67ef8307937d8e785d7f539c45200061ff82855dbc49e36ceb037098",
+    "warpack/solver.py": "5ecd6a8a3ec490dddf0480377abf3ecb1180465a0bd03d303bb749d27d89be15",
     "warpack/kernels.py": "9b1d0a6328d8e248b8bd5e6a6a7106885b1209ae4f8beb14268f56ec3a9ee48a",
     "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
     "warpack/generalized_krylov.py": "6bf584eefa0c917e9076f5708041b9e5de2ef41dd9d359afe13c92ec39294700",
-    "tests/test_multiplicity.py": "84333b87bfac8a26137e9749d731282e049d3d46361850025f5b8b55db992a9b",
-    "tests/fixtures/spectra_null_start.npz": "cc5be5fe5c8b9279c7f57bfb361bc5e9909f0671ff5f3c3b92eeeff5fef79eca"
+    "tests/test_multiplicity.py": "a5c15a9620e631ff8fe7223df27499bbcac6824fade4694f731f521f6c545d58",
+    "tests/fixtures/spectra_null_start.npz": "cc5be5fe5c8b9279c7f57bfb361bc5e9909f0671ff5f3c3b92eeeff5fef79eca",
+    "tests/fixtures/spectra_transformed_sm.npz": "54f8151ed14512a2a1f4e421c1156ce7b4718cbb1ad0cd89364bcacc6d311550"
   },
   "checks": {
     "ruff": true,
@@ -415,5 +431,12 @@
       "current_cupy_accepted": 10,
       "warp_time_ratio": 1.9123561327964063
     }
-  ]
+  ],
+  "validation_schedule": {
+    "initial_implementation": "84df32be689bae8a5918bd51e6924aff7edc7c4d",
+    "final_sm_retention_commit": "7bcc0195a0641e5d83a8d4e0d8eb4460af9af51c",
+    "targeted_rerun": "All six SymEigsShift selection=SM cases; prior attempts retained",
+    "final_local_suite": "147 passed, 1 strict expected failure",
+    "unchanged_paths": "CuPy adapter uses LM for unshifted SM and rejects shifted SM; its other selectors are unchanged. POD, symmetric benchmark and all application/Anvil performance paths are unaffected by the final SM-only retention correction."
+  }
 }

@@ -1,6 +1,7 @@
 # Krylov restart and multiplicity regressions
 
-Implementation: `84df32b`. Local verification: **146 passed, 1 strict expected
+Implementation: `84df32b`, with final SM-retention correction `7bcc019`.
+Local verification: **147 passed, 1 strict expected
 failure**, plus lint, formatting and wheel-build checks. The expected failure
 remains the damped-chain residual in #27.
 
@@ -18,7 +19,8 @@ Other small-subspace cases stalled because recovery reused the same random
 direction at each restart and retained too many vectors to expand effectively.
 
 Recovery now uses a fresh device-generated direction, and compact subspaces
-reserve more expansion columns. After recovery, retained Ritz residuals need
+reserve more expansion columns for extremal targets. Interior `SM` selection
+preserves the previous larger retained space. After recovery, retained Ritz residuals need
 not be collinear. Restart therefore expands the requested vector with the
 largest relative residual, instead of an arbitrary last retained vector.
 The basis permutation preserves the ordered output vectors and projected
@@ -54,6 +56,21 @@ previous passes remain passes. The twelve improvements include three of the
 four SVD cases, one ordinary symmetric case and three shifted symmetric cases.
 The remaining SVD case and complex Hermitian failures stay open. This focused
 run does not replace the complete 360-case upstream inventory.
+
+`SVD_1` now also meets all original numerical bounds (singular-value error
+5.55e-12, left/right vector errors 1.04e-10 and 4.22e-11), but reports 4/5
+converged and therefore remains a failure under the unchanged adapter rules.
+
+Comparison also checks numerical bounds separately from outcome labels. An
+initial attempt worsened `SymEigsShift_17` from a count-only failure (physical
+residual 5.11e-12) to a numerical failure (1.59e-7), despite its unchanged
+`failed` label. Preserving the previous retention policy for interior `SM`
+targets restores its physical residual to 5.69e-12. All six transformed-SM
+cases were rerun, and the rejected attempts remain in their JSON histories.
+There are no numerical-pass to numerical-failure transitions in the final
+102-case comparison. A permanent captured test also checks this case's
+requested physical spectrum, residual and orthogonality; its stricter inverse
+count still does not satisfy the upstream adapter, so #13 remains open.
 
 The complete adapted CuPy eigensolver/SVD suite retains exactly the same
 outcome for every one of its 3,984 parameter cases: 673 ordinary passes,
@@ -179,3 +196,9 @@ and separate numerical acceptance from the stricter zero-host-transfer graph
 contract. Reports collected before committing name the parent revision
 `8c1dbec` with a dirty working tree; the implementation is the source change
 published with this report.
+
+The final SM-only retention correction was followed by the six-case targeted
+rerun and the full local suite. It does not change the LM/LA/SA paths used in the
+CuPy adapter, POD benchmarks or application/Anvil performance reports; those
+earlier measured samples remain applicable. No performance gain is claimed
+from the targeted single-sample SM rerun.
