@@ -93,6 +93,10 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None):
             row["outer_cycles"] = steps
             row["start"] = "Warp seed 42; same start restored on every replay"
             setup, (solver, inverse) = timed(lambda: warp_setup(p, selected, ncv))
+            # Complex shift-invert wraps the real factor object twice.
+            factor = getattr(inverse, "inverse", inverse)
+            factor = getattr(factor, "inverse", factor)
+            row["cudss_refinement_steps"] = getattr(factor, "refinement_steps", None)
             cleanup = getattr(inverse, "close", lambda: None)
             capture, graph = timed(lambda: solver.capture(steps))
             row.update(setup_seconds=setup, capture_seconds=capture)
