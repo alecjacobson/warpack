@@ -63,6 +63,7 @@ The comparison overlays the prior 102-case multiplicity run onto the original
 Seven failed labels become passes, but two strict passes become failures:
 `ComplexEigs_16` and `GenEigsRealShift_12`, both 19/20 counts while satisfying
 the original numerical bounds. **The strict regression gate therefore fails.**
+They are tracked in [#35](https://github.com/alecjacobson/warpack/issues/35).
 Their maximum absolute residuals are `3.58e-12` and `1.86e-12`, respectively,
 against upstream bounds of `1e-9` and `1e-8`. These results are retained.
 
@@ -119,7 +120,8 @@ Correction has a measured cost on already-accurate interior bar fixtures:
 | n=1024 | 17.199 ms | 24.183 ms | 1.406× |
 | n=10000 | 21.228 ms | 31.531 ms | 1.485× |
 
-These rows fail the unchanged 1.25× timing gate. All accuracy gates pass;
+These rows fail the unchanged 1.25× timing gate, tracked in
+[P1 #34](https://github.com/alecjacobson/warpack/issues/34). All accuracy gates pass;
 all application/isolated-inverse trials report no competing GPU process.
 Other previously accepted small application rows remain within that timing
 gate. H has no accepted prior timing baseline. POD is unchanged by this PR
@@ -168,3 +170,8 @@ python -m benchmarks.applications.compare --classes ABC --methods warp --sizes 1
 python -m benchmarks.cg_experiments --mode eigen --shifts 1 --preconditioners cudss \
   --cycles 1 --ncv 64 --repeats 3 --out results/refinement_anvil.json
 ```
+
+A separate early-exploration prototype for #31 was rejected because the
+existing cycle test recovered the wrong multiplicity. Its
+[patch and failed regression](../../historical/adaptive-exploration-rejected.md)
+are retained; no production change or performance claim came from it.
