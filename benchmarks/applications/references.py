@@ -109,6 +109,10 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8):
                     return w, v, None
 
             return solve, lambda: None, "CuPy eigsh SA" if p.api_class == "E" else "CuPy svds"
+        if p.n < 5 * p.k:
+            raise Unsupported(
+                "CuPy LOBPCG uses a dense fallback below n=5*k; excluded from this sparse comparison"
+            )
         b = cs.csr_matrix(p.b)
         # Generalized LOBPCG preserves the mass metric. This is not eigsh.
         shifted = p.b if p.mode == "regular" else p.a - p.target * p.b

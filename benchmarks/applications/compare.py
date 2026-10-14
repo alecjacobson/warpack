@@ -44,8 +44,8 @@ def other_gpu_processes():
         return ["GPU process inventory unavailable"]
 
 
-def run(api_class, size, method, repeats=3, ncv=32, steps=None):
-    p = make_problem(api_class, size)
+def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
+    p = make_problem(api_class, size) if problem is None else problem
     ref = reference_values(p)
     matrix_hash = hashlib.sha256()
     for mat in (p.a, p.b):
@@ -124,7 +124,10 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None):
                 "Reference seed 2026; restored per trial (algorithms have different start spaces)"
             )
             if method == "scipy":
-                setup, solve = timed(lambda: scipy_setup(p))
+                reference_ncv = min(ncv, min(p.a.shape) - 1 if p.mode == "svd" else p.n)
+                row["reference_ncv"] = reference_ncv
+                row["implementation"] = f"SciPy ARPACK explicit ncv={reference_ncv}"
+                setup, solve = timed(lambda: scipy_setup(p, ncv=reference_ncv))
             elif method == "spectra":
                 setup, (solve, cleanup) = timed(lambda: spectra_setup(p, ncv))
             elif method == "cupy":

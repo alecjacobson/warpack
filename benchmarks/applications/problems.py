@@ -19,6 +19,7 @@ class Problem:
     expected: object = None
     nullity: int = 0
     notes: str = ""
+    null_basis: object = None
 
     @property
     def n(self):
