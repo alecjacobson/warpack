@@ -5,6 +5,9 @@ import scipy.linalg as la
 import scipy.optimize as opt
 import scipy.sparse as sp
 import scipy.sparse.linalg as sla
+import warp as wp
+import warp.optim.linear as linear
+import warp.sparse as ws
 
 from benchmarks.upstream.adapters import complex_matrix, matrix, output
 from warpack import (
@@ -70,7 +73,7 @@ def accuracy(p, values, vectors, right=None, reference=None):
         orthogonality=orth,
         spectrum_error=value_error,
     )
-    if p.nullity or p.api_class == "D":
+    if p.nullity or p.api_class == "D" or p.null_basis is not None:
         result["recovered_nullity"] = int(np.count_nonzero(abs(values) < 1e-8))
         result["accepted"] &= result["recovered_nullity"] == p.nullity
     if p.api_class == "D":
@@ -78,32 +81,68 @@ def accuracy(p, values, vectors, right=None, reference=None):
         result["positive_guard"] = float(positive.min()) if len(positive) else None
         if p.require_positive_guard:
             result["accepted"] &= result["positive_guard"] is not None
-        if p.null_basis is not None and result["recovered_nullity"] == p.nullity:
-            zeros = vectors[:, abs(values) < 1e-8]
-            overlap = p.null_basis.T @ (p.b @ zeros)
-            remainder = zeros - p.null_basis @ overlap
-            result["nullspace_subspace_error"] = float(
-                np.sqrt(max(0.0, np.sum(remainder * (p.b @ remainder))))
-            )
-            result["accepted"] &= result["nullspace_subspace_error"] < 1e-8
+    if p.null_basis is not None and result["recovered_nullity"] == p.nullity:
+        zeros = vectors[:, abs(values) < 1e-8]
+        overlap = p.null_basis.T @ (p.b @ zeros)
+        remainder = zeros - p.null_basis @ overlap
+        result["nullspace_subspace_error"] = float(
+            np.sqrt(max(0.0, np.sum(remainder * (p.b @ remainder))))
+        )
+        result["accepted"] &= result["nullspace_subspace_error"] < 1e-8
+    if p.requested_basis is not None:
+        basis = p.requested_basis
+        remainder = vectors - basis @ (basis.conj().T @ bv)
+        metric_remainder = remainder if p.b is None else p.b @ remainder
+        result["requested_subspace_error"] = float(
+            np.sqrt(max(0.0, np.sum(remainder.conj() * metric_remainder).real))
+        )
+        result["accepted"] &= result["requested_subspace_error"] < 1e-8
     return result
 
 
-def warp_setup(p, method="krylov", ncv=32):
+def warp_setup(p, method="krylov", ncv=32, tol=1e-11):
     ncv = min(ncv, p.n)
     if p.api_class in "EH":
-        solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=1e-11)
+        solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=tol)
         return solver, solver
     if p.mode == "svd":
-        return PartialSVD(matrix(p.a), p.k, ncv=ncv, tol=1e-11), None
+        return PartialSVD(matrix(p.a), p.k, ncv=ncv, tol=tol), None
     a, b = matrix(p.a), matrix(p.b)
     shifted = p.b if p.mode == "regular" else p.a - p.target * p.b
     block = method == "block" or p.api_class in "DG"
     width = ncv if block else 1
-    if method == "cg":
+    if method.startswith("cg"):
         if p.api_class not in "ACD" or p.mode != "shift-invert":
             raise ValueError("CG benchmark only supplies known SPD shifted systems")
-        inv = CGInverse(matrix(shifted), tol=1e-13, maxiter=10000, preconditioner="diag")
+        if method == "cg":
+            shifted_device = matrix(shifted)
+            preconditioner = "diag"
+        else:
+            blocks = shifted.tobsr(blocksize=(p.block_size, p.block_size))
+            dtype = wp.types.matrix(shape=(p.block_size, p.block_size), dtype=wp.float64)
+            shifted_device = ws.bsr_from_triplets(
+                p.n // p.block_size,
+                p.n // p.block_size,
+                wp.array(
+                    np.repeat(np.arange(p.n // p.block_size), np.diff(blocks.indptr)),
+                    dtype=wp.int32,
+                ),
+                wp.array(blocks.indices, dtype=wp.int32),
+                wp.array(blocks.data, dtype=dtype),
+            )
+            if method == "cg-bj":
+                preconditioner = "block_jacobi_sequential"
+            elif method == "cg-fsai":
+                preconditioner = linear.FSAI(
+                    shifted_device,
+                    max_row_size=32,
+                    max_step_size=3,
+                    apply_lanes=8,
+                    factor_dtype=wp.float32,
+                )
+            else:
+                raise ValueError(method)
+        inv = CGInverse(shifted_device, tol=1e-13, maxiter=10000, preconditioner=preconditioner)
     else:
         inv = CuDSSInverse(
             matrix(shifted),
@@ -113,14 +152,14 @@ def warp_setup(p, method="krylov", ncv=32):
         )
     if p.mode == "buckling":
         solver = BucklingEigensolver(
-            SparseOperator(a), SparseOperator(b), inv, p.k, p.target, ncv=ncv, tol=1e-11
+            SparseOperator(a), SparseOperator(b), inv, p.k, p.target, ncv=ncv, tol=tol
         )
     elif block:
         if p.mode == "regular":
             inv.close()
             raise ValueError("old block API has no regular mass-inverse mode")
         solver = GeneralizedEigensolver(
-            SparseOperator(a), SparseOperator(b), inv, p.k, ncv=ncv, target=p.target, tol=1e-11
+            SparseOperator(a), SparseOperator(b), inv, p.k, ncv=ncv, target=p.target, tol=tol
         )
     else:
         solver = GeneralizedKrylovSchur(
@@ -131,7 +170,7 @@ def warp_setup(p, method="krylov", ncv=32):
             ncv=ncv,
             target=p.target,
             mode=p.mode,
-            tol=1e-11,
+            tol=tol,
         )
     return solver, inv
 

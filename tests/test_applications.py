@@ -47,6 +47,12 @@ def test_regression_gate_handles_contention_and_worker_failure():
         1.25,
     )[0]
     assert not changed_tol["comparable"]
+    changed_shift = compare_baseline(
+        [{**good, "target": [-1.0, 0.0]}],
+        {"cases": [{**good, "target": [-0.01, 0.0]}]},
+        1.25,
+    )[0]
+    assert not changed_shift["comparable"]
     failed = dict(api_class="A", requested_size=10000, method="warp", accepted=False)
     assert compare_baseline([failed], baseline, 1.25)[0]["accuracy_regression"]
 

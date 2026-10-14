@@ -1,0 +1,78 @@
+{
+  "source_commit": "159d3f767faec73c45292dd07391eea43574ed35",
+  "tests": 242,
+  "passed": 242,
+  "failed": 0,
+  "seconds": 149.24,
+  "command": "PYTHONPATH=/home/horde/projects/warpack/build/warp-fsai:/tmp/warpack-fem-coverage OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+  "checks": {
+    "ruff_check": "pass",
+    "python_formatting": "pass",
+    "wheel": "pass"
+  },
+  "followup": {
+    "source_commit": "330c592",
+    "change": "Benchmark source hashes/timeout metadata and additional known rigid-block device-slice assertions",
+    "focused_tests_passed": 2,
+    "seconds": 6.4
+  },
+  "initial_strict_trial": {
+    "tests": 14,
+    "passed": 13,
+    "failed": 1,
+    "case": "repeated_bending",
+    "outcome": "All physical spectrum/subspace gates passed; full 6/6 at tol=1e-11 was not attained (5/6). New application tests explicitly request tol=1e-9 and independent residual<1e-9, while comparison profiles retain 1e-11 and actual counts."
+  },
+  "notes": [
+    "No production numerical solver changes.",
+    "Reference assembly and numerical validation are host-side and outside graph capture.",
+    "All preconditioner arithmetic uses upstream Warp; cuDSS is the optional direct inverse.",
+    "Package CI does not run CUDA numerical tests."
+  ],
+  "followups": [
+    {
+      "source_commit": "12a418e",
+      "test": "baseline gate rejects changed shifts/tolerances",
+      "passed": 1,
+      "seconds": 0.86
+    },
+    {
+      "source_commit": "159d3f7",
+      "tests": "native diagonal-mass CuPy and batched LOBPCG adapters",
+      "passed": 3,
+      "seconds": 1.57
+    }
+  ],
+  "existing_regression": [
+    {
+      "api_class": "A",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0002701686160518,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "B",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9999229789283037,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "C",
+      "n": 10000,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9995571737582459,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ]
+}
