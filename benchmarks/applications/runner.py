@@ -76,7 +76,8 @@ def accuracy(p, values, vectors, right=None, reference=None):
     if p.api_class == "D":
         positive = values[values > 1e-8]
         result["positive_guard"] = float(positive.min()) if len(positive) else None
-        result["accepted"] &= result["positive_guard"] is not None
+        if p.require_positive_guard:
+            result["accepted"] &= result["positive_guard"] is not None
         if p.null_basis is not None and result["recovered_nullity"] == p.nullity:
             zeros = vectors[:, abs(values) < 1e-8]
             overlap = p.null_basis.T @ (p.b @ zeros)

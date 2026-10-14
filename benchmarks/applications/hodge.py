@@ -137,6 +137,7 @@ def make_hodge_case(name, side=4, weak_scale=1e-4):
         expected=values[: int(beta) + 2],
         nullity=int(beta),
         null_basis=harmonics,
+        require_positive_guard=True,
         notes=f"{reference}; beta1={beta}; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
     )
     return HodgeCase(p, b1, b2, int(rank1), int(rank2), values, vectors, reference)
