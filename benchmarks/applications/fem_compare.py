@@ -1,7 +1,9 @@
 """Isolated elastic-ROM comparisons with complete requested-space acceptance."""
 
 import argparse
+import hashlib
 import importlib.metadata
+import inspect
 import json
 import os
 import subprocess
@@ -9,6 +11,7 @@ import sys
 from pathlib import Path
 
 import warp as wp
+import warp.optim.linear as linear
 
 from .compare import compare_baseline, run
 from .fem_cases import make_fem_case
@@ -99,6 +102,14 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         git_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], text=True)),
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
+        upstream_source_sha256={
+            "linear": hashlib.sha256(
+                Path(inspect.getfile(linear.preconditioner)).read_bytes()
+            ).hexdigest(),
+            "fsai": hashlib.sha256(Path(inspect.getfile(linear.FSAI)).read_bytes()).hexdigest()
+            if hasattr(linear, "FSAI")
+            else None,
+        },
         protocol="Sequential isolated workers, every synchronized timed trial checked in the original pencil at 1e-8 for residual, spectrum, M-orthogonality, known rigid subspace and complete requested subspace. Full boundary clusters included. Reference assembly/factorization, setup/capture, output conversion and acceptance checks excluded from solve timing. cuDSS factors SPD; pure Warp CG profiles use upstream diagonal, block-Jacobi or FSAI preconditioning as recorded per row. CuPy is generalized LOBPCG+cuDSS, not eigsh. Rejected/unsupported rows retained. Fixed outer budgets and stricter reported solver counts recorded separately.",
         cases=[],
     )
@@ -131,6 +142,8 @@ def main():
                 str(args.lobpcg_tol),
                 "--out",
                 str(output),
+                "--timeout",
+                str(args.timeout),
             ]
             output.unlink(missing_ok=True)
             try:

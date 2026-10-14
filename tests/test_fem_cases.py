@@ -76,7 +76,9 @@ def test_elastic_modes_captured_replay(name):
             assert check["requested_subspace_error"] < 1e-8
             assert check["residual"] < 1e-9
             assert solver.converged.numpy()[0] == p.k
-            physical = v[:, np.argsort(w)[p.nullity :]]
+            assert np.all(abs(w[: p.nullity]) < 1e-8)
+            assert np.all(w[p.nullity :] > 1e-4)
+            physical = solver.eigenvectors[p.nullity :].numpy().T
             np.testing.assert_allclose(p.null_basis.T @ (p.b @ physical), 0, atol=1e-9)
     finally:
         solver.graph = graph = None
