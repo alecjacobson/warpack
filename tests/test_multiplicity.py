@@ -96,3 +96,29 @@ def test_full_space_does_not_require_redundant_exploration():
     wp.capture_launch(solver.capture(20))
     assert_pairs(a, solver, np.arange(9.0, 13.0))
     assert solver.iterations.numpy()[0] == 1
+
+
+def test_transformed_sm_retains_physical_accuracy():
+    """A count-only upstream failure must not become a physical residual failure."""
+    from pathlib import Path
+
+    from warpack import CuDSSInverse, EigenpairEvaluation
+
+    a = np.load(Path(__file__).parent / "fixtures/spectra_transformed_sm.npz")["a"]
+    inverse = CuDSSInverse(matrix(a - np.eye(len(a))), 1, mtype="symmetric")
+    solver = KrylovSchur(inverse, 3, ncv=6, which="SM", tol=1e-12)
+    evaluation = EigenpairEvaluation(SparseOperator(matrix(a)), solver.eigenvectors, tol=1e-9)
+    graph = solver.capture(100, finalizer=evaluation.run)
+    try:
+        for _ in range(2):
+            wp.capture_launch(graph)
+            values, vectors = evaluation.values.numpy(), solver.eigenvectors.numpy().T
+            expected = np.linalg.eigvalsh(a)
+            expected = expected[np.argsort(-abs(expected - 1))[:3]]
+            np.testing.assert_allclose(np.sort(values), np.sort(expected), atol=1e-9, rtol=0)
+            assert np.max(abs(a @ vectors - vectors * values)) < 1e-9
+            np.testing.assert_allclose(vectors.T @ vectors, np.eye(3), atol=1e-10, rtol=0)
+            assert evaluation.converged.numpy()[0] == 3
+    finally:
+        solver.graph = graph = None
+        inverse.close()

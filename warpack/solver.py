@@ -401,8 +401,11 @@ class KrylovSchur(SymmetricEigensolver):
             if initial_vector.device != self.device:
                 raise ValueError("initial_vector must be on the operator device")
             self.initial_vector = initial_vector.reshape((1, self.n))
-        # Leave room to expand; retaining m-1 vectors can stagnate on clusters.
-        self.keep = min(k + 4, max(k, self.m // 2))
+        # Extremal targets need expansion room to resolve clusters. Interior SM
+        # Ritz selection instead needs the larger retained space: reducing it
+        # loses accuracy on the transformed-SM SymEigsShift_17 regression.
+        retain_limit = self.m - 1 if which == "SM" else max(k, self.m // 2)
+        self.keep = min(k + 4, retain_limit)
         # Sparse products can be cheaper and more accurate than a dense basis
         # rotation. Keep cached products for dense operators and inverses.
         self._reapply_after_restart = (
