@@ -108,7 +108,8 @@ spectrum check passes. This establishes sensitivity across captured runs even
 with the original profile; the initial results do not isolate matching as the
 cause. No favorable retry replaces a failed row. The
 [restored-profile cycle results](../../results/matching_cycle_legacy.json)
-retain all three failures.
+retain all three failures, tracked in
+[#36](https://github.com/alecjacobson/warpack/issues/36).
 
 The [composite inventory](../../results/matching_spectra_overlay.json) overlays
 those 27 matched cases and three restored cycle cases onto the previous full
