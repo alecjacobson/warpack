@@ -31,6 +31,7 @@ def main():
     parser.add_argument("--methods", default=",".join(METHODS))
     parser.add_argument("--large-side", type=int, default=41)
     parser.add_argument("--steps", type=int, default=20)
+    parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--timeout", type=int, default=180)
@@ -46,7 +47,16 @@ def main():
             parser.error("Worker needs one case and method")
         c = make_hodge_case(names[0], args.large_side if names[0] == "large_disconnected" else 4)
         p = c.problem
-        row = run("D", p.n, methods[0], args.repeats, args.ncv, args.steps, problem=p)
+        row = run(
+            "D",
+            p.n,
+            methods[0],
+            args.repeats,
+            args.ncv,
+            args.steps,
+            problem=p,
+            lobpcg_tol=args.lobpcg_tol,
+        )
         row.update(
             fixture=names[0],
             expected_nullity=p.nullity,
@@ -100,6 +110,8 @@ def main():
                 str(args.repeats),
                 "--out",
                 str(out),
+                "--lobpcg-tol",
+                str(args.lobpcg_tol),
             ]
             out.unlink(missing_ok=True)
             try:

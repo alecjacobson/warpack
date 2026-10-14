@@ -44,7 +44,7 @@ def other_gpu_processes():
         return ["GPU process inventory unavailable"]
 
 
-def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
+def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None, lobpcg_tol=1e-8):
     p = make_problem(api_class, size) if problem is None else problem
     ref = reference_values(p)
     matrix_hash = hashlib.sha256()
@@ -132,7 +132,9 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
                 setup, (solve, cleanup) = timed(lambda: spectra_setup(p, ncv))
             elif method in ("cupy", "cupy-eigsh"):
                 setup, (solve, cleanup, label) = timed(
-                    lambda: cupy_setup(p, ncv, standard=method == "cupy-eigsh")
+                    lambda: cupy_setup(
+                        p, ncv, lobpcg_tol=lobpcg_tol, standard=method == "cupy-eigsh"
+                    )
                 )
                 if method == "cupy-eigsh":
                     row["reference_ncv"] = min(max(ncv, p.k + 2), p.n - 1)
@@ -141,7 +143,7 @@ def run(api_class, size, method, repeats=3, ncv=32, steps=None, problem=None):
                     row["reference_block_size"] = p.k
                 row["implementation"] = label
                 row["reference_tolerance"] = (
-                    1e-11 if api_class in "EI" or method == "cupy-eigsh" else 1e-8
+                    1e-11 if api_class in "EI" or method == "cupy-eigsh" else lobpcg_tol
                 )
             else:
                 raise ValueError(method)
@@ -232,7 +234,14 @@ def compare_baseline(rows, baseline, limit):
             continue
         same = all(
             r.get(key) == b.get(key)
-            for key in ["matrix_sha256", "k", "ncv", "outer_cycles", "implementation"]
+            for key in [
+                "matrix_sha256",
+                "k",
+                "ncv",
+                "outer_cycles",
+                "implementation",
+                "reference_tolerance",
+            ]
         )
         eligible = (
             same
@@ -263,6 +272,7 @@ def main():
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument("--steps", type=int)
+    parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
     parser.add_argument("--out", default="results/application_coverage.json")
     parser.add_argument("--baseline")
     parser.add_argument("--regression-limit", type=float, default=1.25)
@@ -272,7 +282,15 @@ def main():
     dest = Path(args.out)
     dest.parent.mkdir(exist_ok=True, parents=True)
     if args.worker:
-        row = run(args.classes, int(args.sizes), args.methods, args.repeats, args.ncv, args.steps)
+        row = run(
+            args.classes,
+            int(args.sizes),
+            args.methods,
+            args.repeats,
+            args.ncv,
+            args.steps,
+            lobpcg_tol=args.lobpcg_tol,
+        )
         dest.write_text(json.dumps(row, indent=2) + "\n")
         return
     report = dict(
@@ -315,6 +333,8 @@ def main():
                     str(args.ncv),
                     "--out",
                     str(out),
+                    "--lobpcg-tol",
+                    str(args.lobpcg_tol),
                 ]
                 if args.steps is not None:
                     command += ["--steps", str(args.steps)]
