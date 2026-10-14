@@ -80,17 +80,21 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
 
+    mass_diagonal = None
     if standard:
-        if p.api_class != "D" or p.b is None:
+        if p.api_class not in "AD" or p.b is None:
             raise Unsupported(
-                "Explicit CuPy eigsh comparison currently requires identity-mass Hodge data"
+                "Explicit CuPy eigsh comparison requires diagonal-mass FEM or Hodge data"
             )
-        delta = p.b - sp.eye(p.n, format="csr")
+        diagonal = p.b.diagonal()
+        delta = p.b - sp.diags(diagonal, format="csr")
         delta.eliminate_zeros()
-        if delta.nnz:
+        if delta.nnz or not np.all(np.isfinite(diagonal)) or np.any(diagonal <= 0):
             raise Unsupported(
-                "CuPy eigsh has no generalized mass argument; use the LOBPCG comparison"
+                "CuPy eigsh has no generalized mass argument; this path requires positive diagonal mass, otherwise use LOBPCG"
             )
+        if not np.all(diagonal == 1):
+            mass_diagonal = diagonal
     stream = cp.cuda.Stream.from_external(wp.get_stream())
     if p.api_class in "BGH":
         raise Unsupported(
@@ -99,6 +103,10 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
     with stream:
         a = cs.csr_matrix(p.a)
         if standard:
+            scale = None if mass_diagonal is None else 1 / cp.sqrt(cp.asarray(mass_diagonal))
+            if scale is not None:
+                transform = cs.diags(scale, format="csr")
+                a = transform @ a @ transform
             effective_ncv = min(max(ncv, p.k + 2), p.n - 1)
             initial = cp.asarray(np.random.default_rng(2026).normal(size=p.n))
 
@@ -114,9 +122,10 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False):
                         maxiter=10000,
                         v0=initial.copy(),
                     )
-                    return w, v, None
+                    return w, v if scale is None else scale[:, None] * v, None
 
-            return solve, lambda: None, f"CuPy eigsh SA, identity mass, ncv={effective_ncv}"
+            mass_label = "identity mass" if scale is None else "diagonal mass scaling"
+            return solve, lambda: None, f"CuPy eigsh SA, {mass_label}, ncv={effective_ncv}"
         if p.api_class in "EI":
             initial = cp.asarray(
                 np.random.default_rng(2026).normal(size=min(p.a.shape)), dtype=a.dtype

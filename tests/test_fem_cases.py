@@ -112,3 +112,26 @@ def test_elastic_modes_with_upstream_preconditioners(method):
     assert check["accepted"], check
     assert solver.converged.numpy()[0] == p.k
     assert inverse.stats.numpy()[2] == 0
+
+
+def test_native_cupy_diagonal_mass_scaling_in_original_pencil():
+    pytest.importorskip("cupy")
+    from benchmarks.applications.references import cupy_setup
+
+    p = make_fem_case("clamped_lumped", side=1).problem
+    solve, close, label = cupy_setup(p, ncv=32, standard=True)
+    try:
+        values, vectors, _ = solve()
+        assert "diagonal mass scaling" in label
+        assert accuracy(p, values.get(), vectors.get())["accepted"]
+    finally:
+        close()
+
+
+def test_native_cupy_rejects_consistent_mass_without_silent_transformation():
+    pytest.importorskip("cupy")
+    from benchmarks.applications.references import Unsupported, cupy_setup
+
+    p = make_fem_case("clamped_consistent", side=1).problem
+    with pytest.raises(Unsupported, match="diagonal mass"):
+        cupy_setup(p, ncv=32, standard=True)
