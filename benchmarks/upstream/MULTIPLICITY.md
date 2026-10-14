@@ -116,6 +116,8 @@ host callback or host transfer. The application comparison command correctly
 exits unsuccessfully for these timing regressions. The stronger exploration
 and restart policy has a throughput cost on these adaptive paths; the stable
 FEM timings above do not imply unchanged performance for every problem class.
+The measured regression and acceptance criteria for recovering throughput are
+tracked in [#31](https://github.com/alecjacobson/warpack/issues/31).
 
 All twenty original Spectra symmetric benchmark datasets were also rerun with
 Warp and CuPy: all forty backend/dataset results pass. These are small dense
