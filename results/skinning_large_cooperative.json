@@ -1,0 +1,193 @@
+{
+  "side": 24,
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "c6336c4329b58c9c570db2fc6ef9c364342cc300",
+  "matrix_hash": "f046b521d0b4ff5402ef0e0d989db1b9ada2aff9887f4b1ab2858eb2beebd974",
+  "numerical_source_hash": "59a06d7bed7903c76daa63b73ec6e536f6a92f7fde2ec61f343c6dcfc81574f6",
+  "reference_cache": "build/skinning-audit/reference-f046b521d0b4ff54-shift-0.1-k20.npz",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz",
+  "cpu_contention": "Not isolated; CPU-heavy geometric_peel process observed during initial large run",
+  "blas_threads": "4",
+  "other_gpu_processes": [],
+  "reference": "independent enlarged ARPACK KKT transform (seed 913)",
+  "reference_check": {
+    "equilibrium_residual": 1.693594012177599e-12,
+    "constraint_residual": 8.778780927004386e-15,
+    "raw_rig_constraint_max": 9.783550719241231e-15,
+    "eigenvalue_error": 0.0,
+    "mass_orthogonality": 1.2895070483796573e-15,
+    "subspace_error": 6.661338147750939e-16,
+    "accepted": true
+  },
+  "raw_constraint_rows": 24,
+  "independent_constraints": 14,
+  "protocol": "Shared heterogeneous tet weight stiffness, lumped mass, rank-reduced Appendix B.1 constraints; sequential methods; one warmup and repeated synchronized solves, all independently checked. Assembly, reference and validation excluded. GPU setup includes uploads/KKT assembly/factors; CPU setup includes KKT factors. Spectra compilation excluded. Fixed Warp replay includes physical residuals and multipliers; CPU/CuPy physical checks are outside solve. No speedups from rejected trials.",
+  "cases": [
+    {
+      "method": "cupy-cudss",
+      "n": 45625,
+      "constraints": 14,
+      "nnz": 644121,
+      "kkt_nnz": 1857313,
+      "k": 20,
+      "ncv": 64,
+      "shift": -0.1,
+      "seed": 2026,
+      "tolerance": 1e-11,
+      "acceptance_tolerance": 1e-07,
+      "steps": null,
+      "factor": "cuDSS general + matching + one Warp residual correction",
+      "cooperative_refinement": true,
+      "note": "CuPy eigsh on explicit mass-scaled KKT inverse; cuDSS supplied by our adapter, NOT native CuPy factorization",
+      "setup_seconds": 0.8410616777837276,
+      "capture_warmup_seconds": 0.3941643126308918,
+      "samples": [
+        0.28851867094635963,
+        0.2884342856705189,
+        0.2884235084056854
+      ],
+      "solve_seconds": 0.2884342856705189,
+      "checks": [
+        {
+          "equilibrium_residual": 1.6953380859984616e-12,
+          "constraint_residual": 1.022804639988414e-15,
+          "raw_rig_constraint_max": 7.962109704190423e-17,
+          "eigenvalue_error": 2.01148390086836e-14,
+          "mass_orthogonality": 2.929443177970444e-15,
+          "subspace_error": 7.771561172376096e-16,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 1.7021581378949826e-12,
+          "constraint_residual": 9.224642213009206e-16,
+          "raw_rig_constraint_max": 9.677393774027744e-17,
+          "eigenvalue_error": 1.9795555849815607e-14,
+          "mass_orthogonality": 3.1041054361396815e-15,
+          "subspace_error": 6.661338147750939e-16,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 1.695239701276238e-12,
+          "constraint_residual": 1.05406624910522e-15,
+          "raw_rig_constraint_max": 6.547162341625796e-17,
+          "eigenvalue_error": 1.8678064793777626e-14,
+          "mass_orthogonality": 3.946732120080154e-15,
+          "subspace_error": 8.881784197001252e-16,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 1.6903806305228728e-12,
+          "constraint_residual": 1.1829990293188928e-15,
+          "raw_rig_constraint_max": 1.0606970081991976e-16,
+          "eigenvalue_error": 1.915698953207962e-14,
+          "mass_orthogonality": 3.039832611183697e-15,
+          "subspace_error": 7.771561172376096e-16,
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "outcome": "passed"
+    },
+    {
+      "method": "warp-cudss",
+      "n": 45625,
+      "constraints": 14,
+      "nnz": 644121,
+      "kkt_nnz": 1857313,
+      "k": 20,
+      "ncv": 64,
+      "shift": -0.1,
+      "seed": 2026,
+      "tolerance": 1e-09,
+      "acceptance_tolerance": 1e-07,
+      "steps": 2,
+      "factor": "cuDSS general + matching + one Warp residual correction",
+      "cooperative_refinement": true,
+      "setup_seconds": 0.686064574867487,
+      "graph_audit": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1634,
+          "MEMCPY": 1484,
+          "KERNEL": 5615,
+          "CONDITIONAL": 103
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 984,
+          "HtoD (HOST PAGEABLE to DEVICE)": 500
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "capture_warmup_seconds": 0.9174581915140152,
+      "samples": [
+        0.3387155570089817,
+        0.3387754559516907,
+        0.33871276676654816
+      ],
+      "solve_seconds": 0.3387155570089817,
+      "checks": [
+        {
+          "equilibrium_residual": 4.2144671672130306e-13,
+          "constraint_residual": 9.416185187221445e-16,
+          "raw_rig_constraint_max": 8.666332896537648e-17,
+          "eigenvalue_error": 1.6793594407547228e-14,
+          "mass_orthogonality": 2.451363205899858e-14,
+          "subspace_error": 8.43769498715119e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 4.64772736009017e-13,
+          "constraint_residual": 9.72142696923187e-16,
+          "raw_rig_constraint_max": 1.6189679534050344e-16,
+          "eigenvalue_error": 1.5710136703834505e-14,
+          "mass_orthogonality": 2.4401126579140105e-14,
+          "subspace_error": 8.43769498715119e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 5.195333307438576e-13,
+          "constraint_residual": 9.706439749567598e-16,
+          "raw_rig_constraint_max": 1.0891149635795794e-16,
+          "eigenvalue_error": 1.5890712987786625e-14,
+          "mass_orthogonality": 2.414731211895441e-14,
+          "subspace_error": 9.547918011776346e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 5.890892583348822e-13,
+          "constraint_residual": 1.2277895121773808e-15,
+          "raw_rig_constraint_max": 8.881140451961339e-17,
+          "eigenvalue_error": 1.6251865555690868e-14,
+          "mass_orthogonality": 2.21729270228381e-14,
+          "subspace_error": 8.43769498715119e-15,
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "outcome": "passed",
+      "strict_converged": 20,
+      "device_equilibrium_residual": 5.891200089033269e-13,
+      "device_constraint_residual": 5.906594079844996e-17
+    }
+  ],
+  "regression_checks": [
+    {
+      "method": "cupy-cudss",
+      "ratio": 0.2732919587241194,
+      "accuracy_regression": false,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cudss",
+      "ratio": 0.275827322109324,
+      "accuracy_regression": false,
+      "performance_regression": false
+    }
+  ]
+}

@@ -15,7 +15,7 @@ implementation bugs and the remaining coverage requirements.
 | C / P2 | Indefinite tangent stiffness, SPD M; most-negative eigenvalues via a shift below the spectrum | [#22](https://github.com/alecjacobson/warpack/issues/22) |
 | D / P0 | Sphere/disk/annulus/tori Hodge 1-Laplacians; disconnected and weak components, independent topology/subspace references, positive guard; [Krylov/CG profiles](HODGE_CG.md) | [#23](https://github.com/alecjacobson/warpack/issues/23) |
 | E / P2 | Complex Hermitian connection ring with nontrivial holonomy and known spectrum; standard mass | [#24](https://github.com/alecjacobson/warpack/issues/24) |
-| F / P2 | P1 Cauchy–Riemann energy and centered boundary norm; reciprocal spectral-conformal pencil with SPD regularized metric | [#25](https://github.com/alecjacobson/warpack/issues/25) |
+| F / P1 skinning, P2 broader pencils | [Rig-constrained skinning modes](SKINNING.md) via physical-space KKT shift-invert; reciprocal spectral-conformal pencil with SPD regularized metric | [#25](https://github.com/alecjacobson/warpack/issues/25), [#55](https://github.com/alecjacobson/warpack/issues/55) |
 | G / P2 | Coupled SPD stiffness / indefinite geometric-stiffness pencil; analytic buckling factors | [#26](https://github.com/alecjacobson/warpack/issues/26) |
 | H / P3 | Damped coupled chain, standard first-order nonsymmetric linearization; analytic complex frequencies | [#27](https://github.com/alecjacobson/warpack/issues/27) |
 | I / P2 | [Large tall/wide POD and analytic string snapshots](POD.md); repeated leading clusters, rank deficiency, both singular subspaces and reconstruction energy | [#28](https://github.com/alecjacobson/warpack/issues/28) |
@@ -32,8 +32,10 @@ A/B/C use `GeneralizedKrylovSchur`: restarted Krylov iteration with two-pass
 orthogonalization in the M inner product. In shift-invert mode its one-vector
 inverse solves `(K - sigma M) y = x`; Warp forms Mx and all other numerical
 operations. Regular mode applies `M^-1 K` while preserving the M metric. It
-supports physical LM/LA/SA selection. F uses this regular mode on the reciprocal
-pencil; this does **not** add support for an arbitrary singular mass matrix.
+supports physical LM/LA/SA selection. The spectral-conformal F fixture uses this
+regular mode on the reciprocal pencil. The [skinning F fixture](SKINNING.md) uses
+`ConstrainedKrylovSchur` on the physical SPD mass with a cuDSS KKT inverse and
+explicit rig constraints. Neither route accepts an arbitrary singular mass matrix.
 
 D uses block `GeneralizedEigensolver` for its repeated nullspace, with
 [device-controlled metric QR recovery](WEAK_BLOCK.md) for ill-conditioned inverse images.

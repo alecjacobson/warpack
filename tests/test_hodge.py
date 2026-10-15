@@ -158,7 +158,9 @@ def test_mass_krylov_hodge_preserves_complete_harmonic_space(method):
         pytest.skip("Requires pinned upstream Warp FSAI")
     problem = make_hodge_case("large_disconnected", side=7).problem
     solver, inverse = warp_setup(problem, method, ncv=32, force_krylov=True)
-    graph = solver.capture(2)
+    # Two direct cycles intermittently leave a guard pair just above 1e-11.
+    # Preserve the strict accuracy checks; give the direct method expansion room.
+    graph = solver.capture(3 if method == "krylov" else 2)
     try:
         for _ in range(2):
             wp.capture_launch(graph)

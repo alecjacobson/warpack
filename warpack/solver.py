@@ -58,6 +58,9 @@ class CuDSSInverse:
     pivoting with ``colamd``/``btf_colamd`` should use ``mtype="general"``.
     Correction products and updates run in Warp, with cuDSS only applying the
     existing factors. Check original residuals for the chosen configuration.
+    ``cooperative_refinement=True`` evaluates correction products with a warp
+    per CSR row; useful for KKT matrices with a few very long constraint rows.
+    The default retains the thread-per-row product.
     """
 
     requires_static_outer_capture = True
@@ -70,6 +73,7 @@ class CuDSSInverse:
         refinement_steps=None,
         reordering="default",
         matching=False,
+        cooperative_refinement=False,
     ):
         if width < 1 or matrix.scalar_type != wp.float64:
             raise ValueError("cuDSS inverse needs a positive RHS width and FP64 matrix")
@@ -82,6 +86,7 @@ class CuDSSInverse:
         self.refinement_steps = refinement_steps
         self.reordering = reordering
         self.matching = bool(matching)
+        self.cooperative_refinement = bool(cooperative_refinement)
         self.mtype = mtype
         self.width = width
         import os
@@ -148,12 +153,13 @@ class CuDSSInverse:
         # These are the same original matrix values supplied for factorization.
         csr = self.solver._csr
         for _ in range(self.refinement_steps):
-            wp.launch(
-                K.csr_mm,
-                y.shape,
-                [csr.row_offsets, csr.columns, csr.values, y, self._residual, 0.0, 1.0],
-                device=self.device,
-            )
+            args = [csr.row_offsets, csr.columns, csr.values, y, self._residual, 0.0, 1.0]
+            if self.cooperative_refinement:
+                wp.launch_tiled(
+                    K.csr_mv_cooperative, dim=y.shape, inputs=args, block_dim=32, device=self.device
+                )
+            else:
+                wp.launch(K.csr_mm, y.shape, args, device=self.device)
             wp.launch(K.linear_residual, y.shape, [self._rhs, self._residual], device=self.device)
             self.solver.solve(x=self._correction, b=self._residual)
             wp.launch(K.add_correction, y.shape, [y, self._correction], device=self.device)

@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-15",
+  "base_commit": "c6336c4329b58c9c570db2fc6ef9c364342cc300",
+  "production_source_sha256": "431ae3d0ecb8018b40f8a6f6c0de6000e911dcd3ceba715767a7a7a0d643a413",
+  "python": "3.10.12",
+  "gpu": "NVIDIA L40",
+  "driver": "570.158.01",
+  "warp": "1.18.0+cu12 with pinned FSAI overlay",
+  "overlay_commit": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+  "tests": {
+    "full_suite": "337 passed in 209.42s (0:03:29)",
+    "pinned_skinning": "12 passed in 4.62s",
+    "stock_1_15_skinning": "12 passed in 4.19s"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: 135 files already formatted",
+  "wheel": {
+    "path": "build/skinning-audit/dist/warpack-0.1.3-py3-none-any.whl",
+    "build": "pip wheel --no-deps --no-build-isolation .: passed",
+    "production_files_match_workspace": true
+  },
+  "stock_compatibility": {
+    "warp": "1.15.0",
+    "sparse_and_linear_sources_match_installed_RECORD": true
+  },
+  "benchmarks": [
+    "results/skinning_small.json",
+    "results/skinning_medium.json",
+    "results/skinning_medium_two_cycles.json",
+    "results/skinning_medium_one_cycle.json",
+    "results/skinning_large.json",
+    "results/skinning_large_regression.json",
+    "results/skinning_large_cooperative.json",
+    "results/skinning_large_confirmed.json"
+  ],
+  "confirmed_gpu_regression_checks": [
+    {
+      "method": "cupy-cudss",
+      "ratio": 1.0042626643103003,
+      "accuracy_regression": false,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cudss",
+      "ratio": 1.0013921959357708,
+      "accuracy_regression": false,
+      "performance_regression": false
+    }
+  ],
+  "rejected_profiles": {
+    "medium_one_cycle": "Physical residual 6.53e-4, constraint residual 3.57e-7, strict count 11/20; retained, not a speedup."
+  },
+  "resolved_validation_failures": [
+    {
+      "issue": 57,
+      "run": "1 failed, 336 passed in 192.14s",
+      "test": "test_mass_krylov_hodge_preserves_complete_harmonic_space[krylov]",
+      "failure": "strict physical count 5/6 at 1e-11, other independent accuracy assertions passed",
+      "fix": "three-cycle direct regression budget; all original tolerances/assertions retained",
+      "probe": "results/hodge_strict_probe.json"
+    },
+    {
+      "issue": 58,
+      "run": "1 failed, 11 passed in 30.19s on stock Warp 1.15",
+      "test": "test_skinning_appendix_matrices_and_modes",
+      "failure": {
+        "equilibrium_residual": 0.49776635567145516,
+        "eigenvalue_error": 26.858689491530036
+      },
+      "fix": "notify_nnz_changed after topology copy; explicit synchronized-count regression"
+    }
+  ],
+  "graph_audit": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 1634,
+      "MEMCPY": 1484,
+      "KERNEL": 5615,
+      "CONDITIONAL": 103
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 984,
+      "HtoD (HOST PAGEABLE to DEVICE)": 500
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "limitations": [
+    "Not an arbitrary singular-mass solver.",
+    "Rank/validity and sparse counts read back only during setup.",
+    "Vendor cuDSS HtoD scalar graph nodes remain (#29).",
+    "Pure-Warp constrained iterative inverse remains separate (#49).",
+    "Remaining approximately 17% replay gap to adapted CuPy+cuDSS (#56).",
+    "CPU benchmarks ran with observed CPU contention; no universal hardware speedup claim.",
+    "Full upstream CuPy/Spectra conformance suite not rerun for this addition."
+  ]
+}
