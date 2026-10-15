@@ -170,6 +170,8 @@ def test_unconverged_and_negative_spectrum_evidence():
         "threshold",
         "expected",
         "identity_bound",
+        "bound_shape",
+        "bound_dtype",
     ],
 )
 def test_diagnostic_layout_and_scaling_contracts(bad):
@@ -188,6 +190,10 @@ def test_diagnostic_layout_and_scaling_contracts(bad):
         options["expected_nullity"] = 5
     if bad == "identity_bound":
         options.update(mass=None, mass_lower_bound=2)
+    if bad == "bound_shape":
+        options["mass_lower_bound"] = wp.ones(2, dtype=wp.float64)
+    if bad == "bound_dtype":
+        options["mass_lower_bound"] = wp.ones(1, dtype=wp.float32)
     with pytest.raises(ValueError):
         Diagnostics(op, vectors, **options)
 
@@ -216,3 +222,34 @@ def test_diagnostics_composed_with_captured_hodge_solver():
     finally:
         graph = solver.graph = None
         inverse.close()
+
+
+@wp.kernel
+def set_bound(output: wp.array[wp.float64], value: wp.float64):
+    output[0] = value
+
+
+def test_device_bound_updates_and_invalid_recovery_without_recapture():
+    op = SparseOperator(sparse(np.diag([0.0, 1.0, 2.0, 3.0])))
+    vectors = wp.array(np.eye(4)[:2], dtype=wp.float64)
+    bound = wp.ones(1, dtype=wp.float64)
+    d = Diagnostics(op, vectors, mass_lower_bound=bound)
+    d.run()
+    with wp.ScopedCapture() as cap:
+        d.run()
+    for value, valid in [
+        (0.9, True),
+        (0.0, False),
+        (-1.0, False),
+        (float("nan"), False),
+        (1.1, False),
+        (1.0, True),
+    ]:
+        wp.launch(set_bound, 1, [bound, value])
+        wp.capture_launch(cap.graph)
+        assert bool(flags(d) & d.INVALID_DATA) != valid
+        assert d.numerical_count.numpy()[0] == (1 if valid else 0)
+        if valid:
+            assert d.positive_guard.numpy()[0] == 1
+        else:
+            assert np.isnan(d.positive_guard.numpy()[0])

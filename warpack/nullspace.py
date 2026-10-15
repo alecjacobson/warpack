@@ -19,8 +19,9 @@ def _classify(
     classes: wp.array[wp.int32],
     zero_threshold: wp.float64,
     positive_threshold: wp.float64,
-    mass_lower_bound: wp.float64,
+    mass_lower_bound: wp.array[wp.float64],
     residual_tolerance: wp.float64,
+    identity_mass: bool,
 ):
     j = wp.tid()
     value = values[j]
@@ -30,12 +31,16 @@ def _classify(
         wp.float64(1.0), wp.sqrt(norms[j, 1]) + wp.abs(value) * wp.sqrt(norms[j, 2])
     )
     relative = residual / denominator
-    error = residual / wp.sqrt(mass_lower_bound * metric_norm)
+    lower = mass_lower_bound[0]
+    error = residual / wp.sqrt(lower * metric_norm)
     residuals[j] = relative
     bounds[j] = error
     state = int(2)  # Ambiguous between zero and a positive guard.
     if (
-        not wp.isfinite(value)
+        not wp.isfinite(lower)
+        or lower <= wp.float64(0.0)
+        or (identity_mass and lower > wp.float64(1.0))
+        or not wp.isfinite(value)
         or not wp.isfinite(relative)
         or not wp.isfinite(error)
         or metric_norm <= wp.float64(0.0)
@@ -137,7 +142,11 @@ class NumericalNullspaceDiagnostics:
     The entrywise Gram tolerance must be less than 1/capacity to preserve a
     positive independence margin.
     ``mass=None`` means identity. For generalized problems, supply a positive
-    lower spectral bound on SPD M. Residual-based eigenvalue error estimates are
+    lower spectral bound on SPD M, as a scalar or one FP64 device value.
+    A supplied device bound is never read on the host; changing it in place is
+    reflected on replay, including invalid-bound diagnostics. Its mathematical
+    validity for a general mass remains the caller's responsibility.
+    Residual-based eigenvalue error estimates are
     ||Ax-lambda Mx|| / sqrt(mass_lower_bound * x.T M x). In exact arithmetic
     these bound distance to some eigenvalue, not multiplicity or its index.
     Floating estimates are not rigorous interval arithmetic certificates.
@@ -199,7 +208,6 @@ class NumericalNullspaceDiagnostics:
                 raise ValueError("generalized diagnostics require a lower spectral bound on M")
             mass_lower_bound = 1.0
         for value in (
-            mass_lower_bound,
             zero_threshold,
             positive_threshold,
             residual_tolerance,
@@ -207,8 +215,23 @@ class NumericalNullspaceDiagnostics:
         ):
             if not math.isfinite(value) or value <= 0:
                 raise ValueError("bounds and tolerances must be finite and positive")
-        if mass is None and mass_lower_bound > 1:
-            raise ValueError("a lower spectral bound for identity mass cannot exceed one")
+        if isinstance(mass_lower_bound, wp.array):
+            if (
+                mass_lower_bound.ndim != 1
+                or mass_lower_bound.shape != (1,)
+                or mass_lower_bound.dtype != wp.float64
+                or mass_lower_bound.device != self.device
+            ):
+                raise ValueError("device mass bound must be one FP64 value on the operator device")
+            self.mass_lower_bound = mass_lower_bound
+        else:
+            if not math.isfinite(mass_lower_bound) or mass_lower_bound <= 0:
+                raise ValueError("mass_lower_bound must be finite and positive")
+            if mass is None and mass_lower_bound > 1:
+                raise ValueError("a lower spectral bound for identity mass cannot exceed one")
+            self.mass_lower_bound = wp.array(
+                [float(mass_lower_bound)], dtype=wp.float64, device=self.device
+            )
         if positive_threshold <= zero_threshold:
             raise ValueError("positive_threshold must exceed zero_threshold")
         if expected_nullity is not None and (
@@ -218,7 +241,6 @@ class NumericalNullspaceDiagnostics:
         self.capacity = vectors.shape[0]
         if orthogonality_tolerance >= 1.0 / self.capacity:
             raise ValueError("orthogonality_tolerance must be smaller than 1/capacity")
-        self.mass_lower_bound = float(mass_lower_bound)
         self.zero_threshold, self.positive_threshold = (
             float(zero_threshold),
             float(positive_threshold),
@@ -295,6 +317,7 @@ class NumericalNullspaceDiagnostics:
                 self.positive_threshold,
                 self.mass_lower_bound,
                 self.residual_tolerance,
+                self.mass is None,
             ],
             device=self.device,
         )
