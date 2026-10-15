@@ -141,3 +141,21 @@ def make_hodge_case(name, side=4, weak_scale=1e-4):
         notes=f"{reference}; beta1={beta}; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
     )
     return HodgeCase(p, b1, b2, int(rank1), int(rank2), values, vectors, reference)
+
+
+def weak_component_reference(case, scale):
+    """Independent weak-annulus modes, with scaling before the dense solve.
+
+    A global dense solve at large component contrast loses relative accuracy in
+    the weak positive eigenvalues. Incidence ranks still supply the nullspace.
+    This reference is CPU validation only, never an eigensolver initial basis.
+    """
+    p = case.problem
+    if p.name != "hodge_weak_positive" or not np.isfinite(scale) or scale <= 0:
+        raise ValueError("expected a weak-positive Hodge case and positive scale")
+    a, m = p.a[-16:, -16:].toarray() / scale, p.b[-16:, -16:].toarray()
+    values, vectors = la.eigh(a, m)
+    q = np.zeros((p.n, p.k))
+    q[:, : p.nullity] = p.null_basis
+    q[-16:, p.nullity :] = vectors[:, 1 : 1 + p.k - p.nullity]
+    return np.r_[np.zeros(p.nullity), values[1 : 1 + p.k - p.nullity] * scale], q

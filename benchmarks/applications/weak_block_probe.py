@@ -6,13 +6,12 @@ import types
 from pathlib import Path
 
 import numpy as np
-import scipy.linalg as la
 import warp as wp
 
 from warpack import kernels as K
 
 from .compare import timed
-from .hodge import make_hodge_case
+from .hodge import make_hodge_case, weak_component_reference
 from .runner import warp_setup
 
 
@@ -35,26 +34,24 @@ def shifted_orthogonalize(self):
         wp.launch(K.triangular, self.n, [self.q, self.l], device=self.device)
 
 
-def reference(case, scale):
-    p = case.problem
-    # Independent component reference avoids a dense global eigensolve spanning
-    # a 1e10 scale contrast. The weak annulus has 16 oriented edges.
-    a, m = p.a[-16:, -16:].toarray() / scale, p.b[-16:, -16:].toarray()
-    values, vectors = la.eigh(a, m)
-    q = np.zeros((p.n, p.k))
-    q[:, : p.nullity] = p.null_basis
-    q[-16:, p.nullity :] = vectors[:, 1 : 1 + p.k - p.nullity]
-    return np.r_[np.zeros(p.nullity), values[1 : 1 + p.k - p.nullity] * scale], q
+def legacy_orthogonalize(self):
+    for _ in range(2):
+        self.mass.apply(self.q, self.bq)
+        self.gram(self.q, self.bq)
+        wp.launch(K.cholesky, 1, [self.g, self.l, self.status], device=self.device)
+        wp.launch(K.triangular, self.n, [self.q, self.l], device=self.device)
 
 
 def run(scale, shift, shifted_passes):
     case = make_hodge_case("weak_positive", weak_scale=scale)
     p = case.problem
-    expected, space = reference(case, scale)
+    expected, space = weak_component_reference(case, scale)
     solver, inverse = warp_setup(p)
     if shift:
         solver.relative_shift, solver.shifted_passes = shift, shifted_passes
         solver.orthogonalize = types.MethodType(shifted_orthogonalize, solver)
+    else:
+        solver.orthogonalize = types.MethodType(legacy_orthogonalize, solver)
     graph = solver.capture(100)
     seconds, _ = timed(lambda: wp.capture_launch(graph))
     values, vectors = solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
