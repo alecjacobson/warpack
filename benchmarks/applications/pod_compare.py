@@ -20,6 +20,30 @@ from .problems import Problem
 def snapshots(size, variant="tall", modes=4):
     if size < 96 or not 1 <= modes <= 44:
         raise ValueError("require size >= 96 and 1 <= modes <= 44")
+    if variant == "wave":
+        if modes > 22:
+            raise ValueError("Wave fixture has 22 excited spatial modes")
+        # Fixed-end unit string: x_i=i/(n+1), t_j=2*j/48, wave speed 1.
+        # cos(m*pi*t) pairs with sin(m*pi*x). Spatial/time normalizations
+        # make the unweighted sampled snapshot singular spectrum analytic.
+        frequency = np.arange(1, 23)
+        x, time = np.arange(1, size + 1) / (size + 1), np.arange(48) / 24
+        u = np.sin(np.pi * x[:, None] * frequency) * np.sqrt(2 / (size + 1))
+        v = np.cos(np.pi * time[:, None] * frequency) * np.sqrt(2 / 48)
+        spectrum = np.geomspace(20, 0.05, 22)
+        return Problem(
+            "fixed_end_string_snapshots",
+            "I",
+            sp.csr_matrix((u * spectrum) @ v.T),
+            None,
+            modes,
+            0.0,
+            mode="svd",
+            expected=spectrum[:modes],
+            requested_basis=u[:, :modes],
+            right_requested_basis=v[:, :modes],
+            notes="48 equally spaced snapshots over a full fundamental period of a fixed-end unit string with 22 analytic cosine modal responses; normalized unweighted samples, not a general mass-weighted POD API",
+        )
     rng = np.random.default_rng(2026)
     u = la.qr(rng.normal(size=(size, 48)), mode="economic")[0]
     v = la.qr(rng.normal(size=(48, 48)), mode="economic")[0]
@@ -51,7 +75,7 @@ def snapshots(size, variant="tall", modes=4):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cases", default="tall,wide,clustered")
+    parser.add_argument("--cases", default="tall,wide,clustered,wave")
     parser.add_argument("--sizes", default="10000,100000")
     parser.add_argument("--methods", default="scipy,spectra,cupy,warp")
     parser.add_argument("--modes", type=int, default=4)
@@ -67,7 +91,7 @@ def main():
         list(map(int, args.sizes.split(","))),
         args.methods.split(","),
     )
-    if set(names) - {"tall", "wide", "clustered"} or set(methods) - {
+    if set(names) - {"tall", "wide", "clustered", "wave"} or set(methods) - {
         "scipy",
         "spectra",
         "cupy",
@@ -81,6 +105,12 @@ def main():
             parser.error("One fixture, size and method per worker")
         p = snapshots(sizes[0], names[0], args.modes)
         row = run("I", sizes[0], methods[0], args.repeats, args.ncv, args.steps, problem=p)
+        if methods[0] == "warp":
+            row["strict_counts_pass"] = (
+                row.get("status") == 0
+                and all(c.get("solver_full_count", False) for c in row.get("validation", []))
+                and bool(row.get("validation"))
+            )
         row.update(
             variant=names[0],
             reference="Analytic singular spectrum and independently generated left/right bases",
@@ -146,7 +176,12 @@ def main():
                 report["cases"].append(row)
                 destination.write_text(json.dumps(report, indent=2) + "\n")
                 print(name, size, method, row["outcome"], row.get("solve_seconds"), flush=True)
-    if any(not r["accepted"] or not r.get("timing_uncontended") for r in report["cases"]):
+    if any(
+        not r["accepted"]
+        or not r.get("timing_uncontended")
+        or not r.get("strict_counts_pass", True)
+        for r in report["cases"]
+    ):
         raise SystemExit("POD numerical or contention gate failed; inspect retained rows")
 
 

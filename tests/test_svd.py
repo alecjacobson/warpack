@@ -55,7 +55,7 @@ def test_long_snapshot_rows_repeated_singular_subspace(shape):
         assert solver.count_right.numpy()[0] == 4
 
 
-@pytest.mark.parametrize("variant", ["tall", "wide", "clustered"])
+@pytest.mark.parametrize("variant", ["tall", "wide", "clustered", "wave"])
 def test_pod_fixture_reference_and_selection_gate(variant):
     from benchmarks.applications.pod_compare import snapshots
     from benchmarks.applications.runner import accuracy
@@ -66,6 +66,7 @@ def test_pod_fixture_reference_and_selection_gate(variant):
     assert result["accepted"]
     assert result["left_subspace_error"] < 1e-12
     assert result["right_subspace_error"] < 1e-12
+    assert result["reconstruction_energy_error"] < 1e-12
     wrong = accuracy(problem, values[4:8], u[:, 4:8], vt[4:8].T)
     assert wrong["residual"] < 1e-12
     assert not wrong["accepted"]
