@@ -124,17 +124,17 @@ vectors, non-diagonal mass, scaling units, and changed data under graph replay.
 The production diagnostics also run as the finalizer of an actual captured
 Hodge eigensolve.
 
-The extreme weak_scale=1e-10 fixture exposed an existing block-solver failure:
+The original extreme weak_scale=1e-10 run exposed a block-solver failure:
 its shift is about -1e-11 and the standalone solver returns non-finite pairs,
 status 1 and zero converged modes. [#46](https://github.com/alecjacobson/warpack/issues/46)
-tracks that failure separately. The diagnostic correctly reports invalid data
+tracks that failure separately; the subsequent [metric-QR recovery](WEAK_BLOCK.md) fixes it. The diagnostic correctly reports invalid data
 and basis, five ambiguous rows, zero accepted numerical modes, and flags 199.
 This is **a rejected eigensolve**, not a successful nullity estimate or timing
-win. A strict expected-failure regression keeps it visible; fixing diagnostics
-does not fix the upstream numerical failure. The independent-reference weak
+win. The original strict expected-failure regression is now a passing multi-scale
+regression; the failed reports below preserve the pre-fix evidence. The independent-reference weak
 fixture separately verifies that finite weak positive modes remain distinguishable.
 
-The final suite has **282 passing tests and one strict expected failure (#46)**
+At the diagnostic implementation commit, the suite had **282 passing tests and one strict expected failure (#46)**
 in 161.62 seconds. The 26 focused diagnostics tests pass, including device-bound
 updates and invalid-bound recovery. Lint, formatting and wheel build pass. See
 [validation provenance](../../results/nullspace_diagnostics_validation.json).

@@ -35,7 +35,8 @@ operations. Regular mode applies `M^-1 K` while preserving the M metric. It
 supports physical LM/LA/SA selection. F uses this regular mode on the reciprocal
 pencil; this does **not** add support for an arbitrary singular mass matrix.
 
-D retains the existing block `GeneralizedEigensolver` for its repeated nullspace.
+D uses block `GeneralizedEigensolver` for its repeated nullspace, with
+[device-controlled metric QR recovery](WEAK_BLOCK.md) for ill-conditioned inverse images.
 G uses `BucklingEigensolver`. E/H use the existing complex
 `ShiftInvertEigensolver`, and I uses `PartialSVD`. All inverse paths in `warp`
 use cuDSS. SVD requires no sparse inverse. `warp-block` selects the older block
