@@ -172,3 +172,5 @@ and invalid states explicitly, with completeness always unverified. The
 case exposes a separate pre-existing non-finite block-solver failure (#46),
 retained as an expected-failure regression; the earlier weak_scale=1e-4
 coverage remains passing.
+
+The [Hodge CG follow-up](HODGE_CG.md) compares the existing mass-Krylov outer solver at larger sizes, retains failed short budgets, and reduces the tested iterative cost without changing production defaults.

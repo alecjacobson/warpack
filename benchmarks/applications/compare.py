@@ -96,6 +96,9 @@ def run(
                 "warp-cg": "cg",
                 "warp-cg-bj": "cg-bj",
                 "warp-cg-fsai": "cg-fsai",
+                "warp-krylov": "krylov",
+                "warp-cg-krylov": "cg",
+                "warp-cg-fsai-krylov": "cg-fsai",
             }[method]
             if method != "warp" and api_class not in "ABCD":
                 raise Unsupported(
@@ -128,9 +131,15 @@ def run(
             row["start"] = "Warp seed 42; same start restored on every replay"
             setup, (solver, inverse) = timed(
                 lambda: warp_setup(
-                    p, selected, ncv, inverse_transform=warp_inverse_transform, cg_tol=cg_tol
+                    p,
+                    selected,
+                    ncv,
+                    inverse_transform=warp_inverse_transform,
+                    cg_tol=cg_tol,
+                    force_krylov=method.endswith("-krylov"),
                 )
             )
+            row["iteration_method"] = type(solver).__name__
             # Complex shift-invert wraps the real factor object twice.
             factor = getattr(inverse, "inverse", inverse)
             factor = getattr(factor, "inverse", factor)

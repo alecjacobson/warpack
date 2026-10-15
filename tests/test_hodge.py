@@ -148,3 +148,27 @@ def test_extreme_weak_component_retains_finite_independent_modes(scale):
     finally:
         solver.graph = graph = None
         inverse.close()
+
+
+@pytest.mark.parametrize("method", ["krylov", "cg", "cg-fsai"])
+def test_mass_krylov_hodge_preserves_complete_harmonic_space(method):
+    import warp.optim.linear as linear
+
+    if method == "cg-fsai" and not hasattr(linear, "FSAI"):
+        pytest.skip("Requires pinned upstream Warp FSAI")
+    problem = make_hodge_case("large_disconnected", side=7).problem
+    solver, inverse = warp_setup(problem, method, ncv=32, force_krylov=True)
+    graph = solver.capture(2)
+    try:
+        for _ in range(2):
+            wp.capture_launch(graph)
+            result = accuracy(problem, *warp_output(problem, solver))
+            assert result["accepted"], result
+            assert result["recovered_nullity"] == 4
+            assert result["positive_guard"] > 1e-8
+            assert result["nullspace_subspace_error"] < 1e-9
+            assert solver.converged.numpy()[0] == problem.k
+            assert solver.status.numpy()[0] == 0
+    finally:
+        solver.graph = graph = None
+        getattr(inverse, "close", lambda: None)()

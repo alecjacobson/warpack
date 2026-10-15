@@ -1,0 +1,535 @@
+{
+  "baseline": {
+    "gpu": "NVIDIA L40",
+    "warp": "1.18.0",
+    "versions": {
+      "numpy": "2.2.6",
+      "scipy": "1.15.0",
+      "cupy-cuda12x": "14.2.0",
+      "nvidia-cudss-cu12": "0.8.0.10"
+    },
+    "git_head": "7aec27f228358506b08fe95fa50eee3f0b16f269",
+    "git_dirty": true,
+    "blas_threads": "4",
+    "protocol": "Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses upstream diagonal preconditioning. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
+    "cases": [
+      {
+        "api_class": "D",
+        "requested_size": 10086,
+        "problem": "hodge_large_disconnected",
+        "n": 10086,
+        "columns": 10086,
+        "nnz": 70602,
+        "mass_nnz": 10086,
+        "k": 6,
+        "ncv": 32,
+        "method": "warp",
+        "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+        "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+        "target": [
+          -0.001,
+          0.0
+        ],
+        "seed": 2026,
+        "outer_cycles": 20,
+        "start": "Warp seed 42; same start restored on every replay",
+        "cudss_refinement_steps": 0,
+        "cudss_reordering": "default",
+        "cudss_matching": false,
+        "cudss_mtype": "spd",
+        "setup_seconds": 0.3063700459897518,
+        "capture_seconds": 0.17151415348052979,
+        "graph_audit": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 40,
+            "DtoD (DEVICE to DEVICE)": 60
+          },
+          "method": "CUDA graph DOT including nested bodies; not an API trace"
+        },
+        "warmup_seconds": 0.03337037190794945,
+        "samples_seconds": [
+          0.029688194394111633,
+          0.0296766497194767,
+          0.02971583604812622
+        ],
+        "solve_seconds": 0.029688194394111633,
+        "validation": [
+          {
+            "accepted": true,
+            "residual": 1.4966031882999963e-13,
+            "max_absolute_residual": 3.5431998047369406e-15,
+            "orthogonality": 3.441691376337985e-14,
+            "spectrum_error": 2.8622937353617317e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732737,
+            "nullspace_subspace_error": 8.741344095478409e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 1.4966031975632597e-13
+          },
+          {
+            "accepted": true,
+            "residual": 1.1715919649559276e-13,
+            "max_absolute_residual": 2.9912189261974143e-15,
+            "orthogonality": 2.177147351289932e-13,
+            "spectrum_error": 2.8796409701215e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732739,
+            "nullspace_subspace_error": 9.526210950598127e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 1.1715919620522773e-13
+          },
+          {
+            "accepted": true,
+            "residual": 2.651802271996736e-13,
+            "max_absolute_residual": 6.9310402144202865e-15,
+            "orthogonality": 6.106226635438361e-14,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732746,
+            "nullspace_subspace_error": 7.082727709287853e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 2.6518022909087853e-13
+          }
+        ],
+        "accepted": true,
+        "other_gpu_processes": [],
+        "timing_uncontended": true,
+        "reported_converged": 6,
+        "status": 0,
+        "device_only_graph": false,
+        "outcome": "passed",
+        "contract_accepted": false,
+        "fixture": "large_disconnected",
+        "expected_nullity": 4,
+        "reference_positive_guard": 0.007823251356732452,
+        "nullity_cutoff": 1e-08,
+        "incidence_rank1": 3360,
+        "incidence_rank2": 6722,
+        "vertices": 3362,
+        "faces": 6724,
+        "boundary_composition_nnz": 0,
+        "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+        "worker_wall_limit_seconds": 180
+      },
+      {
+        "api_class": "D",
+        "requested_size": 10086,
+        "problem": "hodge_large_disconnected",
+        "n": 10086,
+        "columns": 10086,
+        "nnz": 70602,
+        "mass_nnz": 10086,
+        "k": 6,
+        "ncv": 32,
+        "method": "warp-cg",
+        "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+        "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+        "target": [
+          -0.001,
+          0.0
+        ],
+        "seed": 2026,
+        "outer_cycles": 20,
+        "cg_preconditioner": "upstream diagonal",
+        "cg_block_size": 1,
+        "cg_tolerance": 1e-13,
+        "cg_maxiter": 10000,
+        "start": "Warp seed 42; same start restored on every replay",
+        "cudss_refinement_steps": null,
+        "cudss_reordering": null,
+        "cudss_matching": null,
+        "cudss_mtype": null,
+        "setup_seconds": 0.1235005296766758,
+        "capture_seconds": 1.6416326686739922,
+        "graph_audit": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "DtoD (DEVICE to DEVICE)": 1940
+          },
+          "method": "CUDA graph DOT including nested bodies; not an API trace"
+        },
+        "warmup_seconds": 1.9085196144878864,
+        "cg_statistics": [
+          {
+            "total_iterations": 75690,
+            "max_iterations_per_rhs": 207,
+            "unconverged_rhs": 0,
+            "rhs_calls": 640
+          },
+          {
+            "total_iterations": 75614,
+            "max_iterations_per_rhs": 207,
+            "unconverged_rhs": 0,
+            "rhs_calls": 640
+          },
+          {
+            "total_iterations": 75680,
+            "max_iterations_per_rhs": 207,
+            "unconverged_rhs": 0,
+            "rhs_calls": 640
+          }
+        ],
+        "samples_seconds": [
+          1.8150446638464928,
+          1.8131815642118454,
+          1.8147157430648804
+        ],
+        "solve_seconds": 1.8147157430648804,
+        "validation": [
+          {
+            "accepted": true,
+            "residual": 1.9389352490039073e-13,
+            "max_absolute_residual": 5.556834289585644e-15,
+            "orthogonality": 1.1612932837579137e-13,
+            "spectrum_error": 2.914335439641036e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732739,
+            "nullspace_subspace_error": 4.83628908962538e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 1.9389353005363815e-13
+          },
+          {
+            "accepted": true,
+            "residual": 2.348161729336944e-13,
+            "max_absolute_residual": 6.698905753027562e-15,
+            "orthogonality": 1.9984014443252818e-13,
+            "spectrum_error": 2.96637714392034e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732746,
+            "nullspace_subspace_error": 6.09776265096937e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 2.3481617430802426e-13
+          },
+          {
+            "accepted": true,
+            "residual": 3.342258894163747e-13,
+            "max_absolute_residual": 9.663941196759451e-15,
+            "orthogonality": 8.79296635503124e-14,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732742,
+            "nullspace_subspace_error": 6.546120914217675e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 3.342258888662101e-13
+          }
+        ],
+        "accepted": true,
+        "other_gpu_processes": [],
+        "timing_uncontended": true,
+        "reported_converged": 6,
+        "status": 0,
+        "device_only_graph": true,
+        "outcome": "passed",
+        "contract_accepted": true,
+        "fixture": "large_disconnected",
+        "expected_nullity": 4,
+        "reference_positive_guard": 0.007823251356732452,
+        "nullity_cutoff": 1e-08,
+        "incidence_rank1": 3360,
+        "incidence_rank2": 6722,
+        "vertices": 3362,
+        "faces": 6724,
+        "boundary_composition_nnz": 0,
+        "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+        "worker_wall_limit_seconds": 180
+      }
+    ]
+  },
+  "current": {
+    "gpu": "NVIDIA L40",
+    "warp": "1.18.0",
+    "versions": {
+      "numpy": "2.2.6",
+      "scipy": "1.15.0",
+      "cupy-cuda12x": "14.2.0",
+      "nvidia-cudss-cu12": "0.8.0.10"
+    },
+    "git_head": "0be2acd87f7e54f339d75827422e862573808a83",
+    "git_dirty": true,
+    "blas_threads": "4",
+    "protocol": "Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses the explicitly selected upstream diagonal or FSAI preconditioner. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
+    "cases": [
+      {
+        "api_class": "D",
+        "requested_size": 10086,
+        "problem": "hodge_large_disconnected",
+        "n": 10086,
+        "columns": 10086,
+        "nnz": 70602,
+        "mass_nnz": 10086,
+        "k": 6,
+        "ncv": 32,
+        "method": "warp",
+        "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+        "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+        "target": [
+          -0.001,
+          0.0
+        ],
+        "seed": 2026,
+        "outer_cycles": 20,
+        "start": "Warp seed 42; same start restored on every replay",
+        "iteration_method": "GeneralizedEigensolver",
+        "cudss_refinement_steps": 0,
+        "cudss_reordering": "default",
+        "cudss_matching": false,
+        "cudss_mtype": "spd",
+        "setup_seconds": 0.25587326288223267,
+        "capture_seconds": 0.1728956140577793,
+        "graph_audit": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 40,
+            "DtoD (DEVICE to DEVICE)": 60
+          },
+          "method": "CUDA graph DOT including nested bodies; not an API trace"
+        },
+        "warmup_seconds": 0.03328520059585571,
+        "samples_seconds": [
+          0.029698118567466736,
+          0.02969534322619438,
+          0.0296471044421196
+        ],
+        "solve_seconds": 0.02969534322619438,
+        "validation": [
+          {
+            "accepted": true,
+            "residual": 3.342472523728812e-13,
+            "max_absolute_residual": 9.780767368976553e-15,
+            "orthogonality": 8.359979375427429e-14,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.00782325135673274,
+            "nullspace_subspace_error": 6.082886398769809e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 3.342472593405562e-13
+          },
+          {
+            "accepted": true,
+            "residual": 3.446530307293061e-13,
+            "max_absolute_residual": 9.57675778956446e-15,
+            "orthogonality": 9.836575998178887e-14,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732746,
+            "nullspace_subspace_error": 5.3097862024730104e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 3.4465303047968945e-13
+          },
+          {
+            "accepted": true,
+            "residual": 3.030476211663766e-13,
+            "max_absolute_residual": 8.482472536874841e-15,
+            "orthogonality": 9.325873406851315e-14,
+            "spectrum_error": 2.96637714392034e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732747,
+            "nullspace_subspace_error": 6.452284359912018e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 3.030476216539166e-13
+          }
+        ],
+        "accepted": true,
+        "other_gpu_processes": [],
+        "timing_uncontended": true,
+        "reported_converged": 6,
+        "status": 0,
+        "device_only_graph": false,
+        "outcome": "passed",
+        "contract_accepted": false,
+        "fixture": "large_disconnected",
+        "expected_nullity": 4,
+        "reference_positive_guard": 0.007823251356732452,
+        "nullity_cutoff": 1e-08,
+        "incidence_rank1": 3360,
+        "incidence_rank2": 6722,
+        "vertices": 3362,
+        "faces": 6724,
+        "boundary_composition_nnz": 0,
+        "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+        "worker_wall_limit_seconds": 180
+      },
+      {
+        "api_class": "D",
+        "requested_size": 10086,
+        "problem": "hodge_large_disconnected",
+        "n": 10086,
+        "columns": 10086,
+        "nnz": 70602,
+        "mass_nnz": 10086,
+        "k": 6,
+        "ncv": 32,
+        "method": "warp-cg",
+        "matrix_sha256": "8589e02afa58d04fd31106efc664b92aed947550ca465fb5b8caa601fc31f75a",
+        "notes": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains; beta1=4; retain all zeros and two positive guard modes; fixed k is not a certified Betti counter",
+        "target": [
+          -0.001,
+          0.0
+        ],
+        "seed": 2026,
+        "outer_cycles": 20,
+        "cg_preconditioner": "upstream diagonal",
+        "cg_block_size": 1,
+        "cg_tolerance": 1e-13,
+        "cg_maxiter": 10000,
+        "start": "Warp seed 42; same start restored on every replay",
+        "iteration_method": "GeneralizedEigensolver",
+        "cudss_refinement_steps": null,
+        "cudss_reordering": null,
+        "cudss_matching": null,
+        "cudss_mtype": null,
+        "setup_seconds": 0.15652232989668846,
+        "capture_seconds": 1.6832914538681507,
+        "graph_audit": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "DtoD (DEVICE to DEVICE)": 1940
+          },
+          "method": "CUDA graph DOT including nested bodies; not an API trace"
+        },
+        "warmup_seconds": 1.9108003415167332,
+        "cg_statistics": [
+          {
+            "total_iterations": 75636,
+            "max_iterations_per_rhs": 207,
+            "unconverged_rhs": 0,
+            "rhs_calls": 640
+          },
+          {
+            "total_iterations": 75631,
+            "max_iterations_per_rhs": 207,
+            "unconverged_rhs": 0,
+            "rhs_calls": 640
+          },
+          {
+            "total_iterations": 75625,
+            "max_iterations_per_rhs": 207,
+            "unconverged_rhs": 0,
+            "rhs_calls": 640
+          }
+        ],
+        "samples_seconds": [
+          1.8136283569037914,
+          1.8134339861571789,
+          1.8132618479430676
+        ],
+        "solve_seconds": 1.8134339861571789,
+        "validation": [
+          {
+            "accepted": true,
+            "residual": 4.2315890249127697e-13,
+            "max_absolute_residual": 1.210643227445127e-14,
+            "orthogonality": 1.8607337892717624e-13,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732744,
+            "nullspace_subspace_error": 6.800301918819032e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 4.2315889926645953e-13
+          },
+          {
+            "accepted": true,
+            "residual": 3.140201375371921e-13,
+            "max_absolute_residual": 8.77929998664706e-15,
+            "orthogonality": 8.992806499463768e-14,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732742,
+            "nullspace_subspace_error": 5.652438205185264e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 3.140201411323884e-13
+          },
+          {
+            "accepted": true,
+            "residual": 2.3663888065265135e-13,
+            "max_absolute_residual": 6.06430866894464e-15,
+            "orthogonality": 8.08242361927114e-14,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.00782325135673274,
+            "nullspace_subspace_error": 6.059318771361512e-14,
+            "reported_converged": 6,
+            "solver_full_count": true,
+            "reported_max_residual": 2.3663888354563416e-13
+          }
+        ],
+        "accepted": true,
+        "other_gpu_processes": [],
+        "timing_uncontended": true,
+        "reported_converged": 6,
+        "status": 0,
+        "device_only_graph": true,
+        "outcome": "passed",
+        "contract_accepted": true,
+        "fixture": "large_disconnected",
+        "expected_nullity": 4,
+        "reference_positive_guard": 0.007823251356732452,
+        "nullity_cutoff": 1e-08,
+        "incidence_rank1": 3360,
+        "incidence_rank2": 6722,
+        "vertices": 3362,
+        "faces": 6724,
+        "boundary_composition_nnz": 0,
+        "topology_reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+        "worker_wall_limit_seconds": 180
+      }
+    ],
+    "regression_checks": [
+      {
+        "api_class": "D",
+        "n": 10086,
+        "method": "warp",
+        "comparable": true,
+        "time_ratio": 1.039167438855426,
+        "performance_regression": false,
+        "accuracy_regression": false,
+        "graph_regression": false,
+        "fixture": "large_disconnected"
+      },
+      {
+        "api_class": "D",
+        "n": 10086,
+        "method": "warp-cg",
+        "comparable": false,
+        "accuracy_regression": false,
+        "graph_regression": false,
+        "fixture": "large_disconnected"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "api_class": "D",
+      "n": 10086,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0002407971326193,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "D",
+      "n": 10086,
+      "method": "warp-cg",
+      "comparable": true,
+      "time_ratio": 0.9992936872275452,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "note": "Fresh main control carries complete CG configuration metadata. The older hodge_large.json CG row lacks those fields and was correctly marked noncomparable by the original comparison; no old metadata was inferred or silently filled."
+}
