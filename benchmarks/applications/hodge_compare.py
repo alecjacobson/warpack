@@ -70,6 +70,14 @@ def main():
             lobpcg_tol=args.lobpcg_tol,
             cg_tol=args.cg_tol,
         )
+        if methods[0].startswith("warp"):
+            row["strict_counts_pass"] = (
+                row.get("status") == 0
+                and bool(row.get("validation"))
+                and all(
+                    trial.get("solver_full_count", False) for trial in row.get("validation", [])
+                )
+            )
         row.update(
             fixture=names[0],
             expected_nullity=p.nullity,
@@ -94,7 +102,7 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         git_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], text=True)),
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
-        protocol="Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses the explicitly selected upstream diagonal or FSAI preconditioner. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
+        protocol="Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated; strict counts are reported separately from numerical acceptance. Warp cuDSS uses SPD factors; pure-Warp CG uses the explicitly selected upstream diagonal or FSAI preconditioner. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
         cases=[],
     )
     folder = Path("build/hodge-workers")
