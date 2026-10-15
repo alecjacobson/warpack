@@ -53,3 +53,19 @@ def test_long_snapshot_rows_repeated_singular_subspace(shape):
         assert np.linalg.norm(v - right[:, :4] @ (right[:, :4].T @ v)) < 1e-9
         assert solver.count_left.numpy()[0] == 4
         assert solver.count_right.numpy()[0] == 4
+
+
+@pytest.mark.parametrize("variant", ["tall", "wide", "clustered"])
+def test_pod_fixture_reference_and_selection_gate(variant):
+    from benchmarks.applications.pod_compare import snapshots
+    from benchmarks.applications.runner import accuracy
+
+    problem = snapshots(101, variant)
+    u, values, vt = np.linalg.svd(problem.a.toarray(), full_matrices=False)
+    result = accuracy(problem, values[:4], u[:, :4], vt[:4].T)
+    assert result["accepted"]
+    assert result["left_subspace_error"] < 1e-12
+    assert result["right_subspace_error"] < 1e-12
+    wrong = accuracy(problem, values[4:8], u[:, 4:8], vt[4:8].T)
+    assert wrong["residual"] < 1e-12
+    assert not wrong["accepted"]

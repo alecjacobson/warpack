@@ -16,9 +16,11 @@ class Unsupported(Exception):
 
 
 def spectra_setup(p, ncv):
-    if p.api_class in "EHI":
+    if p.mode == "svd":
+        return spectra_svd_setup(p, ncv)
+    if p.api_class in "EH":
         raise Unsupported(
-            "This native adapter covers real symmetric pencils; upstream harness tracks complex/general/SVD Spectra separately"
+            "This native adapter covers real symmetric pencils; upstream harness tracks complex/general Spectra separately"
         )
     path = Path("build/application_spectra.so")
     if not path.exists():
@@ -73,6 +75,41 @@ def spectra_setup(p, ncv):
         return values, v.reshape((p.n, p.k), order="F"), None
 
     return solve, lambda: lib.app_free(ctx)
+
+
+def spectra_svd_setup(p, ncv):
+    path = Path("build/application_spectra.so")
+    if not path.exists():
+        raise Unsupported("Compile benchmarks/applications/spectra.cpp first")
+    lib = ctypes.CDLL(str(path.resolve()))
+    if not hasattr(lib, "app_svd_setup"):
+        raise Unsupported("Recompile application_spectra.so for the SVD adapter")
+    ip = np.ctypeslib.ndpointer(dtype=np.int32, flags="C_CONTIGUOUS")
+    dp = np.ctypeslib.ndpointer(dtype=np.float64, flags="C_CONTIGUOUS")
+    lib.app_svd_setup.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ip, ip, dp]
+    lib.app_svd_setup.restype = ctypes.c_void_p
+    lib.app_svd_solve.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, dp, dp, dp]
+    lib.app_svd_solve.restype = ctypes.c_int
+    lib.app_svd_free.argtypes = [ctypes.c_void_p]
+    a = p.a.tocsc()
+    a.sort_indices()
+    context = lib.app_svd_setup(*a.shape, a.nnz, a.indptr, a.indices, a.data)
+    if not context:
+        raise RuntimeError("Spectra SVD setup failed")
+
+    def solve():
+        values = np.empty(p.k)
+        u, v = np.empty(a.shape[0] * p.k), np.empty(a.shape[1] * p.k)
+        count = lib.app_svd_solve(context, p.k, min(ncv, min(a.shape)), values, u, v)
+        if count != p.k:
+            raise RuntimeError(f"Spectra SVD converged {count}/{p.k}")
+        return (
+            values,
+            u.reshape((a.shape[0], p.k), order="F"),
+            v.reshape((a.shape[1], p.k), order="F"),
+        )
+
+    return solve, lambda: lib.app_svd_free(context)
 
 
 def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
@@ -137,7 +174,7 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
                 with stream:
                     cp.random.seed(2026)
                     if p.mode == "svd":
-                        u, w, vt = cl.svds(a, k=p.k, tol=1e-11, maxiter=10000)
+                        u, w, vt = cl.svds(a, k=p.k, ncv=ncv, tol=1e-11, maxiter=10000)
                         return w, u, vt.T
                     w, v = cl.eigsh(
                         a,

@@ -45,13 +45,22 @@ def accuracy(p, values, vectors, right=None, reference=None):
             1, float(max(values))
         )
         orth = max(abs(u.T @ u - np.eye(p.k)).max(), abs(v.T @ v - np.eye(p.k)).max())
-        return dict(
+        result = dict(
             accepted=bool(residual < 1e-8 and orth < 1e-8 and value_error < 1e-8),
             residual=float(residual),
             orthogonality=float(orth),
             spectrum_error=value_error,
             captured_energy=float(sum(values**2) / sum(p.a.data**2)),
         )
+        for name, basis, vectors in (
+            ("left", p.requested_basis, u),
+            ("right", p.right_requested_basis, v),
+        ):
+            if basis is not None:
+                error = float(np.linalg.norm(vectors - basis @ (basis.T @ vectors)))
+                result[f"{name}_subspace_error"] = error
+                result["accepted"] &= error < 1e-8
+        return result
     av = p.a @ vectors
     bv = vectors if p.b is None else p.b @ vectors
     r = av - bv * values
