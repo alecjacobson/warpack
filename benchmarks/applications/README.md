@@ -18,7 +18,7 @@ implementation bugs and the remaining coverage requirements.
 | F / P2 | P1 Cauchy–Riemann energy and centered boundary norm; reciprocal spectral-conformal pencil with SPD regularized metric | [#25](https://github.com/alecjacobson/warpack/issues/25) |
 | G / P2 | Coupled SPD stiffness / indefinite geometric-stiffness pencil; analytic buckling factors | [#26](https://github.com/alecjacobson/warpack/issues/26) |
 | H / P3 | Damped coupled chain, standard first-order nonsymmetric linearization; analytic complex frequencies | [#27](https://github.com/alecjacobson/warpack/issues/27) |
-| I / P2 | Tall correlated rank-deficient snapshots; known singular values, both SVD equations and captured energy | [#28](https://github.com/alecjacobson/warpack/issues/28) |
+| I / P2 | [Large tall/wide POD and analytic string snapshots](POD.md); repeated leading clusters, rank deficiency, both singular subspaces and reconstruction energy | [#28](https://github.com/alecjacobson/warpack/issues/28) |
 
 The FEM bar, ring and load-factor pencil have analytic spectra, so comparison
 does not depend on trusting another iterative solver. The small conformal case

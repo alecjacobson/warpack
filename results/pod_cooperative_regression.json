@@ -1,0 +1,428 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "1b2eb2c4ec802180f84c22cf55f7827187fb433f",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "I",
+      "requested_size": 80,
+      "problem": "snapshot_pod",
+      "n": 80,
+      "columns": 40,
+      "nnz": 3200,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "5c85d3d48a1ffbc8b59489a164e5f96f20f0e6ba2479bc2a0ed9d1ae2afc5860",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.11056191101670265,
+      "capture_seconds": 0.20188064128160477,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.01047028973698616,
+      "samples_seconds": [
+        0.007297821342945099,
+        0.0073053836822509766,
+        0.0073097459971904755
+      ],
+      "solve_seconds": 0.0073053836822509766,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.423238176929701e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 8.453513114205656e-15,
+          "captured_energy": 0.7074263696258447,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 8.67559294831091e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 6.423238176929701e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 8.453513114205656e-15,
+          "captured_energy": 0.7074263696258447,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 8.67559294831091e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 6.423238176929701e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 8.453513114205656e-15,
+          "captured_energy": 0.7074263696258447,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 8.67559294831091e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 4,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 1024,
+      "problem": "snapshot_pod",
+      "n": 1024,
+      "columns": 48,
+      "nnz": 49152,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "4d41170e7c0fa78b4336733a6ee47a06b06a9a5e483a15b14a00ea3c65ec9923",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.10790719464421272,
+      "capture_seconds": 0.21438461169600487,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.014305472373962402,
+      "samples_seconds": [
+        0.010921914130449295,
+        0.010927706956863403,
+        0.01092514768242836
+      ],
+      "solve_seconds": 0.01092514768242836,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 9.431161060163745e-15,
+          "orthogonality": 7.771561172376096e-16,
+          "spectrum_error": 9.634315674527908e-15,
+          "captured_energy": 0.6393466566909395,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 9.849234185377298e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 9.431161060163745e-15,
+          "orthogonality": 7.771561172376096e-16,
+          "spectrum_error": 9.634315674527908e-15,
+          "captured_energy": 0.6393466566909395,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 9.849234185377298e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 9.431161060163745e-15,
+          "orthogonality": 7.771561172376096e-16,
+          "spectrum_error": 9.634315674527908e-15,
+          "captured_energy": 0.6393466566909395,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 9.849179354773534e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 4,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 10000,
+      "problem": "snapshot_pod",
+      "n": 10000,
+      "columns": 48,
+      "nnz": 480000,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "44be744c2c2f0f196e344b0df74d72ee81415ac97d8d9c0a9a49fc9cc7867587",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.11957209184765816,
+      "capture_seconds": 0.20172595977783203,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.020973600447177887,
+      "samples_seconds": [
+        0.01770414412021637,
+        0.0177905410528183,
+        0.017729569226503372
+      ],
+      "solve_seconds": 0.017729569226503372,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.8629309605468e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 5.9888989328146456e-15,
+          "captured_energy": 0.6393466566909405,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 6.8569038883624746e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 9.280432335446003e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 8.881784197001252e-15,
+          "captured_energy": 0.6393466566909433,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 9.331000970546923e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 4.702260833902095e-15,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 5.9888989328146456e-15,
+          "captured_energy": 0.6393466566909405,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 6.856933893328901e-15,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 4,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod",
+      "n": 100000,
+      "columns": 48,
+      "nnz": 4800000,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "12c3046ec8b3ca195d468ee767c9a0526ce3a8707a838547edb172b9b9760019",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.1970774307847023,
+      "capture_seconds": 0.25000810995697975,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.1452920362353325,
+      "samples_seconds": [
+        0.1420043706893921,
+        0.14199348166584969,
+        0.14200834184885025
+      ],
+      "solve_seconds": 0.1420043706893921,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.0801108105592905e-14,
+          "orthogonality": 9.992007221626409e-16,
+          "spectrum_error": 5.042882514183285e-15,
+          "captured_energy": 0.6393466566909873,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 1.2268393195019874e-14,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 1.0901577030278813e-14,
+          "orthogonality": 1.3322676295501878e-15,
+          "spectrum_error": 5.042882514183285e-15,
+          "captured_energy": 0.6393466566909873,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 1.2395920365743378e-14,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        },
+        {
+          "accepted": true,
+          "residual": 1.2167911019992559e-14,
+          "orthogonality": 9.992007221626409e-16,
+          "spectrum_error": 6.188992176497668e-15,
+          "captured_energy": 0.6393466566909893,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 1.3741864102001266e-14,
+          "left_converged": 4,
+          "right_converged": 4,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 3,
+          "augmented_operator_products": 132
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 4,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    }
+  ],
+  "regression_checks": [
+    {
+      "api_class": "I",
+      "n": 80,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 2.0154491899247273,
+      "performance_regression": true,
+      "accuracy_regression": false,
+      "graph_regression": false
+    },
+    {
+      "api_class": "I",
+      "n": 1024,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.1778197600983478,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "performance_comparisons": 2
+}
