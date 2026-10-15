@@ -177,6 +177,13 @@ class SymmetricEigensolver:
     `finalize` can be captured. Results use row-major (k,n) eigenvector storage.
     Fixed iteration budgets make replay deterministic; inspect `converged` and
     `residuals` on device or explicitly transfer them after completion.
+
+    ``initial_vectors`` optionally supplies 1..ncv independent FP64 row vectors
+    on the operator device. Remaining rows are seeded randomly. Initialization
+    reads its current contents without modifying it, so a captured graph can
+    reuse an updated starting subspace. The combined block must have full row
+    rank; inspect ``status`` after replay. A starting subspace does not certify
+    that all requested eigenvalues have been found.
     """
 
     def __init__(
@@ -188,6 +195,7 @@ class SymmetricEigensolver:
         iteration_operator=None,
         tol=1.0e-9,
         target=None,
+        initial_vectors=None,
     ):
         self.op = operator
         self.iter_op = iteration_operator or operator
@@ -210,11 +218,25 @@ class SymmetricEigensolver:
                     "Block iteration needs an explicit iteration_operator for this selection; use KrylovSchur otherwise"
                 )
         self.tol = tol
+        self.initial_vectors = initial_vectors
+        if initial_vectors is not None:
+            if (
+                initial_vectors.dtype != wp.float64
+                or initial_vectors.ndim != 2
+                or initial_vectors.shape[1] != self.n
+                or not 1 <= initial_vectors.shape[0] <= self.m
+            ):
+                raise ValueError("initial_vectors must have shape (1..ncv, n) and dtype FP64")
+            if initial_vectors.device != self.device:
+                raise ValueError("initial_vectors must be on the operator device")
 
         def empty(shape, dtype=wp.float64):
             return wp.zeros(shape, dtype=dtype, device=self.device)
 
         self.q, self.z = empty((self.m, self.n)), empty((self.m, self.n))
+        self._initial_rows = (
+            self.q[: initial_vectors.shape[0]] if initial_vectors is not None else None
+        )
         self.g, self.l, self.v = [empty((self.m, self.m)) for _ in range(3)]
         self.coeff = empty((self.m, self.m))
         self.jtmp, self.vtmp = empty((self.m, self.m)), empty((self.m, self.m))
@@ -350,7 +372,10 @@ class SymmetricEigensolver:
 
     def initialize(self, seed=42):
         self.status.zero_()
-        wp.launch(K.random_block, self.q.shape, [self.q, seed], device=self.device)
+        if self.initial_vectors is None or self.initial_vectors.shape[0] < self.m:
+            wp.launch(K.random_block, self.q.shape, [self.q, seed], device=self.device)
+        if self.initial_vectors is not None:
+            wp.copy(self._initial_rows, self.initial_vectors)
         self.orthogonalize()
 
     def step(self):

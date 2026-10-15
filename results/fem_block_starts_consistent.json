@@ -1,0 +1,1023 @@
+{
+  "arguments": {
+    "case": "clamped_consistent",
+    "side": 6,
+    "modes": 6,
+    "ncv": 16,
+    "change": 0.02,
+    "budgets": "4,8,16,32,64",
+    "bootstrap_steps": 64,
+    "repeats": 3,
+    "cupy": true,
+    "out": "results/fem_block_starts_consistent.json"
+  },
+  "n": 2646,
+  "k": 6,
+  "ncv": 16,
+  "source_revision": "b587ce49951f2944122ce5615dacf537f130799c",
+  "source_changes": " M warpack/generalized.py\n M warpack/kernels.py\n M warpack/solver.py\n?? benchmarks/applications/fem_starts.py\n?? tests/test_block_starts.py\n",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+  "source_quality": {
+    "accepted": true,
+    "residual": 3.064271492693228e-14,
+    "max_absolute_residual": 4.9404924595819466e-15,
+    "orthogonality": 1.9984014443252818e-15,
+    "spectrum_error": 1.1157741397482823e-13,
+    "recovered_nullity": 0,
+    "nullspace_subspace_error": 0.0,
+    "requested_subspace_error": 7.538722954114099e-15
+  },
+  "start_provenance": "Computed Warpack modes/subspace of unmodified beam; no reference starts",
+  "inverse_setup_seconds": 0.18166784569621086,
+  "rows": [
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "random",
+      "steps": 4,
+      "capture_seconds": 0.006249472498893738,
+      "seconds": [
+        0.006680253893136978,
+        0.00717587023973465,
+        0.007786590605974197
+      ],
+      "median_seconds": 0.00717587023973465,
+      "quality": [
+        {
+          "accepted": false,
+          "residual": 2.7402026878503417e-05,
+          "max_absolute_residual": 2.4791631047325208e-06,
+          "orthogonality": 4.6629367034256575e-15,
+          "spectrum_error": 1.6017053373014967e-09,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.2169899747960563e-05,
+          "status": 0,
+          "converged": 0,
+          "physical_accepted": false
+        },
+        {
+          "accepted": false,
+          "residual": 2.7402026878824005e-05,
+          "max_absolute_residual": 2.4791631045659873e-06,
+          "orthogonality": 5.329070518200751e-15,
+          "spectrum_error": 1.6017050231672816e-09,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.2169899747994293e-05,
+          "status": 0,
+          "converged": 0,
+          "physical_accepted": false
+        },
+        {
+          "accepted": false,
+          "residual": 2.7402026878582157e-05,
+          "max_absolute_residual": 2.4791631053986546e-06,
+          "orthogonality": 4.218847493575595e-15,
+          "spectrum_error": 1.6017009394224846e-09,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.2169899747960122e-05,
+          "status": 0,
+          "converged": 0,
+          "physical_accepted": false
+        }
+      ],
+      "accepted": false,
+      "physical_accepted": false
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "random",
+      "steps": 8,
+      "capture_seconds": 0.009530697017908096,
+      "seconds": [
+        0.015803761780261993,
+        0.010840576142072678,
+        0.01385558396577835
+      ],
+      "median_seconds": 0.01385558396577835,
+      "quality": [
+        {
+          "accepted": false,
+          "residual": 2.1662686774492188e-10,
+          "max_absolute_residual": 1.9302671223561663e-11,
+          "orthogonality": 3.3306690738754696e-15,
+          "spectrum_error": 8.396061623727746e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.537673467647892e-11,
+          "status": 0,
+          "converged": 3,
+          "physical_accepted": true
+        },
+        {
+          "accepted": false,
+          "residual": 2.166272460558409e-10,
+          "max_absolute_residual": 1.9301916402009178e-11,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 7.532863222081687e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.537673361013289e-11,
+          "status": 0,
+          "converged": 3,
+          "physical_accepted": true
+        },
+        {
+          "accepted": false,
+          "residual": 2.16626625512029e-10,
+          "max_absolute_residual": 1.9302415351848956e-11,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 7.863154571907671e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.537673981982495e-11,
+          "status": 0,
+          "converged": 3,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": false,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "random",
+      "steps": 16,
+      "capture_seconds": 0.013446833938360214,
+      "seconds": [
+        0.08612486720085144,
+        0.02081409841775894,
+        0.022695768624544144
+      ],
+      "median_seconds": 0.022695768624544144,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.107722630287991e-14,
+          "max_absolute_residual": 4.8382521947165635e-15,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 8.876233081878127e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.776045802671095e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.1445143811014314e-14,
+          "max_absolute_residual": 4.7427339833205906e-15,
+          "orthogonality": 3.774758283725532e-15,
+          "spectrum_error": 8.237854842718662e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.533244579875842e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.154684578746178e-14,
+          "max_absolute_residual": 4.319895136051244e-15,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 8.026912468039882e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.439870822151719e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "random",
+      "steps": 32,
+      "capture_seconds": 0.021733365952968597,
+      "seconds": [
+        0.055425047874450684,
+        0.04617377370595932,
+        0.05154478922486305
+      ],
+      "median_seconds": 0.05154478922486305,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.04279477807871e-14,
+          "max_absolute_residual": 5.025277069470313e-15,
+          "orthogonality": 1.5543122344752192e-15,
+          "spectrum_error": 7.606415497463104e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.41870581384514e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.1012212228195124e-14,
+          "max_absolute_residual": 4.489139095176231e-15,
+          "orthogonality": 2.4424906541753444e-15,
+          "spectrum_error": 8.155975894652556e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.881230685712716e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.0851252754363145e-14,
+          "max_absolute_residual": 4.603088743504458e-15,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 7.896461262646426e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.267442487182074e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "random",
+      "steps": 64,
+      "capture_seconds": 0.04234195500612259,
+      "seconds": [
+        0.10592522844672203,
+        0.09028122946619987,
+        0.09199191257357597
+      ],
+      "median_seconds": 0.09199191257357597,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.1271349480608766e-14,
+          "max_absolute_residual": 4.848552115355176e-15,
+          "orthogonality": 3.3306690738754696e-15,
+          "spectrum_error": 7.704947790898586e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.576890940243991e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.0685082910333035e-14,
+          "max_absolute_residual": 5.153863447127094e-15,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 7.893685705084863e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.834746009016278e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.191921070604208e-14,
+          "max_absolute_residual": 4.418340693312928e-15,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 8.34193825127727e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.387046217902742e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same batched cuDSS preconditioner",
+      "start": "random",
+      "block_width": 16,
+      "residual_history_lengths": [
+        49,
+        49,
+        49
+      ],
+      "seconds": [
+        1.4669431671500206,
+        1.5109973475337029,
+        1.5110556446015835
+      ],
+      "median_seconds": 1.5109973475337029,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 1.7442255988912342e-11,
+          "max_absolute_residual": 1.614906559171958e-12,
+          "orthogonality": 1.3322676295501878e-15,
+          "spectrum_error": 1.5182299861749016e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 6.801812205382669e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.7447298942874875e-11,
+          "max_absolute_residual": 1.6151949569498392e-12,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 7.521760991835436e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 6.799124506372286e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.7444410280531338e-11,
+          "max_absolute_residual": 1.6142712166988815e-12,
+          "orthogonality": 3.9968028886505635e-15,
+          "spectrum_error": 7.922829059481273e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 6.797528820536691e-13
+        }
+      ],
+      "accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_modes",
+      "steps": 4,
+      "capture_seconds": 0.0074387602508068085,
+      "seconds": [
+        0.010474186390638351,
+        0.006427869200706482,
+        0.006298806518316269
+      ],
+      "median_seconds": 0.006427869200706482,
+      "quality": [
+        {
+          "accepted": false,
+          "residual": 1.0322019812220493e-07,
+          "max_absolute_residual": 9.772058382970239e-09,
+          "orthogonality": 2.4424906541753444e-15,
+          "spectrum_error": 8.797129691373584e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 4.011739030458199e-08,
+          "status": 0,
+          "converged": 2,
+          "physical_accepted": false
+        },
+        {
+          "accepted": false,
+          "residual": 1.0322019856772728e-07,
+          "max_absolute_residual": 9.772057421933433e-09,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 8.458511668862911e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 4.01173903387985e-08,
+          "status": 0,
+          "converged": 2,
+          "physical_accepted": false
+        },
+        {
+          "accepted": false,
+          "residual": 1.0322019843804347e-07,
+          "max_absolute_residual": 9.772056126094997e-09,
+          "orthogonality": 1.5543122344752192e-15,
+          "spectrum_error": 9.05248098703737e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 4.011739035726542e-08,
+          "status": 0,
+          "converged": 2,
+          "physical_accepted": false
+        }
+      ],
+      "accepted": false,
+      "physical_accepted": false
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_modes",
+      "steps": 8,
+      "capture_seconds": 0.008678730577230453,
+      "seconds": [
+        0.016657210886478424,
+        0.010629214346408844,
+        0.011594519019126892
+      ],
+      "median_seconds": 0.011594519019126892,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 6.055535478688599e-13,
+          "max_absolute_residual": 5.713485240477212e-14,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 7.55506768257419e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.303427442179587e-13,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 6.062079389798672e-13,
+          "max_absolute_residual": 5.6083609978330173e-14,
+          "orthogonality": 1.9984014443252818e-15,
+          "spectrum_error": 7.993605777301127e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.303453897168788e-13,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 6.05869806365931e-13,
+          "max_absolute_residual": 5.6002077974959263e-14,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 8.301692666634608e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.303695941482625e-13,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_modes",
+      "steps": 16,
+      "capture_seconds": 0.012518443167209625,
+      "seconds": [
+        0.024570871144533157,
+        0.022666804492473602,
+        0.02138858661055565
+      ],
+      "median_seconds": 0.022666804492473602,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.0066216863462255e-14,
+          "max_absolute_residual": 5.461776864112977e-15,
+          "orthogonality": 2.4424906541753444e-15,
+          "spectrum_error": 8.185119249048967e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.4175818501112e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.098060605376037e-14,
+          "max_absolute_residual": 4.9231452248221785e-15,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 8.575085086448553e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.871666435788348e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.0809214061644885e-14,
+          "max_absolute_residual": 5.172945405362839e-15,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 8.532063944244328e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.002436873688623e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_modes",
+      "steps": 32,
+      "capture_seconds": 0.02338985726237297,
+      "seconds": [
+        0.04622308909893036,
+        0.042071785777807236,
+        0.04220472276210785
+      ],
+      "median_seconds": 0.04220472276210785,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.104003374929856e-14,
+          "max_absolute_residual": 5.656933255160368e-15,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 8.071321389024888e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.062228789319895e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.110105755765686e-14,
+          "max_absolute_residual": 4.89538964920655e-15,
+          "orthogonality": 1.9984014443252818e-15,
+          "spectrum_error": 8.334999357373363e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.282141699057415e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.092217103055169e-14,
+          "max_absolute_residual": 5.113964807179627e-15,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 8.748557434046234e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.19063561256588e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_modes",
+      "steps": 64,
+      "capture_seconds": 0.042178839445114136,
+      "seconds": [
+        0.09413780272006989,
+        0.08377202600240707,
+        0.08057131618261337
+      ],
+      "median_seconds": 0.08377202600240707,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.014197115377708e-14,
+          "max_absolute_residual": 4.7102079181460255e-15,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 8.298917109073045e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.104701787569145e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.913789143214422e-14,
+          "max_absolute_residual": 4.251807239619154e-15,
+          "orthogonality": 1.9984014443252818e-15,
+          "spectrum_error": 8.409939411535561e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.834044668201916e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.91413097815299e-14,
+          "max_absolute_residual": 4.4565046097844174e-15,
+          "orthogonality": 3.3306690738754696e-15,
+          "spectrum_error": 8.623657343775903e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.254072937939702e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same batched cuDSS preconditioner",
+      "start": "previous_modes",
+      "block_width": 16,
+      "residual_history_lengths": [
+        44,
+        44,
+        44
+      ],
+      "seconds": [
+        1.3655049949884415,
+        1.3607274629175663,
+        1.3648433201014996
+      ],
+      "median_seconds": 1.3648433201014996,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 1.2081103716963224e-12,
+          "max_absolute_residual": 1.3937895976257053e-13,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 7.922829059481273e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 6.929515664485367e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.227328311096732e-12,
+          "max_absolute_residual": 1.4474478473441854e-13,
+          "orthogonality": 3.3306690738754696e-15,
+          "spectrum_error": 7.939482404850651e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.024583762060302e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.2053435522224225e-12,
+          "max_absolute_residual": 1.4028069070942673e-13,
+          "orthogonality": 2.4424906541753444e-15,
+          "spectrum_error": 8.396061623727746e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 6.905038089401286e-14
+        }
+      ],
+      "accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_full_subspace",
+      "steps": 4,
+      "capture_seconds": 0.007099878042936325,
+      "seconds": [
+        0.005830511450767517,
+        0.005965471267700195,
+        0.0061543844640254974
+      ],
+      "median_seconds": 0.005965471267700195,
+      "quality": [
+        {
+          "accepted": false,
+          "residual": 5.471933096481827e-09,
+          "max_absolute_residual": 4.960816722687778e-10,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 7.868705687030797e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.516412200003018e-09,
+          "status": 0,
+          "converged": 2,
+          "physical_accepted": true
+        },
+        {
+          "accepted": false,
+          "residual": 5.471934058389279e-09,
+          "max_absolute_residual": 4.960811455633624e-10,
+          "orthogonality": 1.5543122344752192e-15,
+          "spectrum_error": 7.888134589961737e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.516412169249541e-09,
+          "status": 0,
+          "converged": 2,
+          "physical_accepted": true
+        },
+        {
+          "accepted": false,
+          "residual": 5.4719334825048435e-09,
+          "max_absolute_residual": 4.960816891823316e-10,
+          "orthogonality": 1.5543122344752192e-15,
+          "spectrum_error": 7.652212197228891e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.5164121631567848e-09,
+          "status": 0,
+          "converged": 2,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": false,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_full_subspace",
+      "steps": 8,
+      "capture_seconds": 0.007943663746118546,
+      "seconds": [
+        0.011484790593385696,
+        0.010914172977209091,
+        0.010997835546731949
+      ],
+      "median_seconds": 0.010997835546731949,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.84210540961435e-14,
+          "max_absolute_residual": 6.192962809237201e-15,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 8.090750291955828e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.2495255729098679e-14,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.708790441282179e-14,
+          "max_absolute_residual": 4.7444687067965674e-15,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 7.945033519973776e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.2374495191355303e-14,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.6688909605355015e-14,
+          "max_absolute_residual": 5.3212100524502315e-15,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 8.382183835919932e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.278727014053982e-14,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_full_subspace",
+      "steps": 16,
+      "capture_seconds": 0.012091539800167084,
+      "seconds": [
+        0.021379977464675903,
+        0.020667970180511475,
+        0.020419776439666748
+      ],
+      "median_seconds": 0.020667970180511475,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.245466098830678e-14,
+          "max_absolute_residual": 5.618769338688878e-15,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 8.210099267103033e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.02180025799081e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.091173325595161e-14,
+          "max_absolute_residual": 5.676015213396113e-15,
+          "orthogonality": 3.1086244689504383e-15,
+          "spectrum_error": 8.350264923961959e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.762807163974462e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.2182748161327355e-14,
+          "max_absolute_residual": 4.865899350114944e-15,
+          "orthogonality": 4.440892098500626e-15,
+          "spectrum_error": 7.985279104616438e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.686571563943291e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_full_subspace",
+      "steps": 32,
+      "capture_seconds": 0.020926225930452347,
+      "seconds": [
+        0.04567906633019447,
+        0.05076644569635391,
+        0.040888018906116486
+      ],
+      "median_seconds": 0.04567906633019447,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.0250572244637986e-14,
+          "max_absolute_residual": 5.115699530655604e-15,
+          "orthogonality": 4.440892098500626e-15,
+          "spectrum_error": 8.190670364172092e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.995143207841182e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.1659749055948586e-14,
+          "max_absolute_residual": 5.235395450498004e-15,
+          "orthogonality": 1.9984014443252818e-15,
+          "spectrum_error": 7.827072323607354e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 7.970440535954429e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.122999782925102e-14,
+          "max_absolute_residual": 4.93875773610597e-15,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 7.896461262646426e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.173638062364651e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "Warp block inverse iteration + cuDSS",
+      "start": "previous_full_subspace",
+      "steps": 64,
+      "capture_seconds": 0.046361006796360016,
+      "seconds": [
+        0.08724412694573402,
+        0.08012431487441063,
+        0.0816144198179245
+      ],
+      "median_seconds": 0.0816144198179245,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 3.0774591195814965e-14,
+          "max_absolute_residual": 5.06886199680423e-15,
+          "orthogonality": 1.5543122344752192e-15,
+          "spectrum_error": 7.92976795338518e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 9.22726692234011e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.059741126436658e-14,
+          "max_absolute_residual": 4.817327092787593e-15,
+          "orthogonality": 2.220446049250313e-15,
+          "spectrum_error": 7.846501226538294e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.936733074279208e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.255973377070176e-14,
+          "max_absolute_residual": 5.745404152435185e-15,
+          "orthogonality": 2.886579864025407e-15,
+          "spectrum_error": 8.285039321265231e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 8.806581366272101e-15,
+          "status": 0,
+          "converged": 6,
+          "physical_accepted": true
+        }
+      ],
+      "accepted": true,
+      "physical_accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same batched cuDSS preconditioner",
+      "start": "previous_full_subspace",
+      "block_width": 16,
+      "residual_history_lengths": [
+        35,
+        35,
+        35
+      ],
+      "seconds": [
+        1.0777264721691608,
+        1.0666548423469067,
+        1.077607985585928
+      ],
+      "median_seconds": 1.077607985585928,
+      "quality": [
+        {
+          "accepted": true,
+          "residual": 1.8483062120638803e-11,
+          "max_absolute_residual": 2.4598867864530916e-12,
+          "orthogonality": 3.3306690738754696e-15,
+          "spectrum_error": 8.977540932875172e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.1037582082901114e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.849101973828683e-11,
+          "max_absolute_residual": 2.461634411934921e-12,
+          "orthogonality": 3.219646771412954e-15,
+          "spectrum_error": 1.0372258607560525e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.1036179551104492e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.848785940610742e-11,
+          "max_absolute_residual": 2.4618741290352575e-12,
+          "orthogonality": 2.6645352591003757e-15,
+          "spectrum_error": 9.002520950929238e-14,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.1036509052054835e-12
+        }
+      ],
+      "accepted": true
+    }
+  ],
+  "other_gpu_processes_before": [
+    "2639657, /home/horde/tools/blender-4.5.3-linux-x64/blender",
+    "2642653, python",
+    "2643103, python"
+  ],
+  "other_gpu_processes_after": [
+    "2639657, /home/horde/tools/blender-4.5.3-linux-x64/blender",
+    "2643103, python"
+  ],
+  "timing_eligible": false,
+  "acceptance_note": "Exploratory solver tolerance 1e-11. Original physical acceptance is retained separately; accepted additionally requires all k device-converged pairs. Later harness uses 1e-8 matched to physical acceptance."
+}

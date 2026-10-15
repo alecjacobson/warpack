@@ -40,7 +40,7 @@ def cholesky(g: wp.array2d[wp.float64], l: wp.array2d[wp.float64], status: wp.ar
             for k in range(j):
                 v -= l[i, k] * l[j, k]
             if i == j:
-                if v <= wp.float64(0.0):
+                if not wp.isfinite(v) or v <= wp.float64(0.0):
                     wp.atomic_max(status, 0, 1)
                 l[i, j] = wp.sqrt(wp.max(v, wp.float64(1.0e-30)))
             else:

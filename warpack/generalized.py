@@ -174,9 +174,27 @@ class GeneralizedEigensolver(SymmetricEigensolver):
     physical residuals and the requested spectrum.
     """
 
-    def __init__(self, operator, mass, inverse, k, ncv=None, tol=1.0e-9, which="SA", target=None):
+    def __init__(
+        self,
+        operator,
+        mass,
+        inverse,
+        k,
+        ncv=None,
+        tol=1.0e-9,
+        which="SA",
+        target=None,
+        initial_vectors=None,
+    ):
         super().__init__(
-            operator, k, ncv=ncv, which=which, iteration_operator=inverse, tol=tol, target=target
+            operator,
+            k,
+            ncv=ncv,
+            which=which,
+            iteration_operator=inverse,
+            tol=tol,
+            target=target,
+            initial_vectors=initial_vectors,
         )
         if mass.n != self.n or mass.device != self.device:
             raise ValueError("mass and stiffness must have matching shape and device")

@@ -1,0 +1,28 @@
+{
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "runtime": "Warp 1.18.0+cu12 upstream FSAI overlay",
+    "result": "359 passed",
+    "seconds": 305.46
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "package": {
+    "command": "python -m pip wheel --no-deps --no-build-isolation <clean staging tree>",
+    "result": "passed",
+    "production_python_files": 18,
+    "application_modules_packaged": false,
+    "wheel_sha256": "0411bf68c6f79f3a0a2efcc2569d7b4b5d9f61597207c3c48584bdf396cb332c"
+  },
+  "performance_status": "Not accepted: unrelated GPU jobs present. Related-problem iteration/accuracy comparisons are valid; elapsed timing samples are diagnostic only.",
+  "numerical_reports": [
+    "results/fem_block_starts_consistent_large.json",
+    "results/fem_block_starts_lumped_large.json",
+    "results/anvil_lobpcg_screen.json"
+  ],
+  "minimum_version": {
+    "runtime": "Warp 1.15.0",
+    "command": "OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_block_starts.py tests/test_metric_qr.py",
+    "result": "26 passed",
+    "seconds": 13.79
+  }
+}
