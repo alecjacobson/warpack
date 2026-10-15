@@ -1,0 +1,53 @@
+{
+  "source_commit": "96bce262701a14a9ec90e3661032d2f78c2ca2c9",
+  "production_solver_changed": false,
+  "focused_tests": {
+    "passed": 34,
+    "failed": 0,
+    "seconds": 33.89,
+    "scope": "FEM, metric projection, and timing baseline guards"
+  },
+  "preceding_full_suite": {
+    "source_commit": "c330a14",
+    "passed": 256,
+    "seconds": 158.94
+  },
+  "checks": {
+    "ruff": "passed",
+    "python_formatting": "passed",
+    "wheel": "passed"
+  },
+  "default_regression": [
+    {
+      "api_class": "A",
+      "n": 11253,
+      "method": "warp-cg-bj",
+      "comparable": true,
+      "time_ratio": 1.0000846914257544,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false,
+      "fixture": "free"
+    },
+    {
+      "api_class": "A",
+      "n": 11253,
+      "method": "warp-cg-fsai",
+      "comparable": true,
+      "time_ratio": 0.999827536107492,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false,
+      "fixture": "free"
+    }
+  ],
+  "comparison_configurations": 24,
+  "external_numerical_passes": 24,
+  "all_trials_full_strict_counts": 18,
+  "retained_incomplete_strict_profiles": 6,
+  "notes": [
+    "The six incomplete 1e-14 profiles were retained and rerun at 1e-15, all then reaching full counts.",
+    "Pure Warp upstream BJ/FSAI and CG; no production/default algorithm changes.",
+    "No full upstream, complex or Anvil rerun."
+  ]
+}
