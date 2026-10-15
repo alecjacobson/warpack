@@ -1,0 +1,46 @@
+{
+  "source_commit": "3a8643b",
+  "cli_default_followup_commit": "a6e3fc7",
+  "full_suite": {
+    "passed": 311,
+    "failed": 0,
+    "xfailed": 0,
+    "seconds": 170.76
+  },
+  "focused_suite": {
+    "passed": 19,
+    "seconds": 10.74
+  },
+  "checks": {
+    "ruff": "passed",
+    "python_formatting": "passed",
+    "wheel": "passed"
+  },
+  "comparisons": {
+    "passed": 39,
+    "unsupported": 24,
+    "failed": 4
+  },
+  "saved_baseline_checks": [
+    {
+      "api_class": "B",
+      "n": 10890,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9997748045561322,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false,
+      "fixture": "clamped_consistent"
+    }
+  ],
+  "notes": [
+    "Production numerical code is unchanged from merged PR #48.",
+    "The CLI-default-only follow-up was committed while the full suite ran; numerical fixtures/tests were unchanged.",
+    "All 67 comparison profiles use source 3a8643b; all accepted Warp trials reach full strict counts.",
+    "Four short-budget block failures are preserved and classified by accepted 20-step follow-ups.",
+    "Reference construction and validation are outside solve timing; GPU jobs ran sequentially.",
+    "The published default omits the optional block method; explicit --methods warp-block --steps 5 reproduces the rejected profiles.",
+    "No full upstream or Anvil rerun; CPU package CI is separate from these local GPU checks."
+  ]
+}

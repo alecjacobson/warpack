@@ -1,0 +1,110 @@
+{
+  "source_commit": "3a8643b",
+  "cpu": "Intel Xeon Platinum 8362 @ 2.80GHz",
+  "gpu": "NVIDIA L40",
+  "blas_threads": 4,
+  "profiles": 67,
+  "outcomes": {
+    "passed": 39,
+    "unsupported": 24,
+    "failed": 4
+  },
+  "reports": [
+    {
+      "path": "interior_small.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 16,
+        "unsupported": 15,
+        "failed": 4
+      }
+    },
+    {
+      "path": "interior_small_block20.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "interior_large_k6.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 9,
+        "unsupported": 9
+      }
+    },
+    {
+      "path": "interior_larger_k6.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "interior_large_k20.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "interior_large_near.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "interior_regression.json",
+      "source_commit": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+      "outcomes": {
+        "passed": 1
+      }
+    }
+  ],
+  "accepted_warp_profiles": 17,
+  "all_accepted_warp_trials_full_count": true,
+  "all_timed_profiles_uncontended": true,
+  "largest_n": 41616,
+  "preserved_failures": [
+    {
+      "source_report": "interior_small.json",
+      "fixture": "clamped_consistent",
+      "method": "warp-block",
+      "cycles": 5,
+      "max_residual": 1.5159800965121409e-06,
+      "followup": "interior_small_block20.json; same fixture with 20 block steps passes every trial and full counts"
+    },
+    {
+      "source_report": "interior_small.json",
+      "fixture": "clamped_lumped",
+      "method": "warp-block",
+      "cycles": 5,
+      "max_residual": 5.004330832542469e-05,
+      "followup": "interior_small_block20.json; same fixture with 20 block steps passes every trial and full counts"
+    },
+    {
+      "source_report": "interior_small.json",
+      "fixture": "heterogeneous",
+      "method": "warp-block",
+      "cycles": 5,
+      "max_residual": 3.534985109687753e-08,
+      "followup": "interior_small_block20.json; same fixture with 20 block steps passes every trial and full counts"
+    },
+    {
+      "source_report": "interior_small.json",
+      "fixture": "disconnected",
+      "method": "warp-block",
+      "cycles": 5,
+      "max_residual": 4.1464875197203156e-05,
+      "followup": "interior_small_block20.json; same fixture with 20 block steps passes every trial and full counts"
+    }
+  ],
+  "notes": [
+    "The default primary comparison omits the optional block method as of a6e3fc7. Original five-step block failures remain in raw reports and are reproducible explicitly.",
+    "CuPy generalized interior shift and pure-Warp CG on indefinite systems are unsupported, not timing wins. Issue #49 tracks an optional suitable iterative inverse.",
+    "No production numerical changes, no Anvil or full upstream rerun.",
+    "Numerical acceptance and strict counts are separate from vendor cuDSS HtoD graph nodes (#29)."
+  ]
+}

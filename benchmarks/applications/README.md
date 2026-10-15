@@ -11,7 +11,7 @@ implementation bugs and the remaining coverage requirements.
 | Class / priority | Fixture and numerical contract | Coverage issue |
 |---|---|---|
 | A / P0 | Clamped/free tetrahedral FEM, disconnected bodies, material contrast, lumped/consistent mass and repeated Hermite bending; complete low-mode clusters | [#20](https://github.com/alecjacobson/warpack/issues/20) |
-| B / P1 | Same pencil, interior shift between known frequencies; nearest physical eigenvalues | [#21](https://github.com/alecjacobson/warpack/issues/21) |
+| B / P1 | [Coupled FEM pencils](INTERIOR.md), interior/near-eigenvalue shifts, consistent mass and repeated bands; complete nearest physical set | [#21](https://github.com/alecjacobson/warpack/issues/21) |
 | C / P2 | Indefinite tangent stiffness, SPD M; most-negative eigenvalues via a shift below the spectrum | [#22](https://github.com/alecjacobson/warpack/issues/22) |
 | D / P0 | Sphere/disk/annulus/tori Hodge 1-Laplacians; disconnected and weak components, independent topology/subspace references, positive guard | [#23](https://github.com/alecjacobson/warpack/issues/23) |
 | E / P2 | Complex Hermitian connection ring with nontrivial holonomy and known spectrum; standard mass | [#24](https://github.com/alecjacobson/warpack/issues/24) |
