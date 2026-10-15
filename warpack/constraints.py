@@ -1,6 +1,7 @@
-"""Device-resident projection onto the complement of a known subspace."""
+"""Constraint row reduction and device-resident subspace projections."""
 
 import warp as wp
+import warp.sparse as ws
 
 from . import kernels as K
 
@@ -246,3 +247,147 @@ class MassOrthogonalComplementInverse:
             self._project(self.basis, self.mass_basis, self.rhs, False)
             self.inverse.apply(self.rhs, y[j : j + 1])
             self._project(self.mass_basis, self.basis, y[j : j + 1], True)
+
+
+@wp.kernel
+def _row_norms(rows: wp.array2d[wp.float64], norms: wp.array2d[wp.float64]):
+    j, chunk = wp.tid()
+    v = wp.tile_load(rows[j], shape=256, offset=chunk * 256)
+    wp.tile_atomic_add(norms[j], wp.tile_sum(wp.tile_map(wp.mul, v, v)), offset=0)
+
+
+@wp.kernel
+def _normalize_rows(
+    rows: wp.array2d[wp.float64], norms: wp.array2d[wp.float64], info: wp.array[wp.int32]
+):
+    j, i = wp.tid()
+    norm = wp.sqrt(norms[j, 0])
+    if not wp.isfinite(norm):
+        wp.atomic_max(info, 1, 1)
+    if norm > wp.float64(0.0):
+        rows[j, i] /= norm
+
+
+@wp.kernel
+def _pivot(
+    norms: wp.array2d[wp.float64],
+    selected: wp.array[wp.int32],
+    rank: wp.array[wp.int32],
+    j: int,
+    tolerance: wp.float64,
+):
+    best, index = wp.float64(0.0), int(-1)
+    for i in range(norms.shape[0]):
+        if norms[i, 0] > best:
+            best = norms[i, 0]
+            index = i
+    if best > tolerance * tolerance:
+        rank[0] = j + 1
+        selected[0] = index
+    else:
+        selected[0] = -1
+
+
+@wp.kernel
+def _pivot_row(
+    work: wp.array2d[wp.float64],
+    norms: wp.array2d[wp.float64],
+    selected: wp.array[wp.int32],
+    basis: wp.array2d[wp.float64],
+    j: int,
+):
+    i = wp.tid()
+    p = selected[0]
+    value = wp.float64(0.0)
+    if p >= 0:
+        value = work[p, i] / wp.sqrt(norms[p, 0])
+    basis[j, i] = value
+
+
+@wp.kernel
+def _subtract_rows(
+    work: wp.array2d[wp.float64], row: wp.array2d[wp.float64], dots: wp.array2d[wp.float64]
+):
+    j, i = wp.tid()
+    work[j, i] -= dots[j, 0] * row[0, i]
+
+
+@wp.kernel
+def _dense_triplets(
+    basis: wp.array2d[wp.float64],
+    rows: wp.array[wp.int32],
+    cols: wp.array[wp.int32],
+    vals: wp.array[wp.float64],
+):
+    j, i = wp.tid()
+    p = j * basis.shape[1] + i
+    rows[p] = j
+    cols[p] = i
+    vals[p] = basis[j, i]
+
+
+def independent_constraints(rows, tolerance=1e-10):
+    """Pure-Warp pivoted, twice-reorthogonalized row QR for small dense constraint spaces.
+
+    Scale nonzero input rows to unit norm, then drop residual directions of norm
+    <= tolerance. Return scalar BSR with independent orthonormal rows spanning
+    the retained constraint space. Does not mutate the input. Cost O(p^2*n);
+    intended for few constraint rows, not arbitrary large constraint systems.
+
+    This is SETUP: only integer rank/validity metadata is read back to allocate
+    the CSR shape; all rank decisions and numerical linear algebra run on device. It
+    is not graph capturable. Changed rows require rebuilding the constraints
+    and KKT factors. Verify dropped directions against the original rows.
+    """
+    import math
+
+    if rows.dtype != wp.float64 or rows.ndim != 2 or min(rows.shape) < 1:
+        raise ValueError("rows must be a nonempty FP64 matrix")
+    if not math.isfinite(tolerance) or not 0 < tolerance < 1:
+        raise ValueError("tolerance must be finite and between zero and one")
+    p, n = rows.shape
+    device = rows.device
+    work = wp.clone(rows)
+    basis = wp.zeros((min(p, n), n), dtype=wp.float64, device=device)
+    norms = wp.zeros((p, 1), dtype=wp.float64, device=device)
+    dots = wp.zeros_like(norms)
+    pivot = wp.zeros(1, dtype=wp.int32, device=device)
+    rank = wp.zeros(2, dtype=wp.int32, device=device)
+
+    def row_norms():
+        norms.zero_()
+        wp.launch_tiled(
+            _row_norms,
+            dim=(p, (n + 255) // 256),
+            inputs=[work, norms],
+            block_dim=128,
+            device=device,
+        )
+
+    row_norms()
+    wp.launch(_normalize_rows, work.shape, [work, norms, rank], device=device)
+    for j in range(min(p, n)):
+        row_norms()
+        wp.launch(_pivot, 1, [norms, pivot, rank, j, tolerance], device=device)
+        wp.launch(_pivot_row, n, [work, norms, pivot, basis, j], device=device)
+        for _ in range(2):
+            dots.zero_()
+            wp.launch_tiled(
+                K.gram_partial,
+                dim=(p, 1, (n + 255) // 256),
+                inputs=[work, basis[j : j + 1], dots],
+                block_dim=128,
+                device=device,
+            )
+            wp.launch(_subtract_rows, work.shape, [work, basis[j : j + 1], dots], device=device)
+    info = rank.numpy()
+    if info[1]:
+        raise ValueError("constraint rows must have finite norms")
+    count = int(info[0])
+    if not 0 < count < n:
+        raise ValueError("constraints must have rank between 1 and n-1")
+    rr = wp.empty(count * n, dtype=wp.int32, device=device)
+    cc = wp.empty_like(rr)
+    vv = wp.empty(count * n, dtype=wp.float64, device=device)
+    wp.launch(_dense_triplets, (count, n), [basis, rr, cc, vv], device=device)
+    return ws.bsr_from_triplets(count, n, rr, cc, vv)

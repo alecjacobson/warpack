@@ -24,8 +24,8 @@ import warp.optim.linear as linear
 
 from benchmarks.audit_profile import graph_summary
 from benchmarks.validate_dragon_meshes import mode_quality
+from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CGInverse, CuDSSInverse, KrylovSchur
-from warpack.fem import assemble_rest, mass_normalized, read_mesh
 
 
 def clocked(function, gpu=False):

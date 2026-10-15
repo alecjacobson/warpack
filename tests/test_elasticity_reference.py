@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from benchmarks.elasticity_reference import assemble_stvk_rest
+from examples.problems.elasticity import assemble_rest
 from tests.test_fem import dense
-from warpack.fem import assemble_rest
 
 
 def energy(f, mu, lam, model):

@@ -8,8 +8,8 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
+from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CuDSSInverse, KrylovSchur, SparseOperator, SymmetricEigensolver
-from warpack.fem import assemble_rest, mass_normalized, read_mesh
 from warpack.solver import EigenpairEvaluation
 
 

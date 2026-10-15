@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-15",
+  "base_commit": "f46662822b1f51e861ff0518ab24a5507877c7b1",
+  "scope": "Move application assembly out of core; numerical function bodies unchanged.",
+  "core_and_application_source_sha256": "d33631ee79748420fb8b21076f6e609ce69e3e1d311fb63b6b5e5ee397bbcbc8",
+  "source_paths": [
+    "examples/problems/__init__.py",
+    "examples/problems/elasticity.py",
+    "examples/problems/skinning.py",
+    "warpack/__init__.py",
+    "warpack/arnoldi.py",
+    "warpack/constrained.py",
+    "warpack/constraints.py",
+    "warpack/cudss_memory.py",
+    "warpack/generalized.py",
+    "warpack/generalized_krylov.py",
+    "warpack/hermitian.py",
+    "warpack/kernels.py",
+    "warpack/krylov_kernels.py",
+    "warpack/linalg_tiles.py",
+    "warpack/nullspace.py",
+    "warpack/projected.py",
+    "warpack/schur.py",
+    "warpack/shift.py",
+    "warpack/solver.py",
+    "warpack/svd.py",
+    "warpack/transforms.py"
+  ],
+  "python": "3.10.12",
+  "gpu": "NVIDIA L40",
+  "driver": "570.158.01",
+  "full_suite": {
+    "warp": "1.18.0+cu12 with FSAI overlay 04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "337 passed in 186.35s",
+    "junit": {
+      "tests": "337",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "186.315"
+    }
+  },
+  "stock_compatibility": {
+    "warp": "1.15.0",
+    "command": "OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_constrained.py tests/test_constraints.py tests/test_fem.py tests/test_elasticity_reference.py",
+    "result": "32 passed in 17.39s",
+    "junit": {
+      "tests": "32",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "17.383"
+    }
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: 138 files already formatted",
+  "wheel": {
+    "build": "pip wheel --no-deps --no-build-isolation, from clean staging directory: passed",
+    "core_python_files": 18,
+    "core_sources_match_workspace": true,
+    "examples_and_benchmarks_excluded": true,
+    "isolated_import": "Passed outside checkout using python -I with explicit wheel and dependency directories; no examples/benchmarks/SciPy/CuPy modules loaded."
+  },
+  "implementation_preservation": {
+    "elasticity": "Exact source comparison to base, allowing only kernels import path change.",
+    "skinning_and_constraint_reduction": "AST equality for every relocated numerical function, excluding docstrings."
+  },
+  "benchmarks": "Not rerun: existing measurements and source hashes preserved; no numerical algorithm changes."
+}

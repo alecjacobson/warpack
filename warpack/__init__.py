@@ -2,8 +2,11 @@
 
 from .arnoldi import ComplexCSR, GeneralEigensolver
 from .constrained import ConstrainedKrylovSchur, saddle_point_matrix
-from .constraints import MassOrthogonalComplementInverse, OrthogonalComplementOperator
-from .fem import RestElasticity, rigid_body_basis
+from .constraints import (
+    MassOrthogonalComplementInverse,
+    OrthogonalComplementOperator,
+    independent_constraints,
+)
 from .generalized import CGInverse, GeneralizedEigensolver
 from .generalized_krylov import GeneralizedKrylovSchur
 from .hermitian import HermitianCSR, HermitianEigensolver
@@ -35,8 +38,7 @@ __all__ = [
     "NumericalNullspaceDiagnostics",
     "OrthogonalComplementOperator",
     "MassOrthogonalComplementInverse",
-    "RestElasticity",
-    "rigid_body_basis",
+    "independent_constraints",
     "ShiftInvertEigensolver",
     "SparseOperator",
     "SymmetricEigensolver",

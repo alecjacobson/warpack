@@ -11,8 +11,8 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
+from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CuDSSInverse
-from warpack.fem import assemble_rest, mass_normalized, read_mesh
 
 
 def main():

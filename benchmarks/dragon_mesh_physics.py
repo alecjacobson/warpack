@@ -7,7 +7,7 @@ import numpy as np
 import warp as wp
 
 from benchmarks.mesh_quality import tet_metrics
-from warpack.fem import read_mesh
+from examples.problems.elasticity import read_mesh
 
 
 @wp.kernel

@@ -15,6 +15,7 @@ import warp.sparse as ws
 from scipy.sparse.csgraph import connected_components, dijkstra
 
 from benchmarks.elasticity_reference import assemble_consistent_mass, assemble_stvk_rest
+from examples.problems.elasticity import RestElasticity, mass_normalized, read_mesh
 from warpack import (
     CuDSSInverse,
     EigenpairEvaluation,
@@ -22,7 +23,6 @@ from warpack import (
     KrylovSchur,
     SparseOperator,
 )
-from warpack.fem import RestElasticity, mass_normalized, read_mesh
 
 
 def vector_agreement(a, b, mass):

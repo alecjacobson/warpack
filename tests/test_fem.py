@@ -1,8 +1,8 @@
 import numpy as np
 import warp as wp
 
+from examples.problems.elasticity import assemble_rest, mass_normalized
 from warpack import SparseOperator
-from warpack.fem import assemble_rest, mass_normalized
 
 
 def dense(a):
@@ -50,7 +50,7 @@ def test_rest_hessian_and_mass():
 
 
 def test_assembly_graph_replay():
-    from warpack.fem import RestElasticity
+    from examples.problems.elasticity import RestElasticity
 
     x = np.array([[0.0, 0, 0], [1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]])
     model = RestElasticity(x, np.array([[0, 1, 2, 3]]))

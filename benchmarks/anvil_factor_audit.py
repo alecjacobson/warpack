@@ -40,7 +40,7 @@ def main():
     if args.backend == "assemble":
         import warp as wp
 
-        from warpack.fem import assemble_rest, mass_normalized, read_mesh
+        from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 
         x, t = read_mesh(mesh)
         x = (x - x.mean(0)) / np.ptp(x, axis=0).max()

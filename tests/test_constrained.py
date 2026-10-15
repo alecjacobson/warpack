@@ -142,11 +142,11 @@ def test_skinning_appendix_matrices_and_modes():
     import warp.sparse as ws
 
     from benchmarks.applications.skinning_cases import make_skinning_case, reference, validate
-    from warpack.skinning import (
-        independent_constraints,
+    from examples.problems.skinning import (
         skinning_constraint_rows,
         skinning_stiffness,
     )
+    from warpack import independent_constraints
 
     case = make_skinning_case(3)
     block = case.elastic_hessian.tobsr(blocksize=(3, 3))
@@ -216,7 +216,7 @@ def test_skinning_appendix_matrices_and_modes():
 
 
 def test_constraint_rank_reduction_handles_redundancy_and_scaling():
-    from warpack.skinning import independent_constraints
+    from warpack import independent_constraints
 
     rng = np.random.default_rng(43)
     rows = rng.normal(size=(5, 19))

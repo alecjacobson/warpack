@@ -15,8 +15,8 @@ import numpy as np
 import warp as wp
 
 from benchmarks.audit_profile import replay_timing
+from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperator
-from warpack.fem import assemble_rest, mass_normalized, read_mesh
 
 
 class Events:

@@ -52,6 +52,9 @@ outside setup/capture/replay timing boundaries.
 
 ## Example: one connected free body with consistent mass
 
+The rigid-motion constructor below is an application helper from the source
+checkout; the mass projection and generalized eigensolver are library APIs.
+
 ```python
 import warp as wp
 from warpack import (
@@ -60,7 +63,7 @@ from warpack import (
     MassOrthogonalComplementInverse,
     SparseOperator,
 )
-from warpack.fem import rigid_body_basis
+from examples.problems.elasticity import rigid_body_basis
 
 # positions is a device vec3d array; K, M and shifted = K - sigma*M
 # are compatible FP64 Warp sparse matrices. Choose sigma < 0.

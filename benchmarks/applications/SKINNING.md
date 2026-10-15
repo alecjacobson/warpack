@@ -17,7 +17,7 @@ W.T M_w W = I
 ```
 
 H_w is the real symmetric n-by-n **scalar weight** stiffness, not the 3n-by-3n
-displacement stiffness. `warpack.skinning.skinning_stiffness(H)` computes the
+displacement stiffness. `examples.problems.skinning.skinning_stiffness(H)` computes the
 sum of the three coordinate diagonal blocks of an interleaved 3x3-block elastic
 Hessian. M_w is the scalar SPD vertex mass; consistent mass is also supported
 by the solver. Each weight can generate twelve affine displacement coordinates.
@@ -72,11 +72,21 @@ simply projecting an unconstrained inverse does not solve this problem.
 
 ## Use and graph lifecycle
 
+The skinning assembly helpers live in `examples/problems/skinning.py` and require
+a source checkout. The constrained eigensolver, KKT assembly, and independent-row
+reduction are general library operations; they do not depend on this example.
+
 ```python
 import warp as wp
 
-from warpack import ConstrainedKrylovSchur, CuDSSInverse, SparseOperator, saddle_point_matrix
-from warpack.skinning import independent_constraints, skinning_constraint_rows
+from examples.problems.skinning import skinning_constraint_rows
+from warpack import (
+    ConstrainedKrylovSchur,
+    CuDSSInverse,
+    SparseOperator,
+    independent_constraints,
+    saddle_point_matrix,
+)
 
 # H_w and M_w: compressed scalar FP64 Warp BSR; X: vec3d array.
 raw = skinning_constraint_rows(X, J_effective)

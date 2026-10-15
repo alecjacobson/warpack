@@ -5,8 +5,8 @@ from dataclasses import replace
 import numpy as np
 import warp as wp
 
+from examples.problems.elasticity import rigid_body_basis
 from warpack import MassOrthogonalComplementInverse
-from warpack.fem import rigid_body_basis
 
 
 def device_rigid_rows(case, device):

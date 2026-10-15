@@ -12,7 +12,7 @@ import numpy as np
 import warp as wp
 import warp.sparse as ws
 
-from . import kernels as K
+from warpack import kernels as K
 
 
 @wp.kernel

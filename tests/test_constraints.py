@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 import warp as wp
 
+from examples.problems.elasticity import assemble_rest, mass_normalized, rigid_body_basis
 from tests.test_solver import sparse
 from warpack import CGInverse, KrylovSchur, OrthogonalComplementOperator, SparseOperator
-from warpack.fem import assemble_rest, mass_normalized, rigid_body_basis
 
 
 @pytest.mark.parametrize("alias", [False, True])

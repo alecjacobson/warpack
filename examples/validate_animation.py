@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
-from warpack.fem import read_mesh
+from examples.problems.elasticity import read_mesh
 
 
 @wp.func

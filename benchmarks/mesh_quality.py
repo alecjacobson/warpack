@@ -10,7 +10,7 @@ import scipy.sparse as sp
 import warp as wp
 from scipy.sparse.csgraph import connected_components
 
-from warpack.fem import read_mesh
+from examples.problems.elasticity import read_mesh
 
 
 @wp.kernel

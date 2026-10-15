@@ -17,8 +17,8 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
+from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperator
-from warpack.fem import assemble_rest, mass_normalized, read_mesh
 
 
 def mode_quality(a, values, vectors):

@@ -11,8 +11,8 @@ import numpy as np
 import warp as wp
 
 from benchmarks.audit_profile import graph_summary, profile_restart, replay_timing
+from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperator
-from warpack.fem import assemble_rest, mass_normalized, read_mesh
 
 
 def main():

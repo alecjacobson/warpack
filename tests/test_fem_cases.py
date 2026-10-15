@@ -43,8 +43,8 @@ def test_fem_reference_constraints_nullspace_and_cluster(name):
 
 def test_independent_tet_strain_assembly_matches_warp_rest_tangent():
     from benchmarks.elasticity_reference import assemble_consistent_mass
+    from examples.problems.elasticity import assemble_rest
     from tests.test_fem import dense
-    from warpack.fem import assemble_rest
 
     vertices, tets = beam_mesh(1)
     a, b = elastic_matrices(vertices, tets, consistent=False)
