@@ -122,7 +122,11 @@ def accuracy(p, values, vectors, right=None, reference=None):
     return result
 
 
-def warp_setup(p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None, cg_tol=1e-13):
+def warp_setup(
+    p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None, cg_tol=1e-13, force_krylov=False
+):
+    if force_krylov and p.api_class != "D":
+        raise ValueError("Explicit alternative Krylov benchmark is limited to Hodge class D")
     ncv = min(ncv, p.n)
     if p.api_class in "EH":
         solver = ShiftInvertEigensolver(complex_matrix(p.a), p.k, p.target, ncv=ncv, tol=tol)
@@ -131,7 +135,7 @@ def warp_setup(p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None, cg
         return PartialSVD(matrix(p.a), p.k, ncv=ncv, tol=tol), None
     a, b = matrix(p.a), matrix(p.b)
     shifted = p.b if p.mode == "regular" else p.a - p.target * p.b
-    block = method == "block" or p.api_class in "DG"
+    block = method == "block" or (p.api_class in "DG" and not force_krylov)
     width = ncv if block else 1
     if method.startswith("cg"):
         if p.api_class not in "ACD" or p.mode != "shift-invert":

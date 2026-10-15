@@ -22,13 +22,24 @@ NAMES = [
     "weak_positive",
     "large_disconnected",
 ]
-METHODS = ["scipy", "spectra", "cupy-eigsh", "cupy", "warp", "warp-cg", "warp-cg-fsai"]
+METHODS = [
+    "scipy",
+    "spectra",
+    "cupy-eigsh",
+    "cupy",
+    "warp",
+    "warp-cg",
+    "warp-cg-fsai",
+    "warp-krylov",
+    "warp-cg-krylov",
+    "warp-cg-fsai-krylov",
+]
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cases", default=",".join(NAMES))
-    parser.add_argument("--methods", default=",".join(METHODS))
+    parser.add_argument("--methods", default="scipy,spectra,cupy-eigsh,cupy,warp,warp-cg")
     parser.add_argument("--large-side", type=int, default=41)
     parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
