@@ -1,0 +1,54 @@
+{
+  "production_base": "858d1c5",
+  "production_tree_sha": "fa8bc31b7a996d7538e892094a7694936265c7c1",
+  "production_unchanged": true,
+  "preceding_full_suite": {
+    "passed": 311,
+    "seconds": 170.76,
+    "source": "results/interior_validation.json"
+  },
+  "audit_sources": {
+    "scalar_and_configuration": "d76d52d",
+    "large_trace_and_enqueue": "aab75edff043b998bbfaa32961608463c9dda7f0",
+    "copy_control": "df3d91191ddeda42e4e7206ec5aee4e64423bd74",
+    "initial_timing_source": "ec6f1bf plus uncommitted large audit driver",
+    "initial_driver_sha256": "bf031ee9d8c7993f561c49ada3ea801ba6a0fbaf49ce3d059ee124d05cef4b5d"
+  },
+  "checks": {
+    "isolated_matrix_types": 3,
+    "configuration_shape_profiles": 11,
+    "large_timing_profiles": 5,
+    "strict_large_counts": "6/6 in every timed trial",
+    "copy_control_individual_trials": 6,
+    "copy_control_burst_final_outputs": 2,
+    "ruff": "passed",
+    "formatting": "passed",
+    "wheel": "passed"
+  },
+  "saved_baseline_checks": [
+    {
+      "api_class": "A",
+      "n": 10890,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9998744833626525,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "initial_instrumentation_failure": {
+    "stage": "CUDA runtime node-type reflection on conditional graph, after all five valid timing profiles completed",
+    "error": "cudaErrorUnknown: 999",
+    "cleanup": "Scoped CUPTI subscriptions now unsubscribe on exceptions; full-graph inspection uses driver-generated DOT",
+    "timing_samples_reused": true
+  },
+  "notes": [
+    "Timing collection is unchanged between initial and final driver: with configuration(profile), compare.run(A,n,warp,repeats=3,ncv=32,steps=1,problem=p). The final committed audit driver fixes instrumentation, adds resume/environment guards and records additional enqueue measurements without repeating the five timing profiles.",
+    "CUPTI was disabled during synchronized timings and host enqueue measurements.",
+    "Warm replay traces contain only runtime and driver graph-launch calls; explicit caller synchronization is separately labeled.",
+    "No production numerical changes, default changes or vendor graph rewrites. The private-node device-source control is diagnostic-only and validates only its fixed captured pencil.",
+    "Strict zero-host-transfer graphs remain unsupported by this cuDSS configuration; issue #29 remains open.",
+    "No Anvil/full-upstream rerun. The preceding 311-test numerical suite remains the numerical checkpoint; audit commands validate their own evidence."
+  ]
+}
