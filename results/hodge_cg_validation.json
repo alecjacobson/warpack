@@ -1,0 +1,62 @@
+{
+  "date_utc": "2026-10-15",
+  "final_harness_source": "8406ba180774447aecfeaae6aabbb42e8ccba365",
+  "production_base": "7aec27f228358506b08fe95fa50eee3f0b16f269",
+  "production_changes": false,
+  "production_diff_verified_empty": true,
+  "file_sha256": {
+    "benchmarks/applications/runner.py": "abd3ef4305e566fb363ee33e7f2063b9d0a82e5565ca78772d42244c299ec500",
+    "benchmarks/applications/compare.py": "2ca367d79081e2a00fb3ddd6837f545b83634c14511861f347c839e2be79ce20",
+    "benchmarks/applications/hodge_compare.py": "ca4feb7ff420a296232eaa55b2b3b9a8a1c4373d8577ca669b55da96ba1be4fb",
+    "benchmarks/applications/hodge_cg_probe.py": "a87cdc9253bf75cb4d5d6f808760f57c7b71bb5cb1ef1386f6e65eda17e68019",
+    "tests/test_hodge.py": "89be128981fb94a3321f09c3f3f8417da7f21623440c9f96aae56e7362d935a4"
+  },
+  "warp_linear_sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+  "warp_fsai_sha256": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+  "runtime": {
+    "gpu": "NVIDIA L40 48GB",
+    "cpu": "Intel Xeon Platinum 8362 @2.80GHz",
+    "warp": "1.18.0+cu12 with pinned FSAI overlay",
+    "fsai_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "driver": "570.158.01",
+    "cudss": "0.8.0.10",
+    "cupy": "14.2.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "spectra_revision": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
+    "blas_omp_threads": 4
+  },
+  "checks": {
+    "full_suite": "325 passed in 177.09s",
+    "focused_hodge_transforms": "33 passed in 9.30s",
+    "lint": "passed",
+    "format": "126 files already formatted",
+    "wheel": "passed"
+  },
+  "profiles": {
+    "count": 55,
+    "numerical_passes": 43,
+    "numerical_failures": 12,
+    "full_strict_warp": 31,
+    "strict_incomplete_numerical_warp": 8,
+    "native_passes": 4,
+    "small_topology_profiles": 18,
+    "small_topology_full_strict": 18
+  },
+  "default_regression": {
+    "matched_fresh_controls": 2,
+    "cuDSS_ratio": 1.0002407971326193,
+    "diagonal_cg_ratio": 0.9992936872275452,
+    "gate": 1.25,
+    "all_accuracy_graph_timing_checks_pass": true,
+    "older_cg_baseline_missing_metadata": "Preserved as noncomparable; fresh unchanged-main control used without guessing old fields."
+  },
+  "limitations": [
+    "No production algorithm/default change; gains select an existing outer solver and fixture-specific budgets.",
+    "Pure-Warp CG still trails cuDSS-backed methods; #40 remains open.",
+    "No Anvil/full-upstream rerun or claim of an Anvil improvement.",
+    "Graph DOT, not CUPTI trace; cuDSS vendor HtoD nodes remain.",
+    "Scaled-RHS predictors are diagnostic code only and did not beat the diagonal block baseline.",
+    "No peak-memory campaign or general automatic Betti-count certification."
+  ]
+}
