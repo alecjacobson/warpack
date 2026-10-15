@@ -217,6 +217,23 @@ def run(
                 check["reported_max_residual"] = (
                     float(solver.residuals.numpy().max()) if hasattr(solver, "residuals") else None
                 )
+            if method.startswith("warp") and p.mode == "svd":
+                core = solver.core
+                cycles = int(core.iterations.numpy()[0])
+                check.update(
+                    left_converged=int(solver.count_left.numpy()[0]),
+                    right_converged=int(solver.count_right.numpy()[0]),
+                    outer_iterations=cycles,
+                    breakdown_recoveries=int(core.recoveries.numpy()[0]),
+                    # Derived from the captured schedule and device cycle count:
+                    # initialization plus expansion/last product per restart.
+                    augmented_operator_products=core.keep - 1 + cycles * (core.m - core.keep + 1),
+                )
+                check["reported_converged"] = min(check["left_converged"], check["right_converged"])
+                check["solver_full_count"] = check["reported_converged"] == p.k
+                check["reported_max_residual"] = float(
+                    max(solver.left_residuals.numpy().max(), solver.right_residuals.numpy().max())
+                )
             samples.append(elapsed)
             checks.append(check)
             if method.startswith("warp-cg"):

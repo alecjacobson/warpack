@@ -32,6 +32,32 @@ def augmented_mv(
 
 
 @wp.kernel
+def augmented_mv_cooperative(
+    ar: wp.array[wp.int32],
+    ac: wp.array[wp.int32],
+    av: wp.array[wp.float64],
+    br: wp.array[wp.int32],
+    bc: wp.array[wp.int32],
+    bv: wp.array[wp.float64],
+    x: wp.array2d[wp.float64],
+    y: wp.array2d[wp.float64],
+    nrow: int,
+):
+    j, i, lane = wp.tid()
+    val = wp.float64(0.0)
+    if i < nrow:
+        for e in range(ar[i] + lane, ar[i + 1], 32):
+            val += av[e] * x[j, nrow + ac[e]]
+    else:
+        r = i - nrow
+        for e in range(br[r] + lane, br[r + 1], 32):
+            val += bv[e] * x[j, bc[e]]
+    value = wp.tile_extract(wp.tile_sum(wp.tile(val)), 0)
+    if lane == 0:
+        y[j, i] = value
+
+
+@wp.kernel
 def split_vectors(
     q: wp.array2d[wp.float64],
     u: wp.array2d[wp.float64],
@@ -75,12 +101,19 @@ class _Augmented:
 
     def apply(self, x, y):
         a, b = self.a, self.at
-        wp.launch(
-            augmented_mv,
-            x.shape,
-            [a.offsets, a.columns, a.values, b.offsets, b.columns, b.values, x, y, a.shape[0]],
-            device=self.device,
-        )
+        args = [a.offsets, a.columns, a.values, b.offsets, b.columns, b.values, x, y, a.shape[0]]
+        # Tall or wide snapshots have long rows in one half of the augmented
+        # operator. Distribute those dot products over a warp instead of a lane.
+        if max(a.nnz / a.nrow, b.nnz / b.nrow) > 64:
+            wp.launch_tiled(
+                augmented_mv_cooperative,
+                dim=x.shape,
+                inputs=args,
+                block_dim=32,
+                device=self.device,
+            )
+        else:
+            wp.launch(augmented_mv, x.shape, args, device=self.device)
 
 
 class PartialSVD:

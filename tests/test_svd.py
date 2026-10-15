@@ -27,3 +27,29 @@ def test_rectangular_svd(shape):
     np.testing.assert_allclose(v.T @ v, np.eye(5), atol=1.0e-10)
     assert np.linalg.norm(a @ v - u * sigma, axis=0).max() < 1.0e-9
     assert np.linalg.norm(a.T @ u - v * sigma, axis=0).max() < 1.0e-9
+
+
+@pytest.mark.parametrize("shape", [(1031, 20), (20, 1031), (2053, 20)])
+def test_long_snapshot_rows_repeated_singular_subspace(shape):
+    from benchmarks.upstream.adapters import matrix
+
+    rng = np.random.default_rng(131)
+    rank = min(shape)
+    left = np.linalg.qr(rng.normal(size=(shape[0], rank)))[0]
+    right = np.linalg.qr(rng.normal(size=(shape[1], rank)))[0]
+    spectrum = np.r_[np.full(3, 10.0), 8.0, np.linspace(6, 0.5, rank - 6), 0.0, 0.0]
+    a = (left * spectrum) @ right.T
+    solver = PartialSVD(matrix(a), 4, ncv=24, tol=1e-11)
+    graph = solver.capture(100)
+    for _ in range(2):
+        wp.capture_launch(graph)
+        values, u, v = solver.singular_values.numpy(), solver.u.numpy().T, solver.v.numpy().T
+        np.testing.assert_allclose(values, spectrum[:4], atol=1e-9, rtol=0)
+        np.testing.assert_allclose(u.T @ u, np.eye(4), atol=1e-10, rtol=0)
+        np.testing.assert_allclose(v.T @ v, np.eye(4), atol=1e-10, rtol=0)
+        assert np.linalg.norm(a @ v - u * values, axis=0).max() < 1e-9
+        assert np.linalg.norm(a.T @ u - v * values, axis=0).max() < 1e-9
+        assert np.linalg.norm(u - left[:, :4] @ (left[:, :4].T @ u)) < 1e-9
+        assert np.linalg.norm(v - right[:, :4] @ (right[:, :4].T @ v)) < 1e-9
+        assert solver.count_left.numpy()[0] == 4
+        assert solver.count_right.numpy()[0] == 4
