@@ -20,7 +20,7 @@ from .weak_block_probe import legacy_orthogonalize, shifted_orthogonalize
 
 
 def run(name, scale, variant, repeats):
-    case = make_hodge_case(name, side=41, weak_scale=scale)
+    case = make_hodge_case(name, side=41 if name == "large_disconnected" else 4, weak_scale=scale)
     p = case.problem
     expected, space = (
         weak_component_reference(case, scale) if name == "weak_positive" else (None, None)
