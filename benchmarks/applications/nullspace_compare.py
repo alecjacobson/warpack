@@ -31,7 +31,8 @@ def host_evidence(p, vectors, lower_bound):
         1, np.linalg.norm(av, axis=0) + abs(values) * np.linalg.norm(mv, axis=0)
     )
     bounds = absolute / np.sqrt(lower_bound * metric_norms)
-    return values, residuals, bounds
+    orthogonality = np.max(abs(vectors.T @ mv - np.eye(vectors.shape[1])))
+    return values, residuals, bounds, orthogonality
 
 
 def audit(graph, path):
@@ -111,7 +112,13 @@ def run(name, side, weak_scale, repeats):
             agreement = max(
                 float(np.max(abs(a - b)))
                 for a, b in zip(
-                    reference, [d.values.numpy(), d.residuals.numpy(), d.error_bounds.numpy()]
+                    reference,
+                    [
+                        d.values.numpy(),
+                        d.residuals.numpy(),
+                        d.error_bounds.numpy(),
+                        d.orthogonality_error.numpy(),
+                    ],
                 )
             )
             state = int(d.flags.numpy()[0])
@@ -183,7 +190,7 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         git_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], text=True)),
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
-        protocol="Sequential uncontended synchronized median replays, three trials by default. Independent host residual/metric evidence outside GPU timing. Host reference timing assumes vectors already resident on CPU. Solver+diagnostic uses capture(finalizer=diagnostic.run); no intermediate host numerical readback. Known topology checks agreement only; no result certifies complete nullity. Weak cases can deliberately fail the solver counting gate while diagnostics correctly report unresolved evidence. DOT audits include nested bodies, not a host synchronization API trace.",
+        protocol="Sequential uncontended synchronized median replays, three trials by default. Independent host residual/metric evidence outside GPU timing. Host reference timing covers Rayleigh values, physical residuals, metric error bounds and Gram independence with vectors already resident on CPU; discrete classification is outside that timing. Solver+diagnostic uses capture(finalizer=diagnostic.run); no intermediate host numerical readback. Known topology checks agreement only; no result certifies complete nullity. Weak cases can deliberately fail the solver counting gate while diagnostics correctly report unresolved evidence. DOT audits include nested bodies, not a host synchronization API trace.",
         cases=[],
     )
     for name in args.cases.split(","):
