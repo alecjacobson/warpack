@@ -3,6 +3,7 @@
 import ctypes as ct
 import gc
 import json
+import re
 import struct
 from collections import Counter
 from pathlib import Path
@@ -50,6 +51,30 @@ def copies(graph):
                         row["double"] = struct.unpack("d", payload)[0]
                         row["int64"] = struct.unpack("q", payload)[0]
                 rows.append(row)
+    return rows
+
+
+def copies_from_dot(path):
+    """Inspect transfers in conditional graphs without runtime node reflection.
+
+    CUDA runtime node-type introspection can reject conditional graph nodes;
+    the driver-generated DOT already supplies source pointers and extents.
+    Read only live HtoD source bytes while the owning inverse is retained.
+    """
+    rows = []
+    for block in Path(path).read_text().split('"];'):
+        if "{kind | HtoD" not in block:
+            continue
+        line = next(line for line in block.splitlines() if "{srcPtr | dstPtr}" in line)
+        source, destination = re.findall(r"0x[0-9A-Fa-f]+", line)
+        width = int(re.search(r"Width \| (\d+)", block).group(1))
+        row = dict(source=source, destination=destination, bytes=width)
+        if width <= 16:
+            payload = ct.string_at(int(source, 16), width)
+            row["payload_hex"] = payload.hex()
+            if width == 8:
+                row["int32_pair"] = list(struct.unpack("ii", payload))
+        rows.append(row)
     return rows
 
 

@@ -107,6 +107,12 @@ class ApiTrace:
         except Exception as exc:
             self.errors.append(repr(exc))
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
     def close(self):
         self.phase = None
         if self.handle:
