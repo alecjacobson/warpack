@@ -5,6 +5,7 @@ import gc
 import hashlib
 import json
 import subprocess
+import time
 from collections import Counter
 from importlib.metadata import version
 from pathlib import Path
@@ -34,6 +35,41 @@ def trace_graph(trace, graph, label):
     trace.phase = label + ":caller_sync"
     wp.synchronize()
     trace.phase = None
+
+
+def measure_enqueue(graph, validate):
+    """Uninstrumented launch vs completion latency, with explicit caller waits."""
+    wp.capture_launch(graph)
+    wp.synchronize()
+    rows = []
+    for _ in range(3):
+        start = time.perf_counter()
+        wp.capture_launch(graph)
+        enqueued = time.perf_counter()
+        wp.synchronize()
+        complete = time.perf_counter()
+        rows.append(
+            dict(
+                enqueue_seconds=enqueued - start,
+                completion_seconds=complete - start,
+                validation=validate(),
+            )
+        )
+    wp.synchronize()
+    start = time.perf_counter()
+    launches = []
+    for _ in range(3):
+        begin = time.perf_counter()
+        wp.capture_launch(graph)
+        launches.append(time.perf_counter() - begin)
+    wp.synchronize()
+    burst = dict(
+        enqueue_seconds=launches,
+        completion_seconds=time.perf_counter() - start,
+        final_validation=validate(),
+        intermediate_outputs_validated=False,
+    )
+    return dict(single_replays=rows, queued_burst_diagnostic=burst)
 
 
 def main():
@@ -89,6 +125,9 @@ def main():
         report["full_solver_config"] = config_values(inverse.solver)
         report["full_solver_graph_audit"] = audit(graph, folder / "full-fem.dot")
         report["full_solver_copies"] = copies_from_dot(folder / "full-fem.dot")
+        report["full_solver_enqueue"] = measure_enqueue(
+            graph, lambda: accuracy(p, *warp_output(p, solver))
+        )
         with ApiTrace() as trace:
             trace_graph(trace, graph, "fem_cudss")
         events, errors = trace.events, trace.errors
@@ -108,6 +147,9 @@ def main():
     with wp.ScopedCapture() as cap:
         inverse.apply(rhs, inverse.x.reshape((1, n)))
     report["pure_warp_graph_audit"] = audit(cap.graph, folder / "pure-warp-cg.dot")
+    report["pure_warp_enqueue"] = measure_enqueue(
+        cap.graph, lambda: dict(accepted=bool(abs(a @ inverse.x.numpy() - 1).max() < 1e-11))
+    )
     with ApiTrace() as trace:
         trace_graph(trace, cap.graph, "pure_warp_cg")
     events += trace.events
@@ -129,6 +171,11 @@ def main():
     ]
     if (
         forbidden_replay_calls
+        or any(
+            not row["validation"]["accepted"]
+            for key in ("full_solver_enqueue", "pure_warp_enqueue")
+            for row in report[key]["single_replays"]
+        )
         or any(e.get("status", 0) for e in events)
         or report["full_solver_count"] != p.k
         or errors
