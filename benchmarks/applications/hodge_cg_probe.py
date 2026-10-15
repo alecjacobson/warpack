@@ -6,6 +6,7 @@ from pathlib import Path
 
 import warp as wp
 
+from warpack import GeneralizedKrylovSchur
 from warpack.generalized import accumulate_cg_statistics
 
 from . import compare
@@ -27,9 +28,9 @@ def set_guess(
     b: wp.array[wp.float64], x: wp.array[wp.float64], sums: wp.array[wp.float64], mode: int
 ):
     i = wp.tid()
-    numerator, denominator = sums[0], sums[1]
+    numerator, denominator = wp.float64(sums[0]), wp.float64(sums[1])
     if mode == 1:
-        numerator, denominator = sums[1], sums[2]
+        numerator, denominator = wp.float64(sums[1]), wp.float64(sums[2])
     scale = wp.float64(0.0)
     if denominator > wp.float64(0.0) and wp.isfinite(numerator) and wp.isfinite(denominator):
         scale = numerator / denominator
@@ -70,6 +71,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--variant", choices=["zero", "rayleigh", "minres"], default="rayleigh")
     parser.add_argument("--method", choices=["warp-cg", "warp-cg-fsai"], default="warp-cg-fsai")
+    parser.add_argument("--iteration", choices=["block", "krylov"], default="block")
     parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument("--out", required=True)
@@ -78,6 +80,11 @@ def main():
 
     def setup(*setup_args, **kwargs):
         solver, inverse = original(*setup_args, **kwargs)
+        if args.iteration == "krylov":
+            p = setup_args[0]
+            solver = GeneralizedKrylovSchur(
+                solver.op, solver.mass, inverse, p.k, ncv=solver.m, tol=solver.tol, target=p.target
+            )
         if args.variant != "zero":
             guess = Guess(inverse, int(args.variant == "minres"))
             inverse.apply = guess.apply
@@ -88,6 +95,7 @@ def main():
     row = compare.run("D", p.n, args.method, ncv=args.ncv, steps=args.steps, problem=p)
     row.update(
         initial_guess=args.variant,
+        iteration=args.iteration,
         diagnostic_only=True,
         note="CG recurrence and preconditioner are unchanged upstream Warp; initial guess is a scalar multiple of the current RHS, not recycled state or a known-nullspace projection",
     )
