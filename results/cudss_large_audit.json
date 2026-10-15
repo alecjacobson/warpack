@@ -1,0 +1,1719 @@
+{
+  "source_commit": "ec6f1bf6e674ec0861dd22e884f235d542ee0831",
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "timings": [
+    {
+      "api_class": "A",
+      "requested_size": 10890,
+      "problem": "fem_clamped_consistent",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 1,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.23244672268629074,
+      "capture_seconds": 0.3173082433640957,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 64,
+          "DtoD (DEVICE to DEVICE)": 98
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.023099403828382492,
+      "samples_seconds": [
+        0.017479121685028076,
+        0.01748117431998253,
+        0.017478719353675842
+      ],
+      "solve_seconds": 0.017479121685028076,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.711209528610739e-13,
+          "max_absolute_residual": 1.504907174354128e-14,
+          "orthogonality": 8.659739592076221e-15,
+          "spectrum_error": 1.128958038165706e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.9455328880688466e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7080297851177105e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.683148237685893e-13,
+          "max_absolute_residual": 1.647568867902023e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "spectrum_error": 1.0873246747422627e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.925727377509823e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.6832380178663586e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.7203842621042304e-13,
+          "max_absolute_residual": 1.804930987656106e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "spectrum_error": 1.1445011605104582e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.9502089966964286e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7206972988984493e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "configuration_profile": "default"
+    },
+    {
+      "api_class": "A",
+      "requested_size": 10890,
+      "problem": "fem_clamped_consistent",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 1,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.06897635757923126,
+      "capture_seconds": 0.05663492530584335,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 64,
+          "DtoD (DEVICE to DEVICE)": 98
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.022088713943958282,
+      "samples_seconds": [
+        0.017749149352312088,
+        0.017693933099508286,
+        0.017715241760015488
+      ],
+      "solve_seconds": 0.017715241760015488,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.7113438670984158e-13,
+          "max_absolute_residual": 1.611223361761699e-14,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 1.1851630787873546e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7784096352405698e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7089272131017882e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.737454968366647e-13,
+          "max_absolute_residual": 1.712501397199001e-14,
+          "orthogonality": 1.1324274851176597e-14,
+          "spectrum_error": 1.1095291352347658e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.770907180445707e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.735997994959371e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.696140271231561e-13,
+          "max_absolute_residual": 1.5044890788913634e-14,
+          "orthogonality": 9.992007221626409e-15,
+          "spectrum_error": 1.1431133817296768e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.765902313724195e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.6959707655986998e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "configuration_profile": "explicit_zero_ir"
+    },
+    {
+      "api_class": "A",
+      "requested_size": 10890,
+      "problem": "fem_clamped_consistent",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 1,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.06580003350973129,
+      "capture_seconds": 0.05625234544277191,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 64,
+          "DtoD (DEVICE to DEVICE)": 98
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.02098141983151436,
+      "samples_seconds": [
+        0.017481781542301178,
+        0.0174541138112545,
+        0.017454273998737335
+      ],
+      "solve_seconds": 0.017454273998737335,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.7025467413036782e-13,
+          "max_absolute_residual": 1.4186473718848236e-14,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 1.2108369862318114e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7853879667523117e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.700444655370407e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.6818551677027435e-13,
+          "max_absolute_residual": 1.5993838740381572e-14,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 1.1053657988924215e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7897101319778478e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.6799878499173034e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.6728142857810405e-13,
+          "max_absolute_residual": 1.5983559148533694e-14,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 1.1589340598305853e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7820174160108418e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.6722146600377557e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "configuration_profile": "general_solve"
+    },
+    {
+      "api_class": "A",
+      "requested_size": 10890,
+      "problem": "fem_clamped_consistent",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 1,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.06570004671812057,
+      "capture_seconds": 0.10012245923280716,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 64,
+          "DtoD (DEVICE to DEVICE)": 162
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.03918970003724098,
+      "samples_seconds": [
+        0.02852945774793625,
+        0.02852446585893631,
+        0.028527580201625824
+      ],
+      "solve_seconds": 0.028527580201625824,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.760605942882733e-13,
+          "max_absolute_residual": 2.448325017116032e-14,
+          "orthogonality": 7.549516567451064e-15,
+          "spectrum_error": 1.0318135235110049e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7979760592454503e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.758569598340624e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.7606054310870447e-13,
+          "max_absolute_residual": 2.4483229842369586e-14,
+          "orthogonality": 7.549516567451064e-15,
+          "spectrum_error": 1.0320910792671611e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7979760592454503e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7585700881403443e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.760605942882733e-13,
+          "max_absolute_residual": 2.448325017116032e-14,
+          "orthogonality": 7.549516567451064e-15,
+          "spectrum_error": 1.0320910792671611e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7979760592454503e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7585695983406238e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "configuration_profile": "deterministic"
+    },
+    {
+      "api_class": "A",
+      "requested_size": 10890,
+      "problem": "fem_clamped_consistent",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 1,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.0609205961227417,
+      "capture_seconds": 0.055900704115629196,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 64,
+          "DtoD (DEVICE to DEVICE)": 98
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.020418133586645126,
+      "samples_seconds": [
+        0.01728855073451996,
+        0.01730114221572876,
+        0.01732519641518593
+      ],
+      "solve_seconds": 0.01730114221572876,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.721913524947152e-13,
+          "max_absolute_residual": 2.2334578305728547e-14,
+          "orthogonality": 7.549516567451064e-15,
+          "spectrum_error": 1.1320111514834252e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.6817808869211928e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7209457966065775e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.770403071728564e-13,
+          "max_absolute_residual": 2.146157194017964e-14,
+          "orthogonality": 6.217248937900877e-15,
+          "spectrum_error": 1.2308210006750642e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.6656910907998923e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7701767441456765e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.7593253908523683e-13,
+          "max_absolute_residual": 2.1525573749674176e-14,
+          "orthogonality": 7.549516567451064e-15,
+          "spectrum_error": 1.175864960956119e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 1.7022853690381997e-14,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 1.7562490135596722e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "configuration_profile": "no_superpanels"
+    }
+  ],
+  "trace": [
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 7,
+      "time_ns": 18958089639148371
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 7,
+      "time_ns": 18958089639155763
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 7,
+      "time_ns": 18958089639518765,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 7,
+      "time_ns": 18958089639525563,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 8,
+      "time_ns": 18958089639531398
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 8,
+      "time_ns": 18958089639534214
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 8,
+      "time_ns": 18958089639886853,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 8,
+      "time_ns": 18958089639890210,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 9,
+      "time_ns": 18958089639894854
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 9,
+      "time_ns": 18958089639897171
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 9,
+      "time_ns": 18958089641883237,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 9,
+      "time_ns": 18958089641886935,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 10,
+      "time_ns": 18958089641894865
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 10,
+      "time_ns": 18958089641897453,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 2,
+      "name": "cudaStreamIsCapturing",
+      "site": 0,
+      "correlation": 11,
+      "time_ns": 18958089641903751
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuStreamIsCapturing",
+      "site": 0,
+      "correlation": 11,
+      "time_ns": 18958089641907189
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuStreamIsCapturing",
+      "site": 1,
+      "correlation": 11,
+      "time_ns": 18958089641909689,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 2,
+      "name": "cudaStreamIsCapturing",
+      "site": 1,
+      "correlation": 11,
+      "time_ns": 18958089641913060,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 12,
+      "time_ns": 18958089641917344
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 12,
+      "time_ns": 18958089641919694,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxSynchronize",
+      "site": 0,
+      "correlation": 13,
+      "time_ns": 18958089641923417
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxSynchronize",
+      "site": 1,
+      "correlation": 13,
+      "time_ns": 18958089691521508,
+      "status": 0
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 14,
+      "time_ns": 18958089691526117
+    },
+    {
+      "phase": "fem_cudss:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 14,
+      "time_ns": 18958089691528390,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 761,
+      "time_ns": 18958089769378402
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 761,
+      "time_ns": 18958089769383585
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 761,
+      "time_ns": 18958089769394179,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 761,
+      "time_ns": 18958089769398617,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 762,
+      "time_ns": 18958089769403701
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 762,
+      "time_ns": 18958089769406078
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 762,
+      "time_ns": 18958089769415484,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 762,
+      "time_ns": 18958089769418592,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 763,
+      "time_ns": 18958089769422858
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 763,
+      "time_ns": 18958089769425189
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 763,
+      "time_ns": 18958089769434499,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:warm_replay",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 763,
+      "time_ns": 18958089769437399,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 764,
+      "time_ns": 18958089769442516
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 764,
+      "time_ns": 18958089769444662,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 2,
+      "name": "cudaStreamIsCapturing",
+      "site": 0,
+      "correlation": 765,
+      "time_ns": 18958089769449647
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuStreamIsCapturing",
+      "site": 0,
+      "correlation": 765,
+      "time_ns": 18958089769452150
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuStreamIsCapturing",
+      "site": 1,
+      "correlation": 765,
+      "time_ns": 18958089769454251,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 2,
+      "name": "cudaStreamIsCapturing",
+      "site": 1,
+      "correlation": 765,
+      "time_ns": 18958089769457175,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 766,
+      "time_ns": 18958089769461024
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 766,
+      "time_ns": 18958089769463083,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxSynchronize",
+      "site": 0,
+      "correlation": 767,
+      "time_ns": 18958089769465997
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxSynchronize",
+      "site": 1,
+      "correlation": 767,
+      "time_ns": 18958089770002387,
+      "status": 0
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 768,
+      "time_ns": 18958089770005948
+    },
+    {
+      "phase": "pure_warp_cg:caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 768,
+      "time_ns": 18958089770008027,
+      "status": 0
+    }
+  ],
+  "saved_baseline_checks": [
+    {
+      "api_class": "A",
+      "n": 10890,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9998744833626525,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "full_solver_config": {
+    "solve_algorithm": {
+      "status": 0,
+      "value": 0,
+      "bytes": 4
+    },
+    "ir_steps": {
+      "status": 0,
+      "value": 0,
+      "bytes": 4
+    },
+    "hybrid_memory": {
+      "status": 0,
+      "value": 0,
+      "bytes": 4
+    },
+    "hybrid_execute": {
+      "status": 0,
+      "value": 0,
+      "bytes": 4
+    },
+    "superpanels": {
+      "status": 0,
+      "value": 1,
+      "bytes": 4
+    },
+    "deterministic": {
+      "status": 0,
+      "value": 0,
+      "bytes": 4
+    }
+  },
+  "full_solver_graph_audit": {
+    "host_nodes": 0,
+    "memcpy_kinds": {
+      "HtoD (HOST PAGEABLE to DEVICE)": 64,
+      "DtoD (DEVICE to DEVICE)": 98
+    }
+  },
+  "full_solver_copies": [
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF40",
+      "destination": "0x0000000302075020",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    },
+    {
+      "source": "0x0000559359AABF50",
+      "destination": "0x0000000302075030",
+      "bytes": 8,
+      "payload_hex": "00000000892a0000",
+      "int32_pair": [
+        0,
+        10889
+      ]
+    }
+  ],
+  "full_solver_accuracy": {
+    "accepted": true,
+    "residual": 1.7092182442553363e-13,
+    "max_absolute_residual": 1.7498880762380903e-14,
+    "orthogonality": 1.0436096431476471e-14,
+    "spectrum_error": 1.1657341758564144e-13,
+    "recovered_nullity": 0,
+    "nullspace_subspace_error": 0.0,
+    "requested_subspace_error": 2.115116127510451e-14
+  },
+  "full_solver_count": 6,
+  "pure_warp_graph_audit": {
+    "host_nodes": 0,
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 3
+    }
+  },
+  "pure_warp_residual": 1.0946799022804043e-13,
+  "trace_errors": [],
+  "api_entries_by_phase": {
+    "fem_cudss:caller_sync": {
+      "cuCtxGetCurrent": 3,
+      "cudaStreamIsCapturing": 1,
+      "cuStreamIsCapturing": 1,
+      "cuCtxSynchronize": 1
+    },
+    "fem_cudss:warm_replay": {
+      "cudaGraphLaunch": 3,
+      "cuGraphLaunch": 3
+    },
+    "pure_warp_cg:caller_sync": {
+      "cuCtxGetCurrent": 3,
+      "cudaStreamIsCapturing": 1,
+      "cuStreamIsCapturing": 1,
+      "cuCtxSynchronize": 1
+    },
+    "pure_warp_cg:warm_replay": {
+      "cudaGraphLaunch": 3,
+      "cuGraphLaunch": 3
+    }
+  },
+  "trace_source_commit": "aab75edff043b998bbfaa32961608463c9dda7f0",
+  "versions": {
+    "cuda-bindings": "12.9.7",
+    "nvidia-cuda-cupti-cu12": "12.8.90",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "full_solver_enqueue": {
+    "single_replays": [
+      {
+        "enqueue_seconds": 0.0003791786730289459,
+        "completion_seconds": 0.01747824251651764,
+        "validation": {
+          "accepted": true,
+          "residual": 1.7239017185946515e-13,
+          "max_absolute_residual": 1.9964530991400074e-14,
+          "orthogonality": 1.0658141036401503e-14,
+          "spectrum_error": 1.1572687252936475e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.1520628736530684e-14
+        }
+      },
+      {
+        "enqueue_seconds": 0.0003833360970020294,
+        "completion_seconds": 0.017470892518758774,
+        "validation": {
+          "accepted": true,
+          "residual": 1.7243986322960184e-13,
+          "max_absolute_residual": 1.9565392125994903e-14,
+          "orthogonality": 9.769962616701378e-15,
+          "spectrum_error": 1.1533829447074595e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.1066600900592727e-14
+        }
+      },
+      {
+        "enqueue_seconds": 0.00038760527968406677,
+        "completion_seconds": 0.01747008040547371,
+        "validation": {
+          "accepted": true,
+          "residual": 1.7113941285403414e-13,
+          "max_absolute_residual": 1.9909978681465108e-14,
+          "orthogonality": 1.0436096431476471e-14,
+          "spectrum_error": 1.0699774399824946e-13,
+          "recovered_nullity": 0,
+          "nullspace_subspace_error": 0.0,
+          "requested_subspace_error": 2.111541505762911e-14
+        }
+      }
+    ],
+    "queued_burst_diagnostic": {
+      "enqueue_seconds": [
+        0.00038137659430503845,
+        0.00035886839032173157,
+        0.0019860118627548218
+      ],
+      "completion_seconds": 0.05237419530749321,
+      "final_validation": {
+        "accepted": true,
+        "residual": 1.6756661118070768e-13,
+        "max_absolute_residual": 1.873667880732382e-14,
+        "orthogonality": 8.43769498715119e-15,
+        "spectrum_error": 1.1340928196545974e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 2.135360422178355e-14
+      },
+      "intermediate_outputs_validated": false
+    }
+  },
+  "pure_warp_enqueue": {
+    "single_replays": [
+      {
+        "enqueue_seconds": 1.0214745998382568e-05,
+        "completion_seconds": 0.0002119205892086029,
+        "validation": {
+          "accepted": true
+        }
+      },
+      {
+        "enqueue_seconds": 1.271069049835205e-05,
+        "completion_seconds": 0.0002141892910003662,
+        "validation": {
+          "accepted": true
+        }
+      },
+      {
+        "enqueue_seconds": 1.1146068572998047e-05,
+        "completion_seconds": 0.00021249055862426758,
+        "validation": {
+          "accepted": true
+        }
+      }
+    ],
+    "queued_burst_diagnostic": {
+      "enqueue_seconds": [
+        1.047179102897644e-05,
+        8.787959814071655e-06,
+        8.560717105865479e-06
+      ],
+      "completion_seconds": 0.0006200820207595825,
+      "final_validation": {
+        "accepted": true
+      },
+      "intermediate_outputs_validated": false
+    }
+  }
+}

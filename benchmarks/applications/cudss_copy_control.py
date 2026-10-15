@@ -1,6 +1,6 @@
 """Diagnostic only: substitute device sources for fixed vendor metadata bytes.
 
-This modifies private cuDSS graph nodes and is NOT a supported inverse backend.
+This modifies private cuDSS graph nodes and is not a supported inverse backend.
 It measures a fixed captured pencil; source changes/refactorization are outside
 this experiment's contract. Production Warpack never imports this helper.
 """
