@@ -2,6 +2,7 @@
 #include <Eigen/SparseLU>
 #include <Spectra/SymGEigsSolver.h>
 #include <Spectra/SymGEigsShiftSolver.h>
+#include <Spectra/contrib/PartialSVDSolver.h>
 #include <memory>
 using Sparse = Eigen::SparseMatrix<double>;
 using Vec = Eigen::VectorXd;
@@ -48,3 +49,23 @@ extern "C" int app_solve(void*ptr,int k,int ncv,const double*initial,double*w,do
     }catch(...){return -1;}
 }
 extern "C" void app_free(void*ptr){delete static_cast<Context*>(ptr);}
+
+extern "C" void* app_svd_setup(int rows,int cols,int nnz,const int*ap,const int*ai,const double*av) {
+    try { return new Sparse(Eigen::Map<const Sparse>(rows,cols,nnz,ap,ai,av)); }
+    catch(...) { return nullptr; }
+}
+extern "C" int app_svd_solve(void*ptr,int k,int ncv,double*w,double*u,double*v) {
+    try {
+        auto& a=*static_cast<Sparse*>(ptr);
+        const Eigen::Ref<const Sparse> matrix(a);
+        Spectra::PartialSVDSolver<Sparse> solver(matrix,k,ncv);
+        int count=solver.compute(10000,1e-11);
+        if(count==k) {
+            Eigen::Map<Vec>(w,k)=solver.singular_values();
+            Eigen::Map<Eigen::MatrixXd>(u,a.rows(),k)=solver.matrix_U(k);
+            Eigen::Map<Eigen::MatrixXd>(v,a.cols(),k)=solver.matrix_V(k);
+        }
+        return count;
+    } catch(...) { return -1; }
+}
+extern "C" void app_svd_free(void*ptr){delete static_cast<Sparse*>(ptr);}

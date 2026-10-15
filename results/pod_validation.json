@@ -1,0 +1,66 @@
+{
+  "date_utc": "2026-10-15",
+  "production_commit": "81d40841faf672a5517cad1c9a08386fa6f32791",
+  "cooperative_source": "2c1f057",
+  "native_probe_source": "af89ccb",
+  "baseline_commit": "f8b05fb5eb74f02993eed2e19410acaa5572a9e6",
+  "production_scope": "Only warpack/svd.py differs from baseline; no Krylov restart/orthogonalization policy, generalized/CG/cuDSS arithmetic changes.",
+  "file_sha256": {
+    "warpack/svd.py": "ab9c5c02ef56ac39013ffc7f72570deab890f4002c1c3a8e9a79ee589bdf408d",
+    "benchmarks/applications/compare.py": "b3b43080c62746f779c991e486e530299ca2e1e4ea03ac0008e67eb30412f84a",
+    "benchmarks/applications/pod_compare.py": "cf292890fbdbfe45ecb2b8d773651dd2ad84eb07f5d10e4b16cc11bec575ee6d",
+    "benchmarks/applications/pod_cupy_probe.py": "2d0f2f31c099f886c214c58f4d553f0b0831be4b1e1f3192226327486f660013",
+    "benchmarks/applications/runner.py": "f7b0d576d43f8226b9c15c2472464cc7a8acfbf83fc807cf0eafeb46b6e23cf4",
+    "benchmarks/applications/references.py": "ef69df1ef5e21504ec583cd49b5f33ff9c4ce84e8813bc9656b4383d116a69f0",
+    "benchmarks/applications/spectra.cpp": "d801104a0fdc35a16753721fc70812ebd652d0617844801681f1b5ac715dc6e6",
+    "tests/test_svd.py": "b190d0d535ff40d78b83e51350e6d39567d8fd751c7704a24ec79e8d00c10608"
+  },
+  "native_adapter_sha256": "03eef93f96b2b7310a5288caabbdf80fdf587be6e6ef33a56d041decaae05184",
+  "checks": {
+    "full_suite": "322 passed in 177.25s at final production source",
+    "focused_svd_multiplicity": "32 passed in 9.61s",
+    "prior_cooperative_suite": "314 passed in 172.47s before four fixture checks and four split-row cases were added",
+    "lint": "passed",
+    "format": "124 files already formatted",
+    "wheel": "passed"
+  },
+  "profiles": {
+    "four_mode_composite": {
+      "passed": 32,
+      "native_retained": 24,
+      "fresh_warp": 8
+    },
+    "twenty_mode": {
+      "passed": 14,
+      "failed_native_cupy": 2
+    },
+    "native_cupy_ncv24_followup": {
+      "passed": 2
+    },
+    "original_spectra_svd": {
+      "passed": 3,
+      "failed_strict_count": 1,
+      "all_original_numerical_bounds_pass": true
+    },
+    "matched_control_regression": {
+      "passed": 4
+    },
+    "original_pre_multiplicity_baseline": {
+      "passed_1024": true,
+      "failed_80": true
+    }
+  },
+  "protocol": "GPU work sequential; every accepted application trial has physical/subspace validation and uncontended inventory. Setup/capture/reference/validation excluded from synchronized warm solve medians. No full upstream or Anvil rerun. Final 32-row table is a labeled composite, not a fresh 32-profile rerun. Microprofiles and rejected short-vector experiments are diagnostics only and not timing claims.",
+  "runtime": {
+    "gpu": "NVIDIA L40 48GB",
+    "cpu": "Intel Xeon Platinum 8362 @ 2.80GHz",
+    "warp": "1.18.0+cu12",
+    "warp_fsai_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "cuda_driver": "570.158.01",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy": "14.2.0",
+    "spectra_revision": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
+    "blas_omp_threads": 4
+  }
+}

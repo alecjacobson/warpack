@@ -1,0 +1,168 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "git_head": "af89ccb7cd5f96e55efb2dd9c0d6e4b14f5ec845",
+  "blas_threads": "4",
+  "protocol": "Sequential isolated workers; setup/capture/reference/validation excluded from synchronized warm solve medians; every trial checks requested values, both SVD equations, both orthogonalities and both complete requested subspaces. Independent CPU reference bases use seed 2026, Warp starts seed 42. ncv and maximum Warp restart cycles explicit; no tolerance relaxation. Failed timings are diagnostics, not speedups. Contention inventory before/after every trial. Graph DOT includes nested bodies, not API trace.",
+  "cases": [
+    {
+      "api_class": "I",
+      "requested_size": 10000,
+      "problem": "fixed_end_string_snapshots",
+      "n": 10000,
+      "columns": 48,
+      "nnz": 480000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 24,
+      "method": "cupy",
+      "matrix_sha256": "2ad86df2994360e9fb9bca24b820c9989ae037f7a4a697548ea3645bba4ea508",
+      "notes": "48 equally spaced snapshots over a full fundamental period of a fixed-end unit string with 22 analytic cosine modal responses; normalized unweighted samples, not a general mass-weighted POD API",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "implementation": "CuPy svds with explicit ncv",
+      "reference_ncv": 24,
+      "reference_tolerance": 1e-11,
+      "setup_seconds": 0.27009517699480057,
+      "warmup_seconds": 0.22581328079104424,
+      "samples_seconds": [
+        0.01175079494714737,
+        0.011896949261426926,
+        0.01164538785815239
+      ],
+      "solve_seconds": 0.01175079494714737,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.1735871610231786e-13,
+          "orthogonality": 1.3793480246881984e-13,
+          "spectrum_error": 1.84297022087776e-14,
+          "captured_energy": 0.9999924738566056,
+          "relative_reconstruction_error": 0.0027433817443061645,
+          "optimal_relative_reconstruction_error": 0.0027433817442385922,
+          "reconstruction_energy_error": 3.70753384511444e-16,
+          "left_subspace_error": 3.6220786459533816e-13,
+          "right_subspace_error": 1.301423393868836e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.093978987773364e-13,
+          "orthogonality": 1.8204361629248211e-13,
+          "spectrum_error": 1.8207657603852567e-14,
+          "captured_energy": 0.9999924738566057,
+          "relative_reconstruction_error": 0.0027433817439457787,
+          "optimal_relative_reconstruction_error": 0.0027433817442385922,
+          "reconstruction_energy_error": 1.6065979995495907e-15,
+          "left_subspace_error": 4.3563839022933486e-13,
+          "right_subspace_error": 2.5851491306021583e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.0386891694401423e-13,
+          "orthogonality": 1.5116033424966702e-13,
+          "spectrum_error": 1.9095836023552692e-14,
+          "captured_energy": 0.999992473856606,
+          "relative_reconstruction_error": 0.0027433817445314057,
+          "optimal_relative_reconstruction_error": 0.0027433817442385922,
+          "reconstruction_energy_error": 1.6065979995495907e-15,
+          "left_subspace_error": 3.6660926924724457e-13,
+          "right_subspace_error": 1.407402474707244e-12
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "variant": "wave",
+      "reference": "Analytic singular spectrum and independently generated left/right bases",
+      "worker_wall_limit_seconds": 180
+    },
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "fixed_end_string_snapshots",
+      "n": 100000,
+      "columns": 48,
+      "nnz": 4800000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 24,
+      "method": "cupy",
+      "matrix_sha256": "3d928abb1fe076395a4be75c900ce8f4cd4da1ef558452928745cac3778144b4",
+      "notes": "48 equally spaced snapshots over a full fundamental period of a fixed-end unit string with 22 analytic cosine modal responses; normalized unweighted samples, not a general mass-weighted POD API",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "implementation": "CuPy svds with explicit ncv",
+      "reference_ncv": 24,
+      "reference_tolerance": 1e-11,
+      "setup_seconds": 0.29348505288362503,
+      "warmup_seconds": 0.2525990344583988,
+      "samples_seconds": [
+        0.04587773606181145,
+        0.06623047217726707,
+        0.04695365950465202
+      ],
+      "solve_seconds": 0.04695365950465202,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.069814750437523e-13,
+          "orthogonality": 1.1704220661504661e-12,
+          "spectrum_error": 2.706168622523819e-14,
+          "captured_energy": 0.999992473856609,
+          "relative_reconstruction_error": 0.0027433817447566466,
+          "optimal_relative_reconstruction_error": 0.002743381744261116,
+          "reconstruction_energy_error": 2.7188581530839224e-15,
+          "left_subspace_error": 1.426985534777183e-12,
+          "right_subspace_error": 8.723068298269127e-12
+        },
+        {
+          "accepted": true,
+          "residual": 5.219648785651231e-13,
+          "orthogonality": 1.2613256911777086e-12,
+          "spectrum_error": 3.2421030582567846e-14,
+          "captured_energy": 0.9999924738566088,
+          "relative_reconstruction_error": 0.002743381744486357,
+          "optimal_relative_reconstruction_error": 0.002743381744261116,
+          "reconstruction_energy_error": 1.2358446150381465e-15,
+          "left_subspace_error": 7.154292468642071e-13,
+          "right_subspace_error": 8.323084448774405e-12
+        },
+        {
+          "accepted": true,
+          "residual": 4.2736555059395524e-13,
+          "orthogonality": 1.0814839404197458e-12,
+          "spectrum_error": 2.4591439995447217e-14,
+          "captured_energy": 0.9999924738566098,
+          "relative_reconstruction_error": 0.0027433817445314053,
+          "optimal_relative_reconstruction_error": 0.002743381744261116,
+          "reconstruction_energy_error": 1.4830135380457758e-15,
+          "left_subspace_error": 9.952409563771353e-13,
+          "right_subspace_error": 9.496715511658594e-12
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "variant": "wave",
+      "reference": "Analytic singular spectrum and independently generated left/right bases",
+      "worker_wall_limit_seconds": 180
+    }
+  ]
+}

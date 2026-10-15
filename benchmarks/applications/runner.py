@@ -45,13 +45,35 @@ def accuracy(p, values, vectors, right=None, reference=None):
             1, float(max(values))
         )
         orth = max(abs(u.T @ u - np.eye(p.k)).max(), abs(v.T @ v - np.eye(p.k)).max())
-        return dict(
+        energy = float(np.vdot(p.a.data, p.a.data).real)
+        result = dict(
             accepted=bool(residual < 1e-8 and orth < 1e-8 and value_error < 1e-8),
             residual=float(residual),
             orthogonality=float(orth),
             spectrum_error=value_error,
-            captured_energy=float(sum(values**2) / sum(p.a.data**2)),
+            captured_energy=float(sum(values**2) / max(energy, 1e-300)),
         )
+        reconstructed_error = max(0.0, energy + sum(values**2) - 2 * np.sum(u * av * values))
+        optimal_error = max(0.0, energy - float(sum(np.asarray(ref) ** 2)))
+        result.update(
+            relative_reconstruction_error=float(np.sqrt(reconstructed_error / max(energy, 1e-300))),
+            optimal_relative_reconstruction_error=float(
+                np.sqrt(optimal_error / max(energy, 1e-300))
+            ),
+            reconstruction_energy_error=float(
+                abs(reconstructed_error - optimal_error) / max(energy, 1e-300)
+            ),
+        )
+        result["accepted"] &= result["reconstruction_energy_error"] < 1e-8
+        for name, basis, vectors in (
+            ("left", p.requested_basis, u),
+            ("right", p.right_requested_basis, v),
+        ):
+            if basis is not None:
+                error = float(np.linalg.norm(vectors - basis @ (basis.T @ vectors)))
+                result[f"{name}_subspace_error"] = error
+                result["accepted"] &= error < 1e-8
+        return result
     av = p.a @ vectors
     bv = vectors if p.b is None else p.b @ vectors
     r = av - bv * values

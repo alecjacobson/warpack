@@ -168,6 +168,13 @@ def run(
                 setup, solve = timed(lambda: scipy_setup(p, ncv=reference_ncv))
             elif method == "spectra":
                 setup, (solve, cleanup) = timed(lambda: spectra_setup(p, ncv))
+                if p.mode == "svd":
+                    row["implementation"] = (
+                        "Spectra PartialSVDSolver sparse normal-equation products"
+                    )
+                    row["reference_ncv"] = min(ncv, min(p.a.shape))
+                    row["reference_tolerance"] = 1e-11
+                    row["start"] = "Spectra built-in deterministic default; fresh solver each trial"
             elif method in ("cupy", "cupy-eigsh", "cupy-batched"):
                 setup, (solve, cleanup, label) = timed(
                     lambda: cupy_setup(
@@ -184,6 +191,9 @@ def run(
                     row["reference_ncv"] = None
                     row["reference_block_size"] = p.k
                 row["implementation"] = label
+                if p.mode == "svd":
+                    row["implementation"] = "CuPy svds with explicit ncv"
+                    row["reference_ncv"] = min(max(ncv, p.k + 2), min(p.a.shape) - 1)
                 row["reference_tolerance"] = (
                     1e-11 if api_class in "EI" or method == "cupy-eigsh" else lobpcg_tol
                 )
@@ -217,6 +227,23 @@ def run(
                 check["reported_max_residual"] = (
                     float(solver.residuals.numpy().max()) if hasattr(solver, "residuals") else None
                 )
+            if method.startswith("warp") and p.mode == "svd":
+                core = solver.core
+                cycles = int(core.iterations.numpy()[0])
+                check.update(
+                    left_converged=int(solver.count_left.numpy()[0]),
+                    right_converged=int(solver.count_right.numpy()[0]),
+                    outer_iterations=cycles,
+                    breakdown_recoveries=int(core.recoveries.numpy()[0]),
+                    # Derived from the captured schedule and device cycle count:
+                    # initialization plus expansion/last product per restart.
+                    augmented_operator_products=core.keep - 1 + cycles * (core.m - core.keep + 1),
+                )
+                check["reported_converged"] = min(check["left_converged"], check["right_converged"])
+                check["solver_full_count"] = check["reported_converged"] == p.k
+                check["reported_max_residual"] = float(
+                    max(solver.left_residuals.numpy().max(), solver.right_residuals.numpy().max())
+                )
             samples.append(elapsed)
             checks.append(check)
             if method.startswith("warp-cg"):
@@ -248,6 +275,11 @@ def run(
                 int(solver.converged.numpy()[0]) if hasattr(solver, "converged") else None
             )
             row["status"] = int(solver.status.numpy()[0]) if hasattr(solver, "status") else None
+            if p.mode == "svd":
+                row["reported_converged"] = min(
+                    int(solver.count_left.numpy()[0]), int(solver.count_right.numpy()[0])
+                )
+                row["status"] = int(solver.core.status.numpy()[0])
             audit = row["graph_audit"]
             row["device_only_graph"] = audit["host_nodes"] == 0 and not any(
                 "Host" in x or "HOST" in x for x in audit["memcpy_kinds"]

@@ -23,6 +23,7 @@ class Problem:
     require_positive_guard: bool = False
     requested_basis: object = None
     block_size: int = 1
+    right_requested_basis: object = None
 
     @property
     def n(self):

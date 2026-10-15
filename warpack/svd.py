@@ -32,6 +32,32 @@ def augmented_mv(
 
 
 @wp.kernel
+def augmented_mv_cooperative(
+    ar: wp.array[wp.int32],
+    ac: wp.array[wp.int32],
+    av: wp.array[wp.float64],
+    br: wp.array[wp.int32],
+    bc: wp.array[wp.int32],
+    bv: wp.array[wp.float64],
+    x: wp.array2d[wp.float64],
+    y: wp.array2d[wp.float64],
+    nrow: int,
+):
+    j, i, lane = wp.tid()
+    val = wp.float64(0.0)
+    if i < nrow:
+        for e in range(ar[i] + lane, ar[i + 1], 32):
+            val += av[e] * x[j, nrow + ac[e]]
+    else:
+        r = i - nrow
+        for e in range(br[r] + lane, br[r + 1], 32):
+            val += bv[e] * x[j, bc[e]]
+    value = wp.tile_extract(wp.tile_sum(wp.tile(val)), 0)
+    if lane == 0:
+        y[j, i] = value
+
+
+@wp.kernel
 def split_vectors(
     q: wp.array2d[wp.float64],
     u: wp.array2d[wp.float64],
@@ -64,6 +90,74 @@ def rect_mv(
     y[j, i] = val
 
 
+@wp.kernel
+def rect_mv_cooperative(
+    offsets: wp.array[wp.int32],
+    cols: wp.array[wp.int32],
+    values: wp.array[wp.float64],
+    x: wp.array2d[wp.float64],
+    y: wp.array2d[wp.float64],
+):
+    j, row, lane = wp.tid()
+    value = wp.float64(0.0)
+    for e in range(offsets[row] + lane, offsets[row + 1], 32):
+        value += values[e] * x[j, cols[e]]
+    total = wp.tile_extract(wp.tile_sum(wp.tile(value)), 0)
+    if lane == 0:
+        y[j, row] = total
+
+
+@wp.kernel
+def rect_mv_partials(
+    offsets: wp.array[wp.int32],
+    cols: wp.array[wp.int32],
+    values: wp.array[wp.float64],
+    x: wp.array2d[wp.float64],
+    parts: wp.array2d[wp.float64],
+    rows: int,
+):
+    j, row, chunk, lane = wp.tid()
+    value = wp.float64(0.0)
+    for e in range(offsets[row] + chunk * 128 + lane, offsets[row + 1], parts.shape[1] * 128):
+        value += values[e] * x[j, cols[e]]
+    total = wp.tile_extract(wp.tile_sum(wp.tile(value)), 0)
+    if lane == 0:
+        parts[j * rows + row, chunk] = total
+
+
+@wp.kernel
+def rect_mv_finish(parts: wp.array2d[wp.float64], y: wp.array2d[wp.float64]):
+    j, row, lane = wp.tid()
+    value = wp.float64(0.0)
+    for chunk in range(lane, parts.shape[1], 32):
+        value += parts[j * y.shape[1] + row, chunk]
+    total = wp.tile_extract(wp.tile_sum(wp.tile(value)), 0)
+    if lane == 0:
+        y[j, row] = total
+
+
+class _LongRowProduct:
+    """Distribute long rectangular CSR rows across blocks, without atomics."""
+
+    def __init__(self, matrix, width):
+        self.matrix = matrix
+        chunks = min(256, max(1, (matrix.nnz + matrix.nrow * 1024 - 1) // (matrix.nrow * 1024)))
+        self.parts = wp.empty((width * matrix.nrow, chunks), dtype=wp.float64, device=matrix.device)
+
+    def apply(self, x, y):
+        a = self.matrix
+        wp.launch_tiled(
+            rect_mv_partials,
+            dim=(x.shape[0], a.nrow, self.parts.shape[1]),
+            inputs=[a.offsets, a.columns, a.values, x, self.parts, a.nrow],
+            block_dim=128,
+            device=a.device,
+        )
+        wp.launch_tiled(
+            rect_mv_finish, dim=y.shape, inputs=[self.parts, y], block_dim=32, device=a.device
+        )
+
+
 class _Augmented:
     def __init__(self, a):
         if a.scalar_type != wp.float64 or a.block_shape != (1, 1) or a.row_counts is not None:
@@ -72,15 +166,49 @@ class _Augmented:
         self.at = ws.bsr_transposed(a)
         self.n = sum(a.shape)
         self.device = a.device
+        self.long_forward = _LongRowProduct(a, 1) if a.nnz / a.nrow > 4096 else None
+        self.long_backward = (
+            _LongRowProduct(self.at, 1) if self.at.nnz / self.at.nrow > 4096 else None
+        )
 
     def apply(self, x, y):
         a, b = self.a, self.at
-        wp.launch(
-            augmented_mv,
-            x.shape,
-            [a.offsets, a.columns, a.values, b.offsets, b.columns, b.values, x, y, a.shape[0]],
-            device=self.device,
-        )
+        if self.long_forward is not None or self.long_backward is not None:
+            split = a.shape[0]
+            for matrix, product, source, output in (
+                (a, self.long_forward, x[:, split:], y[:, :split]),
+                (b, self.long_backward, x[:, :split], y[:, split:]),
+            ):
+                if product is not None:
+                    product.apply(source, output)
+                else:
+                    wp.launch_tiled(
+                        rect_mv_cooperative,
+                        dim=output.shape,
+                        inputs=[
+                            matrix.offsets,
+                            matrix.columns,
+                            matrix.values,
+                            source,
+                            output,
+                        ],
+                        block_dim=32,
+                        device=self.device,
+                    )
+            return
+        args = [a.offsets, a.columns, a.values, b.offsets, b.columns, b.values, x, y, a.shape[0]]
+        # Tall or wide snapshots have long rows in one half of the augmented
+        # operator. Distribute those dot products over a warp instead of a lane.
+        if max(a.nnz / a.nrow, b.nnz / b.nrow) > 64:
+            wp.launch_tiled(
+                augmented_mv_cooperative,
+                dim=x.shape,
+                inputs=args,
+                block_dim=32,
+                device=self.device,
+            )
+        else:
+            wp.launch(augmented_mv, x.shape, args, device=self.device)
 
 
 class PartialSVD:
@@ -116,6 +244,10 @@ class PartialSVD:
         self.count_right = wp.zeros_like(self.count_left)
         self.value_scratch = wp.empty_like(self.singular_values)
         self.tol = tol
+        self.final_products = (
+            _LongRowProduct(self.op.a, k) if self.op.long_forward is not None else None,
+            _LongRowProduct(self.op.at, k) if self.op.long_backward is not None else None,
+        )
 
     def finalize(self):
         wp.launch(
@@ -155,18 +287,27 @@ class PartialSVD:
                 )
                 wp.launch(K.basis_scale, n, [vectors, self.norm, j], device=self.device)
         a, b = self.op.a, self.op.at
-        wp.launch(
-            rect_mv,
-            self.av.shape,
-            [a.offsets, a.columns, a.values, self.v, self.av],
-            device=self.device,
-        )
-        wp.launch(
-            rect_mv,
-            self.atu.shape,
-            [b.offsets, b.columns, b.values, self.u, self.atu],
-            device=self.device,
-        )
+        for matrix, product, source, output in (
+            (a, self.final_products[0], self.v, self.av),
+            (b, self.final_products[1], self.u, self.atu),
+        ):
+            if product is not None:
+                product.apply(source, output)
+            elif matrix.nnz / matrix.nrow > 64:
+                wp.launch_tiled(
+                    rect_mv_cooperative,
+                    dim=output.shape,
+                    inputs=[matrix.offsets, matrix.columns, matrix.values, source, output],
+                    block_dim=32,
+                    device=self.device,
+                )
+            else:
+                wp.launch(
+                    rect_mv,
+                    output.shape,
+                    [matrix.offsets, matrix.columns, matrix.values, source, output],
+                    device=self.device,
+                )
         wp.launch(K.identity_order, self.k, [self.order], device=self.device)
         for vec, prod, norms, errors, count in (
             (self.u, self.av, self.left_norms, self.left_residuals, self.count_left),

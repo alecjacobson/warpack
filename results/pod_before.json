@@ -1,0 +1,345 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "f8b05fb5eb74f02993eed2e19410acaa5572a9e6",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "I",
+      "requested_size": 80,
+      "problem": "snapshot_pod",
+      "n": 80,
+      "columns": 40,
+      "nnz": 3200,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "5c85d3d48a1ffbc8b59489a164e5f96f20f0e6ba2479bc2a0ed9d1ae2afc5860",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.10571695491671562,
+      "capture_seconds": 0.2861698977649212,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.010966300964355469,
+      "samples_seconds": [
+        0.008446179330348969,
+        0.008481249213218689,
+        0.008443903177976608
+      ],
+      "solve_seconds": 0.008446179330348969,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.091787627492884e-15,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 6.279752599124201e-15,
+          "captured_energy": 0.7074263696258438,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 5.091787627492884e-15,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 6.279752599124201e-15,
+          "captured_energy": 0.7074263696258438,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 5.091787627492884e-15,
+          "orthogonality": 2.220446049250313e-16,
+          "spectrum_error": 6.279752599124201e-15,
+          "captured_energy": 0.7074263696258438,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": null,
+      "status": null,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 1024,
+      "problem": "snapshot_pod",
+      "n": 1024,
+      "columns": 48,
+      "nnz": 49152,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "4d41170e7c0fa78b4336733a6ee47a06b06a9a5e483a15b14a00ea3c65ec9923",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.1083562932908535,
+      "capture_seconds": 0.21535130590200424,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.025054246187210083,
+      "samples_seconds": [
+        0.021559979766607285,
+        0.021565575152635574,
+        0.021571245044469833
+      ],
+      "solve_seconds": 0.021565575152635574,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.665050723602554e-15,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 6.762047007654859e-15,
+          "captured_energy": 0.6393466566909374,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 5.665050723602554e-15,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 6.762047007654859e-15,
+          "captured_energy": 0.6393466566909374,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 5.665050723602554e-15,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 6.762047007654859e-15,
+          "captured_energy": 0.6393466566909374,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": null,
+      "status": null,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 10000,
+      "problem": "snapshot_pod",
+      "n": 10000,
+      "columns": 48,
+      "nnz": 480000,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "44be744c2c2f0f196e344b0df74d72ee81415ac97d8d9c0a9a49fc9cc7867587",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.1190103143453598,
+      "capture_seconds": 0.22102167829871178,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.12249079719185829,
+      "samples_seconds": [
+        0.11921064183115959,
+        0.1192377358675003,
+        0.11921660974621773
+      ],
+      "solve_seconds": 0.11921660974621773,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.489923350384812e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.947351292325142e-15,
+          "captured_energy": 0.6393466566909405,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 4.490159907292772e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.947351292325142e-15,
+          "captured_energy": 0.6393466566909405,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 4.490354633817795e-15,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.947351292325142e-15,
+          "captured_energy": 0.6393466566909405,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": null,
+      "status": null,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod",
+      "n": 100000,
+      "columns": 48,
+      "nnz": 4800000,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "12c3046ec8b3ca195d468ee767c9a0526ce3a8707a838547edb172b9b9760019",
+      "notes": "Dense correlated tall snapshots with known singular spectrum and rank deficiency",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 30,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.15361464023590088,
+      "capture_seconds": 0.636560183018446,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 35
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 1.817773226648569,
+      "samples_seconds": [
+        1.8148877918720245,
+        1.8143339939415455,
+        1.814060039818287
+      ],
+      "solve_seconds": 1.8143339939415455,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.249677593073399e-14,
+          "orthogonality": 1.4432899320127035e-15,
+          "spectrum_error": 5.272104446646162e-15,
+          "captured_energy": 0.6393466566909877,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 1.2404040901928464e-14,
+          "orthogonality": 1.4432899320127035e-15,
+          "spectrum_error": 5.272104446646162e-15,
+          "captured_energy": 0.6393466566909877,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        },
+        {
+          "accepted": true,
+          "residual": 1.1918726763368062e-14,
+          "orthogonality": 6.661338147750939e-16,
+          "spectrum_error": 7.638334409421077e-15,
+          "captured_energy": 0.6393466566909884,
+          "reported_converged": null,
+          "solver_full_count": false,
+          "reported_max_residual": null
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": null,
+      "status": null,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    }
+  ]
+}
