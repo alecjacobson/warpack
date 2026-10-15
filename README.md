@@ -123,25 +123,25 @@ The mesh name, orientation, and displacement cap are rendering options; the eige
 
 ### Timing and accuracy
 
-Best recorded accepted configurations for the same **283,857-DOF anvil**, including six rigid and 20 elastic modes. These are the retained Anvil measurements, not a fresh benchmark of current `main`; subsequent POD and Hodge improvements have not been rebenchmarked on Anvil. Solve times are medians of three synchronized trials after warmup, on an **NVIDIA L40** or **Intel Xeon Platinum 8362 (four BLAS threads)**. Each trial restores its starting vector. Setup covers factorization or preconditioning; solve excludes mesh I/O/assembly, transfers, JIT/warmup/graph capture, and final original-problem validation.
+Best recorded accepted configurations for the same **283,857-DOF anvil**, including six rigid and 20 elastic modes. The CPU rows were rechecked with MKL PARDISO on 2026-10-15; the GPU rows retain the earlier measurements. This is not a fresh matched rerun of every backend, and subsequent POD/Hodge improvements have not been rebenchmarked on Anvil. Solve times are medians of three synchronized trials after warmup, on an **NVIDIA L40** or **Intel Xeon Platinum 8362 (four BLAS threads)**. Each trial restores its starting vector. Setup is a single recorded factorization or preconditioner construction, separate from the median solve time; solve excludes mesh I/O/assembly, transfers, JIT/warmup/graph capture, and final original-problem validation.
 
 | Method | Setup (s) | Solve (s) | Max original residual, all 26 |
 |---|---:|---:|---:|
-| SciPy ARPACK + SuperLU | 449.2954 | 42.6216 | 4.519e-9 |
-| Spectra + Eigen LDLT | 799.6008 | 62.4199 | 3.078e-8 |
+| SciPy ARPACK + MKL PARDISO | 9.5567 | 16.5791 | 4.011e-9 |
+| Spectra + MKL PARDISO | 13.4716 | 9.9369 | 2.737e-8 |
 | CuPy eigsh + shared cuDSS | 2.1534 | 0.4587 | 2.852e-9 |
 | Warp + cuDSS | 2.2063 | 0.4669 | 2.610e-9 |
 | Warp + FSAI-preconditioned CG (64-entry rows) | 5.0477 | 9.6082 | 3.036e-9 |
 
-All five pass the common original-problem residual cutoff of **1e-7**, orthogonality cutoff of **1e-8**, and elastic mode-shape checks. Residuals are `||Av−λv||₂ / max(1,|λ|)` for unit-norm vectors and the original mass-normalized operator. Elastic frequencies agree with the reference to within **6.56e-14 relative error**. Warp rows report the worst residual across their three replays.
+All five pass the common original-problem residual cutoff of **1e-7**, orthogonality cutoff of **1e-8**, and elastic mode-shape checks. Residuals are `||Av−λv||₂ / max(1,|λ|)` for unit-norm vectors and the original mass-normalized operator. Elastic frequencies agree with the reference to within **6.56e-14 relative error**. CPU and Warp rows report the worst residual across their three timed trials.
 
-The direct-inverse rows solve with **`A + I`** and `ncv=64`, where `A = M^(-1/2) K M^(-1/2)` is the mass-normalized stiffness. This is `sigma = -1` in the `A - sigma*I` shift-invert convention. CuPy's row explicitly wraps shared cuDSS factors; cuDSS is supplied by this benchmark. ARPACK uses SuperLU (`MMD_AT_PLUS_A`, zero diagonal-pivot threshold, symmetric mode), while Spectra uses native C++ Eigen AMD-ordered sparse LDLᵀ. These timings include different CPU/GPU inverse implementations.
+The direct-inverse rows solve with **`A + I`** and `ncv=64`, where `A = M^(-1/2) K M^(-1/2)` is the mass-normalized stiffness. This is `sigma = -1` in the `A - sigma*I` shift-invert convention. CuPy's row explicitly wraps shared cuDSS factors; cuDSS is supplied by this benchmark. Both CPU rows use MKL PARDISO SPD Cholesky through Eigen, METIS ordering, a four-thread limit, and internal refinement disabled. ARPACK runs through SciPy; Spectra remains native C++ without Python matvec callbacks. These are separate runs of the same factor configuration: their setup differences and solve-time variation should not be interpreted as intrinsic eigensolver overhead. The [CPU factorization audit](benchmarks/ANVIL_FACTORIZATION.md) preserves the former SuperLU/Eigen timings, explains their large fill-in and numerical factorization costs, and records the rejected PARDISO refinement profile. Factor setup is reusable for the same matrix and shift; changed values generally require numerical refactorization. CPU/GPU inverse implementations differ.
 
 The fastest recorded pure-Warp setting solves with **`A + 10,000 I`** (`sigma = -10,000`), `ncv=120`, one outer cycle, and inner CG tolerance **1e-12** with a 10,000-iteration limit. Six rigid motions are constructed analytically in Warp and projected out; the 20 elastic modes are computed numerically, and all 26 modes are validated. Rigid-basis setup costs an additional **0.0155 s**, excluded from the setup column. FSAI uses `max_row_size=64`, `max_step_size=3`, `apply_lanes=8`, and FP32 factor storage with FP64 products and CG. These settings are tuned for this anvil. Reference eigensolutions are used only for validation.
 
 FSAI comes from the unmodified [Warp PR #16](https://github.com/alecjacobson/warp/pull/16), pinned to `04427b997fe7ff07bc6ed1dde5ca9813496c6b55`. Its construction synchronizes outside capture; preconditioner application and the complete eigensolve are graph capturable. The recorded CG graph has no host-copy or host-callback nodes; median host enqueue is **1.311 ms**.
 
-Sources: [ARPACK, Spectra, and CuPy comparison](results/anvil_benchmarks.json), [latest Warp + cuDSS recheck](results/anvil_cudss_recheck.json), and [best CG settings and per-replay accuracy](results/anvil_cg_optimized.json). Earlier configurations and unsuccessful trials are in the [historical experiments](historical/README.md).
+Sources: [current ARPACK + PARDISO](results/anvil_pardiso_noir_confirmed.json), [current Spectra + PARDISO](results/anvil_pardiso_spectra_confirmed.json), [original CPU and retained CuPy comparison](results/anvil_benchmarks.json), [latest Warp + cuDSS recheck](results/anvil_cudss_recheck.json), and [best CG settings and per-replay accuracy](results/anvil_cg_optimized.json). Earlier configurations and unsuccessful trials are in the [historical experiments](historical/README.md).
 
 ## Validation and benchmarking
 
@@ -167,7 +167,7 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python benchmarks/compare.py
 <details>
 <summary>Pinned environment and commands for the current anvil comparison</summary>
 
-The recorded GPU runs use the official **Warp 1.18.0+cu12 native runtime** for CUDA driver 570.158.01. The CPU/CuPy comparison used upstream linear-solver revision `5a0c33d17d847d0be07ae1003263b572aae0729a`; its exact environment is retained in the [baseline notes](historical/anvil-baseline.md). The recorded Anvil Warp rows and their original 111-test validation used three unmodified FSAI PR modules overlaid on that runtime. The latest 325-test validation uses the same pinned environment. Install the latter without changing the default Warp installation:
+The recorded GPU runs use the official **Warp 1.18.0+cu12 native runtime** for CUDA driver 570.158.01. The original SuperLU/Eigen/CuPy comparison used upstream linear-solver revision `5a0c33d17d847d0be07ae1003263b572aae0729a`; its exact environment is retained in the [baseline notes](historical/anvil-baseline.md). The recorded Anvil Warp rows and their original 111-test validation used three unmodified FSAI PR modules overlaid on that runtime. The latest 325-test validation uses the same pinned environment. The current CPU PARDISO rows use MKL 2020.4.304 and Eigen 3.4.0; their build and run commands are in the [factorization audit](benchmarks/ANVIL_FACTORIZATION.md#reproduction). Install the Warp overlay without changing the default Warp installation:
 
 ```bash
 python -m pip install --no-deps --target build/warp-fsai \
@@ -179,7 +179,8 @@ for f in warp/_src/optim/linear.py warp/_src/optim/fsai.py warp/optim/linear.py;
 done
 PYTHONPATH="$PWD/build/warp-fsai:$PWD" OPENBLAS_NUM_THREADS=4 python -m pytest -q
 
-# Native Spectra reference; requires the pinned checkout above and Eigen headers.
+# Original Eigen LDLT/SuperLU CPU references and retained direct GPU comparison.
+# Requires the pinned Spectra checkout above and Eigen headers.
 g++ -O3 -DNDEBUG -shared -fPIC -I/usr/include/eigen3 -Ibuild/spectra/include \
   benchmarks/spectra_native.cpp -o build/spectra_native.so
 PYTHONPATH="$PWD/build/warp-fsai:$PWD" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \

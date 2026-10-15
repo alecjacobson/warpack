@@ -1,0 +1,34 @@
+{
+  "date_utc": "2026-10-15",
+  "production_changes": false,
+  "checks": {
+    "lint": "passed",
+    "format": "128 files already formatted",
+    "documentation_links": "passed",
+    "python_snippet_syntax": "passed",
+    "shared_matrix_hash": "passed",
+    "confirmed_eigenpair_trials": "8/8 warm and timed trials accepted (4 each for ARPACK/Spectra)",
+    "full_local_suite": "not rerun: benchmark/documentation-only changes"
+  },
+  "matrix_sha256": "4f2bcc4883059a91997e016e1b3c5de8700299d4f4355c23724e89bb5b7d020d",
+  "environment": {
+    "cpu": "Intel Xeon Platinum 8362",
+    "mkl": "2020.4.304",
+    "eigen": "3.4.0",
+    "compiler": "GCC 11.4.0 -O3 -DNDEBUG",
+    "spectra": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
+    "blas_thread_limit": 4
+  },
+  "limitations": [
+    "One-thread SuperLU cancelled by user, not a completed timing.",
+    "Default PARDISO refinement fails the full eigenpair residual gate; preserved.",
+    "CPU affinity not pinned; no continuous whole-machine contention trace; timings vary.",
+    "GPU rows not rerun.",
+    "Setup plus solve excludes assembly, transfers, compilation, warmup and validation.",
+    "MATLAB 143-second M4 total is user-reported and not a matched comparison."
+  ],
+  "source_sha256": {
+    "benchmarks/anvil_factor_audit.py": "c0e6125c6df6561c3aba19318336dbc824fb72ef07cf728f6412eadbae0e3b20",
+    "benchmarks/anvil_factor_audit.cpp": "319f8f117d28268ed31a7763ff9a8f33db8220ef21938c53ea453f96772523ec"
+  }
+}
