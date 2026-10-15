@@ -113,13 +113,65 @@ def generalized_outputs(
         wp.atomic_add(converged, 0, 1)
 
 
+@wp.kernel
+def metric_cholesky(
+    g: wp.array2d[wp.float64],
+    factor: wp.array2d[wp.float64],
+    status: wp.array[wp.int32],
+    repaired: wp.array[wp.int32],
+    recoveries: wp.array[wp.int32],
+    allow_shift: bool,
+):
+    # A finite inverse image can have a Gram matrix that is indefinite in FP64.
+    # Retry before applying the damaged factor to the basis. The trace-scaled
+    # shift is a numerical safeguard, not a change to the eigenproblem.
+    shift = wp.float64(0.0)
+    for attempt in range(2):
+        bad = int(0)
+        for i in range(g.shape[0]):
+            for j in range(i + 1):
+                v = g[i, j]
+                if i == j:
+                    v += shift
+                for k in range(j):
+                    v -= factor[i, k] * factor[j, k]
+                if i == j:
+                    if not wp.isfinite(v) or v <= wp.float64(0.0):
+                        bad = 1
+                        break
+                    if allow_shift and attempt == 0 and v <= wp.float64(1.0e-14) * g[i, i]:
+                        bad = 1
+                        break
+                    factor[i, j] = wp.sqrt(v)
+                else:
+                    factor[i, j] = v / factor[j, j]
+            if bad != 0:
+                break
+        if bad == 0:
+            break
+        if not allow_shift or attempt == 1:
+            status[0] = 1
+            break
+        trace = wp.float64(0.0)
+        for i in range(g.shape[0]):
+            trace += g[i, i]
+        shift = wp.float64(1.0e-12) * trace
+        repaired[0] = 1
+        recoveries[0] += 1
+
+
 class GeneralizedEigensolver(SymmetricEigensolver):
     """Solve A x = lambda B x for symmetric A and SPD B.
 
-    B-orthogonal inverse iteration, B-CholeskyQR2, and a projected symmetric
+    B-orthogonal inverse iteration, stabilized B-CholeskyQR2, and a projected symmetric
     eigensolve. `inverse` applies (A-sigma B)^-1. Mass need not be diagonal.
     This class targets smallest eigenvalues for SPD A, or eigenvalues near a
     provided shift with target=sigma. The supplied inverse must match that shift.
+    Ill-conditioned Gram factors are retried with a small diagonal shift, then
+    two unshifted metric QR passes restore orthogonality. Recovery decisions and
+    ``orthogonalization_recoveries`` stay on device. This safeguard does not
+    guarantee recovery of rank-deficient blocks; inspect ``status`` as well as
+    physical residuals and the requested spectrum.
     """
 
     def __init__(self, operator, mass, inverse, k, ncv=None, tol=1.0e-9, which="SA", target=None):
@@ -132,13 +184,45 @@ class GeneralizedEigensolver(SymmetricEigensolver):
         self.bq = wp.empty_like(self.q)
         self.bx = wp.empty_like(self.eigenvectors)
         self.general_norms = wp.zeros((k, 3), dtype=wp.float64, device=self.device)
+        self._orth_repaired = wp.zeros(1, dtype=wp.int32, device=self.device)
+        self.orthogonalization_recoveries = wp.zeros(1, dtype=wp.int32, device=self.device)
+
+    def initialize(self, seed=42):
+        self.orthogonalization_recoveries.zero_()
+        super().initialize(seed)
+
+    def _metric_qr(self, allow_shift):
+        self.mass.apply(self.q, self.bq)
+        self.gram(self.q, self.bq)
+        wp.launch(
+            metric_cholesky,
+            1,
+            [
+                self.g,
+                self.l,
+                self.status,
+                self._orth_repaired,
+                self.orthogonalization_recoveries,
+                allow_shift,
+            ],
+            device=self.device,
+        )
+        wp.launch(K.triangular, self.n, [self.q, self.l], device=self.device)
 
     def orthogonalize(self):
+        self._orth_repaired.zero_()
         for _ in range(2):
-            self.mass.apply(self.q, self.bq)
-            self.gram(self.q, self.bq)
-            wp.launch(K.cholesky, 1, [self.g, self.l, self.status], device=self.device)
-            wp.launch(K.triangular, self.n, [self.q, self.l], device=self.device)
+            self._metric_qr(True)
+
+        def finish_qr2():
+            for _ in range(2):
+                self._metric_qr(False)
+
+        if wp.get_stream(self.device).is_capturing:
+            wp.capture_if(self._orth_repaired, finish_qr2)
+        else:
+            # Eager execution does not read the numerical decision on the host.
+            finish_qr2()
 
     def step(self):
         self.mass.apply(self.q, self.bq)

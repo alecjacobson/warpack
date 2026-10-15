@@ -1,0 +1,798 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "de76ab0179bf1ef3faa11aae78ca6f573b78ba82",
+  "blas_threads": "4",
+  "protocol": "Sequential synchronized warm replays; setup, capture, independent CPU reference and validation excluded. Same matrices, starts, cuDSS inverse, steps and ncv. Every timed trial validated. Legacy overrides only orthogonalize with the pre-fix two-pass method; always_shifted uses shifted QR followed by QR2. Weak references solve the rescaled annulus independently and include incidence-derived nullspace directions. Zero errors are absolute; positive errors are normalized by the weak component scale. Timings of rejected solves are not wins. DOT inspection includes conditional bodies but is not a host API trace.",
+  "cases": [
+    {
+      "name": "weak_positive",
+      "weak_scale": 0.0001,
+      "variant": "legacy",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1e-05,
+      "outer_cycles": 100,
+      "capture_seconds": 2.1226492635905743,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.08274326846003532,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 7.103512676140781e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.3552527156068805e-15,
+          "physical_residual": 9.580035755040253e-16,
+          "metric_orthogonality": 4.440892098500626e-16,
+          "requested_subspace_error": 4.097427141677987e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.08275091648101807,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 8.05638666843263e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.3552527156068805e-15,
+          "physical_residual": 1.016238533384148e-15,
+          "metric_orthogonality": 1.1102230246251565e-15,
+          "requested_subspace_error": 4.781557381763021e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.08274127542972565,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 2.120279540658083e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.3552527156068805e-15,
+          "physical_residual": 7.867261389832789e-16,
+          "metric_orthogonality": 5.551115123125783e-16,
+          "requested_subspace_error": 2.5968581915234622e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.08274326846003532,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 0.0001,
+      "variant": "conditional",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1e-05,
+      "outer_cycles": 100,
+      "capture_seconds": 0.08347515389323235,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.0878247581422329,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 4.301553410053241e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.3552527156068805e-15,
+          "physical_residual": 8.793747374578975e-16,
+          "metric_orthogonality": 4.440892098500626e-16,
+          "requested_subspace_error": 2.7342650187212492e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.0878266990184784,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 3.4280880246838886e-17,
+          "positive_eigenvalue_error_over_weak_scale": 9.486769009248164e-16,
+          "physical_residual": 7.267078483938591e-16,
+          "metric_orthogonality": 8.881784197001252e-16,
+          "requested_subspace_error": 6.080654296002204e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.0878310464322567,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 7.757003889773906e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.3552527156068805e-15,
+          "physical_residual": 7.457165698162514e-16,
+          "metric_orthogonality": 6.661338147750939e-16,
+          "requested_subspace_error": 5.18365150911561e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.0878266990184784,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 0.0001,
+      "variant": "always_shifted",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1e-05,
+      "outer_cycles": 100,
+      "capture_seconds": 0.21330736577510834,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.12163464725017548,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 9.573385646479529e-17,
+          "positive_eigenvalue_error_over_weak_scale": 8.131516293641283e-16,
+          "physical_residual": 9.133200110488643e-16,
+          "metric_orthogonality": 2.220446049250313e-16,
+          "requested_subspace_error": 6.058415880636933e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.12164930999279022,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 9.911231383879688e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.6263032587282567e-15,
+          "physical_residual": 8.853665672294851e-16,
+          "metric_orthogonality": 1.1102230246251565e-15,
+          "requested_subspace_error": 4.817214707444532e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.12163827568292618,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 9.127282155055709e-17,
+          "positive_eigenvalue_error_over_weak_scale": 8.131516293641283e-16,
+          "physical_residual": 1.0588882968692935e-15,
+          "metric_orthogonality": 1.5543122344752192e-15,
+          "requested_subspace_error": 3.413248939972395e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.12163827568292618,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 1e-10,
+      "variant": "legacy",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1.0000000000000001e-11,
+      "outer_cycles": 100,
+      "capture_seconds": 0.031143669039011,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.09931744635105133,
+          "finite": false,
+          "status": 1,
+          "count": 0,
+          "recoveries": 0,
+          "accepted": false
+        },
+        {
+          "seconds": 0.09932461753487587,
+          "finite": false,
+          "status": 1,
+          "count": 0,
+          "recoveries": 0,
+          "accepted": false
+        },
+        {
+          "seconds": 0.09808704629540443,
+          "finite": false,
+          "status": 1,
+          "count": 0,
+          "recoveries": 0,
+          "accepted": false
+        }
+      ],
+      "solve_seconds": 0.09931744635105133,
+      "accepted": false,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 1e-10,
+      "variant": "conditional",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1.0000000000000001e-11,
+      "outer_cycles": 100,
+      "capture_seconds": 0.07384093478322029,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.08864593505859375,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 1,
+          "zero_eigenvalue_absolute_error": 6.745856672994502e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.5509636485369269e-15,
+          "physical_residual": 8.385894209198372e-16,
+          "metric_orthogonality": 2.220446049250313e-16,
+          "requested_subspace_error": 3.154670660079695e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.08865165710449219,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 1,
+          "zero_eigenvalue_absolute_error": 1.550199388676697e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.5509636485369269e-15,
+          "physical_residual": 8.102106436485923e-16,
+          "metric_orthogonality": 1.1102230246251565e-15,
+          "requested_subspace_error": 5.269849988011072e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.08865430951118469,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 1,
+          "zero_eigenvalue_absolute_error": 8.225627061260548e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.0339757656912846e-15,
+          "physical_residual": 1.0045893434675733e-15,
+          "metric_orthogonality": 8.881784197001252e-16,
+          "requested_subspace_error": 5.237654204028742e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.08865165710449219,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 1e-10,
+      "variant": "always_shifted",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1.0000000000000001e-11,
+      "outer_cycles": 100,
+      "capture_seconds": 0.04528559744358063,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.12137328833341599,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 4.7768296274643296e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.0339757656912846e-15,
+          "physical_residual": 1.1897020189353218e-15,
+          "metric_orthogonality": 1.1102230246251565e-15,
+          "requested_subspace_error": 5.488153858149352e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.12135801464319229,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 2.417782198912677e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.809457589959748e-15,
+          "physical_residual": 8.704777155949475e-16,
+          "metric_orthogonality": 3.3306690738754696e-16,
+          "requested_subspace_error": 2.8668848373017036e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.12135680764913559,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 5.361748208954565e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.0339757656912846e-15,
+          "physical_residual": 9.325973032405965e-16,
+          "metric_orthogonality": 6.661338147750939e-16,
+          "requested_subspace_error": 4.2789999343250583e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.12135801464319229,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 1e-12,
+      "variant": "legacy",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1e-13,
+      "outer_cycles": 100,
+      "capture_seconds": 0.031157605350017548,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.0982590839266777,
+          "finite": false,
+          "status": 1,
+          "count": 0,
+          "recoveries": 0,
+          "accepted": false
+        },
+        {
+          "seconds": 0.09694093465805054,
+          "finite": false,
+          "status": 1,
+          "count": 0,
+          "recoveries": 0,
+          "accepted": false
+        },
+        {
+          "seconds": 0.09693384915590286,
+          "finite": false,
+          "status": 1,
+          "count": 0,
+          "recoveries": 0,
+          "accepted": false
+        }
+      ],
+      "solve_seconds": 0.09694093465805054,
+      "accepted": false,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 1e-12,
+      "variant": "conditional",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1e-13,
+      "outer_cycles": 100,
+      "capture_seconds": 0.06908378005027771,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.08873292803764343,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 1,
+          "zero_eigenvalue_absolute_error": 5.50444403132554e-17,
+          "positive_eigenvalue_error_over_weak_scale": 2.0194839173657902e-15,
+          "physical_residual": 9.011515938695982e-16,
+          "metric_orthogonality": 4.440892098500626e-16,
+          "requested_subspace_error": 1.6529432194072343e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.08874009549617767,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 1,
+          "zero_eigenvalue_absolute_error": 5.512384937187109e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.2116903504194741e-15,
+          "physical_residual": 7.16956305011635e-16,
+          "metric_orthogonality": 2.220446049250313e-16,
+          "requested_subspace_error": 3.50770886221556e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.08878674358129501,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 1,
+          "zero_eigenvalue_absolute_error": 5.512384937187111e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.4136387421560532e-15,
+          "physical_residual": 7.654682349664023e-16,
+          "metric_orthogonality": 2.220446049250313e-16,
+          "requested_subspace_error": 3.7976264821641765e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.08874009549617767,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "weak_positive",
+      "weak_scale": 1e-12,
+      "variant": "always_shifted",
+      "n": 64,
+      "k": 5,
+      "ncv": 32,
+      "target": -1e-13,
+      "outer_cycles": 100,
+      "capture_seconds": 0.04402553290128708,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 200,
+          "DtoD (DEVICE to DEVICE)": 300
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.1216178722679615,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 3.84488979171641e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.2116903504194741e-15,
+          "physical_residual": 7.967442001595579e-16,
+          "metric_orthogonality": 4.440892098500626e-16,
+          "requested_subspace_error": 2.455210817736423e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.1216319091618061,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 4.1452735059814023e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.4136387421560532e-15,
+          "physical_residual": 6.728443340904468e-16,
+          "metric_orthogonality": 3.5813559301867027e-16,
+          "requested_subspace_error": 5.4053019411767785e-14,
+          "accepted": true
+        },
+        {
+          "seconds": 0.12161707133054733,
+          "finite": true,
+          "status": 0,
+          "count": 5,
+          "recoveries": 0,
+          "zero_eigenvalue_absolute_error": 5.466996517790913e-17,
+          "positive_eigenvalue_error_over_weak_scale": 1.0097419586828951e-15,
+          "physical_residual": 8.849190702899056e-16,
+          "metric_orthogonality": 8.881784197001252e-16,
+          "requested_subspace_error": 5.172553626689692e-14,
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.1216178722679615,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "large_disconnected",
+      "weak_scale": 0.0001,
+      "variant": "legacy",
+      "n": 10086,
+      "k": 6,
+      "ncv": 32,
+      "target": -0.001,
+      "outer_cycles": 20,
+      "capture_seconds": 0.009579833596944809,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 40,
+          "DtoD (DEVICE to DEVICE)": 60
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.02859663963317871,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 5.891503653106034e-13,
+            "max_absolute_residual": 1.6547735607447787e-14,
+            "orthogonality": 1.1302070390684094e-13,
+            "spectrum_error": 3.0010716134398763e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732746,
+            "nullspace_subspace_error": 7.648849797978964e-14
+          },
+          "accepted": true
+        },
+        {
+          "seconds": 0.028597325086593628,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 4.699187205903512e-13,
+            "max_absolute_residual": 1.366200447043553e-14,
+            "orthogonality": 9.370282327836321e-14,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.00782325135673274,
+            "nullspace_subspace_error": 5.2394870041328756e-14
+          },
+          "accepted": true
+        },
+        {
+          "seconds": 0.028655998408794403,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 2.611010132908265e-13,
+            "max_absolute_residual": 7.253244771292244e-15,
+            "orthogonality": 1.0857981180834031e-13,
+            "spectrum_error": 2.914335439641036e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.00782325135673274,
+            "nullspace_subspace_error": 6.429552646765585e-14
+          },
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.028597325086593628,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "large_disconnected",
+      "weak_scale": 0.0001,
+      "variant": "conditional",
+      "n": 10086,
+      "k": 6,
+      "ncv": 32,
+      "target": -0.001,
+      "outer_cycles": 20,
+      "capture_seconds": 0.017600011080503464,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 40,
+          "DtoD (DEVICE to DEVICE)": 60
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.02968190237879753,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 4.576610370110651e-13,
+            "max_absolute_residual": 1.338875841791487e-14,
+            "orthogonality": 9.725553695716371e-14,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732742,
+            "nullspace_subspace_error": 6.493291207518274e-14
+          },
+          "accepted": true
+        },
+        {
+          "seconds": 0.029689259827136993,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 2.6378199267638485e-13,
+            "max_absolute_residual": 7.211120128759393e-15,
+            "orthogonality": 8.593126210598712e-14,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.00782325135673274,
+            "nullspace_subspace_error": 3.9793604969287216e-14
+          },
+          "accepted": true
+        },
+        {
+          "seconds": 0.02966531738638878,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 2.565827910709196e-13,
+            "max_absolute_residual": 7.0945311257675225e-15,
+            "orthogonality": 8.926193117986259e-14,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732744,
+            "nullspace_subspace_error": 7.991983859423083e-14
+          },
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.02968190237879753,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    },
+    {
+      "name": "large_disconnected",
+      "weak_scale": 0.0001,
+      "variant": "always_shifted",
+      "n": 10086,
+      "k": 6,
+      "ncv": 32,
+      "target": -0.001,
+      "outer_cycles": 20,
+      "capture_seconds": 0.015067070722579956,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 40,
+          "DtoD (DEVICE to DEVICE)": 60
+        }
+      },
+      "trials": [
+        {
+          "seconds": 0.03824529051780701,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 6.899500872334754e-13,
+            "max_absolute_residual": 1.9613379930588648e-14,
+            "orthogonality": 5.88418203051333e-14,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732739,
+            "nullspace_subspace_error": 7.492161173381158e-14
+          },
+          "accepted": true
+        },
+        {
+          "seconds": 0.03821619600057602,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 4.855482626875545e-13,
+            "max_absolute_residual": 1.3763201190709895e-14,
+            "orthogonality": 1.2745360322696797e-13,
+            "spectrum_error": 2.896988204881268e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.00782325135673274,
+            "nullspace_subspace_error": 6.666208923144815e-14
+          },
+          "accepted": true
+        },
+        {
+          "seconds": 0.03822037950158119,
+          "finite": true,
+          "status": 0,
+          "count": 6,
+          "recoveries": 0,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 2.957215566155349e-13,
+            "max_absolute_residual": 8.478366121146552e-15,
+            "orthogonality": 7.860379014346108e-14,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732746,
+            "nullspace_subspace_error": 6.429078610829059e-14
+          },
+          "accepted": true
+        }
+      ],
+      "solve_seconds": 0.03822037950158119,
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "requested_outer_tolerance": 1e-11
+    }
+  ],
+  "metadata_note": "Requested outer tolerance added after measurements from unchanged warp_setup default; no numerical or timing samples changed."
+}
