@@ -22,7 +22,7 @@ NAMES = [
     "weak_positive",
     "large_disconnected",
 ]
-METHODS = ["scipy", "spectra", "cupy-eigsh", "cupy", "warp", "warp-cg"]
+METHODS = ["scipy", "spectra", "cupy-eigsh", "cupy", "warp", "warp-cg", "warp-cg-fsai"]
 
 
 def main():
@@ -32,6 +32,7 @@ def main():
     parser.add_argument("--large-side", type=int, default=41)
     parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
+    parser.add_argument("--cg-tol", type=float, default=1e-13)
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--timeout", type=int, default=180)
@@ -56,6 +57,7 @@ def main():
             args.steps,
             problem=p,
             lobpcg_tol=args.lobpcg_tol,
+            cg_tol=args.cg_tol,
         )
         row.update(
             fixture=names[0],
@@ -81,7 +83,7 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         git_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], text=True)),
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
-        protocol="Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses upstream diagonal preconditioning. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
+        protocol="Sequential isolated workers. Original residual, requested spectrum, mass orthogonality, known nullity, independent nullspace projection and positive guard are required for accepted timings. Cutoff 1e-8 is a benchmark policy, not certified Betti counting. Setup/reference construction/capture/output conversion excluded from solve timing. Every timed trial validated. Warp cuDSS uses SPD factors; pure-Warp CG uses the explicitly selected upstream diagonal or FSAI preconditioner. CuPy-eigsh uses native SA only for identity mass. CuPy uses generalized LOBPCG with a cuDSS preconditioner; dense fallback sizes explicitly unsupported. Failed timings retained, not wins.",
         cases=[],
     )
     folder = Path("build/hodge-workers")
@@ -112,6 +114,8 @@ def main():
                 str(out),
                 "--lobpcg-tol",
                 str(args.lobpcg_tol),
+                "--cg-tol",
+                str(args.cg_tol),
             ]
             out.unlink(missing_ok=True)
             try:
