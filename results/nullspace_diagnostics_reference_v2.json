@@ -1,0 +1,883 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "996b32bc8043fbbb591e0dabd0aa06da01ad6031",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "protocol": "Sequential uncontended synchronized median replays, three trials by default. Independent host residual/metric evidence outside GPU timing. Host reference timing covers Rayleigh values, physical residuals, metric error bounds and Gram independence with vectors already resident on CPU; discrete classification is outside that timing. Solver+diagnostic uses capture(finalizer=diagnostic.run); no intermediate host numerical readback. Known topology checks agreement only; no result certifies complete nullity. Weak cases can deliberately fail the solver counting gate while diagnostics correctly report unresolved evidence. DOT audits include nested bodies, not a host synchronization API trace.",
+  "cases": [
+    {
+      "name": "sphere",
+      "n": 6,
+      "nnz": 6,
+      "mass_nnz": 6,
+      "k": 2,
+      "ncv": 6,
+      "known_topological_nullity": 0,
+      "weak_scale": 0.0001,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.19133281335234642,
+      "diagnostic_setup_seconds": 0.008159715682268143,
+      "capture_baseline_seconds": 0.1679391823709011,
+      "capture_combined_seconds": 0.041123125702142715,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.00850415974855423,
+          "combined_seconds": 0.008523084223270416,
+          "diagnostic_seconds": 3.2261013984680176e-05,
+          "host_reference_seconds": 6.355717778205872e-05,
+          "reference_max_absolute_difference": 2.4458122560925385e-17,
+          "flags": 1,
+          "numerical_count": 0,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 4.0,
+          "suggested_capacity": 2,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 0.0,
+            "max_absolute_residual": 0.0,
+            "orthogonality": 3.297453054703528e-18,
+            "spectrum_error": 0.0,
+            "recovered_nullity": 0,
+            "positive_guard": 4.0,
+            "nullspace_subspace_error": 0.0
+          },
+          "reported_converged": 2,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.008505895733833313,
+          "combined_seconds": 0.008526679128408432,
+          "diagnostic_seconds": 3.2529234886169434e-05,
+          "host_reference_seconds": 5.8609992265701294e-05,
+          "reference_max_absolute_difference": 2.4458122560925385e-17,
+          "flags": 1,
+          "numerical_count": 0,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 4.0,
+          "suggested_capacity": 2,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 0.0,
+            "max_absolute_residual": 0.0,
+            "orthogonality": 3.297453054703528e-18,
+            "spectrum_error": 0.0,
+            "recovered_nullity": 0,
+            "positive_guard": 4.0,
+            "nullspace_subspace_error": 0.0
+          },
+          "reported_converged": 2,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.008506633341312408,
+          "combined_seconds": 0.008526802062988281,
+          "diagnostic_seconds": 3.30805778503418e-05,
+          "host_reference_seconds": 5.979090929031372e-05,
+          "reference_max_absolute_difference": 2.4458122560925385e-17,
+          "flags": 1,
+          "numerical_count": 0,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 4.0,
+          "suggested_capacity": 2,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 0.0,
+            "max_absolute_residual": 0.0,
+            "orthogonality": 3.297453054703528e-18,
+            "spectrum_error": 0.0,
+            "recovered_nullity": 0,
+            "positive_guard": 4.0,
+            "nullspace_subspace_error": 0.0
+          },
+          "reported_converged": 2,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.008505895733833313,
+      "combined_seconds": 0.008526679128408432,
+      "diagnostic_seconds": 3.2529234886169434e-05,
+      "host_reference_seconds": 5.979090929031372e-05,
+      "combined_over_baseline": 1.0024434104561675,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    },
+    {
+      "name": "disk",
+      "n": 5,
+      "nnz": 9,
+      "mass_nnz": 5,
+      "k": 2,
+      "ncv": 5,
+      "known_topological_nullity": 0,
+      "weak_scale": 0.0001,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.010172702372074127,
+      "diagnostic_setup_seconds": 0.0016853362321853638,
+      "capture_baseline_seconds": 0.029016241431236267,
+      "capture_combined_seconds": 0.030508145689964294,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.007941015064716339,
+          "combined_seconds": 0.007953200489282608,
+          "diagnostic_seconds": 3.506988286972046e-05,
+          "host_reference_seconds": 7.955357432365417e-05,
+          "reference_max_absolute_difference": 4.440892098500626e-16,
+          "flags": 1,
+          "numerical_count": 0,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 1.9999999999999993,
+          "suggested_capacity": 2,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.6883057536160649e-16,
+            "max_absolute_residual": 4.440892098500626e-16,
+            "orthogonality": 1.5745528146370416e-17,
+            "spectrum_error": 0.0,
+            "recovered_nullity": 0,
+            "positive_guard": 2.0,
+            "nullspace_subspace_error": 0.0
+          },
+          "reported_converged": 2,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.007947742938995361,
+          "combined_seconds": 0.007955167442560196,
+          "diagnostic_seconds": 3.4790486097335815e-05,
+          "host_reference_seconds": 6.108358502388e-05,
+          "reference_max_absolute_difference": 4.440892098500626e-16,
+          "flags": 1,
+          "numerical_count": 0,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 1.9999999999999993,
+          "suggested_capacity": 2,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.6883057536160649e-16,
+            "max_absolute_residual": 4.440892098500626e-16,
+            "orthogonality": 1.5745528146370416e-17,
+            "spectrum_error": 0.0,
+            "recovered_nullity": 0,
+            "positive_guard": 2.0,
+            "nullspace_subspace_error": 0.0
+          },
+          "reported_converged": 2,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.00793224573135376,
+          "combined_seconds": 0.007949057966470718,
+          "diagnostic_seconds": 3.590434789657593e-05,
+          "host_reference_seconds": 6.408616900444031e-05,
+          "reference_max_absolute_difference": 4.440892098500626e-16,
+          "flags": 1,
+          "numerical_count": 0,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 1.9999999999999993,
+          "suggested_capacity": 2,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.6883057536160649e-16,
+            "max_absolute_residual": 4.440892098500626e-16,
+            "orthogonality": 1.5745528146370416e-17,
+            "spectrum_error": 0.0,
+            "recovered_nullity": 0,
+            "positive_guard": 2.0,
+            "nullspace_subspace_error": 0.0
+          },
+          "reported_converged": 2,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.007941015064716339,
+      "combined_seconds": 0.007953200489282608,
+      "diagnostic_seconds": 3.506988286972046e-05,
+      "host_reference_seconds": 6.408616900444031e-05,
+      "combined_over_baseline": 1.0015344920601412,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    },
+    {
+      "name": "annulus",
+      "n": 16,
+      "nnz": 64,
+      "mass_nnz": 16,
+      "k": 3,
+      "ncv": 16,
+      "known_topological_nullity": 1,
+      "weak_scale": 0.0001,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.010702550411224365,
+      "diagnostic_setup_seconds": 0.0017689988017082214,
+      "capture_baseline_seconds": 0.03260290250182152,
+      "capture_combined_seconds": 0.03219829872250557,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.023285310715436935,
+          "combined_seconds": 0.023307442665100098,
+          "diagnostic_seconds": 3.8392841815948486e-05,
+          "host_reference_seconds": 6.679818034172058e-05,
+          "reference_max_absolute_difference": 6.661338147750939e-16,
+          "flags": 1,
+          "numerical_count": 1,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.9999999999999992,
+          "suggested_capacity": 3,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 5.917212721286936e-16,
+            "max_absolute_residual": 3.7470027081099033e-16,
+            "orthogonality": 2.220446049250313e-16,
+            "spectrum_error": 7.523111646736031e-16,
+            "recovered_nullity": 1,
+            "positive_guard": 1.0,
+            "nullspace_subspace_error": 3.065703529144609e-16
+          },
+          "reported_converged": 3,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.023298148065805435,
+          "combined_seconds": 0.023309912532567978,
+          "diagnostic_seconds": 3.984197974205017e-05,
+          "host_reference_seconds": 6.546080112457275e-05,
+          "reference_max_absolute_difference": 1.942890293094024e-16,
+          "flags": 1,
+          "numerical_count": 1,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.9999999999999992,
+          "suggested_capacity": 3,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 4.581772189210292e-16,
+            "max_absolute_residual": 3.3306690738754696e-16,
+            "orthogonality": 2.7755575615628914e-17,
+            "spectrum_error": 7.523111646736031e-16,
+            "recovered_nullity": 1,
+            "positive_guard": 1.0,
+            "nullspace_subspace_error": 4.0980616289968964e-16
+          },
+          "reported_converged": 3,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.02329796925187111,
+          "combined_seconds": 0.023311249911785126,
+          "diagnostic_seconds": 4.144012928009033e-05,
+          "host_reference_seconds": 6.328895688056946e-05,
+          "reference_max_absolute_difference": 4.440892098500626e-16,
+          "flags": 1,
+          "numerical_count": 1,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.9999999999999992,
+          "suggested_capacity": 3,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 3.5381555418772976e-16,
+            "max_absolute_residual": 2.220446049250313e-16,
+            "orthogonality": 1.1102230246251565e-16,
+            "spectrum_error": 7.523111646736031e-16,
+            "recovered_nullity": 1,
+            "positive_guard": 1.0,
+            "nullspace_subspace_error": 3.4219371797089426e-16
+          },
+          "reported_converged": 3,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.02329796925187111,
+      "combined_seconds": 0.023309912532567978,
+      "diagnostic_seconds": 3.984197974205017e-05,
+      "host_reference_seconds": 6.546080112457275e-05,
+      "combined_over_baseline": 1.0005126318336055,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    },
+    {
+      "name": "torus",
+      "n": 48,
+      "nnz": 336,
+      "mass_nnz": 48,
+      "k": 4,
+      "ncv": 32,
+      "known_topological_nullity": 2,
+      "weak_scale": 0.0001,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.010932743549346924,
+      "diagnostic_setup_seconds": 0.0017619915306568146,
+      "capture_baseline_seconds": 0.03350096940994263,
+      "capture_combined_seconds": 0.03137426823377609,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.0809374675154686,
+          "combined_seconds": 0.0809643529355526,
+          "diagnostic_seconds": 4.258379340171814e-05,
+          "host_reference_seconds": 8.051842451095581e-05,
+          "reference_max_absolute_difference": 5.551115123125783e-16,
+          "flags": 1,
+          "numerical_count": 2,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.7639320225002092,
+          "suggested_capacity": 4,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.0166411993827273e-15,
+            "max_absolute_residual": 4.3111408971667126e-16,
+            "orthogonality": 2.3245294578089215e-16,
+            "spectrum_error": 2.55351295663786e-15,
+            "recovered_nullity": 2,
+            "positive_guard": 0.76393202250021,
+            "nullspace_subspace_error": 1.0973548640836833e-15
+          },
+          "reported_converged": 4,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.08094806969165802,
+          "combined_seconds": 0.08097163215279579,
+          "diagnostic_seconds": 4.3064355850219727e-05,
+          "host_reference_seconds": 7.378682494163513e-05,
+          "reference_max_absolute_difference": 2.220446049250313e-16,
+          "flags": 1,
+          "numerical_count": 2,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.7639320225002093,
+          "suggested_capacity": 4,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 9.706195732108186e-16,
+            "max_absolute_residual": 5.551115123125783e-16,
+            "orthogonality": 4.440892098500626e-16,
+            "spectrum_error": 2.6645352591003757e-15,
+            "recovered_nullity": 2,
+            "positive_guard": 0.7639320225002102,
+            "nullspace_subspace_error": 9.808354186140923e-16
+          },
+          "reported_converged": 4,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.08094125986099243,
+          "combined_seconds": 0.08096814155578613,
+          "diagnostic_seconds": 4.4967979192733765e-05,
+          "host_reference_seconds": 7.468461990356445e-05,
+          "reference_max_absolute_difference": 4.440892098500626e-16,
+          "flags": 1,
+          "numerical_count": 2,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.7639320225002094,
+          "suggested_capacity": 4,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 9.288941783507477e-16,
+            "max_absolute_residual": 4.163336342344337e-16,
+            "orthogonality": 2.220446049250313e-16,
+            "spectrum_error": 2.7755575615628914e-15,
+            "recovered_nullity": 2,
+            "positive_guard": 0.7639320225002103,
+            "nullspace_subspace_error": 1.1148807447081794e-15
+          },
+          "reported_converged": 4,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.08094125986099243,
+      "combined_seconds": 0.08096814155578613,
+      "diagnostic_seconds": 4.3064355850219727e-05,
+      "host_reference_seconds": 7.468461990356445e-05,
+      "combined_over_baseline": 1.0003321136196777,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    },
+    {
+      "name": "disconnected",
+      "n": 96,
+      "nnz": 672,
+      "mass_nnz": 284,
+      "k": 6,
+      "ncv": 32,
+      "known_topological_nullity": 4,
+      "weak_scale": 0.0001,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.012019459158182144,
+      "diagnostic_setup_seconds": 0.001841038465499878,
+      "capture_baseline_seconds": 0.030707579106092453,
+      "capture_combined_seconds": 0.03126539662480354,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.08324790000915527,
+          "combined_seconds": 0.08323585614562035,
+          "diagnostic_seconds": 5.809590220451355e-05,
+          "host_reference_seconds": 0.0001109875738620758,
+          "reference_max_absolute_difference": 2.220446049250313e-16,
+          "flags": 1,
+          "numerical_count": 4,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.7326999941196324,
+          "suggested_capacity": 6,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.0308715727357734e-15,
+            "max_absolute_residual": 3.885780586188048e-16,
+            "orthogonality": 1.3322676295501878e-15,
+            "spectrum_error": 1.5926053918775218e-15,
+            "recovered_nullity": 4,
+            "positive_guard": 0.7326999941196342,
+            "nullspace_subspace_error": 1.7320862306579183e-15
+          },
+          "reported_converged": 6,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.08320112153887749,
+          "combined_seconds": 0.0832429938018322,
+          "diagnostic_seconds": 5.369260907173157e-05,
+          "host_reference_seconds": 0.00011229515075683594,
+          "reference_max_absolute_difference": 2.220446049250313e-16,
+          "flags": 1,
+          "numerical_count": 4,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.7326999941196327,
+          "suggested_capacity": 6,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.1760207821441334e-15,
+            "max_absolute_residual": 4.718447854656915e-16,
+            "orthogonality": 2.4424906541753444e-15,
+            "spectrum_error": 1.6653345369377348e-15,
+            "recovered_nullity": 4,
+            "positive_guard": 0.7326999941196347,
+            "nullspace_subspace_error": 2.254843499538881e-15
+          },
+          "reported_converged": 6,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.08321314677596092,
+          "combined_seconds": 0.08325887471437454,
+          "diagnostic_seconds": 5.566328763961792e-05,
+          "host_reference_seconds": 9.569898247718811e-05,
+          "reference_max_absolute_difference": 1.1102230246251565e-16,
+          "flags": 1,
+          "numerical_count": 4,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.7326999941196325,
+          "suggested_capacity": 6,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 1.20491282283127e-15,
+            "max_absolute_residual": 4.996003610813204e-16,
+            "orthogonality": 1.9984014443252818e-15,
+            "spectrum_error": 1.6653345369377348e-15,
+            "recovered_nullity": 4,
+            "positive_guard": 0.7326999941196347,
+            "nullspace_subspace_error": 1.9042704375275892e-15
+          },
+          "reported_converged": 6,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.08321314677596092,
+      "combined_seconds": 0.0832429938018322,
+      "diagnostic_seconds": 5.566328763961792e-05,
+      "host_reference_seconds": 0.0001109875738620758,
+      "combined_over_baseline": 1.0003586816149572,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    },
+    {
+      "name": "weak_positive",
+      "n": 64,
+      "nnz": 400,
+      "mass_nnz": 188,
+      "k": 5,
+      "ncv": 32,
+      "known_topological_nullity": 3,
+      "weak_scale": 0.0001,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.010932650417089462,
+      "diagnostic_setup_seconds": 0.0017665289342403412,
+      "capture_baseline_seconds": 0.030566301196813583,
+      "capture_combined_seconds": 0.030869130045175552,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.08289814367890358,
+          "combined_seconds": 0.08289280533790588,
+          "diagnostic_seconds": 5.478411912918091e-05,
+          "host_reference_seconds": 8.658692240715027e-05,
+          "reference_max_absolute_difference": 2.220446049250313e-16,
+          "flags": 1,
+          "numerical_count": 3,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.00010216227423897482,
+          "suggested_capacity": 5,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 7.041708447789262e-16,
+            "max_absolute_residual": 3.49294478946546e-16,
+            "orthogonality": 1.3322676295501878e-15,
+            "spectrum_error": 1.7062074430905774e-15,
+            "recovered_nullity": 3,
+            "positive_guard": 0.00010216227423897487,
+            "nullspace_subspace_error": 1.4144309273316084e-15
+          },
+          "reported_converged": 5,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.08284180983901024,
+          "combined_seconds": 0.08286863565444946,
+          "diagnostic_seconds": 4.9035996198654175e-05,
+          "host_reference_seconds": 7.157027721405029e-05,
+          "reference_max_absolute_difference": 2.220446049250313e-16,
+          "flags": 1,
+          "numerical_count": 3,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.00010216227423897479,
+          "suggested_capacity": 5,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 7.293351736957743e-16,
+            "max_absolute_residual": 2.3978438740065014e-16,
+            "orthogonality": 8.881784197001252e-16,
+            "spectrum_error": 1.7156137780367072e-15,
+            "recovered_nullity": 3,
+            "positive_guard": 0.00010216227423897489,
+            "nullspace_subspace_error": 1.550016897935375e-15
+          },
+          "reported_converged": 5,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.08287212252616882,
+          "combined_seconds": 0.08289305120706558,
+          "diagnostic_seconds": 6.216391921043396e-05,
+          "host_reference_seconds": 7.52471387386322e-05,
+          "reference_max_absolute_difference": 2.220446049250313e-16,
+          "flags": 1,
+          "numerical_count": 3,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.00010216227423897482,
+          "suggested_capacity": 5,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 8.398921273550143e-16,
+            "max_absolute_residual": 2.9388441539192814e-16,
+            "orthogonality": 8.881784197001252e-16,
+            "spectrum_error": 1.714063395149843e-15,
+            "recovered_nullity": 3,
+            "positive_guard": 0.00010216227423897487,
+            "nullspace_subspace_error": 1.5999201411311368e-15
+          },
+          "reported_converged": 5,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.08287212252616882,
+      "combined_seconds": 0.08289280533790588,
+      "diagnostic_seconds": 5.478411912918091e-05,
+      "host_reference_seconds": 7.52471387386322e-05,
+      "combined_over_baseline": 1.0002495750212086,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    },
+    {
+      "name": "large_disconnected",
+      "n": 10086,
+      "nnz": 70602,
+      "mass_nnz": 10086,
+      "k": 6,
+      "ncv": 32,
+      "known_topological_nullity": 4,
+      "weak_scale": 0.0001,
+      "reference": "Two oriented closed tori: incidence ranks V-2 and F-2; independent Fourier spectra and coordinate harmonic cochains",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 20,
+      "setup_seconds": 0.07960280403494835,
+      "diagnostic_setup_seconds": 0.0025545135140419006,
+      "capture_baseline_seconds": 0.009650100022554398,
+      "capture_combined_seconds": 0.010160136967897415,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 40,
+            "DtoD (DEVICE to DEVICE)": 60
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 40,
+            "DtoD (DEVICE to DEVICE)": 60
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.028633490204811096,
+          "combined_seconds": 0.028687842190265656,
+          "diagnostic_seconds": 6.22682273387909e-05,
+          "host_reference_seconds": 0.001822635531425476,
+          "reference_max_absolute_difference": 1.4932499681208355e-13,
+          "flags": 1,
+          "numerical_count": 4,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.007823251356224354,
+          "suggested_capacity": 6,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 4.823129483103721e-13,
+            "max_absolute_residual": 1.3966800806175517e-14,
+            "orthogonality": 1.503241975342462e-13,
+            "spectrum_error": 2.96637714392034e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732737,
+            "nullspace_subspace_error": 5.627922452543419e-14
+          },
+          "reported_converged": 6,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.028729677200317383,
+          "combined_seconds": 0.02870304137468338,
+          "diagnostic_seconds": 6.243586540222168e-05,
+          "host_reference_seconds": 0.001845572143793106,
+          "reference_max_absolute_difference": 1.5121237595394632e-13,
+          "flags": 1,
+          "numerical_count": 4,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.007823251356452779,
+          "suggested_capacity": 6,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 2.6560526561906045e-13,
+            "max_absolute_residual": 7.77323490947987e-15,
+            "orthogonality": 1.5298873279334657e-13,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732742,
+            "nullspace_subspace_error": 6.11787844131079e-14
+          },
+          "reported_converged": 6,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.02862580493092537,
+          "combined_seconds": 0.02867729216814041,
+          "diagnostic_seconds": 6.064772605895996e-05,
+          "host_reference_seconds": 0.0018744580447673798,
+          "reference_max_absolute_difference": 1.474376176702208e-13,
+          "flags": 1,
+          "numerical_count": 4,
+          "ambiguous_count": 0,
+          "weak_positive_count": 0,
+          "positive_guard": 0.007823251356088596,
+          "suggested_capacity": 6,
+          "physical_validation": {
+            "accepted": true,
+            "residual": 6.110998748801102e-13,
+            "max_absolute_residual": 1.7427235327570345e-14,
+            "orthogonality": 1.4854784069484595e-13,
+            "spectrum_error": 2.931682674400804e-16,
+            "recovered_nullity": 4,
+            "positive_guard": 0.007823251356732742,
+            "nullspace_subspace_error": 5.3372890244322214e-14
+          },
+          "reported_converged": 6,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.028633490204811096,
+      "combined_seconds": 0.028687842190265656,
+      "diagnostic_seconds": 6.22682273387909e-05,
+      "host_reference_seconds": 0.001845572143793106,
+      "combined_over_baseline": 1.0018981963101874,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    }
+  ]
+}

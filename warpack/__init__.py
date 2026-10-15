@@ -6,6 +6,7 @@ from .fem import RestElasticity, rigid_body_basis
 from .generalized import CGInverse, GeneralizedEigensolver
 from .generalized_krylov import GeneralizedKrylovSchur
 from .hermitian import HermitianCSR, HermitianEigensolver
+from .nullspace import NumericalNullspaceDiagnostics
 from .shift import ComplexShiftInverse, ShiftInvertEigensolver
 from .solver import (
     CuDSSInverse,
@@ -29,6 +30,7 @@ __all__ = [
     "HermitianCSR",
     "HermitianEigensolver",
     "KrylovSchur",
+    "NumericalNullspaceDiagnostics",
     "OrthogonalComplementOperator",
     "MassOrthogonalComplementInverse",
     "RestElasticity",

@@ -1,0 +1,139 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "2c3a0d6e0c1d7d72901d790eb360c7afdcc55f68",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "protocol": "Sequential uncontended synchronized median replays, three trials by default. Independent host residual/metric evidence outside GPU timing. Host reference timing covers Rayleigh values, physical residuals, metric error bounds and Gram independence with vectors already resident on CPU; discrete classification is outside that timing. Solver+diagnostic uses capture(finalizer=diagnostic.run); no intermediate host numerical readback. Known topology checks agreement only; no result certifies complete nullity. Weak cases can deliberately fail the solver counting gate while diagnostics correctly report unresolved evidence. DOT audits include nested bodies, not a host synchronization API trace.",
+  "cases": [
+    {
+      "name": "weak_positive",
+      "side": 4,
+      "target": [
+        -1.0000000000000001e-11,
+        0.0
+      ],
+      "matrix_sha256": "5c92b5af086f6d32eaa0f1dbc62a6bc04fb2b9eebbbdf89e8c9b47122c38b067",
+      "n": 64,
+      "nnz": 400,
+      "mass_nnz": 188,
+      "k": 5,
+      "ncv": 32,
+      "known_topological_nullity": 3,
+      "weak_scale": 1e-10,
+      "reference": "Independent incidence SVD ranks/nullspace; dense generalized spectrum",
+      "mass_lower_bound": 0.9,
+      "outer_cycles": 100,
+      "setup_seconds": 0.19585243239998817,
+      "diagnostic_setup_seconds": 0.008520655333995819,
+      "capture_baseline_seconds": 0.1813727170228958,
+      "capture_combined_seconds": 0.044522788375616074,
+      "graph_audits": {
+        "baseline": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "combined": {
+          "host_nodes": 0,
+          "memcpy_kinds": {
+            "HtoD (HOST PAGEABLE to DEVICE)": 200,
+            "DtoD (DEVICE to DEVICE)": 300
+          }
+        },
+        "diagnostic": {
+          "host_nodes": 0,
+          "memcpy_kinds": {}
+        }
+      },
+      "trials": [
+        {
+          "baseline_seconds": 0.09810204431414604,
+          "baseline_finite": false,
+          "baseline_status": 1,
+          "combined_finite": false,
+          "combined_status": 1,
+          "combined_seconds": 0.09812142327427864,
+          "diagnostic_seconds": 5.089491605758667e-05,
+          "host_reference_seconds": null,
+          "reference_max_absolute_difference": null,
+          "flags": 199,
+          "numerical_count": 0,
+          "ambiguous_count": 5,
+          "weak_positive_count": 0,
+          "positive_guard": null,
+          "suggested_capacity": 5,
+          "physical_validation": {
+            "accepted": false,
+            "reason": "Non-finite eigenvalues or vectors"
+          },
+          "reported_converged": 0,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.0991964191198349,
+          "baseline_finite": false,
+          "baseline_status": 1,
+          "combined_finite": false,
+          "combined_status": 1,
+          "combined_seconds": 0.09937908872961998,
+          "diagnostic_seconds": 5.5417418479919434e-05,
+          "host_reference_seconds": null,
+          "reference_max_absolute_difference": null,
+          "flags": 199,
+          "numerical_count": 0,
+          "ambiguous_count": 5,
+          "weak_positive_count": 0,
+          "positive_guard": null,
+          "suggested_capacity": 5,
+          "physical_validation": {
+            "accepted": false,
+            "reason": "Non-finite eigenvalues or vectors"
+          },
+          "reported_converged": 0,
+          "diagnostic_contract_pass": true
+        },
+        {
+          "baseline_seconds": 0.09809814393520355,
+          "baseline_finite": false,
+          "baseline_status": 1,
+          "combined_finite": false,
+          "combined_status": 1,
+          "combined_seconds": 0.09939007833600044,
+          "diagnostic_seconds": 0.00011925771832466125,
+          "host_reference_seconds": null,
+          "reference_max_absolute_difference": null,
+          "flags": 199,
+          "numerical_count": 0,
+          "ambiguous_count": 5,
+          "weak_positive_count": 0,
+          "positive_guard": null,
+          "suggested_capacity": 5,
+          "physical_validation": {
+            "accepted": false,
+            "reason": "Non-finite eigenvalues or vectors"
+          },
+          "reported_converged": 0,
+          "diagnostic_contract_pass": true
+        }
+      ],
+      "baseline_seconds": 0.09810204431414604,
+      "combined_seconds": 0.09937908872961998,
+      "diagnostic_seconds": 5.5417418479919434e-05,
+      "host_reference_seconds": null,
+      "combined_over_baseline": 1.0130175107399857,
+      "diagnostic_contract_pass": true,
+      "solver_accepted": false,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "completeness_certified": false
+    }
+  ]
+}
