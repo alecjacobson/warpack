@@ -63,8 +63,12 @@ class ApiTrace:
         self.lib.cuptiEnableDomain.argtypes = [ct.c_uint32, ct.c_void_p, ct.c_int]
         self.lib.cuptiUnsubscribe.argtypes = [ct.c_void_p]
         self._check(self.lib.cuptiSubscribe(ct.byref(self.handle), self.callback, None))
-        for domain in (1, 2):
-            self._check(self.lib.cuptiEnableDomain(1, self.handle, domain))
+        try:
+            for domain in (1, 2):
+                self._check(self.lib.cuptiEnableDomain(1, self.handle, domain))
+        except Exception:
+            self.close()
+            raise
 
     @staticmethod
     def _check(status):

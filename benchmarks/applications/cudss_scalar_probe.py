@@ -132,6 +132,8 @@ def main():
         },
     )
     (folder / "scalar-probe.json").write_text(json.dumps(report, indent=2) + "\n")
+    if trace.errors or any(e.get("status", 0) for e in trace.events):
+        raise SystemExit("Trace instrumentation or CUDA API error")
     print(
         json.dumps(
             dict(cases=rows, entries=report["api_entries_by_phase"], errors=trace.errors), indent=2

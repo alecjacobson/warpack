@@ -2,9 +2,11 @@
 
 import argparse
 import gc
+import hashlib
 import json
 import subprocess
 from collections import Counter
+from importlib.metadata import version
 from pathlib import Path
 
 import scipy.sparse as sp
@@ -39,6 +41,7 @@ def main():
     parser.add_argument("--skip-timings", action="store_true")
     args = parser.parse_args()
     folder = Path("build/cudss-graph-audit")
+    folder.mkdir(parents=True, exist_ok=True)
     p = make_fem_case("clamped_consistent", side=10).problem
     report = dict(
         source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
@@ -48,7 +51,28 @@ def main():
         trace=[],
     )
     if args.skip_timings:
-        report = json.loads((folder / "large-audit.json").read_text())
+        previous = json.loads((folder / "large-audit.json").read_text())
+        digest = hashlib.sha256()
+        for mat in (p.a, p.b):
+            for data in (mat.indptr, mat.indices, mat.data):
+                digest.update(data.tobytes())
+        first = previous["timings"][0]
+        if (
+            previous["gpu"],
+            previous["warp"],
+            first["matrix_sha256"],
+            first["target"],
+            first["k"],
+        ) != (report["gpu"], report["warp"], digest.hexdigest(), [p.target, 0.0], p.k):
+            raise ValueError("Saved timing environment or pencil does not match the trace")
+        report = previous
+    report["trace_source_commit"] = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True
+    ).strip()
+    report["versions"] = {
+        n: version(n) for n in ("cuda-bindings", "nvidia-cuda-cupti-cu12", "nvidia-cudss-cu12")
+    }
+
     for profile in [] if args.skip_timings else PROFILES:
         # Do not enable CUPTI during timing comparisons.
         with configuration(profile):
@@ -74,7 +98,7 @@ def main():
         graph = solver.graph = None
         gc.collect()
         inverse.close()
-    # A purely Warp inverse supplies a transfer-free graph control.
+    # A purely Warp inverse supplies a graph with no host transfers as a control.
     n = 256
     a = sp.diags([[-0.1] * (n - 1), [2.0] * n, [-0.1] * (n - 1)], [-1, 0, 1], format="csr")
     inverse = CGInverse(matrix(a), tol=1e-13, maxiter=100, preconditioner="diag")
@@ -97,11 +121,32 @@ def main():
         for phase in sorted({e["phase"] for e in events})
     }
     (folder / "large-audit.json").write_text(json.dumps(report, indent=2) + "\n")
+    forbidden_replay_calls = [
+        e
+        for e in events
+        if e["phase"].endswith(":warm_replay")
+        and ("Synchronize" in e["name"] or "Memcpy" in e["name"])
+    ]
     if (
-        errors
+        forbidden_replay_calls
+        or any(e.get("status", 0) for e in events)
+        or report["full_solver_count"] != p.k
+        or errors
         or not report["full_solver_accuracy"]["accepted"]
         or report["pure_warp_residual"] > 1e-11
-        or any(not r["accepted"] for r in report["timings"])
+        or any(
+            not r["accepted"]
+            or not r["timing_uncontended"]
+            or any(not v["solver_full_count"] for v in r["validation"])
+            for r in report["timings"]
+        )
+        or not any(c["comparable"] for c in report["saved_baseline_checks"])
+        or any(
+            c.get("performance_regression")
+            or c.get("accuracy_regression")
+            or c.get("graph_regression")
+            for c in report["saved_baseline_checks"]
+        )
     ):
         raise SystemExit("Audit validation failed")
     print(report["saved_baseline_checks"], report["api_entries_by_phase"], flush=True)

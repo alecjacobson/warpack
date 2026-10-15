@@ -141,6 +141,7 @@ def run(structure, n, width, profile):
 
 
 def main():
+    Path("build/cudss-graph-audit").mkdir(parents=True, exist_ok=True)
     rows = []
     cases = [("diagonal", n, 1, "default") for n in (4, 16, 64)]
     cases += [(s, 64, w, "default") for s in ("chain", "dense") for w in (1, 8)]
@@ -158,6 +159,9 @@ def main():
             [(r["int32_pair"]) for r in row["copies_before"]],
             flush=True,
         )
+
+    if not all(r["accepted"] and r["copies_before"] == r["copies_after"] for r in rows):
+        raise SystemExit("Configuration accuracy or source-lifetime check failed")
 
 
 if __name__ == "__main__":
