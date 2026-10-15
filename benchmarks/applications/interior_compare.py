@@ -20,7 +20,7 @@ METHODS = ("scipy", "spectra", "cupy", "warp", "warp-block", "warp-cg-bj", "warp
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cases", default=",".join(NAMES))
-    parser.add_argument("--methods", default=",".join(METHODS))
+    parser.add_argument("--methods", default=",".join(m for m in METHODS if m != "warp-block"))
     parser.add_argument("--side", type=int, default=2)
     parser.add_argument("--modes", type=int, default=6)
     parser.add_argument("--band-index", type=int, default=6)
