@@ -5,6 +5,7 @@ import math
 import warp as wp
 import warp.sparse as ws
 
+from . import kernels as K
 from .generalized_krylov import GeneralizedKrylovSchur, quotient_parts, quotients
 
 
@@ -135,15 +136,29 @@ def _long_row_product(
 
 @wp.kernel
 def _multipliers(
-    solution: wp.array2d[wp.float64],
+    images: wp.array2d[wp.float64],
     values: wp.array[wp.float64],
     mu: wp.array2d[wp.float64],
-    n: int,
-    j: int,
     shift: wp.float64,
 ):
-    i = wp.tid()
-    mu[j, i] = (values[j] - shift) * solution[0, n + i]
+    j, i = wp.tid()
+    mu[j, i] = (values[j] - shift) * images[j, i]
+
+
+@wp.kernel
+def _restart_multiplier_images(
+    retained: wp.array2d[wp.float64],
+    images: wp.array2d[wp.float64],
+    seed: wp.array[wp.int32],
+):
+    j, i = wp.tid()
+    source = j
+    last = retained.shape[0] - 1
+    if j == seed[0]:
+        source = last
+    elif j == last:
+        source = seed[0]
+    images[j, i] = retained[source, i]
 
 
 @wp.kernel
@@ -229,6 +244,10 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
     residuals ||H w+C.T mu-lambda M w||/max(1,||H w||+||C.T mu||+|lambda| ||M w||),
     and constraint_residuals max_i |C_i w|/(||C_i|| ||w||). Both must pass tol.
     All numeric iteration and validation run in Warp except the supplied inverse.
+    Multiplier images from Krylov applications are retained through Ritz rotations
+    and restarts, avoiding extra inverse solves at finalization. As for cached
+    physical products, this relies on a fixed linear inverse during each solve;
+    approximate-inverse error is still checked in the original equilibrium.
     Replay uses preallocated buffers; cuDSS requires a fixed outer cycle budget.
     Owns no factors: release graphs before closing the caller-owned inverse.
     """
@@ -280,12 +299,52 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
         self.constraint_residuals = wp.empty(k, dtype=wp.float64, device=self.device)
         self.constraint_norms = wp.empty(r, dtype=wp.float64, device=self.device)
         self.constraint_force = wp.empty_like(self.eigenvectors)
-        self.inverse_image = wp.empty((1, n), dtype=wp.float64, device=self.device)
+        self.multiplier_images = wp.empty((self.m, r), dtype=wp.float64, device=self.device)
+        self.retained_multiplier_images = wp.empty(
+            (self.keep, r), dtype=wp.float64, device=self.device
+        )
         self.constrained_sums = wp.zeros((k, 5), dtype=wp.float64, device=self.device)
         wp.launch(
             _constraint_norms,
             r,
             [constraints.offsets, constraints.values, self.constraint_norms],
+            device=self.device,
+        )
+
+    def _save_multiplier_image(self, j):
+        wp.copy(
+            self.multiplier_images[j : j + 1],
+            self.physical_inverse.solution,
+            src_offset=self.n,
+            count=self.multipliers.shape[1],
+        )
+
+    def expand(self, j):
+        super().expand(j)
+        # expand applies the inverse to M q[j-1]; recovery changes only q[j].
+        self._save_multiplier_image(j - 1)
+
+    def complete_projection(self):
+        # step has just applied the inverse to the last basis vector.
+        self._save_multiplier_image(self.m - 1)
+        super().complete_projection()
+
+    def update_retained_products(self):
+        super().update_retained_products()
+        wp.launch(
+            K.rotate,
+            self.retained_multiplier_images.shape,
+            [self.multiplier_images, self.v, self.order, self.retained_multiplier_images],
+            device=self.device,
+        )
+
+    def reset_projection(self):
+        super().reset_projection()
+        # Match the restart-seed swap applied to q/z, leaving output order intact.
+        wp.launch(
+            _restart_multiplier_images,
+            self.retained_multiplier_images.shape,
+            [self.retained_multiplier_images, self.multiplier_images, self.restart_seed],
             device=self.device,
         )
 
@@ -302,23 +361,15 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
             device=self.device,
         )
         wp.launch(quotients, self.k, [self.sums, self.eigenvalues], device=self.device)
-        # If KKT [z;nu]=[M w;0], an exact eigenpair has mu=(lambda-target)*nu.
+        # By linearity, the rotated images are nu from KKT^-1 [M w;0].
+        # An exact eigenpair has mu=(lambda-target)*nu.
         # Always evaluate the ORIGINAL equilibrium and constraints afterward.
-        for j in range(self.k):
-            self.physical_inverse.apply(self.bx[j : j + 1], self.inverse_image)
-            wp.launch(
-                _multipliers,
-                self.multipliers.shape[1],
-                [
-                    self.physical_inverse.solution,
-                    self.eigenvalues,
-                    self.multipliers,
-                    self.n,
-                    j,
-                    self.shift,
-                ],
-                device=self.device,
-            )
+        wp.launch(
+            _multipliers,
+            self.multipliers.shape,
+            [self.retained_multiplier_images, self.eigenvalues, self.multipliers, self.shift],
+            device=self.device,
+        )
         for a, x, y in (
             (self.constraints, self.eigenvectors, self.constraint_values),
             (self.constraint_transpose, self.multipliers, self.constraint_force),

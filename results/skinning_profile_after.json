@@ -1,0 +1,121 @@
+{
+  "git_head": "b319e4a55698fef26e95f97b44d62cc14fbc5cdb",
+  "source_sha256": "f31e80e97965410c59ad439cb42fe5c81728bd290cbc48a7c97bd0a167659d55",
+  "gpu": "NVIDIA L40",
+  "warp": {
+    "samples_ms": [
+      287.8122292459011,
+      287.6715809106827,
+      287.65156865119934
+    ],
+    "median_ms": 287.6715809106827,
+    "checks": [
+      {
+        "equilibrium_residual": 4.460956392559028e-13,
+        "constraint_residual": 1.0612026171985986e-15,
+        "raw_rig_constraint_max": 1.3710075284258105e-16,
+        "eigenvalue_error": 1.5890712987786625e-14,
+        "mass_orthogonality": 2.1823403669589944e-14,
+        "subspace_error": 8.881784197001252e-15,
+        "accepted": true,
+        "strict_count": 20
+      },
+      {
+        "equilibrium_residual": 5.054766812367701e-13,
+        "constraint_residual": 1.0821411617181807e-15,
+        "raw_rig_constraint_max": 1.4214059887874414e-16,
+        "eigenvalue_error": 1.6251865555690868e-14,
+        "mass_orthogonality": 2.5013692661162664e-14,
+        "subspace_error": 8.43769498715119e-15,
+        "accepted": true,
+        "strict_count": 20
+      },
+      {
+        "equilibrium_residual": 4.94160031986184e-13,
+        "constraint_residual": 1.1692736878880005e-15,
+        "raw_rig_constraint_max": 1.124597173740062e-16,
+        "eigenvalue_error": 1.5348984135930262e-14,
+        "mass_orthogonality": 2.302477220925024e-14,
+        "subspace_error": 8.881784197001252e-15,
+        "accepted": true,
+        "strict_count": 20
+      }
+    ],
+    "event_ms": {
+      "inverse": 265.88611125946045,
+      "_orthogonalize_column": 12.116064008325338,
+      "initialize": 60.068511962890625,
+      "diagonalize": 7.031903982162476,
+      "rotate": 1.0221439898014069,
+      "step": 228.64115142822266,
+      "finalize": 0.39558398723602295
+    },
+    "calls": {
+      "inverse": 105,
+      "_orthogonalize_column": 103,
+      "initialize": 1,
+      "diagonalize": 2,
+      "rotate": 4,
+      "step": 2,
+      "finalize": 1
+    }
+  },
+  "cupy": {
+    "samples_ms": [
+      289.4943095743656,
+      288.4669676423073,
+      289.1296334564686
+    ],
+    "median_ms": 289.1296334564686,
+    "inverse_calls": [
+      108,
+      108,
+      108
+    ],
+    "checks": [
+      {
+        "equilibrium_residual": 1.6966785282657246e-12,
+        "constraint_residual": 1.0314996780934354e-15,
+        "raw_rig_constraint_max": 1.39059093016633e-16,
+        "eigenvalue_error": 1.9635914270381608e-14,
+        "mass_orthogonality": 3.740026030967654e-15,
+        "subspace_error": 9.992007221626409e-16,
+        "accepted": true
+      },
+      {
+        "equilibrium_residual": 1.7031809215631427e-12,
+        "constraint_residual": 1.0091055728921991e-15,
+        "raw_rig_constraint_max": 9.640590192469545e-17,
+        "eigenvalue_error": 1.9635914270381608e-14,
+        "mass_orthogonality": 3.6360229809265405e-15,
+        "subspace_error": 8.881784197001252e-16,
+        "accepted": true
+      },
+      {
+        "equilibrium_residual": 1.6895566533429256e-12,
+        "constraint_residual": 9.973191842518435e-16,
+        "raw_rig_constraint_max": 1.3958425344393066e-16,
+        "eigenvalue_error": 1.803949847604164e-14,
+        "mass_orthogonality": 3.3813776189715587e-15,
+        "subspace_error": 1.2212453270876722e-15,
+        "accepted": true
+      }
+    ],
+    "instrumented_wall_ms": 288.7565456330776,
+    "inverse_event_ms": 274.7978563308716
+  },
+  "other_gpu_processes": [],
+  "matrix_hash": "f046b521d0b4ff5402ef0e0d989db1b9ada2aff9887f4b1ab2858eb2beebd974",
+  "n": 45625,
+  "r": 14,
+  "k": 20,
+  "ncv": 64,
+  "steps": 2,
+  "shift": -0.1,
+  "protocol": "One shared cuDSS factorization; same physical start. Warm wall times exclude setup/capture and independent validation. Event timings are separate, overlapping diagnostics, not additive. Warp includes physical residuals and multipliers; CuPy checks outside timing.",
+  "versions": {
+    "warp": "1.18.0",
+    "cupy": "14.2.0"
+  },
+  "runtime_metadata_provenance": "Re-added from the unchanged pinned launch environment after fixing version fields overwritten by same-name backend timing sections. Numerical measurements are unchanged."
+}

@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-15",
+  "base_commit": "b319e4a55698fef26e95f97b44d62cc14fbc5cdb",
+  "production_source_sha256": "362d6d0a8d7efaacfdf3fc61878263d3e57fdfe0f4c99c8e25328bca370b0782",
+  "constrained_source_sha256": "f31e80e97965410c59ad439cb42fe5c81728bd290cbc48a7c97bd0a167659d55",
+  "python": "3.10.12",
+  "gpu": "NVIDIA L40",
+  "driver": "570.158.01",
+  "warp": "1.18.0+cu12 with pinned FSAI overlay",
+  "overlay_commit": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+  "full_suite": {
+    "result": "340 passed in 181.78s",
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "junit": {
+      "tests": "340",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "181.768"
+    }
+  },
+  "focused_pinned": "15 passed in 4.15s",
+  "stock_compatibility": {
+    "warp": "1.15.0",
+    "result": "15 passed in 8.71s",
+    "command": "OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_constrained.py",
+    "junit": {
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "8.679"
+    }
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: 140 files already formatted",
+  "wheel": {
+    "build": "pip wheel --no-deps --no-build-isolation, clean staging directory: passed",
+    "path": "build/skinning-audit/reuse-dist/warpack-0.1.3-py3-none-any.whl",
+    "all_18_core_sources_match_workspace": true
+  },
+  "performance_regressions": [
+    {
+      "size": "small",
+      "before": "results/skinning_profile_small_before.json",
+      "after": "results/skinning_profile_small_after.json",
+      "settings_match": true,
+      "accuracy_regression": false,
+      "ratio": 0.9855556816317234,
+      "performance_regression": false
+    },
+    {
+      "size": "medium",
+      "before": "results/skinning_profile_medium_before.json",
+      "after": "results/skinning_profile_medium_after.json",
+      "settings_match": true,
+      "accuracy_regression": false,
+      "ratio": 0.8873819092114923,
+      "performance_regression": false
+    },
+    {
+      "size": "large",
+      "before": "results/skinning_profile_before.json",
+      "after": "results/skinning_profile_after.json",
+      "settings_match": true,
+      "accuracy_regression": false,
+      "ratio": 0.8506792600113753,
+      "performance_regression": false
+    }
+  ],
+  "standard_harness_repeat": "results/skinning_reuse_confirmed.json",
+  "standard_harness_regression_checks": [
+    {
+      "method": "cupy-cudss",
+      "ratio": 0.9953242854605617,
+      "accuracy_regression": false,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cudss",
+      "ratio": 0.8493516979841635,
+      "accuracy_regression": false,
+      "performance_regression": false
+    }
+  ],
+  "coverage": "Changed starts and adaptive/static capture, dense independent multiplier images through restart permutations, scaled/nonorthogonal constraints, consistent mass, repeated/interior/zero modes, original equilibrium and constraint rejection. No extra inverse applications in finalization.",
+  "limitations": [
+    "Shared-factor profile has separate event-instrumented diagnostics; use uninstrumented times for comparisons.",
+    "Small and medium skinning cases remain slower than CuPy; unchanged cycle budgets.",
+    "Vendor cuDSS HtoD scalar graph nodes remain: 420 on the large two-cycle case.",
+    "Inverse must remain a fixed linear operator during a solve; approximate error is checked physically.",
+    "No full upstream conformance, Anvil, or CPU factor benchmark rerun."
+  ],
+  "harness_corrections": [
+    "Skip event records inside CUDA conditional recovery bodies, which do not support external events.",
+    "Namespace runtime versions separately from backend timing sections; saved runtime metadata restored from unchanged pinned launch environment without changing numerical measurements."
+  ]
+}

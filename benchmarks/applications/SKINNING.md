@@ -6,6 +6,10 @@
 Tracking: [#55](https://github.com/alecjacobson/warpack/issues/55),
 under [#25](https://github.com/alecjacobson/warpack/issues/25).
 
+The [multiplier-reuse follow-up](SKINNING_PERFORMANCE.md) reduces the large
+Warp replay from 339 ms to 288 ms, matching the adapted CuPy+cuDSS comparison
+while retaining device equilibrium and constraint checks.
+
 ## Input and numerical contract
 
 For n vertices and r independent constraints:
@@ -55,8 +59,12 @@ constraints must be independent and sigma must avoid the constrained spectrum.
 The API requires `1 <= k < n-r` and `k < ncv <= n`. Residual convergence alone
 is not a proof of global spectrum completeness, especially at multiplicities.
 
-The returned multiplier for each Ritz vector uses the same KKT factors:
-`mu = (lambda-sigma) nu`. Acceptance checks the original equilibrium including
+The returned multiplier for each Ritz vector uses multiplier images cached from
+the Krylov KKT applications and rotated with the basis:
+`mu = (lambda-sigma) nu`. No additional inverse applications are needed at
+finalization. Cached products assume a fixed linear inverse during a solve;
+approximate-inverse errors still face the physical checks.
+Acceptance checks the original equilibrium including
 constraint forces and separately checks every constraint row:
 
 ```
@@ -166,7 +174,10 @@ replay. CPU setup covers KKT factors; GPU setup also includes transfers and Warp
 KKT assembly. Spectra compilation is excluded. Initial JIT can affect setup on
 a cold cache, and CPU contention is not isolated by this harness.
 
-## Recorded results (2026-10-15)
+## Earlier cooperative-correction results (2026-10-15)
+
+This table preserves the baseline before multiplier reuse. See the
+[current measurements and diagnosis](SKINNING_PERFORMANCE.md) for the improvement.
 
 NVIDIA L40, Warp 1.18.0 with the pinned FSAI overlay, cuDSS 0.8.0.10,
 CuPy 14.2.0, SciPy 1.15.0; Intel Xeon Platinum 8362 with four CPU BLAS threads.
@@ -195,9 +206,9 @@ within 0.2%. [Cooperative correction](../../results/skinning_large_cooperative.j
 cut both to about 27.5% of their previous times, with no accuracy regression.
 The final repeat checks the same problem/device/runtime/configuration and
 passes the 25% timing-regression gate. This improves the common inverse;
-the remaining roughly 17% Warp/CuPy gap is [#56](https://github.com/alecjacobson/warpack/issues/56).
-Warp's physical validation includes 20 extra KKT applications to recover
-multipliers, which is one candidate for further optimization.
+the roughly 17% Warp/CuPy gap motivated [#56](https://github.com/alecjacobson/warpack/issues/56).
+That version's physical validation included 20 extra KKT applications to recover
+multipliers. The current implementation reuses cached images instead.
 
 The [2,025-vertex budget probe](../../results/skinning_medium_two_cycles.json)
 also passes with two cycles (0.082 s before cooperative correction), compared
@@ -207,7 +218,7 @@ is **rejected**: eigenvalue error 6.59e-9 looks acceptable, but equilibrium
 residual 6.53e-4 and constraint error 3.57e-7 fail the physical gates; only
 11/20 meet the device tolerance. This is not a speedup result.
 
-The large two-cycle graph has **zero host callback nodes** and **500 vendor
+The baseline large two-cycle graph has **zero host callback nodes** and **500 vendor
 scalar HtoD copy nodes**, plus device kernels/copies/memsets and Warp recovery
 conditionals. Those transfer nodes remain a separate unresolved limitation (#29).
 

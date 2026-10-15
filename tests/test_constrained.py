@@ -268,3 +268,56 @@ def test_zero_mode_and_pure_warp_adaptive_replay_reject_infeasible_outputs(tmp_p
     np.testing.assert_allclose(solver.residuals.numpy(), 0, atol=1e-14)
     np.testing.assert_allclose(solver.constraint_residuals.numpy(), [1, 1, 0], atol=1e-14)
     assert solver.converged.numpy()[0] == 1
+
+
+@pytest.mark.parametrize("consistent,repeated", [(False, False), (True, False), (False, True)])
+def test_multiplier_images_survive_restarts_without_extra_inverse_solves(consistent, repeated):
+    h, m, c, _, _ = case(consistent, repeated)
+    # Nonorthogonal and differently scaled constraints must work without forming
+    # normal equations, assuming orthonormal rows, or changing the user's basis.
+    c *= np.geomspace(1e-2, 1e2, len(c))[:, None]
+    n, r, shift = len(h), len(c), -0.5
+    kkt = np.block([[h - shift * m, c.T], [c, np.zeros((r, r))]])
+
+    class CountingInverse:
+        def __init__(self):
+            self.operator = SparseOperator(matrix(la.inv(kkt)))
+            self.n, self.device = self.operator.n, self.operator.device
+            self.calls = 0
+
+        def apply(self, x, y):
+            self.calls += x.shape[0]
+            self.operator.apply(x, y)
+
+    inverse = CountingInverse()
+    solver = ConstrainedKrylovSchur(
+        SparseOperator(matrix(h)),
+        SparseOperator(matrix(m)),
+        matrix(c),
+        inverse,
+        6,
+        ncv=24,
+        target=shift,
+    )
+    for seed in (11, 12):
+        solver.initialize(seed)
+        for _ in range(4):
+            solver.step()
+            calls = inverse.calls
+            solver.finalize()
+            assert inverse.calls == calls
+            # Independent dense solves on CURRENT vectors verify all rotations
+            # and the restart-seed permutation, including incomplete Ritz pairs.
+            for vectors, images in (
+                (solver.retained.numpy(), solver.retained_multiplier_images.numpy()),
+                (solver.q.numpy()[: solver.keep], solver.multiplier_images.numpy()[: solver.keep]),
+            ):
+                rhs = np.vstack([m @ vectors.T, np.zeros((r, solver.keep))])
+                expected = la.solve(kkt, rhs)[n:].T
+                np.testing.assert_allclose(images, expected, atol=2e-10, rtol=2e-9)
+            values = solver.eigenvalues.numpy()
+            rhs = np.vstack([m @ solver.eigenvectors.numpy().T, np.zeros((r, solver.k))])
+            expected_mu = la.solve(kkt, rhs)[n:] * (values - shift)
+            np.testing.assert_allclose(
+                solver.multipliers.numpy().T, expected_mu, atol=2e-10, rtol=2e-9
+            )
