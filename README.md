@@ -8,6 +8,8 @@ This is a first implementation, not an API-compatible drop-in replacement for Sp
 
 ![Anvil elastic modes 1–20: 5% bounding-box-diagonal peak displacement with continuous instantaneous coloring](results/anvil_teaser.gif)
 
+Anvil adapted from [“Blacksmith's Anvil”](https://sketchfab.com/3d-models/blacksmiths-anvil-4b11b76fe069496ebd8ccd98f7d37ade) by [m4rcu5j4ck50n](https://sketchfab.com/m4rcu5j4ck50n), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Tetrahedral mesh and vibration visualization adaptations are described in [Acknowledgments](ACKNOWLEDGMENTS.md).
+
 ## Supported problems
 
 | Problem | API | Notes |
