@@ -1,0 +1,139 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "3a8643b7e3de6cf3d069a1d4d8b8f3adf0e8bff2",
+  "blas_threads": "4",
+  "protocol": "Sequential isolated workers; three synchronized warm trials by default, every trial checked against original residual, M-orthogonality, nearest physical eigenvalues and complete requested subspace. CPU reference construction, setup and capture are outside solve timing. Reference seed 913 and expanded basis differ from timed native starts 2026 and Warp starts 42. Complete distance-boundary clusters extend k. Native CuPy generalized shift and CG on an indefinite shifted pencil are explicitly unsupported. Internal strict counts and vendor cuDSS graph transfers remain separate from physical numerical acceptance. Failed timings are retained and are not speedups.",
+  "cases": [
+    {
+      "api_class": "B",
+      "requested_size": 10890,
+      "problem": "interior_clamped_consistent",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 6,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99",
+      "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; nearest physical eigenvalues to sigma=4.9631173392021957; full distance-boundary clusters; shift is squared angular frequency; shifted pencil is indefinite",
+      "target": [
+        4.963117339202196,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 2,
+      "start": "Warp seed 42; same start restored on every replay",
+      "cudss_refinement_steps": 0,
+      "cudss_reordering": "default",
+      "cudss_matching": true,
+      "cudss_mtype": "general",
+      "setup_seconds": 0.27350451052188873,
+      "capture_seconds": 0.2557828910648823,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 110,
+          "DtoD (DEVICE to DEVICE)": 168
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.042013540863990784,
+      "samples_seconds": [
+        0.03124762326478958,
+        0.031206030398607254,
+        0.031208623200654984
+      ],
+      "solve_seconds": 0.031208623200654984,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.361605277160878e-14,
+          "max_absolute_residual": 4.18480354535955e-15,
+          "orthogonality": 9.992007221626409e-15,
+          "spectrum_error": 1.16531784222218e-13,
+          "requested_subspace_error": 3.1460057843694803e-12,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 6.339498778284673e-14
+        },
+        {
+          "accepted": true,
+          "residual": 7.527086538683373e-14,
+          "max_absolute_residual": 4.810605039318183e-15,
+          "orthogonality": 1.021405182655144e-14,
+          "spectrum_error": 1.1005085731596864e-13,
+          "requested_subspace_error": 2.3409473307115207e-12,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 7.498648988136932e-14
+        },
+        {
+          "accepted": true,
+          "residual": 7.841701709416023e-14,
+          "max_absolute_residual": 5.175330650142307e-15,
+          "orthogonality": 1.1102230246251565e-14,
+          "spectrum_error": 1.1388112675092543e-13,
+          "requested_subspace_error": 1.0003331422934586e-12,
+          "reported_converged": 6,
+          "solver_full_count": true,
+          "reported_max_residual": 7.815588475577581e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 6,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false,
+      "fixture": "clamped_consistent",
+      "side": 10,
+      "requested_modes": 6,
+      "band_index": 6,
+      "gap_fraction": 0.37,
+      "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+      "reference_gap": [
+        2.7988780067827843,
+        8.648173499808221
+      ],
+      "selection_margin": 0.0029004395822154194,
+      "selected_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "modes_below_shift": 5,
+      "modes_above_shift": 1,
+      "original_rigid_modes": 0,
+      "mass": "Consistent",
+      "shifted_matrix": "Symmetric indefinite; CG is not applicable",
+      "shift_units": "Eigenvalue / squared angular frequency",
+      "worker_wall_limit_seconds": 180
+    }
+  ],
+  "regression_checks": [
+    {
+      "api_class": "B",
+      "n": 10890,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 0.9997748045561322,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false,
+      "fixture": "clamped_consistent"
+    }
+  ]
+}
