@@ -108,3 +108,23 @@ def test_explicit_reference_basis_budget_for_regular_and_svd(api_class):
 
     p = make_problem(api_class, 80)
     assert accuracy(p, *scipy_setup(p, ncv=32)())["accepted"]
+
+
+@pytest.mark.xfail(
+    strict=True, reason="GH #46: extreme weak-component block solve returns non-finite modes"
+)
+def test_extreme_weak_component_retains_finite_independent_modes():
+    c = make_hodge_case("weak_positive", weak_scale=1e-10)
+    p = c.problem
+    solver, inverse = warp_setup(p)
+    graph = solver.capture(100)
+    try:
+        wp.capture_launch(graph)
+        w, v, _ = warp_output(p, solver)
+        assert np.isfinite(w).all() and np.isfinite(v).all()
+        np.testing.assert_allclose(v.T @ (p.b @ v), np.eye(p.k), atol=1e-8)
+        assert np.linalg.norm(p.a @ v - (p.b @ v) * w, axis=0).max() < 1e-8
+        np.testing.assert_allclose(np.sort(w), p.expected, atol=1e-12, rtol=1e-6)
+    finally:
+        solver.graph = graph = None
+        inverse.close()
