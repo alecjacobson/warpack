@@ -2,6 +2,7 @@
 
 import argparse
 import gc
+import hashlib
 import importlib.metadata
 import json
 import os
@@ -17,7 +18,7 @@ import warp as wp
 from warpack import NumericalNullspaceDiagnostics, SparseOperator
 
 from ..upstream.adapters import matrix
-from .compare import other_gpu_processes, timed
+from .compare import compare_baseline, other_gpu_processes, timed
 from .hodge import make_hodge_case
 from .runner import accuracy, warp_setup
 
@@ -67,8 +68,16 @@ def run(name, side, weak_scale, repeats):
     folder = Path("build/nullspace-diagnostics")
     folder.mkdir(parents=True, exist_ok=True)
     label = f"{name}-{side}-{weak_scale:g}"
+    digest = hashlib.sha256()
+    for mat in (p.a, p.b):
+        csr = mat.tocsr()
+        for data in (csr.indptr, csr.indices, csr.data):
+            digest.update(data.tobytes())
     row = dict(
         name=name,
+        side=side,
+        target=[float(p.target), 0.0],
+        matrix_sha256=digest.hexdigest(),
         n=p.n,
         nnz=p.a.nnz,
         mass_nnz=p.b.nnz,
@@ -101,31 +110,47 @@ def run(name, side, weak_scale, repeats):
         for _ in range(repeats):
             competing.update(other_gpu_processes())
             baseline_time, _ = timed(lambda: wp.capture_launch(baseline))
+            baseline_finite = bool(
+                np.isfinite(solver.eigenvalues.numpy()).all()
+                and np.isfinite(solver.eigenvectors.numpy()).all()
+            )
+            baseline_status = int(solver.status.numpy()[0])
             combined_time, _ = timed(lambda: wp.capture_launch(combined))
             diag_time, _ = timed(lambda: wp.capture_launch(diag_graph))
             competing.update(other_gpu_processes())
             w, v = solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
-            physical = accuracy(p, w, v)
-            start = time.perf_counter()
-            reference = host_evidence(p, v, lower)
-            host_time = time.perf_counter() - start
-            agreement = max(
-                float(np.max(abs(a - b)))
-                for a, b in zip(
-                    reference,
-                    [
-                        d.values.numpy(),
-                        d.residuals.numpy(),
-                        d.error_bounds.numpy(),
-                        d.orthogonality_error.numpy(),
-                    ],
-                )
+            finite = bool(np.isfinite(w).all() and np.isfinite(v).all())
+            physical = (
+                accuracy(p, w, v)
+                if finite
+                else dict(accepted=False, reason="Non-finite eigenvalues or vectors")
             )
+            host_time = agreement = None
+            if finite:
+                start = time.perf_counter()
+                reference = host_evidence(p, v, lower)
+                host_time = time.perf_counter() - start
+                agreement = max(
+                    float(np.max(abs(a - b)))
+                    for a, b in zip(
+                        reference,
+                        [
+                            d.values.numpy(),
+                            d.residuals.numpy(),
+                            d.error_bounds.numpy(),
+                            d.orthogonality_error.numpy(),
+                        ],
+                    )
+                )
             state = int(d.flags.numpy()[0])
             count, ambiguous, weak = map(int, d.counts.numpy())
             guard = float(d.positive_guard.numpy()[0])
             intentionally_unresolved = name == "weak_positive" and weak_scale < 1e-8
-            expected = bool(state & d.COMPLETENESS_UNVERIFIED) and agreement < 1e-11
+            expected = bool(state & d.COMPLETENESS_UNVERIFIED)
+            if finite:
+                expected &= agreement < 1e-11
+            else:
+                expected &= bool(state & d.INVALID_DATA) and count == 0 and not np.isfinite(guard)
             if intentionally_unresolved:
                 expected &= bool(state & d.GAP_UNRESOLVED)
             else:
@@ -138,6 +163,10 @@ def run(name, side, weak_scale, repeats):
             row["trials"].append(
                 dict(
                     baseline_seconds=baseline_time,
+                    baseline_finite=baseline_finite,
+                    baseline_status=baseline_status,
+                    combined_finite=finite,
+                    combined_status=int(solver.status.numpy()[0]),
                     combined_seconds=combined_time,
                     diagnostic_seconds=diag_time,
                     host_reference_seconds=host_time,
@@ -154,7 +183,10 @@ def run(name, side, weak_scale, repeats):
                 )
             )
         for key in ["baseline", "combined", "diagnostic", "host_reference"]:
-            row[f"{key}_seconds"] = float(np.median([r[f"{key}_seconds"] for r in row["trials"]]))
+            samples = [
+                r[f"{key}_seconds"] for r in row["trials"] if r[f"{key}_seconds"] is not None
+            ]
+            row[f"{key}_seconds"] = float(np.median(samples)) if samples else None
         row["combined_over_baseline"] = row["combined_seconds"] / row["baseline_seconds"]
         row["diagnostic_contract_pass"] = all(r["diagnostic_contract_pass"] for r in row["trials"])
         row["solver_accepted"] = all(r["physical_validation"]["accepted"] for r in row["trials"])
@@ -178,6 +210,7 @@ def main():
     parser.add_argument("--weak-scale", type=float, default=1e-4)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--out", default="results/nullspace_diagnostics.json")
+    parser.add_argument("--baseline")
     args = parser.parse_args()
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -209,6 +242,43 @@ def main():
             row["combined_over_baseline"],
             flush=True,
         )
+    if args.baseline:
+        old = json.loads(Path(args.baseline).read_text())
+        if (old["gpu"], old["warp"]) != (report["gpu"], report["warp"]):
+            raise ValueError("Baseline GPU/runtime mismatch")
+        measured = []
+        for row in report["cases"]:
+            audit_data = row["graph_audits"]["baseline"]
+            measured.append(
+                dict(
+                    api_class="D",
+                    requested_size=row["n"],
+                    n=row["n"],
+                    method="warp",
+                    matrix_sha256=row["matrix_sha256"],
+                    target=row["target"],
+                    k=row["k"],
+                    ncv=row["ncv"],
+                    outer_cycles=row["outer_cycles"],
+                    accepted=row["solver_accepted"],
+                    timing_uncontended=row["timing_uncontended"],
+                    solve_seconds=row["baseline_seconds"],
+                    device_only_graph=audit_data["host_nodes"] == 0
+                    and not any(
+                        "HOST" in kind or "Host" in kind for kind in audit_data["memcpy_kinds"]
+                    ),
+                )
+            )
+        checks = compare_baseline(measured, old, 1.25)
+        report["solver_regression_checks"] = checks
+        destination.write_text(json.dumps(report, indent=2) + "\n")
+        if not any(c["comparable"] for c in checks) or any(
+            c.get("accuracy_regression")
+            or c.get("graph_regression")
+            or c.get("performance_regression")
+            for c in checks
+        ):
+            raise SystemExit("Saved solver baseline regression or no comparable result")
     if not all(r["diagnostic_contract_pass"] for r in report["cases"]):
         raise SystemExit(1)
 
