@@ -1,0 +1,54 @@
+{
+  "source_commit": "2c3a0d6e0c1d7d72901d790eb360c7afdcc55f68",
+  "full_suite": {
+    "passed": 282,
+    "xfailed": 1,
+    "failed": 0,
+    "seconds": 161.62,
+    "expected_failure": "GH #46: existing extreme weak-component block solve returns non-finite pairs; strict xfail regression"
+  },
+  "focused_device_bound": {
+    "passed": 26,
+    "seconds": 2.45
+  },
+  "preceding_scalar_bound_full_suite": {
+    "passed": 279,
+    "xfailed": 1,
+    "seconds": 159.46
+  },
+  "checks": {
+    "ruff": "passed",
+    "formatting": "passed",
+    "wheel": "passed"
+  },
+  "final_comparisons": {
+    "diagnostic_contract_passes": 8,
+    "solver_numerical_passes": 7,
+    "solver_numerical_failures": 1,
+    "all_completeness_certified": false
+  },
+  "solver_regression_checks": [
+    {
+      "api_class": "D",
+      "n": 10086,
+      "method": "warp",
+      "comparable": true,
+      "time_ratio": 1.0021259742745119,
+      "performance_regression": false,
+      "accuracy_regression": false,
+      "graph_regression": false
+    }
+  ],
+  "historical_reports": {
+    "nullspace_diagnostics_initial.json": "Initial host evidence timing omitted Gram independence; retained, not the final reference timing.",
+    "nullspace_diagnostics_reference_v2.json": "Host metric independence added; before invalid-output preservation and matrix-hash regression gate.",
+    "nullspace_diagnostics_pre_device_bound.json": "Scalar-bound prototype before the device-bound API; saved solver baseline passes.",
+    "nullspace_diagnostics_weak_pre_device_bound.json": "Original structured #46 failure, detected by scalar-bound prototype."
+  },
+  "notes": [
+    "Final standard and weak comparisons each validate three synchronized uncontended replays.",
+    "Every final diagnostic reports completeness unverified; expected nullity only checks external information.",
+    "Pure Warp diagnostic graphs have no host callbacks/transfers; cuDSS vendor HtoD nodes remain #29.",
+    "No full upstream/complex/Anvil rerun."
+  ]
+}

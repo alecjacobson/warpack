@@ -162,3 +162,13 @@ The baseline gate requires matching GPU/runtime, matrix hashes and solver
 configuration, accepted accuracy and uncontended timings; a slowdown above
 1.25 or a numerical/graph regression fails. Comparison workers have an explicit
 180-second wall limit. Timeouts are preserved rather than converted into wins.
+
+## Device evidence follow-up
+
+[NumericalNullspaceDiagnostics](NULLSPACE.md) now evaluates physical and metric
+evidence after the solve inside one graph. It reports weak positives, capacity
+and invalid states explicitly, with completeness always unverified. The
+10,086-unknown saved solver regression passes. An extreme weak_scale=1e-10
+case exposes a separate pre-existing non-finite block-solver failure (#46),
+retained as an expected-failure regression; the earlier weak_scale=1e-4
+coverage remains passing.
