@@ -68,7 +68,9 @@ def copies_from_dot(path):
         line = next(line for line in block.splitlines() if "{srcPtr | dstPtr}" in line)
         source, destination = re.findall(r"0x[0-9A-Fa-f]+", line)
         width = int(re.search(r"Width \| (\d+)", block).group(1))
-        row = dict(source=source, destination=destination, bytes=width)
+        node_line = next(line for line in block.splitlines() if "node handle" in line)
+        node = re.findall(r"0x[0-9A-Fa-f]+", node_line)[0]
+        row = dict(node=node, source=source, destination=destination, bytes=width)
         if width <= 16:
             payload = ct.string_at(int(source, 16), width)
             row["payload_hex"] = payload.hex()
