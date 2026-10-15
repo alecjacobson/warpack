@@ -1,0 +1,30 @@
+..............F.......                                                   [100%]
+=================================== FAILURES ===================================
+______________ test_truncated_cg_preconditioning_in_static_graph _______________
+
+    def test_truncated_cg_preconditioning_in_static_graph():
+        a = np.diag(np.linspace(1, 30, 64))
+        a += np.diag(np.full(63, 0.4), 1) + np.diag(np.full(63, 0.4), -1)
+        device = matrix(sp.csr_matrix(a))
+        pre = CGInverse(device, tol=0.01, maxiter=5)
+        s = BlockLOBPCG(SparseOperator(device), 4, width=8, preconditioner=pre, tol=1e-9)
+        with pytest.raises(ValueError, match="adaptive=False"):
+            s.capture(30, adaptive=True)
+        graph = s.capture(30)
+        for _ in range(2):
+            wp.capture_launch(graph)
+            assert s.status.numpy()[0] == 0
+>           assert s.converged.numpy()[0] == 4
+E           assert np.int32(0) == 4
+
+tests/test_lobpcg_experimental.py:128: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module _create_tiled_dot_kernels__locals__block_dot_kernel_7cdd1072 cb8e22e load on device 'cuda:0' took 3.28 ms  (cached)
+Module _create_tiled_dot_kernels__locals__block_sum_kernel_85ad7d89 bba3435 load on device 'cuda:0' took 3.84 ms  (cached)
+Module warp.optim.linear 395da8b load on device 'cuda:0' took 7.02 ms  (cached)
+Module make_bsr_mv_kernel__locals__bsr_mv_kernel_f553f011 0fdd445 load on device 'cuda:0' took 1.46 ms  (cached)
+Module _create_update_condition_kernel__locals___update_condition_bba29a29 0492586 load on device 'cuda:0' took 2.39 ms  (cached)
+Module warpack.generalized bfd37f1 load on device 'cuda:0' took 3.69 ms  (cached)
+=========================== short test summary info ============================
+FAILED tests/test_lobpcg_experimental.py::test_truncated_cg_preconditioning_in_static_graph
+1 failed, 21 passed in 5.78s

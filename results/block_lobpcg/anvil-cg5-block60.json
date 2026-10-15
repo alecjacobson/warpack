@@ -1,0 +1,165 @@
+{
+  "args": {
+    "case": "anvil",
+    "side": 6,
+    "modes": 6,
+    "width": 24,
+    "steps": 60,
+    "shift": 10000.0,
+    "fsai_width": 32,
+    "preconditioner": "fsai",
+    "repeats": 1,
+    "tol": 1e-08,
+    "cupy": false,
+    "profile": false,
+    "gram_chunk": 4096,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 5,
+    "inner_tol": 0.01,
+    "out": "build/block-eigen/anvil-cg5-block60.json"
+  },
+  "n": 283857,
+  "k": 20,
+  "setup_seconds": 3.34844246506691,
+  "capture_seconds": 7.165586199611425,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 5483,
+      "MEMCPY": 5479,
+      "KERNEL": 48765,
+      "CONDITIONAL": 1440
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 5479
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 28.368957694619894,
+      "iterations": 60,
+      "quality": {
+        "eigenvalues": [
+          -2.0074757524663685e-12,
+          1.1486044849455965e-12,
+          2.6178006794593303e-12,
+          3.5190126541300783e-12,
+          4.6553245255305465e-12,
+          5.460411239004575e-12,
+          129.5365633077023,
+          147.37679501011266,
+          184.8186317371628,
+          253.27406419088902,
+          560.2701334618793,
+          607.3935917630995,
+          792.1583656154114,
+          975.663416617604,
+          1156.142649586073,
+          1289.4712956372814,
+          1337.0504142420382,
+          1418.9213888704217,
+          1935.556844757589,
+          1949.6753874244387,
+          2241.017931913562,
+          2302.435592428498,
+          2743.4158894488733,
+          3047.7081815970228,
+          3191.821493229422,
+          3316.495954617366
+        ],
+        "frequencies_hz": [
+          1.81140814832667,
+          1.9321226223921968,
+          2.163679881981544,
+          2.5328851123632865,
+          3.7672016498260406,
+          3.922430294288483,
+          4.47946490209303,
+          4.971301947383174,
+          5.4116019281597545,
+          5.715128125133946,
+          5.819611897723107,
+          5.995139585859969,
+          7.002015968952576,
+          7.027506989896517,
+          7.534298066594957,
+          7.636843253025143,
+          8.3361583649508,
+          8.786316070399574,
+          8.991650733723189,
+          9.165578209622899
+        ],
+        "original_residuals": [
+          1.4745417703231033e-09,
+          1.2742331155187109e-09,
+          1.569593348850452e-09,
+          1.2745896636178611e-09,
+          1.2755202209284977e-09,
+          1.5255887039672353e-09,
+          1.7177256750803687e-11,
+          1.2806507184047984e-11,
+          1.0531513783160714e-11,
+          6.763122359828353e-12,
+          8.83111056940937e-12,
+          6.113272415949036e-12,
+          7.850989862140772e-12,
+          8.910941202804508e-12,
+          1.6239047125081428e-11,
+          3.0124433488857314e-11,
+          4.7794839906397986e-11,
+          9.096512139938833e-11,
+          1.521695988854119e-10,
+          2.8284705998772143e-10,
+          8.984792010527906e-10,
+          1.1212519068810279e-09,
+          2.3348310844232472e-08,
+          5.870206557354225e-08,
+          4.1953601793922454e-08,
+          3.474033342942086e-08
+        ],
+        "max_original_residual": 5.870206557354225e-08,
+        "max_elastic_residual": 5.870206557354225e-08,
+        "orthogonality_max_error": 1.9984014443252818e-15,
+        "max_relative_elastic_eigenvalue_error": 6.927791673660977e-14,
+        "max_relative_elastic_frequency_error": 3.4638958368304884e-14,
+        "minimum_elastic_mac": 0.9999999999999993,
+        "rigid_subspace_min_cosine": 0.9999999999999998,
+        "accepted": false,
+        "returned_eigenvalue_error": 6.206146707654625e-14,
+        "returned_pair_residual": 2.935103278687813e-08,
+        "status": 0,
+        "converged": 16,
+        "preconditioner_cg_stats": [
+          7200,
+          5,
+          1440,
+          1440
+        ]
+      }
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "2a084158ddc36cd693c112818abb9ae9994bf81d5d5f2192b6ec74c5904517e3",
+    "benchmarks/experimental/block_kernels.py": "95f62b7c3c894e1f73a994afc69716185bc362d25dce6ecb3b15bef6422d09bd",
+    "benchmarks/experimental/compare_block.py": "fca378853e7a8e41d75c59323727f66895b714496eb1ac8719ac93734c8ff10c",
+    "warpack/generalized.py": "c6679eb6b09cb6b2d2ac6e8523f3bfcb62aca16e10fa6e8ac6b33a4941cee21b"
+  },
+  "other_gpu_processes_before": [
+    "2664422, python",
+    "2664425, python"
+  ],
+  "other_gpu_processes_after": [
+    "2664422, python",
+    "2664425, python"
+  ],
+  "timing_eligible": false,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges the entire oversampled block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence."
+}

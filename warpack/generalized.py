@@ -1,5 +1,7 @@
 """Generalized SPD-mass eigenproblems and a pure-Warp inverse operator."""
 
+import math
+
 import warp as wp
 import warp.optim.linear as linear
 
@@ -32,11 +34,18 @@ class CGInverse:
     unconverged RHSs, number of RHSs); reset explicitly before a measured replay.
     Inner stopping uses device convergence checks. Always verify the original
     eigenproblem residual: a converged recursive CG residual can be optimistic.
+
+    ``atol=None`` preserves upstream Warp's default: ``tol`` is both the
+    relative and absolute residual tolerance. Pass ``atol=0.0`` for relative
+    stopping on small right-hand sides, such as eigenvector residuals used
+    for preconditioning. Warp still applies its dtype-dependent safety floor.
     """
 
     requires_static_outer_capture = True
 
-    def __init__(self, matrix, tol=1.0e-12, maxiter=1000, preconditioner=None):
+    def __init__(self, matrix, tol=1.0e-12, maxiter=1000, preconditioner=None, atol=None):
+        if atol is not None and (not math.isfinite(atol) or atol < 0):
+            raise ValueError("atol must be finite and nonnegative, or None")
         self.n, self.device = matrix.shape[0], matrix.device
         self.b = wp.zeros(self.n, dtype=wp.float64, device=self.device)
         self.x = wp.zeros_like(self.b)
@@ -55,6 +64,7 @@ class CGInverse:
             self.x,
             M=self.preconditioner,
             tol=tol,
+            atol=atol,
             maxiter=maxiter,
             check_every=0,
             run=False,

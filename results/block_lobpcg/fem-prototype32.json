@@ -1,0 +1,85 @@
+{
+  "args": {
+    "case": "clamped_consistent",
+    "side": 6,
+    "modes": 6,
+    "width": 12,
+    "steps": 300,
+    "shift": 0.01,
+    "fsai_width": 32,
+    "preconditioner": "fsai",
+    "repeats": 1,
+    "tol": 1e-08,
+    "cupy": true,
+    "out": "build/block-eigen/fem-prototype32.json"
+  },
+  "n": 2646,
+  "k": 6,
+  "setup_seconds": 0.4324819967150688,
+  "capture_seconds": 2.271900814026594,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 29,
+      "MEMCPY": 13,
+      "KERNEL": 141,
+      "CONDITIONAL": 1
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 13
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.25577371567487717,
+      "iterations": 31,
+      "quality": {
+        "accepted": true,
+        "residual": 6.459412376521239e-09,
+        "max_absolute_residual": 6.927124860458015e-10,
+        "orthogonality": 1.9984014443252818e-15,
+        "spectrum_error": 1.127986593019159e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 9.006041077270722e-10,
+        "status": 0,
+        "converged": 6
+      }
+    },
+    {
+      "method": "CuPy LOBPCG + same upstream Warp preconditioner",
+      "seconds": 7.4731006771326065,
+      "residual_history_length": 93,
+      "quality": {
+        "accepted": true,
+        "residual": 1.8916871650973255e-11,
+        "max_absolute_residual": 1.539882804602044e-12,
+        "orthogonality": 1.3322676295501878e-15,
+        "spectrum_error": 8.522335865194952e-14,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 1.7457911885659222e-12
+      }
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "prototype_sha256": "c0a41fe3465a7d05005764c6e2b9a33af9f8b4b2f9a21860609305a66360e511",
+  "other_gpu_processes_before": [
+    "2648661, /home/horde/tools/blender-4.5.3-linux-x64/blender",
+    "2649967, python",
+    "2651192, python"
+  ],
+  "other_gpu_processes_after": [
+    "2648661, /home/horde/tools/blender-4.5.3-linux-x64/blender",
+    "2649967, python",
+    "2651192, python"
+  ],
+  "timing_eligible": false,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges the entire oversampled block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence."
+}

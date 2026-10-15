@@ -1,0 +1,107 @@
+..............FFF..                                                      [100%]
+=================================== FAILURES ===================================
+_________ test_rectangular_partial_tiles_and_changed_gram_inputs[256] __________
+
+chunk = 256
+
+    @pytest.mark.parametrize("chunk", [256, 1024, 4096])
+    def test_rectangular_partial_tiles_and_changed_gram_inputs(chunk):
+        rng = np.random.default_rng(713)
+        a = rng.normal(size=(13, 4157))
+        b = rng.normal(size=(19, 4157))
+        x, y = wp.array(a, dtype=wp.float64), wp.array(b, dtype=wp.float64)
+        out = wp.empty((13, 19), dtype=wp.float64)
+        gram(x, y, out, chunk=chunk)
+        with wp.ScopedCapture() as capture:
+            gram(x, y, out, chunk=chunk)
+        for scale in [1.0, -1e-30, 1e30]:
+            x.assign(a * scale)
+            wp.capture_launch(capture.graph)
+>           np.testing.assert_allclose(out.numpy() / scale, a @ b.T, atol=2e-11, rtol=2e-12)
+E           AssertionError:
+E           Not equal to tolerance rtol=2e-12, atol=2e-11
+E
+E           Mismatched elements: 247 / 247 (100%)
+E           Max absolute difference among violations: 181.54372313
+E           Max relative difference among violations: 1.
+E            ACTUAL: array([[  46.279492, -158.973158, -285.0313  ,  134.493871,    8.429188,
+E                     -3.102964,  127.454643,   80.84456 ,  115.540288,   -6.986145,
+E                    116.414068, -250.759836,    2.203132,   10.882746, -148.19229 ,...
+E            DESIRED: array([[  23.139746,  -79.486579, -142.51565 ,   67.246935,    4.214594,
+E                     -1.551482,   63.727322,   40.42228 ,   57.770144,   -3.493072,
+E                     58.207034, -125.379918,    1.101566,    5.441373,  -74.096145,...
+
+tests/test_block_products_experimental.py:27: AssertionError
+_________ test_rectangular_partial_tiles_and_changed_gram_inputs[1024] _________
+
+chunk = 1024
+
+    @pytest.mark.parametrize("chunk", [256, 1024, 4096])
+    def test_rectangular_partial_tiles_and_changed_gram_inputs(chunk):
+        rng = np.random.default_rng(713)
+        a = rng.normal(size=(13, 4157))
+        b = rng.normal(size=(19, 4157))
+        x, y = wp.array(a, dtype=wp.float64), wp.array(b, dtype=wp.float64)
+        out = wp.empty((13, 19), dtype=wp.float64)
+        gram(x, y, out, chunk=chunk)
+        with wp.ScopedCapture() as capture:
+            gram(x, y, out, chunk=chunk)
+        for scale in [1.0, -1e-30, 1e30]:
+            x.assign(a * scale)
+            wp.capture_launch(capture.graph)
+>           np.testing.assert_allclose(out.numpy() / scale, a @ b.T, atol=2e-11, rtol=2e-12)
+E           AssertionError:
+E           Not equal to tolerance rtol=2e-12, atol=2e-11
+E
+E           Mismatched elements: 247 / 247 (100%)
+E           Max absolute difference among violations: 181.54372313
+E           Max relative difference among violations: 1.
+E            ACTUAL: array([[  46.279492, -158.973158, -285.0313  ,  134.493871,    8.429188,
+E                     -3.102964,  127.454643,   80.84456 ,  115.540288,   -6.986145,
+E                    116.414068, -250.759836,    2.203132,   10.882746, -148.19229 ,...
+E            DESIRED: array([[  23.139746,  -79.486579, -142.51565 ,   67.246935,    4.214594,
+E                     -1.551482,   63.727322,   40.42228 ,   57.770144,   -3.493072,
+E                     58.207034, -125.379918,    1.101566,    5.441373,  -74.096145,...
+
+tests/test_block_products_experimental.py:27: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module gram_kernel__locals__compute_5ea4837a 53a7bfb load on device 'cuda:0' took 5512.91 ms  (compiled)
+_________ test_rectangular_partial_tiles_and_changed_gram_inputs[4096] _________
+
+chunk = 4096
+
+    @pytest.mark.parametrize("chunk", [256, 1024, 4096])
+    def test_rectangular_partial_tiles_and_changed_gram_inputs(chunk):
+        rng = np.random.default_rng(713)
+        a = rng.normal(size=(13, 4157))
+        b = rng.normal(size=(19, 4157))
+        x, y = wp.array(a, dtype=wp.float64), wp.array(b, dtype=wp.float64)
+        out = wp.empty((13, 19), dtype=wp.float64)
+        gram(x, y, out, chunk=chunk)
+        with wp.ScopedCapture() as capture:
+            gram(x, y, out, chunk=chunk)
+        for scale in [1.0, -1e-30, 1e30]:
+            x.assign(a * scale)
+            wp.capture_launch(capture.graph)
+>           np.testing.assert_allclose(out.numpy() / scale, a @ b.T, atol=2e-11, rtol=2e-12)
+E           AssertionError:
+E           Not equal to tolerance rtol=2e-12, atol=2e-11
+E
+E           Mismatched elements: 247 / 247 (100%)
+E           Max absolute difference among violations: 181.54372313
+E           Max relative difference among violations: 1.
+E            ACTUAL: array([[  46.279492, -158.973158, -285.0313  ,  134.493871,    8.429188,
+E                     -3.102964,  127.454643,   80.84456 ,  115.540288,   -6.986145,
+E                    116.414068, -250.759836,    2.203132,   10.882746, -148.19229 ,...
+E            DESIRED: array([[  23.139746,  -79.486579, -142.51565 ,   67.246935,    4.214594,
+E                     -1.551482,   63.727322,   40.42228 ,   57.770144,   -3.493072,
+E                     58.207034, -125.379918,    1.101566,    5.441373,  -74.096145,...
+
+tests/test_block_products_experimental.py:27: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module gram_kernel__locals__compute_1eed9dd3 f8b36dc load on device 'cuda:0' took 143.59 ms  (cached)
+=========================== short test summary info ============================
+FAILED tests/test_block_products_experimental.py::test_rectangular_partial_tiles_and_changed_gram_inputs[256]
+FAILED tests/test_block_products_experimental.py::test_rectangular_partial_tiles_and_changed_gram_inputs[1024]
+FAILED tests/test_block_products_experimental.py::test_rectangular_partial_tiles_and_changed_gram_inputs[4096]
+3 failed, 16 passed in 10.31s

@@ -1,0 +1,32 @@
+Warp CUDA error 2: out of memory (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/horde/projects/warpack/benchmarks/experimental/compare_block.py", line 215, in <module>
+    main()
+  File "/home/horde/projects/warpack/benchmarks/experimental/compare_block.py", line 85, in main
+    setup_seconds, pre = timed(
+  File "/home/horde/projects/warpack/benchmarks/applications/compare.py", line 28, in timed
+    value = fn()
+  File "/home/horde/projects/warpack/benchmarks/experimental/compare_block.py", line 87, in <lambda>
+    linear.FSAI(
+  File "/home/horde/projects/warpack/build/warp-fsai/warp/_src/optim/fsai.py", line 328, in __init__
+    wp.launch(
+  File "/home/horde/projects/warpack/build/warp-fsai/warp/_src/context.py", line 12007, in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+  File "/home/horde/projects/warpack/build/warp-fsai/warp/_src/context.py", line 11018, in _raise_cuda_launch_error
+    raise RuntimeError(f"Error launching kernel: {kernel.key} on device {device}: {err}")
+RuntimeError: Error launching kernel: _build_kernels__locals__build on device cuda:0: Warp CUDA error 2: out of memory (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+Warp 1.18.0 initialized:
+   CUDA Toolkit 12.9, Driver 12.8
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA L40" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /home/horde/.cache/warp/1.18.0
+Module _bsr_accumulate_triplet_values_5520c14c 2336fbe load on device 'cuda:0' took 4.56 ms  (cached)
+Module _scalarize_kernel__locals__scalarize_ea126c35 ea126c3 load on device 'cuda:0' took 4.83 ms  (cached)
+Module _build_kernels__locals__diagonal_e9b40343 e9b4034 load on device 'cuda:0' took 5.98 ms  (cached)
+Module _build_kernels__locals__build_07478180 0747818 load on device 'cuda:0' took 6.71 ms  (cached)
