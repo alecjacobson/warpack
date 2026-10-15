@@ -5,6 +5,7 @@ import hashlib
 import importlib.metadata
 import inspect
 import json
+import math
 import os
 import subprocess
 import sys
@@ -50,6 +51,7 @@ def main():
     parser.add_argument("--shift", type=float, default=-0.01)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
+    parser.add_argument("--cg-tol", type=float, default=1e-13)
     parser.add_argument("--timeout", type=int, default=180)
     parser.add_argument("--out", default="results/fem_comparisons.json")
     parser.add_argument("--baseline")
@@ -64,6 +66,8 @@ def main():
         or set(methods) - {"warp", "warp-cg", "warp-cg-bj", "warp-cg-fsai"}
     ):
         parser.error("Rigid projection requires free/disconnected cases and a one-RHS Warp method")
+    if not math.isfinite(args.cg_tol) or args.cg_tol <= 0:
+        parser.error("CG tolerance must be finite and positive")
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)
     if args.worker:
@@ -81,6 +85,7 @@ def main():
             args.steps,
             problem=p,
             lobpcg_tol=args.lobpcg_tol,
+            cg_tol=args.cg_tol,
             warp_inverse_transform=rigid_inverse_transform(c) if args.project_rigid else None,
         )
         row.update(
@@ -136,7 +141,7 @@ def main():
         for method in methods:
             output = (
                 folder
-                / f"{name}-{args.side}-{args.modes}-{method}-cycles{args.steps}-shift{args.shift:g}-tol{args.lobpcg_tol:g}-project{int(args.project_rigid)}.json"
+                / f"{name}-{args.side}-{args.modes}-{method}-cycles{args.steps}-shift{args.shift:g}-tol{args.lobpcg_tol:g}-project{int(args.project_rigid)}-cg{args.cg_tol:g}.json"
             )
             log = output.with_suffix(".log")
             command = [
@@ -166,6 +171,8 @@ def main():
                 str(output),
                 "--timeout",
                 str(args.timeout),
+                "--cg-tol",
+                str(args.cg_tol),
             ]
             if args.project_rigid:
                 command.append("--project-rigid")

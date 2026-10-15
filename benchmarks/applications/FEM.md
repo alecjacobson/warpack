@@ -183,6 +183,11 @@ No full upstream CuPy/Spectra, complex, or Anvil rerun is implied. This change
 adds coverage and reference-adapter improvements, with no production solver
 arithmetic changes.
 
+The [inner-CG accuracy follow-up](CG_ACCURACY.md) supplies tighter inner
+profiles that reach full strict counts on the large clamped cases, including
+20 and 40 modes. The original application-tolerance timings above remain as
+recorded; the follow-up does not change solver defaults or Anvil timings.
+
 ## Reproduction
 
 Use the [pinned environment and native Spectra build](README.md).
