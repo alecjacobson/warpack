@@ -102,6 +102,75 @@ def test_complex_krylov_requires_expansion_room(ncv):
 
 
 @pytest.mark.parametrize("which", ["LM", "LA", "SA"])
+def test_complex_initial_vector_replay(which, tmp_path):
+    n, k = 24, 3
+    rng = np.random.default_rng(64)
+    unitary = np.linalg.qr(rng.normal(size=(n, n)) + 1j * rng.normal(size=(n, n)))[0]
+    a = (unitary * np.arange(float(n))) @ unitary.conj().T
+    z = rng.normal(size=n) + 1j * rng.normal(size=n)
+    start = wp.array(np.column_stack((z.real, z.imag)), dtype=wp.vec2d)
+    solver = HermitianEigensolver(
+        complex_operator(a), k, ncv=24, which=which, tol=1e-10, initial_vector=start
+    )
+    solver.real.initialize()
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        solver.real.initialize()
+    graph = solver.capture(40)
+    expected = np.arange(3.0) if which == "SA" else np.arange(n - k, n, dtype=float)
+    # Start in the exact nullspace, then change both real and imaginary parts,
+    # and test safe normalization well outside the squared-norm FP64 range.
+    for vector in [1j * unitary[:, 0], z, z * 1e-250, z * 1e250]:
+        packed = np.column_stack((vector.real, vector.imag))
+        wp.copy(start, wp.array(packed, dtype=wp.vec2d))
+        wp.capture_launch(capture.graph)
+        scaled = vector / max(abs(vector.real).max(), abs(vector.imag).max())
+        normalized = scaled / np.linalg.norm(scaled)
+        np.testing.assert_allclose(
+            solver.real.q.numpy()[0], np.r_[normalized.real, normalized.imag], atol=1e-14
+        )
+        wp.capture_launch(graph)
+        check_pairs(a, solver, expected)
+        np.testing.assert_array_equal(start.numpy(), packed)
+    dot = tmp_path / "hermitian-start.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    audit = dot.read_text()
+    assert "HOST" not in audit and "HtoD" not in audit and "DtoH" not in audit
+
+
+def test_complex_invalid_start_recovers_on_replay():
+    n = 12
+    a = np.diag(np.arange(1.0, n + 1)).astype(complex)
+    start = wp.array(np.ones((n, 2)), dtype=wp.vec2d)
+    solver = HermitianEigensolver(complex_operator(a), 2, initial_vector=start)
+    graph = solver.capture(20)
+    for bad in [0.0, float("nan"), float("inf")]:
+        invalid = np.zeros((n, 2))
+        invalid[0, 1] = bad
+        wp.copy(start, wp.array(invalid, dtype=wp.vec2d))
+        wp.capture_launch(graph)
+        assert solver.real.status.numpy()[0] == 1
+        wp.copy(start, wp.array(np.ones((n, 2)), dtype=wp.vec2d))
+        wp.capture_launch(graph)
+        check_pairs(a, solver, [n - 1, n])
+
+
+@pytest.mark.parametrize("kind", ["dtype", "length", "ndim", "device"])
+def test_complex_start_contract(kind):
+    op = complex_operator(np.eye(10, dtype=complex))
+    if kind == "dtype":
+        start = wp.ones(10, dtype=wp.float64)
+    elif kind == "length":
+        start = wp.ones(9, dtype=wp.vec2d)
+    elif kind == "ndim":
+        start = wp.ones((1, 10), dtype=wp.vec2d)
+    else:
+        start = wp.ones(10, dtype=wp.vec2d, device="cpu")
+    with pytest.raises(ValueError, match="initial_vector"):
+        HermitianEigensolver(op, 2, initial_vector=start)
+
+
+@pytest.mark.parametrize("which", ["LM", "LA", "SA"])
 def test_complex_hermitian_graph(which):
     rng = np.random.default_rng(24)
     n = 40

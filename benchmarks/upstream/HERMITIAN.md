@@ -50,7 +50,7 @@ Validation on the pinned Warp 1.18.0+cu12 environment and NVIDIA L40:
 remains open: its complete exported family has not been rerun in this follow-up.
 The original upstream summary counts remain historical. Generalized complex mass,
 complex starting-vector APIs and broader connection-Laplacian coverage are not
-established by this fix.
+established by this fix. The subsequent [starting-vector follow-up](HERMITIAN_STARTS.md) adds the standard Hermitian starting-vector API and records its focused coverage.
 
 Reproduce after preparing the pinned upstream test copy as described in
 [README.md](README.md):

@@ -127,6 +127,88 @@ class HermitianCSR:
         )
 
 
+@wp.kernel
+def start_scale(
+    source: wp.array[wp.vec2d], scale: wp.array[wp.float64], status: wp.array[wp.int32]
+):
+    i = wp.tid()
+    value = source[i]
+    if not wp.isfinite(value[0]) or not wp.isfinite(value[1]):
+        wp.atomic_max(status, 0, 1)
+    else:
+        wp.atomic_max(scale, 0, wp.max(wp.abs(value[0]), wp.abs(value[1])))
+
+
+@wp.kernel
+def realify_start(
+    source: wp.array[wp.vec2d],
+    target: wp.array[wp.float64],
+    scale: wp.array[wp.float64],
+    status: wp.array[wp.int32],
+):
+    i = wp.tid()
+    # Scale before squaring in the real solver's normalization. Even finite
+    # input components can otherwise overflow or underflow its norm reduction.
+    value = wp.vec2d(0.0)
+    if scale[0] > wp.float64(0.0) and status[0] == 0:
+        value = source[i] / scale[0]
+    elif i == 0:
+        value = wp.vec2d(1.0, 0.0)
+    target[i] = value[0]
+    target[i + source.shape[0]] = value[1]
+
+
+@wp.kernel
+def start_status(
+    scale: wp.array[wp.float64], invalid: wp.array[wp.int32], status: wp.array[wp.int32]
+):
+    if scale[0] == wp.float64(0.0) or invalid[0] != 0:
+        wp.atomic_max(status, 0, 1)
+
+
+class _HermitianKrylov(KrylovSchur):
+    """Refresh the real starting vector inside initialization and capture."""
+
+    def __init__(self, operator, *args, complex_start=None, **kwargs):
+        self.complex_start = complex_start
+        real_start = None
+        if complex_start is not None:
+            real_start = wp.empty(operator.n, dtype=wp.float64, device=operator.device)
+            self.start_scale = wp.zeros(1, dtype=wp.float64, device=operator.device)
+            self.start_invalid = wp.zeros(1, dtype=wp.int32, device=operator.device)
+        super().__init__(operator, *args, initial_vector=real_start, **kwargs)
+
+    def initialize(self, seed=42):
+        if self.complex_start is not None:
+            self.start_scale.zero_()
+            self.start_invalid.zero_()
+            wp.launch(
+                start_scale,
+                self.complex_start.size,
+                [self.complex_start, self.start_scale, self.start_invalid],
+                device=self.device,
+            )
+            wp.launch(
+                realify_start,
+                self.complex_start.size,
+                [
+                    self.complex_start,
+                    self.initial_vector.flatten(),
+                    self.start_scale,
+                    self.start_invalid,
+                ],
+                device=self.device,
+            )
+        super().initialize(seed)
+        if self.complex_start is not None:
+            wp.launch(
+                start_status,
+                1,
+                [self.start_scale, self.start_invalid, self.status],
+                device=self.device,
+            )
+
+
 class HermitianEigensolver:
     """Complex Hermitian eigenpairs through realified restarted Krylov iteration.
 
@@ -137,18 +219,30 @@ class HermitianEigensolver:
     realified directions. ``count`` reports extracted complex vectors;
     ``real.converged`` counts residual-passing real pairs out of ``2*k``.
     Neither count alone certifies the requested spectrum or complex residuals.
+
+    ``initial_vector`` optionally supplies a nonzero finite ``wp.vec2d`` array
+    of shape ``(n,)`` on the operator device. Initialization reads its current
+    contents without modifying them, including on replay. Zero or nonfinite
+    starts set ``real.status`` to 1; outputs must not be used in that case.
     """
 
-    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9):
+    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
         if not 1 <= k < operator.complex_n:
             raise ValueError("require 1 <= k < n")
         self.n, self.k, self.device = operator.complex_n, k, operator.device
-        self.real = KrylovSchur(
+        if initial_vector is not None:
+            if initial_vector.dtype != wp.vec2d or initial_vector.shape != (self.n,):
+                raise ValueError("initial_vector must have shape (n,) and dtype wp.vec2d")
+            if initial_vector.device != self.device:
+                raise ValueError("initial_vector must be on the operator device")
+        self.initial_vector = initial_vector
+        self.real = _HermitianKrylov(
             operator,
             2 * k,
             ncv=min(2 * self.n, max(4 * k + 16, 32)) if ncv is None else ncv,
             which=which,
             tol=tol,
+            complex_start=initial_vector,
         )
         self.eigenvectors = wp.zeros((k, self.n), dtype=wp.vec2d, device=self.device)
         self.eigenvalues = wp.zeros(k, dtype=wp.float64, device=self.device)

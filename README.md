@@ -17,7 +17,7 @@ Anvil adapted from [“Blacksmith's Anvil”](https://sketchfab.com/3d-models/bl
 | Real symmetric | `KrylovSchur` | Thick restart, two-pass reorthogonalization, LM/LA/SA/SM/BE selection |
 | Symmetric block inverse iteration | `SymmetricEigensolver` | CholeskyQR2 and Rayleigh–Ritz; supply an iteration operator that amplifies the requested spectrum |
 | Symmetric generalized `A x = λ B x` | `GeneralizedKrylovSchur`, `GeneralizedEigensolver` | SPD mass, including non-diagonal sparse B; B-orthonormal eigenvectors; restarted Krylov or block inverse iteration; interior targeting |
-| Complex Hermitian | `HermitianEigensolver` | Standard problems via realified restarted Krylov; complex basis and breakdown recovery; broader Spectra convergence gaps remain |
+| Complex Hermitian | `HermitianEigensolver` | Standard problems via realified restarted Krylov; complex basis and breakdown recovery; replayable complex starting vector; broader Spectra convergence gaps remain |
 | Real or complex nonsymmetric | `GeneralEigensolver` | Restarted complex Arnoldi, device Hessenberg reduction and shifted QR; LM/SM/LR/SR/LI/SI selection |
 | Real or complex shift-invert | `ShiftInvertEigensolver` | Eigenpairs nearest a real or complex shift, using cuDSS or pure-Warp GMRES |
 | Buckling / Cayley | `BucklingEigensolver`, `CayleyEigensolver`, `GeneralizedKrylovSchur` | Block or restarted Krylov transforms; original-problem residuals |
@@ -159,7 +159,7 @@ The [latest full local validation](results/block_lobpcg_validation.json), record
 
 The [experimental block eigensolver report](benchmarks/experimental/README.md) adds captured LOBPCG-style iteration, changed-pencil replay, and direct-FSAI/truncated-CG Anvil accuracy checks. It remains outside the public API. Its timings are excluded from performance claims because other GPU jobs were running; the current Anvil timing table is unchanged. The new `CGInverse.atol` regressions also pass on stock Warp 1.15.
 
-The [Hermitian breakdown follow-up](benchmarks/upstream/HERMITIAN.md) fixes the seven reported complex identity/low-rank CuPy failures and adds changed-matrix replay and complex subspace checks. This focused correctness run does not update timings or establish full Spectra Hermitian conformance.
+The [Hermitian breakdown follow-up](benchmarks/upstream/HERMITIAN.md) fixes the seven reported complex identity/low-rank CuPy failures and adds changed-matrix replay and complex subspace checks. The [complex-start follow-up](benchmarks/upstream/HERMITIAN_STARTS.md) adds replayable device starting vectors, invalid-input status and 15 newly enabled CuPy cases. These focused correctness runs do not update timings or establish full Spectra Hermitian conformance.
 
 The tests cover rectangular SVD, buckling/Cayley transforms, FP64 fractional shifts, real symmetric and nonsymmetric spectra, complex Hermitian and general spectra, repeated/zero eigenvalues, both spectrum ends, interior real/complex shifts, non-diagonal mass, device convergence limits, graph replay with changed matrix values, FEM energy derivatives, rigid modes, and graph-captured FEM assembly. They also check the incremental projected matrix against `Q A Qᵀ`, captured breakdown recovery, small projected eigenproblems, orthogonal-complement projection, and pure-Warp graphs for host nodes/transfers. These are representative Spectra-style tests, not a complete port of every upstream test.
 
