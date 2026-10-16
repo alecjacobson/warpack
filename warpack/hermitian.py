@@ -7,7 +7,7 @@ complex Gram-Schmidt removes those duplicate directions, including degeneracies.
 
 import warp as wp
 
-from .solver import SymmetricEigensolver
+from .solver import KrylovSchur
 
 
 @wp.func
@@ -127,59 +127,28 @@ class HermitianCSR:
         )
 
 
-@wp.kernel
-def row_bound(offsets: wp.array[wp.int32], values: wp.array[wp.vec2d], bound: wp.array[wp.float64]):
-    i = wp.tid()
-    val = wp.float64(0.0)
-    for e in range(offsets[i], offsets[i + 1]):
-        val += wp.sqrt(wp.dot(values[e], values[e]))
-    wp.atomic_max(bound, 0, val)
-
-
-@wp.kernel
-def shifted_real(
-    x: wp.array2d[wp.float64],
-    y: wp.array2d[wp.float64],
-    bound: wp.array[wp.float64],
-    sign: float,
-):
-    j, i = wp.tid()
-    y[j, i] = bound[0] * x[j, i] + wp.float64(sign) * y[j, i]
-
-
-class _ExtremalIteration:
-    def __init__(self, op, sign):
-        self.op, self.sign = op, sign
-        self.bound = wp.zeros(1, dtype=wp.float64, device=op.device)
-
-    def apply(self, x, y):
-        self.op.apply(x, y)
-        self.bound.zero_()
-        wp.launch(
-            row_bound,
-            self.op.complex_n,
-            [self.op.offsets, self.op.values, self.bound],
-            device=self.op.device,
-        )
-        wp.launch(shifted_real, x.shape, [x, y, self.bound, self.sign], device=self.op.device)
-
-
 class HermitianEigensolver:
+    """Complex Hermitian eigenpairs through realified restarted Krylov iteration.
+
+    ``ncv`` counts real basis vectors: require ``2*k < ncv <= 2*n``
+    (larger values are clamped to ``2*n``). The real solver recovers independent
+    directions on device when a Krylov chain breaks down, including repeated
+    eigenvalues and nullspaces. Complex Gram--Schmidt removes the duplicate
+    realified directions. ``count`` reports extracted complex vectors;
+    ``real.converged`` counts residual-passing real pairs out of ``2*k``.
+    Neither count alone certifies the requested spectrum or complex residuals.
+    """
+
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9):
         if not 1 <= k < operator.complex_n:
             raise ValueError("require 1 <= k < n")
         self.n, self.k, self.device = operator.complex_n, k, operator.device
-        self.real = SymmetricEigensolver(
+        self.real = KrylovSchur(
             operator,
             2 * k,
-            ncv=ncv or min(2 * self.n, max(4 * k + 16, 32)),
+            ncv=min(2 * self.n, max(4 * k + 16, 32)) if ncv is None else ncv,
             which=which,
             tol=tol,
-            iteration_operator=(
-                _ExtremalIteration(operator, -1.0 if which == "SA" else 1.0)
-                if which in ("SA", "LA")
-                else operator
-            ),
         )
         self.eigenvectors = wp.zeros((k, self.n), dtype=wp.vec2d, device=self.device)
         self.eigenvalues = wp.zeros(k, dtype=wp.float64, device=self.device)
