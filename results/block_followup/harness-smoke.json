@@ -1,0 +1,79 @@
+{
+  "args": {
+    "case": "clamped_consistent",
+    "side": 3,
+    "modes": 6,
+    "width": 12,
+    "steps": 300,
+    "shift": 0.01,
+    "fsai_width": 32,
+    "preconditioner": "fsai",
+    "repeats": 1,
+    "tol": 1e-08,
+    "cupy": false,
+    "profile": false,
+    "keep_graph": false,
+    "gram_chunk": 256,
+    "native_products": false,
+    "batched_products": false,
+    "inner_cg": 0,
+    "inner_tol": 0.01,
+    "out": "build/block-timings/harness-smoke.json"
+  },
+  "n": 432,
+  "k": 6,
+  "setup_seconds": 0.24999157339334488,
+  "capture_seconds": 0.2847612649202347,
+  "warmup_seconds": 0.06900696456432343,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 29,
+      "MEMCPY": 13,
+      "KERNEL": 141,
+      "CONDITIONAL": 1
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 13
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.06772344559431076,
+      "iterations": 15,
+      "quality": {
+        "accepted": true,
+        "residual": 6.1274645606226105e-09,
+        "max_absolute_residual": 1.3233158041581206e-09,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 2.0520953190173721e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 3.6904330391832645e-10,
+        "status": 0,
+        "converged": 6
+      }
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "2a084158ddc36cd693c112818abb9ae9994bf81d5d5f2192b6ec74c5904517e3",
+    "benchmarks/experimental/block_kernels.py": "95f62b7c3c894e1f73a994afc69716185bc362d25dce6ecb3b15bef6422d09bd",
+    "benchmarks/experimental/compare_block.py": "2c6e092e13072e2cc92fea0d3026b486f7cad5397dd901f783ca1ae28b6fefd4",
+    "warpack/generalized.py": "c6679eb6b09cb6b2d2ac6e8523f3bfcb62aca16e10fa6e8ac6b33a4941cee21b"
+  },
+  "other_gpu_processes_before": [
+    "2740630, python3"
+  ],
+  "other_gpu_processes_after": [
+    "2740630, python3"
+  ],
+  "timing_eligible": false,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges the entire oversampled block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence."
+}

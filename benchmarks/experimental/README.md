@@ -138,12 +138,19 @@ is retained. FSAI32 was used for the completed comparison.
 
 Three Gram-product tests once returned doubled results immediately after
 unsynchronized eager warmup and graph capture. Isolated and repeated runs
-passed. Tests now complete warmup before capture, matching the solver protocol,
-but this is **not a confirmed diagnosis or fix**. The
+initially passed. A [follow-up investigation](FOLLOWUP.md) now reproduces the
+failure without Gram arithmetic, including a CuPy-only control with explicit
+graph upload. Tests complete warmup before capture, matching the solver protocol;
+this contains the observed failure but is **not an upstream runtime fix**. The
 [failure log](../../results/block_lobpcg/experimental-tests.log) is preserved and
 [#61](https://github.com/alecjacobson/warpack/issues/61) tracks reproduction and
 root-cause investigation. Experimental product dispatch will remain outside
 production pending that work.
+
+The same [follow-up](FOLLOWUP.md) validates computed starts after a regional
+FEM stiffness change, including a retained profile that failed the independent
+requested-subspace check. It demonstrates a warm-start iteration reduction
+within the prototype without claiming an Anvil speedup.
 
 ## Reproduction and next gates
 

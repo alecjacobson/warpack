@@ -93,6 +93,9 @@ def main():
     p.add_argument("--tol", type=float, default=1e-8)
     p.add_argument("--cupy", action="store_true")
     p.add_argument("--profile", action="store_true")
+    p.add_argument(
+        "--keep-graph", action="store_true", help="Retain the potentially large DOT dump"
+    )
     p.add_argument("--gram-chunk", type=int, default=256)
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
@@ -152,13 +155,18 @@ def main():
     dot = Path("build/block-eigen") / (destination.stem + ".dot")
     dot.parent.mkdir(parents=True, exist_ok=True)
     wp.capture_debug_dot_print(graph, str(dot))
+    audit = graph_summary(dot)
+    if not args.keep_graph:
+        dot.unlink()
+    warmup_seconds, _ = timed(lambda: wp.capture_launch(graph))
     report = dict(
         args=vars(args),
         n=a.shape[0],
         k=k,
         setup_seconds=setup_seconds,
         capture_seconds=capture_seconds,
-        graph=graph_summary(dot),
+        warmup_seconds=warmup_seconds,
+        graph=audit,
         rows=[],
         versions={
             name: importlib.metadata.version(name)

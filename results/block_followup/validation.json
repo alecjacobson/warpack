@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-16",
+  "base_revision": "6f7cfb61f0e434765fb1a6fd76be241d6ff34d7b",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "platform": "Linux-5.15.0-113-generic-x86_64-with-glibc2.35",
+  "production_changes": false,
+  "prior_full_suite": "results/block_lobpcg_validation.json (387 passed; no new full-suite claim)",
+  "performance_status": "No accepted new Anvil timing. Baseline attempt aborted after a competing process appeared. Warm-start runs are numerically validated but timing-ineligible.",
+  "diagnostics": "Intentional failing runtime/upload controls are preserved separately from production regression checks. See NVIDIA/warp#2096 and warpack#61.",
+  "focused_tests": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_lobpcg_experimental.py tests/test_block_products_experimental.py tests/test_cg_tolerances.py",
+    "result": "28 passed",
+    "seconds": 5.06
+  },
+  "benchmark_validation": {
+    "accepted_changed_problem_trials": 27,
+    "dofs": [
+      10890,
+      79380
+    ],
+    "modes": 20,
+    "rejected_profile": "starts-consistent-tol1e-8.json: previous full block failed the independent requested-subspace cutoff",
+    "harness_smoke": "Passed independent accuracy; full graph warmup measured separately; temporary DOT removed."
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check benchmarks/experimental: passed",
+  "cleanup": {
+    "removed_bytes": 1289981893,
+    "tracked_files_deleted": false,
+    "active_runtime_and_anvil_reference_preserved": true
+  }
+}
