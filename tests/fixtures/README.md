@@ -41,3 +41,12 @@ are generated numerical data. The former three exercise sparse indefinite
 stiffness with non-diagonal SPD mass at n=10/100/1000; the latter exercises
 Cayley selection at n=100, k=10, ncv=20 and sigma=1.2345. Independent dense
 references verify the requested invariant subspaces, not residuals alone.
+
+`spectra_hermitian_sparse.npz` preserves the exact complex Hermitian matrices
+from `HermEigs_17` and `HermEigs_22` at the same pinned Spectra revision, under
+keys `a10` and `a100`. The lower triangle is reflected with conjugation, matching
+the upstream self-adjoint operator. These generated numerical data have
+n=10/100, k=3/10, ncv=6/20 and sigma=0. The source `test/HermEigs.cpp` SHA256 is
+`2f8ddf5a1f05877078114716ebbf58f9270e427ea8bf39765ddccc87516ba27e`.
+They guard original residuals, requested spectra and complex orthogonality,
+and expose inaccurate unmatched general cuDSS factors of the realified matrix.

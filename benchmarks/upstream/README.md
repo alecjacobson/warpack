@@ -12,9 +12,9 @@ Pinned sources:
 
 CuPy's tests are copied unchanged into `build/`. The pytest plugin substitutes the solver entry points and expands dtype decorators so each precision is reported individually. Fixtures, NumPy/SciPy references, and assertions retain their upstream definitions. CuPy remains a **test boundary and reference dependency**, not a production eigensolver backend. Dense/CSC/COO and matrix-backed LinearOperator inputs are materialized into Warp CSR by the adapter outside the solve. This tests their numerical problems, not native support for those input containers. Unsupported precision, interfaces, and methods are explicit skips.
 
-Automatic `SM` shifts and output ordering follow the pinned CuPy adapter contract. Real shift-invert supports LM/LA/SA selection through Warp Krylov iteration on the cuDSS inverse. Complex shift-invert remains limited to nearest eigenvalues; unsupported complex shift-invert starts are skipped before CuPy's comparison decorator can misclassify them as assertion failures.
+Automatic `SM` shifts and output ordering follow the pinned CuPy adapter contract. Real shift-invert supports LM/LA/SA selection through Warp Krylov iteration on the cuDSS inverse. Complex Hermitian shift-invert remains limited to nearest eigenvalues and now accepts complex starting vectors; nonsymmetric starting-vector support is separate.
 
-Standard complex Hermitian LM/LA/SA problems accept device starting vectors; the adapter forwards `v0` to this API. See the [complex-start follow-up](HERMITIAN_STARTS.md) for the focused coverage and remaining shift-invert limitation.
+Standard complex Hermitian LM/LA/SA problems accept device starting vectors; the adapter forwards `v0` to this API. See the [complex-start follow-up](HERMITIAN_STARTS.md) for the direct coverage, and the [Hermitian shift-invert follow-up](HERMITIAN_SHIFT.md) for the subsequently enabled SM cases.
 
 For the native CuPy comparison, the pinned, unmodified `_eigen.py` is loaded over installed CuPy 14.2.0. This is a compatibility overlay, **not a complete build of pinned CuPy main**. Both its source hash and test source hash are recorded. The adapter maps ordinary SVD fixtures' `rng=0` to Warpack's fixed seed; it does not claim CuPy RNG API compatibility. RNG-specific tests remain unsupported.
 

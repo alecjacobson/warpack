@@ -61,8 +61,6 @@ def pytest_collection_modifyitems(config, items):
                 is_complex = dtype is not None and np.dtype(dtype).char == "D"
                 if is_complex and (name.startswith("TestSvds") or method.startswith("test_svds")):
                     reason = "PartialSVD supports real FP64 only"
-                if is_complex and name == "TestEigshSM":
-                    reason = "Complex shift-invert has no initial_vector API"
                 if (
                     is_complex
                     and name == "TestEigshSigma"

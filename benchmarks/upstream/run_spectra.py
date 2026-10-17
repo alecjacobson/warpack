@@ -42,7 +42,7 @@ def read(path):
     return a.real.copy() if not np.any(a.imag) else a
 
 
-def run(case):
+def run(case, accuracy_only=False):
     name = case["family"]
     k = case["k"]
     ncv = case["ncv"] or None
@@ -69,7 +69,7 @@ def run(case):
     )
     if name == "DavidsonSymEigs":
         margin = 1e-10
-    started = time.perf_counter()
+    started = None if accuracy_only else time.perf_counter()
     try:
         if name in ("GenEigs", "ComplexEigs"):
             if sel in (2, 6):
@@ -162,7 +162,13 @@ def run(case):
         elif name in ("SymEigsShift", "Example1Shift") or which == "SM":
             if np.iscomplexobj(a):
                 solver = ShiftInvertEigensolver(
-                    complex_matrix(a), k, sigma, ncv=ncv, backend="cudss", tol=threshold
+                    complex_matrix(a),
+                    k,
+                    sigma,
+                    ncv=ncv,
+                    backend="cudss",
+                    tol=threshold,
+                    hermitian=name == "HermEigs",
                 )
                 inv = solver
                 iterations = 30
@@ -197,8 +203,15 @@ def run(case):
             solver = KrylovSchur(
                 SparseOperator(matrix(a)), k, ncv=ncv, which=which, tol=threshold, initial_vector=v0
             )
-        setup = time.perf_counter() - started
-        timing = execute(solver, iterations, **options)
+        if accuracy_only:
+            graph = solver.capture(iterations, **options)
+            for _ in range(2):
+                wp.capture_launch(graph)
+            wp.synchronize_device(solver.device)
+            timing = dict(execution="accuracy_only", replays=2)
+        else:
+            setup = time.perf_counter() - started
+            timing = dict(setup_seconds=setup, **execute(solver, iterations, **options))
         if name == "SVD":
             w = output(solver.singular_values)
             u = output(solver.u).T
@@ -217,6 +230,25 @@ def run(case):
             residual = a @ v - (v if b is None else b @ v) * w
             err = float(np.max(np.abs(residual)))
             errors = {"max_absolute_residual": err, "returned_pairs": len(w)}
+            if name == "HermEigs":
+                ref, basis = la.eigh(a)
+                if which == "LM":
+                    selected = np.argsort(-abs(ref))[:k]
+                elif which == "SM":
+                    selected = np.argsort(abs(ref))[:k]
+                elif which == "LA":
+                    selected = np.arange(n - k, n)
+                elif which == "SA":
+                    selected = np.arange(k)
+                else:  # BothEnds: the larger end gets the odd extra mode.
+                    selected = np.r_[np.arange(k // 2), np.arange(n - (k - k // 2), n)]
+                expected = ref[selected]
+                allowed = basis[:, np.min(abs(ref[:, None] - expected), axis=1) <= 1e-9]
+                errors.update(
+                    spectrum_error=float(np.max(abs(np.sort(w) - np.sort(expected)))),
+                    orthogonality_error=float(np.max(abs(v.conj().T @ v - np.eye(k)))),
+                    subspace_error=float(np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)),
+                )
             # Upstream generic tests require residuals and successful convergence.
             # Examples 1/2/4 additionally check the requested eigenvalues.
             if name in ("Example1", "Example1Shift", "Example2", "Example4"):
@@ -272,7 +304,6 @@ def run(case):
             cudss_matching=getattr(factor, "matching", None),
             cudss_refinement_steps=getattr(factor, "refinement_steps", None),
             outcome="passed" if ok else "failed",
-            setup_seconds=setup,
             **timing,
             iteration_budget=iterations,
             upstream_absolute_tolerance=margin,
@@ -291,6 +322,8 @@ def run(case):
 
         return dict(outcome="error", reason=str(e), traceback=traceback.format_exc())
     finally:
+        if accuracy_only:
+            graph = None
         if "solver" in locals():
             if hasattr(solver, "graph"):
                 solver.graph = None
@@ -302,11 +335,15 @@ def run(case):
 
 
 def main():
+    global FIX
     parser = argparse.ArgumentParser()
     parser.add_argument("--family")
     parser.add_argument("--case")
+    parser.add_argument("--fixtures", type=Path, default=FIX)
+    parser.add_argument("--accuracy-only", action="store_true")
     parser.add_argument("--out", default="results/upstream_spectra_warp.json")
     args = parser.parse_args()
+    FIX = args.fixtures.resolve()
     cases = [
         json.loads(line) for p in sorted(FIX.glob("*.jsonl")) for line in p.read_text().splitlines()
     ]
@@ -321,13 +358,15 @@ def main():
         cases = [c for c in cases if c["family"] == args.family]
     if args.case:
         cases = [c for c in cases if c["id"] == args.case]
+    if not cases:
+        parser.error("no matching exported fixtures")
     result = dict(
         spectra_revision="db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
         protocol="Exact exported upstream matrices, k, ncv, selection and residual assertions; graph replay; cuDSS inverses; 300 direct / 100 symmetric inverse / 30 general inverse cycles",
         cases=[],
     )
     for i, c in enumerate(cases):
-        r = dict(**c, **run(c))
+        r = dict(**c, **run(c, accuracy_only=args.accuracy_only))
         result["cases"].append(r)
         Path(args.out).write_text(json.dumps(result, indent=2) + "\n")
         print(

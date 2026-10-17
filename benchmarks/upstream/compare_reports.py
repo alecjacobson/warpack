@@ -19,6 +19,7 @@ def contracts(row):
         fields.append("spectrum_error")
     elif "spectrum_error" in row:
         fields.append("spectrum_error")
+    fields.extend(key for key in ("orthogonality_error", "subspace_error") if key in row)
     tolerance = row.get("upstream_absolute_tolerance")
     evaluated = (
         row.get("outcome") in ("passed", "failed")

@@ -103,8 +103,12 @@ def eigsh(
     if np.dtype(a.dtype) not in (np.dtype("float64"), np.dtype("complex128")):
         pytest.skip("Warpack supports FP64/complex128 only")
     ah = host(a)
-    if v0 is not None and np.iscomplexobj(ah) and (sigma is not None or which == "SM"):
-        pytest.skip("Complex shift-invert has no initial_vector API")
+    start = None
+    if v0 is not None and np.iscomplexobj(ah):
+        v0h = np.asarray(host(v0))
+        if v0h.shape != (n,):
+            raise ValueError("v0 must have shape (n,)")
+        start = wp.array(np.column_stack((v0h.real, v0h.imag)), dtype=wp.vec2d)
     m = min(n, max(2 * k + 12, 32) if ncv is None else ncv)
     iterations = 300 if maxiter is None else maxiter
     if m <= k:
@@ -125,7 +129,14 @@ def eigsh(
             pytest.skip("complex shift-invert exposes nearest eigenvalues only")
         if np.iscomplexobj(ah):
             solver = ShiftInvertEigensolver(
-                complex_matrix(ah), k, sigma, ncv=m, backend="cudss", tol=threshold
+                complex_matrix(ah),
+                k,
+                sigma,
+                ncv=m,
+                backend="cudss",
+                tol=threshold,
+                hermitian=True,
+                initial_vector=start,
             )
             inverse = solver
         else:
@@ -144,12 +155,6 @@ def eigsh(
             evaluation = EigenpairEvaluation(SparseOperator(a0), solver.eigenvectors, tol=threshold)
         iterations = 1 if m == n else min(iterations, 30)
     elif np.iscomplexobj(ah):
-        start = None
-        if v0 is not None:
-            v0h = np.asarray(host(v0))
-            if v0h.shape != (n,):
-                raise ValueError("v0 must have shape (n,)")
-            start = wp.array(np.column_stack((v0h.real, v0h.imag)), dtype=wp.vec2d)
         solver = HermitianEigensolver(
             complex_matrix(ah, True),
             k,

@@ -4,6 +4,7 @@ Only test execution bodies are replaced in a generated build-directory copy.
 The original sources and their assertions also run separately through CTest.
 """
 
+import argparse
 import concurrent.futures
 import hashlib
 import json
@@ -54,6 +55,8 @@ template<class T> void save_matrix(const T& a, const std::string& path, bool sym
 template<class A,class B> void fixture(const A& a,const B& b,int selection,bool symmetric,
                                      bool allowed=false,const Eigen::VectorXd& v0=Eigen::VectorXd()) {
     std::string id=fixture_family+"_"+std::to_string(fixture_id++);
+    const char* max_size=std::getenv("SPECTRA_MAX_SIZE");
+    if(max_size && (a.rows()>std::atoi(max_size) || a.cols()>std::atoi(max_size))) return;
     std::string base=std::string(std::getenv("SPECTRA_FIXTURES"))+"/"+id;
     save_matrix(a,base+".a",symmetric);
     if(b.size()) save_matrix(b,base+".b",true);
@@ -80,7 +83,7 @@ def replace_body(s, signature, body):
     return s[:start] + "{\n" + body + "\n}" + s[end:]
 
 
-def build(family):
+def build(family, max_size=None):
     original = (UP / "test" / f"{family}.cpp").read_text()
     s = original
     empty = "Eigen::MatrixXd()"
@@ -180,23 +183,42 @@ def build(family):
     import os
 
     env = dict(os.environ, SPECTRA_FIXTURES=str(OUT))
+    if max_size is not None:
+        env["SPECTRA_MAX_SIZE"] = str(max_size)
+    else:
+        env.pop("SPECTRA_MAX_SIZE", None)
     proc = subprocess.run([str(exe)], env=env, capture_output=True, text=True, timeout=120)
     (OUT / f"{family}.log").write_text(proc.stdout + proc.stderr)
     return dict(
         family=family,
         source_sha256=hashlib.sha256(original.encode()).hexdigest(),
         exit_code=proc.returncode,
+        max_size=max_size,
     )
 
 
 def main():
-    OUT.mkdir(exist_ok=True)
+    global OUT
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--families", nargs="+", choices=FAMILIES, default=FAMILIES)
+    parser.add_argument("--max-size", type=int)
+    parser.add_argument("--out", type=Path, default=OUT)
+    args = parser.parse_args()
+    if args.max_size is not None and args.max_size < 1:
+        parser.error("--max-size must be positive")
+    OUT = args.out.resolve()
+    OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "export.h").write_text(HEADER)
-    for p in OUT.glob("*.jsonl"):
-        p.unlink()
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        manifest = list(pool.map(build, FAMILIES))
-    (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2))
+    for family in args.families:
+        (OUT / f"{family}.jsonl").unlink(missing_ok=True)
+        if family == "Example1":
+            (OUT / "Example1Shift.jsonl").unlink(missing_ok=True)
+    manifest_path = OUT / "manifest.json"
+    previous = json.loads(manifest_path.read_text()) if manifest_path.exists() else []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(4, len(args.families))) as pool:
+        manifest = list(pool.map(lambda family: build(family, args.max_size), args.families))
+    manifest = [row for row in previous if row["family"] not in args.families] + manifest
+    manifest_path.write_text(json.dumps(manifest, indent=2))
     print("Exported", sum(len(p.read_text().splitlines()) for p in OUT.glob("*.jsonl")), "cases")
 
 

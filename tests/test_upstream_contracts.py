@@ -50,6 +50,13 @@ def test_residual_only_is_not_spectrum_verification():
     assert not contracts(row)["requested_spectrum_checked"]
 
 
+@pytest.mark.parametrize("field", ["orthogonality_error", "subspace_error"])
+def test_bad_eigenspace_cannot_pass_with_small_residual(field):
+    row = example(family="HermEigs", spectrum_error=1e-14, **{field: 1e-3})
+    assert not contracts(row)["checked_numerical_bounds_pass"]
+    assert field in contracts(row)["checked_fields"]
+
+
 def test_svd_checks_vectors_too():
     c = contracts(example(family="SVD", values=1e-15, left_vectors=1e-5, right_vectors=1e-15))
     assert not c["checked_numerical_bounds_pass"]

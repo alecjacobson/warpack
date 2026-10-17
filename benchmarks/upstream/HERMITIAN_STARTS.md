@@ -1,5 +1,8 @@
 # Complex Hermitian starting vectors, 2026-10-16
 
+The subsequent [Hermitian shift-invert follow-up](HERMITIAN_SHIFT.md) enables the
+48 shifted starting-vector cases left unsupported by this historical run.
+
 `HermitianEigensolver` now accepts an optional `initial_vector`: a finite,
 nonzero `wp.vec2d` array of shape `(n,)` on the operator device. Each entry holds
 the real and imaginary parts. The solver reads the current contents during

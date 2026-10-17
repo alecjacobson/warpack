@@ -5,10 +5,12 @@ import warp.sparse as ws
 from warp.optim import linear
 
 from .arnoldi import (
+    ComplexCSR,
     GeneralEigensolver,
     complex_outputs,
     complex_residual,
 )
+from .hermitian import HermitianEigensolver
 from .kernels import identity_order
 from .schur import cdiv
 from .solver import CuDSSInverse
@@ -76,6 +78,12 @@ def unshift(values: wp.array[wp.vec2d], out: wp.array[wp.vec2d], sigma: wp.vec2d
     out[i] = sigma + cdiv(wp.vec2d(1.0, 0.0), values[i])
 
 
+@wp.kernel
+def unshift_hermitian(values: wp.array[wp.float64], out: wp.array[wp.vec2d], sigma: wp.vec2d):
+    i = wp.tid()
+    out[i] = wp.vec2d(sigma[0] + wp.float64(1.0) / values[i], 0.0)
+
+
 class ComplexShiftInverse:
     """Apply (A-sigma I)^-1 using cuDSS or pure-Warp GMRES.
 
@@ -92,6 +100,7 @@ class ComplexShiftInverse:
         self.complex_n = operator.complex_n
         self.device = operator.device
         n = self.complex_n
+        self.n = 2 * n
         nnz = len(operator.values)
         size = 4 * (nnz + n)
         rows = wp.empty(size, dtype=wp.int32, device=self.device)
@@ -119,7 +128,12 @@ class ComplexShiftInverse:
         self.solution = wp.empty_like(self.rhs)
         self.backend = backend
         if backend == "cudss":
-            self.inverse = CuDSSInverse(self.matrix, 1, mtype="general")
+            # Realification can have many zero diagonal entries. Unmatched
+            # general factors can then leave a large error even after one
+            # correction. Match/scale during setup and retain FP64 correction.
+            self.inverse = CuDSSInverse(
+                self.matrix, 1, mtype="general", matching=True, refinement_steps=1
+            )
         else:
             self.state = linear.gmres(
                 self.matrix,
@@ -132,6 +146,20 @@ class ComplexShiftInverse:
                 run=False,
             )
 
+    def _solve_real(self):
+        if self.backend == "cudss":
+            self.inverse.apply(self.rhs, self.solution)
+        else:
+            self.solution.zero_()
+            self.state(b=self.rhs[0], x=self.solution[0])
+
+    def apply(self, x, y):
+        """Apply to realified row vectors, as used by Hermitian Krylov."""
+        for j in range(x.shape[0]):
+            wp.copy(self.rhs, x[j : j + 1])
+            self._solve_real()
+            wp.copy(y[j : j + 1], self.solution)
+
     def apply_complex(self, x, y):
         for j in range(x.shape[0]):
             wp.launch(
@@ -140,11 +168,7 @@ class ComplexShiftInverse:
                 [x, self.rhs, j, self.complex_n],
                 device=self.device,
             )
-            if self.backend == "cudss":
-                self.inverse.apply(self.rhs, self.solution)
-            else:
-                self.solution.zero_()
-                self.state(b=self.rhs[0], x=self.solution[0])
+            self._solve_real()
             wp.launch(
                 pack_complex,
                 self.complex_n,
@@ -158,7 +182,18 @@ class ComplexShiftInverse:
 
 
 class ShiftInvertEigensolver:
-    """Eigenpairs nearest a real or complex sigma; original-problem residuals."""
+    """Eigenpairs nearest a real or complex sigma; original-problem residuals.
+
+    ``hermitian=True`` asserts that the complex CSR operator is Hermitian and
+    requires a real shift. It uses realified symmetric Krylov instead of general
+    Arnoldi, with optional replayable complex ``initial_vector``. ``ncv`` counts
+    complex dimensions and is doubled internally on this path. The output
+    eigenvalues retain the general API's ``wp.vec2d`` storage, with zero imaginary
+    parts; ``converged`` and ``residuals`` check the original complex equation.
+    Starting vectors are currently supported only with ``hermitian=True``.
+    As with the direct Hermitian API, zero/nonfinite starts set ``status=1``;
+    outputs must not be used unless ``status`` is zero.
+    """
 
     def __init__(
         self,
@@ -170,15 +205,41 @@ class ShiftInvertEigensolver:
         tol=1.0e-9,
         inner_tol=1.0e-12,
         inner_maxiter=1000,
+        hermitian=False,
+        initial_vector=None,
     ):
+        if hermitian and complex(sigma).imag != 0:
+            raise ValueError("Hermitian shift-invert requires a real sigma")
+        if initial_vector is not None and not hermitian:
+            raise ValueError("initial_vector requires hermitian=True")
+        self.hermitian = bool(hermitian)
+        if self.hermitian and not hasattr(operator, "apply_complex"):
+            operator = ComplexCSR(
+                operator.complex_n, operator.offsets, operator.columns, operator.values
+            )
         self.inverse = ComplexShiftInverse(operator, sigma, backend, inner_tol, inner_maxiter)
-        self.core = GeneralEigensolver(self.inverse, k, ncv=ncv, which="LM", tol=tol * 0.01)
+        try:
+            if self.hermitian:
+                self.core = HermitianEigensolver(
+                    self.inverse,
+                    k,
+                    ncv=None if ncv is None else 2 * ncv,
+                    which="LM",
+                    tol=tol * 0.01,
+                    initial_vector=initial_vector,
+                )
+            else:
+                self.core = GeneralEigensolver(self.inverse, k, ncv=ncv, which="LM", tol=tol * 0.01)
+        except Exception:
+            self.inverse.close()
+            raise
         self.op = operator
         self.device = operator.device
         self.k = k
         self.tol = tol
+        self.status = self.core.real.status if self.hermitian else self.core.status
         self.eigenvectors = self.core.eigenvectors
-        self.eigenvalues = wp.empty_like(self.core.eigenvalues)
+        self.eigenvalues = wp.empty(k, dtype=wp.vec2d, device=self.device)
         self.residuals = wp.empty(k, dtype=wp.float64, device=self.device)
         self.norms = wp.zeros((k, 1), dtype=wp.float64, device=self.device)
         self.ax = wp.empty_like(self.eigenvectors)
@@ -187,8 +248,10 @@ class ShiftInvertEigensolver:
         self.value_buffer = wp.empty_like(self.eigenvalues)
 
     def finalize(self):
+        if self.hermitian:
+            self.core.finalize()
         wp.launch(
-            unshift,
+            unshift_hermitian if self.hermitian else unshift,
             self.k,
             [self.core.eigenvalues, self.value_buffer, self.inverse.sigma],
             device=self.device,
@@ -226,13 +289,17 @@ class ShiftInvertEigensolver:
         )
 
     def solve(self, iterations=10):
-        self.core.solve(iterations)
+        (self.core.real if self.hermitian else self.core).solve(iterations)
         self.finalize()
         return self
 
     def capture(self, iterations=10):
-        self.graph = self.core.capture(iterations, adaptive=False, finalizer=self.finalize)
+        core = self.core.real if self.hermitian else self.core
+        self.graph = core.capture(iterations, adaptive=False, finalizer=self.finalize)
         return self.graph
 
     def close(self):
+        self.graph = self.core.graph = None
+        if self.hermitian:
+            self.core.real.graph = None
         self.inverse.close()
