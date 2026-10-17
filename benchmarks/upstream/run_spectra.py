@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import scipy.linalg as la
 import warp as wp
+from scipy.optimize import linear_sum_assignment
 
 from warpack import (
     BucklingEigensolver,
@@ -42,7 +43,9 @@ def read(path):
     return a.real.copy() if not np.any(a.imag) else a
 
 
-def run(case, accuracy_only=False):
+def run(case, accuracy_only=False, iteration_budget=None):
+    if iteration_budget is not None and iteration_budget < 1:
+        raise ValueError("iteration_budget must be positive")
     name = case["family"]
     k = case["k"]
     ncv = case["ncv"] or None
@@ -203,6 +206,8 @@ def run(case, accuracy_only=False):
             solver = KrylovSchur(
                 SparseOperator(matrix(a)), k, ncv=ncv, which=which, tol=threshold, initial_vector=v0
             )
+        if iteration_budget is not None:
+            iterations = iteration_budget
         if accuracy_only:
             graph = solver.capture(iterations, **options)
             for _ in range(2):
@@ -247,6 +252,21 @@ def run(case, accuracy_only=False):
                 errors.update(
                     spectrum_error=float(np.max(abs(np.sort(w) - np.sort(expected)))),
                     orthogonality_error=float(np.max(abs(v.conj().T @ v - np.eye(k)))),
+                    subspace_error=float(np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)),
+                )
+            if name in ("GenEigs", "ComplexEigs") and which == "SM":
+                ref, basis = la.eig(a)
+                # A real problem may cut through a conjugate pair with equal
+                # magnitude. Accept either boundary eigenvalue, but match each
+                # returned value to a distinct reference slot.
+                cutoff = np.sort(abs(ref))[k - 1] + margin
+                selected = np.flatnonzero(abs(ref) <= cutoff)
+                costs = abs(w[:, None] - ref[selected])
+                rows, cols = linear_sum_assignment(costs)
+                allowed = la.orth(basis[:, selected])
+                errors.update(
+                    spectrum_error=float(np.max(costs[rows, cols])),
+                    vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
                     subspace_error=float(np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)),
                 )
             # Upstream generic tests require residuals and successful convergence.
@@ -339,10 +359,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--family")
     parser.add_argument("--case")
+    parser.add_argument("--selection", choices=sorted(set(RULES.values())))
     parser.add_argument("--fixtures", type=Path, default=FIX)
     parser.add_argument("--accuracy-only", action="store_true")
+    parser.add_argument("--iterations", type=int, help="explicit outer-cycle override")
     parser.add_argument("--out", default="results/upstream_spectra_warp.json")
     args = parser.parse_args()
+    if args.iterations is not None and args.iterations < 1:
+        parser.error("--iterations must be positive")
     FIX = args.fixtures.resolve()
     cases = [
         json.loads(line) for p in sorted(FIX.glob("*.jsonl")) for line in p.read_text().splitlines()
@@ -358,15 +382,18 @@ def main():
         cases = [c for c in cases if c["family"] == args.family]
     if args.case:
         cases = [c for c in cases if c["id"] == args.case]
+    if args.selection:
+        cases = [c for c in cases if RULES[c["selection"]] == args.selection]
     if not cases:
         parser.error("no matching exported fixtures")
     result = dict(
         spectra_revision="db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
-        protocol="Exact exported upstream matrices, k, ncv, selection and residual assertions; graph replay; cuDSS inverses; 300 direct / 100 symmetric inverse / 30 general inverse cycles",
+        protocol="Exact exported upstream matrices, k, ncv, selection and residual assertions; graph replay; cuDSS inverses; default 300 direct / 100 symmetric inverse / 30 general inverse cycles; explicit overrides recorded per case",
+        iteration_override=args.iterations,
         cases=[],
     )
     for i, c in enumerate(cases):
-        r = dict(**c, **run(c, accuracy_only=args.accuracy_only))
+        r = dict(**c, **run(c, accuracy_only=args.accuracy_only, iteration_budget=args.iterations))
         result["cases"].append(r)
         Path(args.out).write_text(json.dumps(result, indent=2) + "\n")
         print(

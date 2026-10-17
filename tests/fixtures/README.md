@@ -50,3 +50,16 @@ n=10/100, k=3/10, ncv=6/20 and sigma=0. The source `test/HermEigs.cpp` SHA256 is
 `2f8ddf5a1f05877078114716ebbf58f9270e427ea8bf39765ddccc87516ba27e`.
 They guard original residuals, requested spectra and complex orthogonality,
 and expose inaccurate unmatched general cuDSS factors of the realified matrix.
+
+`spectra_general_sm.npz` preserves `GenEigs_3/21/27` and
+`ComplexEigs_3/21/27` from the same pinned Spectra revision/exporter. These are
+generated real/complex nonsymmetric matrices at n=10/100, including all five
+numerical failures listed in #12 and the additional small strict-count case.
+The source SHA256 values are
+`3964877e344b6816d552c106eecf72da13ea39f9a73053b32c4c7a002c4ab89e`
+for `test/GenEigs.cpp` and
+`1146b5691d6615dcae0646cf4c93b2118fb85791d6c742fd46235df1c93fbae9`
+for `test/ComplexEigs.cpp`. Regressions use matched inverse factors and explicit
+200-cycle compact / 30-cycle wider budgets, preserving k/ncv, requested SM
+selection and original residual bounds. Nonsymmetric eigenvectors are checked
+for normalization and requested invariant-space membership, not orthogonality.

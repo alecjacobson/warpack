@@ -4,7 +4,8 @@ Subsequent fixes and focused reruns are recorded in the
 [Krylov multiplicity report](MULTIPLICITY.md) and
 [cuDSS residual-correction report](REFINEMENT.md), and
 [Hermitian breakdown report](HERMITIAN.md), and
-[Hermitian shift-invert report](HERMITIAN_SHIFT.md). The counts below preserve this
+[Hermitian shift-invert report](HERMITIAN_SHIFT.md), and
+[general SM convergence report](GENERAL_SM.md). The counts below preserve this
 original baseline.
 
 This run found correctness and coverage gaps that the 111-test local suite did not expose. Production solver code stayed at `98f10fa`; the changes in this commit are test adapters, benchmark runners, and recorded results. Every inverse used cuDSS. No CG preconditioner or inner CG stopping criterion was involved.

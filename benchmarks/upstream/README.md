@@ -58,6 +58,8 @@ python -m benchmarks.upstream.bounded benchmarks --timeout 180 --fresh
 python -m benchmarks.upstream.summarize
 ```
 
+For untimed small-case work, see the [Hermitian shift-invert report](HERMITIAN_SHIFT.md) and [general SM convergence profile](GENERAL_SM.md). The exporter accepts `--families`, `--max-size` and `--out`; the runner accepts `--fixtures`, `--selection`, `--accuracy-only` and an explicit `--iterations` override. Historical default budgets are unchanged.
+
 Run GPU jobs sequentially. The upstream Spectra benchmark has 40 dense datasets (100 and 1,000 unknowns; symmetric and nonsymmetric), each repeated ten times. `prepare_benchmarks.py` executes its original native benchmark and exports the exact matrices and starting vectors. `run_benchmarks.py` uses them for Warp and CuPy, with warmup and ten synchronized trials, and reports setup separately. All benchmark backends request `tol=1e-10`, although their convergence criteria differ. General Warp's test-only initialization adapter accepts the original start using Warp copies/kernels. These are small-problem diagnostics, not replacements for the large Anvil/dragon benchmarks.
 
 These commands overwrite recorded reports. Omit `--fresh` to resume an interrupted bounded run; without it, already completed cases are retained.
