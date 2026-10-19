@@ -158,18 +158,106 @@ class _LongRowProduct:
         )
 
 
+@wp.kernel
+def transpose_indices(
+    offsets: wp.array[wp.int32],
+    columns: wp.array[wp.int32],
+    transposed_offsets: wp.array[wp.int32],
+    transposed_columns: wp.array[wp.int32],
+    indices: wp.array[wp.int32],
+    rows: int,
+):
+    e = wp.tid()
+    if e < offsets[rows]:
+        lo, hi = int(0), rows
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if offsets[mid + 1] <= e:
+                lo = mid + 1
+            else:
+                hi = mid
+        row, col = lo, columns[e]
+        lo, hi = int(transposed_offsets[col]), int(transposed_offsets[col + 1])
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if transposed_columns[mid] < row:
+                lo = mid + 1
+            else:
+                hi = mid
+        indices[e] = lo
+
+
+@wp.kernel
+def refresh_transpose(
+    offsets: wp.array[wp.int32],
+    indices: wp.array[wp.int32],
+    values: wp.array[wp.float64],
+    transposed_values: wp.array[wp.float64],
+    rows: int,
+):
+    e = wp.tid()
+    if e < offsets[rows]:
+        transposed_values[indices[e]] = values[e]
+
+
+class _Transpose:
+    """Fixed-topology transpose with a device-only value refresh for replay."""
+
+    def __init__(self, source):
+        self.source = source
+        self.matrix = ws.bsr_transposed(source)
+        self.indices = wp.empty(source.values.shape[0], dtype=wp.int32, device=source.device)
+        wp.launch(
+            transpose_indices,
+            self.indices.size,
+            [
+                source.offsets,
+                source.columns,
+                self.matrix.offsets,
+                self.matrix.columns,
+                self.indices,
+                source.nrow,
+            ],
+            device=source.device,
+        )
+
+    def refresh(self):
+        wp.launch(
+            refresh_transpose,
+            self.indices.size,
+            [
+                self.source.offsets,
+                self.indices,
+                self.source.values,
+                self.matrix.values,
+                self.source.nrow,
+            ],
+            device=self.source.device,
+        )
+
+
+class _SVDKrylovSchur(KrylovSchur):
+    def initialize(self, seed=42):
+        self.op.refresh()
+        super().initialize(seed)
+
+
 class _Augmented:
     def __init__(self, a):
         if a.scalar_type != wp.float64 or a.block_shape != (1, 1) or a.row_counts is not None:
             raise ValueError("SVD needs compact scalar FP64 CSR")
         self.a = a
-        self.at = ws.bsr_transposed(a)
+        self.transpose = _Transpose(a)
+        self.at = self.transpose.matrix
         self.n = sum(a.shape)
         self.device = a.device
         self.long_forward = _LongRowProduct(a, 1) if a.nnz / a.nrow > 4096 else None
         self.long_backward = (
             _LongRowProduct(self.at, 1) if self.at.nnz / self.at.nrow > 4096 else None
         )
+
+    def refresh(self):
+        self.transpose.refresh()
 
     def apply(self, x, y):
         a, b = self.a, self.at
@@ -217,6 +305,8 @@ class PartialSVD:
     Left/right vectors use row-major (k,nrow)/(k,ncol) storage. An augmented
     symmetric operator avoids squaring the condition number. Always inspect
     both left and right residuals; zero singular subspaces are not unique.
+    Matrix values can change in place between solves/replays. The cached
+    transpose values refresh on device; topology changes require a new solver.
     """
 
     def __init__(self, matrix, k, ncv=None, tol=1.0e-10):
@@ -225,7 +315,7 @@ class PartialSVD:
         self.op = _Augmented(matrix)
         self.device = matrix.device
         self.k = k
-        self.core = KrylovSchur(
+        self.core = _SVDKrylovSchur(
             self.op, k, ncv=ncv or min(self.op.n, max(4 * k, 48)), which="LA", tol=tol
         )
         self.u = wp.empty((k, matrix.shape[0]), dtype=wp.float64, device=self.device)

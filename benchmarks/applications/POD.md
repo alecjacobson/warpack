@@ -4,6 +4,14 @@ Related issues: [#31](https://github.com/alecjacobson/warpack/issues/31),
 [#28](https://github.com/alecjacobson/warpack/issues/28),
 [#10](https://github.com/alecjacobson/warpack/issues/10).
 
+**2026-10-19 follow-up:** the [normal-product experiment](../experimental/NORMAL_POD.md)
+uses a full basis in the small snapshot dimension and reaches 15.41 ms for the
+100,000×48 clustered k20 case, against CuPy 74.78 ms. It remains experimental;
+the augmented formulation and its independent-chain guard remain the production
+default. The follow-up also fixes stale transpose values in changed-matrix SVD
+replay and preserves a rejected early-exploration attempt. The tables below are
+the earlier augmented-product campaign.
+
 Production changes are confined to `warpack/svd.py`. Long rectangular CSR
 products distribute work across GPU threads; very long rows use multiple blocks
 and a second device reduction. The same products accelerate final SVD residual

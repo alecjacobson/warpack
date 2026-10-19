@@ -1,0 +1,67 @@
+diff --git a/warpack/krylov_kernels.py b/warpack/krylov_kernels.py
+index 0e39394..fbfa421 100644
+--- a/warpack/krylov_kernels.py
++++ b/warpack/krylov_kernels.py
+@@ -58,6 +58,9 @@ def finish_norm(
+     source: wp.array2d[wp.float64],
+     flag: wp.array[wp.int32],
+     recoveries: wp.array[wp.int32],
++    converged: wp.array[wp.int32],
++    k: int,
++    explore: bool,
+     check: bool,
+ ):
+     value = wp.float64(0.0)
+@@ -66,7 +69,11 @@ def finish_norm(
+         value += wp.tile_extract(wp.tile_sum(part), 0)
+     wp.tile_store(norm[0], wp.tile_from_thread(shape=1, value=value, thread_idx=0))
+     if check:
+-        result = int(value <= wp.float64(1.0e-26) * source[0, 0])
++        # Once requested residuals pass, use the next restart to explore a
++        # fresh independent chain instead of waiting for machine breakdown.
++        # Keep the existing k-chain guard and at most one forced seed per cycle.
++        fresh = explore and converged[0] == k and recoveries[0] + 1 < k
++        result = int(value <= wp.float64(1.0e-26) * source[0, 0] or fresh)
+         wp.tile_store(flag, wp.tile_from_thread(shape=1, value=result, thread_idx=0))
+         count = recoveries[0] + result
+         wp.tile_store(recoveries, wp.tile_from_thread(shape=1, value=count, thread_idx=0))
+diff --git a/warpack/solver.py b/warpack/solver.py
+index 5e7e1da..82e0546 100644
+--- a/warpack/solver.py
++++ b/warpack/solver.py
+@@ -549,7 +549,7 @@ class KrylovSchur(SymmetricEigensolver):
+             device=self.device,
+         )
+ 
+-    def _orthogonalize_column(self, j, check):
++    def _orthogonalize_column(self, j, check, explore=False):
+         for pass_index in range(2):
+             rows = j + int(pass_index == 0)
+             wp.launch_tiled(
+@@ -589,6 +589,9 @@ class KrylovSchur(SymmetricEigensolver):
+                 self.source_norm,
+                 self.breakdown,
+                 self.recoveries,
++                self.converged,
++                self.k,
++                explore,
+                 check,
+             ],
+             block_dim=128,
+@@ -598,7 +601,7 @@ class KrylovSchur(SymmetricEigensolver):
+     def expand(self, j):
+         self.op.apply(self.views[j - 1], self.zviews[j - 1])
+         wp.copy(self.views[j], self.zviews[j - 1])
+-        self._orthogonalize_column(j, True)
++        self._orthogonalize_column(j, True, explore=j == self.keep and self.m < self.n)
+ 
+         def recover():
+             wp.launch(
+@@ -650,6 +653,7 @@ class KrylovSchur(SymmetricEigensolver):
+ 
+     def initialize(self, seed=42):
+         self.recoveries.zero_()
++        self.converged.zero_()
+         self.g.zero_()
+         self.status.zero_()
+         if self.initial_vector is None:
