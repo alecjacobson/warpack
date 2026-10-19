@@ -3,6 +3,7 @@
 import argparse
 import gc
 import json
+import math
 import time
 from pathlib import Path
 
@@ -43,12 +44,42 @@ def read(path):
     return a.real.copy() if not np.any(a.imag) else a
 
 
-def run(case, accuracy_only=False, iteration_budget=None):
+def svd_errors(a, w, u, v):
+    """Original Spectra assertions plus paired equations and leading subspaces."""
+    k = len(w)
+    ref_u, ref_w, ref_vt = la.svd(a, full_matrices=False)
+    return dict(
+        values=float(np.max(np.abs(w - ref_w[:k]))),
+        left_vectors=float(np.max(np.abs(np.abs(u) - np.abs(ref_u[:, :k])))),
+        right_vectors=float(np.max(np.abs(np.abs(v) - np.abs(ref_vt[:k].T)))),
+        left_equation_residual=float(np.max(abs(a @ v - u * w))),
+        right_equation_residual=float(np.max(abs(a.T @ u - v * w))),
+        orthogonality_error=float(
+            max(np.max(abs(u.T @ u - np.eye(k))), np.max(abs(v.T @ v - np.eye(k))))
+        ),
+        subspace_error=float(
+            max(
+                np.linalg.norm(u - ref_u[:, :k] @ (ref_u[:, :k].T @ u), 2),
+                np.linalg.norm(v - ref_vt[:k].T @ (ref_vt[:k] @ v), 2),
+            )
+        ),
+    )
+
+
+def run(
+    case, accuracy_only=False, iteration_budget=None, tolerance_override=None, ncv_override=None
+):
     if iteration_budget is not None and iteration_budget < 1:
         raise ValueError("iteration_budget must be positive")
+    if tolerance_override is not None and (
+        not math.isfinite(tolerance_override) or tolerance_override <= 0
+    ):
+        raise ValueError("tolerance_override must be finite and positive")
+    if ncv_override is not None and ncv_override <= 0:
+        raise ValueError("ncv_override must be positive")
     name = case["family"]
     k = case["k"]
-    ncv = case["ncv"] or None
+    ncv = (case["ncv"] or None) if ncv_override is None else ncv_override
     sel = case["selection"]
     which = RULES[sel]
     if name == "Example4":
@@ -64,7 +95,7 @@ def run(case, accuracy_only=False, iteration_budget=None):
     evaluation = None
     iterations = 300
     options = {}
-    threshold = 1e-12
+    threshold = 1e-12 if tolerance_override is None else tolerance_override
     margin = (
         1e-8
         if name in ("GenEigsRealShift", "GenEigsComplexShift", "Example2", "Example4")
@@ -221,21 +252,19 @@ def run(case, accuracy_only=False, iteration_budget=None):
             w = output(solver.singular_values)
             u = output(solver.u).T
             v = output(solver.v).T
-            ref_u, ref_w, ref_vt = la.svd(a, full_matrices=False)
-            errors = dict(
-                values=float(np.max(np.abs(w - ref_w[:k]))),
-                left_vectors=float(np.max(np.abs(np.abs(u) - np.abs(ref_u[:, :k])))),
-                right_vectors=float(np.max(np.abs(np.abs(v) - np.abs(ref_vt[:k].T)))),
-            )
+            errors = svd_errors(a, w, u, v)
             err = max(errors.values())
             errors["reported_converged"] = int(solver.core.converged.numpy()[0])
+            errors["left_converged"] = int(solver.count_left.numpy()[0])
+            errors["right_converged"] = int(solver.count_right.numpy()[0])
+            errors["outer_iterations"] = int(solver.core.iterations.numpy()[0])
         else:
             w = output(solver.eigenvalues if evaluation is None else evaluation.values)
             v = output(solver.eigenvectors).T
             residual = a @ v - (v if b is None else b @ v) * w
             err = float(np.max(np.abs(residual)))
             errors = {"max_absolute_residual": err, "returned_pairs": len(w)}
-            if name == "HermEigs":
+            if name in ("HermEigs", "DavidsonSymEigs"):
                 ref, basis = la.eigh(a)
                 if which == "LM":
                     selected = np.argsort(-abs(ref))[:k]
@@ -253,6 +282,15 @@ def run(case, accuracy_only=False, iteration_budget=None):
                     spectrum_error=float(np.max(abs(np.sort(w) - np.sort(expected)))),
                     orthogonality_error=float(np.max(abs(v.conj().T @ v - np.eye(k)))),
                     subspace_error=float(np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)),
+                )
+            if name == "DavidsonSymEigs":
+                errors.update(
+                    max_normalized_residual=float(
+                        np.max(np.linalg.norm(residual, axis=0) / np.maximum(1.0, abs(w)))
+                    ),
+                    reported_max_normalized_residual=float(np.max(solver.residuals.numpy())),
+                    outer_iterations=int(solver.iterations.numpy()[0]),
+                    vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
                 )
             if name in ("GenEigs", "ComplexEigs") and which == "SM":
                 ref, basis = la.eig(a)
@@ -318,6 +356,7 @@ def run(case, accuracy_only=False, iteration_budget=None):
         factor = getattr(factor, "inverse", factor)
         return dict(
             solver_type=type(solver).__name__,
+            effective_ncv=ncv if ncv is not None else getattr(solver, "m", None),
             iteration_method=getattr(solver, "method", None),
             cudss_mtype=getattr(factor, "mtype", None),
             cudss_reordering=getattr(factor, "reordering", None),
@@ -363,10 +402,16 @@ def main():
     parser.add_argument("--fixtures", type=Path, default=FIX)
     parser.add_argument("--accuracy-only", action="store_true")
     parser.add_argument("--iterations", type=int, help="explicit outer-cycle override")
+    parser.add_argument("--tol", type=float, help="explicit internal normalized-tolerance override")
+    parser.add_argument("--ncv", type=int, help="explicit Krylov-space override")
     parser.add_argument("--out", default="results/upstream_spectra_warp.json")
     args = parser.parse_args()
     if args.iterations is not None and args.iterations < 1:
         parser.error("--iterations must be positive")
+    if args.tol is not None and (not math.isfinite(args.tol) or args.tol <= 0):
+        parser.error("--tol must be finite and positive")
+    if args.ncv is not None and args.ncv < 1:
+        parser.error("--ncv must be positive")
     FIX = args.fixtures.resolve()
     cases = [
         json.loads(line) for p in sorted(FIX.glob("*.jsonl")) for line in p.read_text().splitlines()
@@ -388,12 +433,23 @@ def main():
         parser.error("no matching exported fixtures")
     result = dict(
         spectra_revision="db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
-        protocol="Exact exported upstream matrices, k, ncv, selection and residual assertions; graph replay; cuDSS inverses; default 300 direct / 100 symmetric inverse / 30 general inverse cycles; explicit overrides recorded per case",
+        protocol="Exact exported upstream matrices, k, selection and assertions; exported ncv unless explicitly overridden; graph replay; cuDSS inverses; default 300 direct / 100 symmetric inverse / 30 general inverse cycles; explicit overrides recorded per case",
         iteration_override=args.iterations,
+        tolerance_override=args.tol,
+        ncv_override=args.ncv,
         cases=[],
     )
     for i, c in enumerate(cases):
-        r = dict(**c, **run(c, accuracy_only=args.accuracy_only, iteration_budget=args.iterations))
+        r = dict(
+            **c,
+            **run(
+                c,
+                accuracy_only=args.accuracy_only,
+                iteration_budget=args.iterations,
+                tolerance_override=args.tol,
+                ncv_override=args.ncv,
+            ),
+        )
         result["cases"].append(r)
         Path(args.out).write_text(json.dumps(result, indent=2) + "\n")
         print(

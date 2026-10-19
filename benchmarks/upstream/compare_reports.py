@@ -22,6 +22,10 @@ def contracts(row):
     fields.extend(
         key for key in ("orthogonality_error", "subspace_error", "vector_norm_error") if key in row
     )
+    if row["family"] == "SVD":
+        fields.extend(
+            key for key in ("left_equation_residual", "right_equation_residual") if key in row
+        )
     tolerance = row.get("upstream_absolute_tolerance")
     evaluated = (
         row.get("outcome") in ("passed", "failed")
@@ -37,15 +41,27 @@ def contracts(row):
         )
     count = row.get("reported_converged")
     count_pass = None if count is None or not evaluated else count >= row["k"]
+    physical_count_pass = None
+    if (
+        evaluated
+        and row["family"] == "SVD"
+        and all(key in row for key in ("left_converged", "right_converged"))
+    ):
+        physical_count_pass = min(row["left_converged"], row["right_converged"]) >= row["k"]
     return dict(
         checked_numerical_bounds_pass=numerical,
         checked_fields=fields if evaluated else [],
         requested_spectrum_checked=spectrum_checked and evaluated,
         reported_count_pass=count_pass,
+        physical_count_pass=physical_count_pass,
         upstream_allows_nonconvergence=row.get("upstream_allows_nonconvergence", False),
         # This field is deliberately stricter than numerical conformance alone.
-        strict_contract_pass=numerical is True and count_pass is True,
-        numerical_pass_count_short=numerical is True and count_pass is False,
+        strict_contract_pass=(
+            numerical is True and count_pass is True and physical_count_pass is not False
+        ),
+        numerical_pass_count_short=(
+            numerical is True and (count_pass is False or physical_count_pass is False)
+        ),
         reported_convergence_space=row.get("reported_convergence_space", "unrecorded"),
     )
 

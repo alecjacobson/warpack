@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-19",
+  "production_commit": "95147ba2a4d1cd427ec7d1d32cc2a6de44b9afcb",
+  "production_code_changed": false,
+  "timing_experiments": false,
+  "environment": {
+    "device": "NVIDIA L40 48 GiB",
+    "warp": "1.18.0+cu12",
+    "stock_warp": "1.15.0",
+    "spectra_revision": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95"
+  },
+  "checks": [
+    {
+      "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 pytest -q tests/test_symmetric_accuracy.py tests/test_svd.py tests/test_upstream_contracts.py tests/test_solver.py",
+      "passed": 69
+    },
+    {
+      "command": "PYTHONPATH=\"$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 pytest -q tests/test_symmetric_accuracy.py tests/test_svd.py tests/test_upstream_contracts.py",
+      "passed": 46
+    },
+    {
+      "command": "build/upstream-spectra-build/test/DavidsonSymEigs",
+      "assertions_passed": 12,
+      "test_cases_passed": 2
+    },
+    {
+      "command": "build/upstream-spectra-build/test/SVD",
+      "assertions_passed": 16,
+      "test_cases_passed": 4
+    }
+  ],
+  "accuracy_reports": [
+    "results/davidson_wider_basis.json",
+    "results/svd_wider_basis.json"
+  ],
+  "failed_controls": [
+    "results/davidson_before.json",
+    "results/davidson_tighter_tolerance.json",
+    "results/svd_before.json"
+  ],
+  "limitations": [
+    "No full numerical-suite rerun",
+    "No timing or speedup claim",
+    "Original narrow-space profiles still fail; successful profiles use larger ncv",
+    "Graph checks cover direct symmetric regression, not cuDSS graphs"
+  ]
+}

@@ -63,3 +63,13 @@ for `test/ComplexEigs.cpp`. Regressions use matched inverse factors and explicit
 200-cycle compact / 30-cycle wider budgets, preserving k/ncv, requested SM
 selection and original residual bounds. Nonsymmetric eigenvectors are checked
 for normalization and requested invariant-space membership, not orthogonality.
+
+`spectra_svd_wide.npz` preserves the real 100-by-1000 `SVD_1` matrix under key
+`a`, exported at the same pinned Spectra revision. This is generated numerical
+data from `test/SVD.cpp` (SHA256
+`53fe3cd06b81050a678830164d7a68e10cd54f7b680a94255c3f49eb6327860a`).
+The regression uses the validated augmented-space profile k=5, ncv=20,
+tol=1e-12 and at most 300 cycles, retaining the original 1e-9 assertions.
+It also checks both SVD equations, leading subspaces, orthogonality and all
+three convergence counts on two graph replays, for this matrix and its transpose.
+The original ncv=10 strict-count failure remains in the upstream report.

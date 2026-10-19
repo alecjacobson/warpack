@@ -95,3 +95,30 @@ def test_split_row_products_with_empty_and_unequal_rows(transpose):
         expected = np.r_[a @ host_x[a.shape[0] :], a.T @ host_x[: a.shape[0]]]
         np.testing.assert_allclose(host_y, expected, atol=1e-10, rtol=1e-12)
         wp.copy(x, wp.array(rng.normal(size=x.shape), dtype=wp.float64))
+
+
+@pytest.mark.parametrize("transpose", [False, True])
+def test_spectra_wide_svd_complete_triplets(transpose):
+    from pathlib import Path
+
+    from benchmarks.upstream.adapters import matrix
+    from benchmarks.upstream.run_spectra import svd_errors
+
+    with np.load(Path(__file__).parent / "fixtures/spectra_svd_wide.npz") as data:
+        a = data["a"]
+    if transpose:
+        a = a.T.copy()
+    solver = PartialSVD(matrix(a), 5, ncv=20, tol=1e-12)
+    graph = solver.capture(300)
+    for _ in range(2):
+        wp.capture_launch(graph)
+        w = solver.singular_values.numpy()
+        u, v = solver.u.numpy().T, solver.v.numpy().T
+        errors = svd_errors(a, w, u, v)
+        assert max(errors.values()) < 1e-9, errors
+        assert solver.core.converged.numpy()[0] == 5
+        assert solver.count_left.numpy()[0] == 5
+        assert solver.count_right.numpy()[0] == 5
+        assert solver.left_residuals.numpy().max() <= 1e-12
+        assert solver.right_residuals.numpy().max() <= 1e-12
+        assert solver.core.status.numpy()[0] == 0

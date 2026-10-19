@@ -93,3 +93,53 @@ def test_missing_case_blocks_regression_success():
     r = compare({"case": example()}, {})
     assert r["missing_cases"] == ["case"]
     assert not r["regression_free"]
+
+
+def test_svd_opposite_left_right_signs_fail_paired_equations():
+    import numpy as np
+
+    from benchmarks.upstream.run_spectra import svd_errors
+
+    a = np.diag([4.0, 2.0, 1.0])
+    u, values, vt = np.linalg.svd(a)
+    errors = svd_errors(a, values[:2], u[:, :2], -vt[:2].T)
+    # The upstream absolute-vector assertions cannot detect mismatched signs.
+    assert errors["values"] == errors["left_vectors"] == errors["right_vectors"] == 0
+    assert errors["left_equation_residual"] == errors["right_equation_residual"] == 8
+    row = example(family="SVD", k=2, reported_converged=2, **errors)
+    assert not contracts(row)["checked_numerical_bounds_pass"]
+
+
+@pytest.mark.parametrize("left,right", [(4, 5), (5, 4), (5, 5)])
+def test_svd_success_requires_both_physical_counts(left, right):
+    row = example(
+        family="SVD",
+        k=5,
+        spectrum_error=0,
+        values=0,
+        left_vectors=0,
+        right_vectors=0,
+        reported_converged=5,
+        left_converged=left,
+        right_converged=right,
+    )
+    result = contracts(row)
+    assert result["reported_count_pass"]
+    assert result["physical_count_pass"] == (left == right == 5)
+    assert result["strict_contract_pass"] == (left == right == 5)
+    assert result["numerical_pass_count_short"] == (min(left, right) < 5)
+
+
+@pytest.mark.parametrize("tol", [0, -1, float("nan"), float("inf")])
+def test_spectra_tolerance_override_rejects_invalid_values(tol):
+    from benchmarks.upstream.run_spectra import run
+
+    with pytest.raises(ValueError, match="tolerance_override"):
+        run({}, tolerance_override=tol)
+
+
+def test_spectra_basis_override_rejects_nonpositive_size():
+    from benchmarks.upstream.run_spectra import run
+
+    with pytest.raises(ValueError, match="ncv_override"):
+        run({}, ncv_override=0)

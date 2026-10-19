@@ -58,7 +58,7 @@ python -m benchmarks.upstream.bounded benchmarks --timeout 180 --fresh
 python -m benchmarks.upstream.summarize
 ```
 
-For untimed small-case work, see the [Hermitian shift-invert report](HERMITIAN_SHIFT.md) and [general SM convergence profile](GENERAL_SM.md). The exporter accepts `--families`, `--max-size` and `--out`; the runner accepts `--fixtures`, `--selection`, `--accuracy-only` and an explicit `--iterations` override. Historical default budgets are unchanged.
+For untimed focused work, see the [Hermitian shift-invert report](HERMITIAN_SHIFT.md), [general SM convergence profile](GENERAL_SM.md), and [Davidson/SVD accuracy profiles](DAVIDSON_SVD.md). The exporter accepts `--families`, `--max-size` and `--out`; the runner accepts `--fixtures`, `--selection`, `--accuracy-only` and explicit `--iterations`, `--ncv` and `--tol` overrides. Original assertion bounds and historical default settings are unchanged; overrides and effective ncv are recorded in the output.
 
 Run GPU jobs sequentially. The upstream Spectra benchmark has 40 dense datasets (100 and 1,000 unknowns; symmetric and nonsymmetric), each repeated ten times. `prepare_benchmarks.py` executes its original native benchmark and exports the exact matrices and starting vectors. `run_benchmarks.py` uses them for Warp and CuPy, with warmup and ten synchronized trials, and reports setup separately. All benchmark backends request `tol=1e-10`, although their convergence criteria differ. General Warp's test-only initialization adapter accepts the original start using Warp copies/kernels. These are small-problem diagnostics, not replacements for the large Anvil/dragon benchmarks.
 
@@ -89,7 +89,10 @@ The absolute upstream bounds differ from the internal `1e-12` tolerance.
 iteration, SVD's augmented problem, and Hermitian realification/extraction.
 `original_evaluation_converged` records the separate physical counter where
 available; it does not change the upstream absolute assertions. For SVD this
-is the minimum of the left and right residual counts. No independent complex
+is the minimum of the left and right residual counts. New SVD reports also
+record `left_converged` and `right_converged`; strict success requires both to
+reach k when recorded. The comparison reports this as `physical_count_pass`;
+older reports lack this additional gate. No independent complex
 physical counter exists for the Hermitian realification adapter, so its field
 is null. The complex shift-invert API already reports physical convergence.
 
@@ -98,6 +101,9 @@ Examples 1/1Shift/2/4 also compare the eigenvalues, and SVD checks singular
 values and both sets of vectors. Generic upstream tests check residuals and
 counts only; `requested_spectrum_checked` makes that limitation explicit.
 Application benchmarks separately require their known requested spectrum.
+The focused Hermitian and Davidson adapters add spectrum and subspace checks.
+New SVD reports also check both paired equations, orthogonality and leading
+subspaces; absolute-vector comparisons alone cannot detect inconsistent signs.
 
 Compare complete reports, overlaying focused runs onto an older baseline:
 
