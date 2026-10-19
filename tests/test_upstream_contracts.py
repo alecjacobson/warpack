@@ -143,3 +143,49 @@ def test_spectra_basis_override_rejects_nonpositive_size():
 
     with pytest.raises(ValueError, match="ncv_override"):
         run({}, ncv_override=0)
+
+
+@pytest.mark.parametrize("kind", ["real", "general", "hermitian", "shifted_hermitian", "svd"])
+def test_spectra_metadata_describes_allocated_basis(kind):
+    import numpy as np
+    import warp as wp
+
+    from benchmarks.upstream.adapters import complex_matrix, matrix
+    from benchmarks.upstream.run_spectra import solver_metadata
+    from warpack import (
+        GeneralEigensolver,
+        HermitianEigensolver,
+        KrylovSchur,
+        PartialSVD,
+        ShiftInvertEigensolver,
+        SparseOperator,
+    )
+
+    a = np.diag(np.arange(1.0, 11.0))
+    if kind == "real":
+        solver = KrylovSchur(SparseOperator(matrix(a)), 2, ncv=50)
+        core, width, length, scalar = solver, 10, 10, "float64"
+    elif kind == "general":
+        solver = GeneralEigensolver(complex_matrix(a), 2, ncv=50)
+        core, width, length, scalar = solver, 10, 10, "complex128"
+    elif kind == "hermitian":
+        solver = HermitianEigensolver(complex_matrix(a, True), 2, ncv=12)
+        core, width, length, scalar = solver.real, 12, 20, "float64"
+    elif kind == "shifted_hermitian":
+        solver = ShiftInvertEigensolver(complex_matrix(a), 2, ncv=6, hermitian=True)
+        core, width, length, scalar = solver.core.real, 12, 20, "float64"
+    else:
+        solver = PartialSVD(matrix(np.ones((12, 8))), 2)
+        core, width, length, scalar = solver.core, solver.core.m, 20, "float64"
+    try:
+        # Test device-to-report accounting independently of iteration arithmetic.
+        core.iterations.fill_(7)
+        wp.synchronize()
+        report = solver_metadata(solver)
+        assert report["effective_ncv"] == width
+        assert report["basis_vector_length"] == length
+        assert report["basis_scalar_type"] == scalar
+        assert report["outer_iterations"] == 7
+    finally:
+        if kind == "shifted_hermitian":
+            solver.close()

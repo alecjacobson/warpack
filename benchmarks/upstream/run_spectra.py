@@ -66,6 +66,22 @@ def svd_errors(a, w, u, v):
     )
 
 
+def solver_metadata(solver):
+    """Describe the allocated iteration space, after solving and outside timing."""
+    core = solver
+    while hasattr(core, "core"):
+        core = core.core
+    if isinstance(core, HermitianEigensolver):
+        core = core.real
+    return dict(
+        effective_ncv=core.m,
+        basis_vector_length=core.n,
+        basis_scalar_type="complex128" if core.q.dtype == wp.vec2d else "float64",
+        basis_solver_type=type(core).__name__,
+        outer_iterations=int(core.iterations.numpy()[0]),
+    )
+
+
 def run(
     case, accuracy_only=False, iteration_budget=None, tolerance_override=None, ncv_override=None
 ):
@@ -257,7 +273,6 @@ def run(
             errors["reported_converged"] = int(solver.core.converged.numpy()[0])
             errors["left_converged"] = int(solver.count_left.numpy()[0])
             errors["right_converged"] = int(solver.count_right.numpy()[0])
-            errors["outer_iterations"] = int(solver.core.iterations.numpy()[0])
         else:
             w = output(solver.eigenvalues if evaluation is None else evaluation.values)
             v = output(solver.eigenvectors).T
@@ -289,7 +304,6 @@ def run(
                         np.max(np.linalg.norm(residual, axis=0) / np.maximum(1.0, abs(w)))
                     ),
                     reported_max_normalized_residual=float(np.max(solver.residuals.numpy())),
-                    outer_iterations=int(solver.iterations.numpy()[0]),
                     vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
                 )
             if name in ("GenEigs", "ComplexEigs") and which == "SM":
@@ -356,7 +370,8 @@ def run(
         factor = getattr(factor, "inverse", factor)
         return dict(
             solver_type=type(solver).__name__,
-            effective_ncv=ncv if ncv is not None else getattr(solver, "m", None),
+            requested_ncv=ncv,
+            **solver_metadata(solver),
             iteration_method=getattr(solver, "method", None),
             cudss_mtype=getattr(factor, "mtype", None),
             cudss_reordering=getattr(factor, "reordering", None),
