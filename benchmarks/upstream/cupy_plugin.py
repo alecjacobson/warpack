@@ -22,10 +22,11 @@ def pytest_configure(config):
     if os.environ.get("WARPACK_UPSTREAM_BACKEND", "warp") == "warp":
         import cupyx.scipy.sparse.linalg as linalg
 
-        from .adapters import eigsh, svds
+        from .adapters import eigsh, lobpcg, svds
 
         linalg.eigsh = eigsh
         linalg.svds = svds
+        linalg.lobpcg = lobpcg
     elif os.environ.get("WARPACK_UPSTREAM_BACKEND") == "cupy-main-overlay":
         import importlib.util
         import sys
@@ -67,8 +68,20 @@ def pytest_collection_modifyitems(config, items):
                     and case_params.get("which", "LM") != "LM"
                 ):
                     reason = "Complex shift-invert supports nearest eigenvalues only"
+                if name == "TestLOBPCG":
+                    if method in (
+                        "test_small_generate_input_for_elastic_rod",
+                        "test_small_generate_input_for_mikota_pair",
+                    ):
+                        reason = "BlockLOBPCG has no dense full-space fallback (k=n)"
+                    elif method in ("test_diagonal", "test_random_initial_float32"):
+                        reason = "BlockLOBPCG requires FP64 starts/matrices; fixture uses FP32"
                 if "LOBPCG" in name:
-                    reason = "No LOBPCG/block-initial-guess API in Warpack"
+                    for key in ("A_dtype", "X_dtype", "Y_dtype", "preconditioner_dtype"):
+                        value = case_params.get(key)
+                        if value is not None and np.dtype(value) != np.dtype("float64"):
+                            reason = "BlockLOBPCG supports FP64 matrices/starts/constraints only"
+                            break
                 if name == "TestRng":
                     reason = "CuPy RNG API/internal tests; no equivalent Warpack interface"
                 if reason:

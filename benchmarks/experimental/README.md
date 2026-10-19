@@ -1,25 +1,25 @@
-# Experimental preconditioned block eigensolver
+# Block eigensolver experiments and historical evaluation
 
-Latest: [symmetric products and fused projection updates](OUTER_PRODUCTS.md) reduce the accepted Anvil block replay to 3.9028 s, with matched-preconditioner and related-matrix checks.
+Current API: [`warpack.BlockLOBPCG`](../upstream/BLOCK_API.md). Only the numerical
+iteration and required dense block kernels moved into the installed package.
+The batched CG and sparse-product experiments, FEM construction, reference
+comparisons and profiling tools remain here. Compatibility imports preserve
+older benchmark commands. Existing Krylov defaults are unchanged.
 
-Latest: the [matched-CG and related-FEM report](MATCHED_CG.md) removes CuPy active-block padding overhead, records the remaining Anvil gap, and compares computed warm starts.
+The latest [coefficient-refresh report](BATCHED_REFRESH.md) records Anvil at
+3.7232 s versus 3.0469 s for CuPy with the same supplied CG. The
+[matched-CG report](MATCHED_CG.md) explains active-width adapter memory/setup
+costs and computed warm starts. New API and exploration validation is in the
+[public block report](BLOCK_API.md).
 
-This directory evaluates [#59](https://github.com/alecjacobson/warpack/issues/59)
-under the large FEM iterative-performance issue
-[#15](https://github.com/alecjacobson/warpack/issues/15). It is **not a supported
-public LOBPCG API** and is excluded from the installed package. The production
-solver defaults are unchanged. The [adaptive batched-CG follow-up](ADAPTIVE_CG.md)
-now records a 4.46 s mixed-precision block replay versus 9.58 s production CG;
-the older contended results below remain historical work-budget evidence.
-
-The prototype computes the smallest algebraic eigenpairs of a symmetric pencil
-with SPD mass. An optional M-orthonormal invariant subspace can be excluded,
-including known rigid motions. This is not a general constrained/KKT interface,
-nor does it support singular mass or complex arithmetic. Caller-owned FP64
-starting blocks must have `width` independent rows. All numerical iteration work is Warp,
-including projected eigensolves, rank decisions, original-pencil residuals,
-and convergence checks. Preconditioners use upstream Warp FSAI, block Jacobi,
-or truncated upstream CG. There are no host numerical decisions in replay.
+The original evaluation below is historical, including its earlier limitations
+and contended timings. Current `BlockLOBPCG` accepts 1..width independent FP64
+starting rows, fills missing rows randomly, optionally perturbs supplied rows,
+and optionally normalizes invariant constraints in SPD mass. It does not
+support arbitrary KKT constraints, singular mass or complex arithmetic.
+All numerical iteration and replay decisions use Warp. Preconditioners use
+upstream Warp FSAI, block Jacobi or CG; optional supplied cuDSS inverses retain
+their separate fixed-capture and host-metadata-transfer limitations.
 
 ## Method and accuracy regressions
 

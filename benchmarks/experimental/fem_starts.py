@@ -83,6 +83,12 @@ def main():
     p.add_argument("--symmetric-products", action="store_true")
     p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--paired-rotation", action="store_true")
+    p.add_argument(
+        "--initial-perturbation",
+        type=float,
+        default=0.0,
+        help="Add a separate Warp full-warm-block trial with this relative exploration amplitude",
+    )
     p.add_argument("--cupy", action="store_true")
     p.add_argument("--cupy-width", type=int)
     p.add_argument("--cupy-tol", type=float)
@@ -103,6 +109,8 @@ def main():
         p.error("Require nonnegative inner-cg and inner-cg for inner-fp32")
     if args.cupy_tol is not None and (not np.isfinite(args.cupy_tol) or args.cupy_tol <= 0):
         p.error("Require finite positive cupy-tol")
+    if not np.isfinite(args.initial_perturbation) or args.initial_perturbation < 0:
+        p.error("Require finite nonnegative initial-perturbation")
     before = other_gpu_processes()
     case = make_fem_case(args.case, args.side, args.modes)
     source = case.problem
@@ -190,6 +198,8 @@ def main():
             for f in [
                 Path(__file__),
                 Path("benchmarks/experimental/block_lobpcg.py"),
+                Path("warpack/block.py"),
+                Path("warpack/block_products.py"),
                 Path("benchmarks/experimental/block_kernels.py"),
                 Path("benchmarks/experimental/block_updates.py"),
                 Path("benchmarks/experimental/batched_cg.py"),
@@ -197,11 +207,14 @@ def main():
             ]
         },
     )
-    for name, start in [
-        ("random", random),
-        ("previous_modes", partial),
-        ("previous_full_block", previous),
-    ]:
+    starts = [
+        ("random", random, 0.0),
+        ("previous_modes", partial, 0.0),
+        ("previous_full_block", previous, 0.0),
+    ]
+    if args.initial_perturbation:
+        starts.append(("previous_full_block_perturbed", previous, args.initial_perturbation))
+    for name, start, perturbation in starts:
         solver_setup, solver = timed(
             lambda: BlockLOBPCG(
                 op,
@@ -210,6 +223,7 @@ def main():
                 mass=mass,
                 preconditioner=current_pre,
                 initial_vectors=start,
+                initial_perturbation=perturbation,
                 tol=args.tol,
                 gram_chunk=args.gram_chunk,
                 symmetric_products=args.symmetric_products,
@@ -234,6 +248,7 @@ def main():
             )
         row = dict(
             start=name,
+            initial_perturbation=perturbation,
             solver_setup_seconds=solver_setup,
             capture_seconds=capture_seconds,
             warmup_seconds=warmup_seconds,
@@ -243,7 +258,7 @@ def main():
         )
         report["rows"].append(row)
         print(name, row, flush=True)
-        if args.cupy:
+        if args.cupy and not perturbation:
             from benchmarks.experimental.compare_block import cupy_trials
 
             cupy_rows, metadata = cupy_trials(
@@ -277,7 +292,7 @@ def main():
         other_gpu_processes_before=before,
         other_gpu_processes_after=after,
         timing_eligible=not (before or after),
-        timing_note="Same changed pencil, preconditioner and stopping criteria for every start; no GPU speed claim if contention is observed. Source solve and setup costs are separate.",
+        timing_note="Optional perturbed full-block trial measures the explicit Warp exploration policy; CuPy comparisons use only identical unperturbed starts. Same changed pencil, preconditioner and stopping criteria for every Warp start; no GPU speed claim if contention is observed. Source solve and setup costs are separate.",
     )
     dest = Path(args.out)
     dest.parent.mkdir(parents=True, exist_ok=True)

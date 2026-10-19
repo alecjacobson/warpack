@@ -153,6 +153,7 @@ def main():
         p.error("require k <= cupy-width <= width")
     print("Prepared", args.case, "n=", a.shape[0], flush=True)
     shifted.nnz_sync()
+    memory_before_setup = wp.get_device().free_memory
     setup_seconds, pre = timed(
         lambda: (
             linear.FSAI(
@@ -216,6 +217,7 @@ def main():
     capture_seconds, graph = timed(
         lambda: solver.capture(args.steps, adaptive=False if args.fixed_outer else None)
     )
+    memory_after_capture = wp.get_device().free_memory
     print("Captured", capture_seconds, flush=True)
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -242,6 +244,8 @@ def main():
             "where encountered; these are not warmed setup measurements. "
             "Historical setup_seconds is an alias for preconditioner_setup_seconds."
         ),
+        setup_capture_device_free_memory_decrease_bytes=memory_before_setup - memory_after_capture,
+        memory_scope="Device free-memory decrease from after fixture preparation through preconditioner/workspace setup and capture. Includes allocator pools/runtime/JIT allocations; excludes original fixture storage and CuPy adapter. Not peak memory or a pure live-workspace count.",
         capture_seconds=capture_seconds,
         warmup_seconds=warmup_seconds,
         graph=audit,
@@ -254,6 +258,8 @@ def main():
             path: hashlib.sha256(Path(path).read_bytes()).hexdigest()
             for path in (
                 "benchmarks/experimental/block_lobpcg.py",
+                "warpack/block.py",
+                "warpack/block_products.py",
                 "benchmarks/experimental/block_kernels.py",
                 "benchmarks/experimental/block_updates.py",
                 "benchmarks/experimental/compare_block.py",
@@ -318,7 +324,7 @@ def main():
 
 def profile_step(solver):
     from benchmarks.applications.skinning_profile import Events
-    from benchmarks.experimental import block_lobpcg as implementation
+    from warpack import block as implementation
 
     events = Events()
     saved = []

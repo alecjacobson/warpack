@@ -7,6 +7,7 @@ import warp as wp
 import warp.sparse as ws
 
 from warpack import SparseOperator
+from warpack.block_products import gram_kernel as gram_kernel
 
 
 @wp.kernel(module="unique")
@@ -36,24 +37,6 @@ def csr_block_product(matrix, x, y):
         block_dim=32,
         device=matrix.device,
     )
-
-
-@functools.lru_cache(None)
-def gram_kernel(chunk):
-    blocks = wp.constant(chunk // 32)
-    stride = wp.constant(chunk)
-
-    @wp.kernel(enable_backward=False, module="unique")
-    def compute(x: wp.array2d[wp.float64], y: wp.array2d[wp.float64], g: wp.array2d[wp.float64]):
-        i, j, piece = wp.tid()
-        acc = wp.tile_zeros(shape=(8, 8), dtype=wp.float64)
-        for k in range(blocks):
-            a = wp.tile_load(x, shape=(8, 32), offset=(i * 8, piece * stride + k * 32))
-            b = wp.tile_load(y, shape=(8, 32), offset=(j * 8, piece * stride + k * 32))
-            wp.tile_matmul(a, wp.tile_transpose(b), acc)
-        wp.tile_atomic_add(g, acc, offset=(i * 8, j * 8))
-
-    return compute
 
 
 @functools.lru_cache(None)

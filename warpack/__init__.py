@@ -1,6 +1,7 @@
 """Sparse eigenproblems computed in NVIDIA Warp kernels."""
 
 from .arnoldi import ComplexCSR, GeneralEigensolver
+from .block import BlockLOBPCG
 from .constrained import ConstrainedKrylovSchur, saddle_point_matrix
 from .constraints import (
     MassOrthogonalComplementInverse,
@@ -23,6 +24,7 @@ from .svd import PartialSVD
 from .transforms import BucklingEigensolver, CayleyEigensolver
 
 __all__ = [
+    "BlockLOBPCG",
     "CGInverse",
     "ComplexCSR",
     "ComplexShiftInverse",

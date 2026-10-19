@@ -1,0 +1,2509 @@
+{
+  "args": {
+    "case": "clamped_lumped",
+    "side": 20,
+    "modes": 20,
+    "width": 24,
+    "steps": 200,
+    "fsai_width": 32,
+    "change": 0.02,
+    "tol": 1e-09,
+    "repeats": 3,
+    "inner_cg": 10,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "batched_products": true,
+    "gram_chunk": 1024,
+    "symmetric_products": true,
+    "fused_updates": true,
+    "paired_rotation": true,
+    "initial_perturbation": 0.001,
+    "cupy": true,
+    "cupy_width": null,
+    "cupy_tol": 1e-09,
+    "cupy_padding": false,
+    "baselines": false,
+    "baseline_ncv": 64,
+    "baseline_steps": 2,
+    "baseline_cg_tol": 1e-15,
+    "out": "results/performance_followup/block-api-related-lumped.json"
+  },
+  "n": 79380,
+  "nnz": 3347132,
+  "mass_nnz": 79380,
+  "shift": -0.01,
+  "seed": 42,
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+  "start_provenance": "Previous modes/full block computed by this pure-Warp prototype; references only validate results.",
+  "source_setup_seconds": 0.2960376963019371,
+  "source_solver_setup_seconds": 0.023284245282411575,
+  "shared_mass_operator_setup_seconds": 0.10113716870546341,
+  "source_capture_seconds": 0.4155014418065548,
+  "source_solve_seconds": 0.9171789474785328,
+  "source_iterations": 30,
+  "source_quality": {
+    "accepted": true,
+    "residual": 8.662510590541879e-11,
+    "max_absolute_residual": 2.9281342975306934e-12,
+    "orthogonality": 6.661338147750939e-16,
+    "spectrum_error": 4.559685962135518e-13,
+    "recovered_nullity": 0,
+    "nullspace_subspace_error": 0.0,
+    "requested_subspace_error": 4.319176541674013e-11,
+    "status": 0,
+    "converged": 20,
+    "preconditioner_cg_stats": [
+      7200,
+      10,
+      720,
+      720
+    ]
+  },
+  "changed_preconditioner_setup_seconds": 0.24778369814157486,
+  "changed_operator_setup_seconds": 0.02207684889435768,
+  "setup_scope": "Preconditioner setup includes upstream FSAI and optional batched CG state/copy. Solver/operator workspaces, capture, and source solve are separate. Host FEM assembly/reference and starting-block generation/upload are excluded. JIT is charged where encountered.",
+  "cg_iteration_accounting": "Scheduled vector iterations including masked RHSs; CuPy padding also includes zero RHSs. These are not sums of individual first-convergence counts.",
+  "rows": [
+    {
+      "start": "random",
+      "initial_perturbation": 0.0,
+      "solver_setup_seconds": 0.001976907253265381,
+      "capture_seconds": 0.05233294144272804,
+      "warmup_seconds": 0.8583355247974396,
+      "median_seconds": 0.8277798146009445,
+      "accepted": true,
+      "trials": [
+        {
+          "seconds": 0.8277798146009445,
+          "iterations": 27,
+          "quality": {
+            "accepted": true,
+            "residual": 8.774489640542811e-10,
+            "max_absolute_residual": 2.7675595756088134e-11,
+            "orthogonality": 8.881784197001252e-16,
+            "spectrum_error": 3.4640346147085666e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 3.049689159689181e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              6480,
+              10,
+              648,
+              648
+            ]
+          }
+        },
+        {
+          "seconds": 0.8525047600269318,
+          "iterations": 28,
+          "quality": {
+            "accepted": true,
+            "residual": 3.83157606465771e-10,
+            "max_absolute_residual": 1.2755416948367904e-11,
+            "orthogonality": 8.881784197001252e-16,
+            "spectrum_error": 3.569089468413722e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.8884662701576407e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              6720,
+              10,
+              672,
+              672
+            ]
+          }
+        },
+        {
+          "seconds": 0.8245522864162922,
+          "iterations": 27,
+          "quality": {
+            "accepted": true,
+            "residual": 8.685824441986584e-10,
+            "max_absolute_residual": 2.8337692652494195e-11,
+            "orthogonality": 6.661338147750939e-16,
+            "spectrum_error": 3.536476667065358e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 3.272416384456957e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              6480,
+              10,
+              648,
+              648
+            ]
+          }
+        }
+      ],
+      "cupy_trials": [
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 1.1573010943830013,
+          "residual_history_length": 141,
+          "last_history_absolute_residuals": [
+            3.5686561714079614e-10,
+            4.1610501419763997e-10,
+            5.147448255567678e-10,
+            4.637185215133231e-10,
+            4.029028920572696e-10,
+            5.794409079508155e-10,
+            1.1960859433293145e-10,
+            1.905669159084714e-10,
+            5.954943714013939e-10,
+            1.3269765417225526e-10,
+            3.6308680920536935e-10,
+            1.4513064472764608e-10,
+            6.795697248887424e-11,
+            1.1175631566190584e-10,
+            1.292162972381413e-10,
+            8.798865140308664e-11,
+            1.9022176403171227e-10,
+            3.1540070158162965e-10,
+            2.1213763828980327e-10,
+            5.147036044545132e-10,
+            4.555260656276742e-10,
+            7.928431043469083e-10,
+            8.401301900992047e-10,
+            7.792300506530719e-10
+          ],
+          "returned_absolute_residuals": [
+            3.5686525937836866e-10,
+            4.1610727831281186e-10,
+            5.147453663880965e-10,
+            4.637182624749267e-10,
+            4.0290476717286513e-10,
+            5.794408970954113e-10,
+            1.1960885639052313e-10,
+            1.9056783550174883e-10,
+            5.954943954405526e-10,
+            1.32697735789632e-10,
+            3.6308768168796625e-10,
+            1.4512854570307555e-10,
+            6.795506114007446e-11,
+            1.1175633979072008e-10,
+            1.2921751594824146e-10,
+            8.798962142568187e-11,
+            1.9022199113249315e-10,
+            3.1540117190982247e-10,
+            2.1213726952470912e-10,
+            5.14702174991858e-10,
+            4.555254248695891e-10,
+            7.928422857251967e-10,
+            8.401302031716889e-10,
+            7.792298207676934e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 5.954943919458872e-10,
+            "max_absolute_residual": 1.0478140341605054e-11,
+            "orthogonality": 1.5543122344752192e-15,
+            "spectrum_error": 3.354816424661067e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.9291248876389002e-10,
+            "preconditioner_cg_stats": [
+              5340,
+              10,
+              534,
+              534
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                1020,
+                10,
+                102,
+                102
+              ],
+              "2": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "3": [
+                60,
+                10,
+                6,
+                6
+              ],
+              "4": [
+                40,
+                10,
+                4,
+                4
+              ],
+              "5": [
+                350,
+                10,
+                35,
+                35
+              ],
+              "6": [
+                60,
+                10,
+                6,
+                6
+              ],
+              "7": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "8": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "9": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "10": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "11": [
+                550,
+                10,
+                55,
+                55
+              ],
+              "12": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "13": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "14": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "15": [
+                300,
+                10,
+                30,
+                30
+              ],
+              "16": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                180,
+                10,
+                18,
+                18
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                2400,
+                10,
+                240,
+                240
+              ]
+            }
+          }
+        },
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 1.1567079834640026,
+          "residual_history_length": 141,
+          "last_history_absolute_residuals": [
+            3.568647593402702e-10,
+            4.1610433553546344e-10,
+            5.147444097320254e-10,
+            4.6371651513790203e-10,
+            4.029024719185141e-10,
+            5.794346844086159e-10,
+            1.196098035611927e-10,
+            1.905639792716599e-10,
+            5.954951761175253e-10,
+            1.3269789087739534e-10,
+            3.630834135727881e-10,
+            1.4512849035825432e-10,
+            6.795602430723092e-11,
+            1.1175958937517538e-10,
+            1.29217849616257e-10,
+            8.798771332043216e-11,
+            1.9022008505420476e-10,
+            3.153998272899132e-10,
+            2.121326828618575e-10,
+            5.147113072305747e-10,
+            4.5552889177066586e-10,
+            7.928368242241229e-10,
+            8.401129713929522e-10,
+            7.793616357643626e-10
+          ],
+          "returned_absolute_residuals": [
+            3.568627600317026e-10,
+            4.1610359124848733e-10,
+            5.147428862701092e-10,
+            4.6371863014051604e-10,
+            4.02904412441926e-10,
+            5.794359396983213e-10,
+            1.1961073102152554e-10,
+            1.9056472299693057e-10,
+            5.954959776105143e-10,
+            1.3269669818836995e-10,
+            3.630844581778433e-10,
+            1.4513172816278026e-10,
+            6.795823430529475e-11,
+            1.1175905808592741e-10,
+            1.292182744124324e-10,
+            8.798898683847335e-11,
+            1.9021923974200753e-10,
+            3.1540011787796164e-10,
+            2.1213324127800199e-10,
+            5.147107959570229e-10,
+            4.5552748887665374e-10,
+            7.92835407680914e-10,
+            8.401126358665673e-10,
+            7.793614275476006e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 5.954958951569578e-10,
+            "max_absolute_residual": 1.0477933502935598e-11,
+            "orthogonality": 1.887379141862766e-15,
+            "spectrum_error": 3.411715354673106e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.9291595963868956e-10,
+            "preconditioner_cg_stats": [
+              5340,
+              10,
+              534,
+              534
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                1020,
+                10,
+                102,
+                102
+              ],
+              "2": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "3": [
+                60,
+                10,
+                6,
+                6
+              ],
+              "4": [
+                40,
+                10,
+                4,
+                4
+              ],
+              "5": [
+                350,
+                10,
+                35,
+                35
+              ],
+              "6": [
+                60,
+                10,
+                6,
+                6
+              ],
+              "7": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "8": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "9": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "10": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "11": [
+                550,
+                10,
+                55,
+                55
+              ],
+              "12": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "13": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "14": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "15": [
+                300,
+                10,
+                30,
+                30
+              ],
+              "16": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                180,
+                10,
+                18,
+                18
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                2400,
+                10,
+                240,
+                240
+              ]
+            }
+          }
+        },
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 1.1612044721841812,
+          "residual_history_length": 141,
+          "last_history_absolute_residuals": [
+            3.568621850618367e-10,
+            4.161076267125572e-10,
+            5.14743347386103e-10,
+            4.637153577805817e-10,
+            4.029021699183699e-10,
+            5.794373325063544e-10,
+            1.196104187876821e-10,
+            1.9056504421897014e-10,
+            5.95495528365164e-10,
+            1.32696268474878e-10,
+            3.6308343549233935e-10,
+            1.451273883502969e-10,
+            6.795453030884238e-11,
+            1.1175516360742279e-10,
+            1.292199268319844e-10,
+            8.798726043735012e-11,
+            1.902250438445575e-10,
+            3.1540255918686424e-10,
+            2.121394288442735e-10,
+            5.147195951988366e-10,
+            4.5552452749435925e-10,
+            7.92831650960581e-10,
+            8.401026169328692e-10,
+            7.793631976175498e-10
+          ],
+          "returned_absolute_residuals": [
+            3.5686075080510154e-10,
+            4.161065266300985e-10,
+            5.147445963083234e-10,
+            4.637147684417128e-10,
+            4.0290336410577415e-10,
+            5.794365385834526e-10,
+            1.1961218208560316e-10,
+            1.9056754030211435e-10,
+            5.954949195967472e-10,
+            1.3269595587340348e-10,
+            3.6308337622358267e-10,
+            1.4512744992283018e-10,
+            6.795662008865112e-11,
+            1.1175454326651888e-10,
+            1.292201301763243e-10,
+            8.798823043524835e-11,
+            1.9022433236831016e-10,
+            3.1540165252820147e-10,
+            2.1213867460102703e-10,
+            5.147198866538918e-10,
+            4.555241059280977e-10,
+            7.928304178813129e-10,
+            8.401034876170285e-10,
+            7.793633414550838e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 5.954948636193001e-10,
+            "max_absolute_residual": 1.0478012825877042e-11,
+            "orthogonality": 1.3322676295501878e-15,
+            "spectrum_error": 3.22145088382797e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.9291328177620469e-10,
+            "preconditioner_cg_stats": [
+              5340,
+              10,
+              534,
+              534
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                1020,
+                10,
+                102,
+                102
+              ],
+              "2": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "3": [
+                60,
+                10,
+                6,
+                6
+              ],
+              "4": [
+                40,
+                10,
+                4,
+                4
+              ],
+              "5": [
+                350,
+                10,
+                35,
+                35
+              ],
+              "6": [
+                60,
+                10,
+                6,
+                6
+              ],
+              "7": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "8": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "9": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "10": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "11": [
+                550,
+                10,
+                55,
+                55
+              ],
+              "12": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "13": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "14": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "15": [
+                300,
+                10,
+                30,
+                30
+              ],
+              "16": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                180,
+                10,
+                18,
+                18
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                2400,
+                10,
+                240,
+                240
+              ]
+            }
+          }
+        }
+      ],
+      "cupy_adapter": {
+        "width": 24,
+        "absolute_tolerance": 1e-09,
+        "padding_width": null,
+        "preallocated_active_widths": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24
+        ],
+        "inner_adapter_setup_capture_seconds": 0.16779357194900513,
+        "inner_adapter_device_memory_delta_bytes": 1142947840,
+        "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+        "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+        "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+      }
+    },
+    {
+      "start": "previous_modes",
+      "initial_perturbation": 0.0,
+      "solver_setup_seconds": 0.0019544512033462524,
+      "capture_seconds": 0.04958966374397278,
+      "warmup_seconds": 0.6142946258187294,
+      "median_seconds": 0.6124922372400761,
+      "accepted": true,
+      "trials": [
+        {
+          "seconds": 0.6129409782588482,
+          "iterations": 20,
+          "quality": {
+            "accepted": true,
+            "residual": 5.551456673523931e-10,
+            "max_absolute_residual": 1.685010594595915e-11,
+            "orthogonality": 1.1102230246251565e-15,
+            "spectrum_error": 3.469169396197458e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.4626539225529373e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4800,
+              10,
+              480,
+              480
+            ]
+          }
+        },
+        {
+          "seconds": 0.6124922372400761,
+          "iterations": 20,
+          "quality": {
+            "accepted": true,
+            "residual": 6.607748153990744e-10,
+            "max_absolute_residual": 1.8923376754464982e-11,
+            "orthogonality": 1.2212453270876722e-15,
+            "spectrum_error": 3.5370317785776706e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.8299558757090664e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4800,
+              10,
+              480,
+              480
+            ]
+          }
+        },
+        {
+          "seconds": 0.612244576215744,
+          "iterations": 20,
+          "quality": {
+            "accepted": true,
+            "residual": 5.652397521036914e-10,
+            "max_absolute_residual": 1.5759930036343683e-11,
+            "orthogonality": 1.5543122344752192e-15,
+            "spectrum_error": 3.555628014240142e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.5547045488607646e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4800,
+              10,
+              480,
+              480
+            ]
+          }
+        }
+      ],
+      "cupy_trials": [
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 0.7535487003624439,
+          "residual_history_length": 88,
+          "last_history_absolute_residuals": [
+            1.589157585891418e-10,
+            9.163005778489061e-11,
+            2.303922383661229e-10,
+            1.688938854865863e-10,
+            7.068422424582535e-11,
+            9.228432159095783e-11,
+            1.556839060446517e-10,
+            6.115030386487234e-11,
+            3.2128010273361705e-10,
+            3.429268560631504e-10,
+            2.8874720505607465e-10,
+            3.2627540233800684e-10,
+            2.7767700730308363e-10,
+            1.41949160121414e-10,
+            3.6102396872696585e-10,
+            2.028494514140707e-10,
+            3.3971766815027805e-10,
+            3.7885010601990505e-10,
+            2.1653828882966216e-10,
+            1.8026342776674918e-10,
+            2.4554570711395207e-10,
+            1.1526379192648418e-10,
+            5.75080997453727e-10,
+            7.968535583751048e-10
+          ],
+          "returned_absolute_residuals": [
+            1.5891561771704676e-10,
+            9.163021377234095e-11,
+            2.3039214928693074e-10,
+            1.688927129188789e-10,
+            7.068370126714798e-11,
+            9.228523727298003e-11,
+            1.5568362485665249e-10,
+            6.115085592758807e-11,
+            3.212804866807081e-10,
+            3.429254454117002e-10,
+            2.8874782975280706e-10,
+            3.262755265783838e-10,
+            2.776768440352372e-10,
+            1.4194911691839924e-10,
+            3.61023485643217e-10,
+            2.028502458595954e-10,
+            3.397182639883123e-10,
+            3.7885022184674817e-10,
+            2.165388411398961e-10,
+            1.8026135321932945e-10,
+            2.455474271270417e-10,
+            1.1533858370978983e-10,
+            5.75079984508225e-10,
+            7.968418463060508e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 3.6102347613473984e-10,
+            "max_absolute_residual": 1.9226297637287004e-11,
+            "orthogonality": 1.5543122344752192e-15,
+            "spectrum_error": 3.322342401190781e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.405261609619583e-10,
+            "preconditioner_cg_stats": [
+              3620,
+              10,
+              362,
+              362
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                480,
+                10,
+                48,
+                48
+              ],
+              "2": [
+                180,
+                10,
+                18,
+                18
+              ],
+              "3": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "4": [
+                160,
+                10,
+                16,
+                16
+              ],
+              "5": [
+                300,
+                10,
+                30,
+                30
+              ],
+              "6": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "7": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "8": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "9": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "10": [
+                100,
+                10,
+                10,
+                10
+              ],
+              "11": [
+                330,
+                10,
+                33,
+                33
+              ],
+              "12": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "13": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "14": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "15": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "16": [
+                160,
+                10,
+                16,
+                16
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                1200,
+                10,
+                120,
+                120
+              ]
+            }
+          }
+        },
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 0.7511080205440521,
+          "residual_history_length": 88,
+          "last_history_absolute_residuals": [
+            1.5891444911978948e-10,
+            9.162131189622981e-11,
+            2.3040165205051173e-10,
+            1.6888578307915726e-10,
+            7.067550351102746e-11,
+            9.228247588217656e-11,
+            1.5568348257115522e-10,
+            6.114917540808498e-11,
+            3.213789426784379e-10,
+            3.4292208144703926e-10,
+            2.8873791028880636e-10,
+            3.2628411452255814e-10,
+            2.776691830958935e-10,
+            1.4195143058667524e-10,
+            3.610219526721383e-10,
+            2.0284223796084278e-10,
+            3.396544618383603e-10,
+            3.7884462034347166e-10,
+            2.164594213159913e-10,
+            1.802792519716936e-10,
+            2.454686608639335e-10,
+            1.1540240899834803e-10,
+            5.751247901450437e-10,
+            7.976927746151346e-10
+          ],
+          "returned_absolute_residuals": [
+            1.5891401858523584e-10,
+            9.162169160650385e-11,
+            2.3040145084738108e-10,
+            1.688865549528705e-10,
+            7.067664856704048e-11,
+            9.22811412508107e-11,
+            1.5568367075801912e-10,
+            6.115016401255674e-11,
+            3.21378577897468e-10,
+            3.429226315279339e-10,
+            2.8873822427050624e-10,
+            3.2628470613212964e-10,
+            2.776689379200354e-10,
+            1.4195179179294337e-10,
+            3.610208141014698e-10,
+            2.0284269173428834e-10,
+            3.3965504991929444e-10,
+            3.788461022582062e-10,
+            2.1645889025904522e-10,
+            1.802777881504607e-10,
+            2.454694653608157e-10,
+            1.1550576344973935e-10,
+            5.751269180254678e-10,
+            7.977089269100284e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 3.610207463350223e-10,
+            "max_absolute_residual": 1.9219273741932774e-11,
+            "orthogonality": 1.6653345369377348e-15,
+            "spectrum_error": 3.322481179068859e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.4050747720153095e-10,
+            "preconditioner_cg_stats": [
+              3620,
+              10,
+              362,
+              362
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                480,
+                10,
+                48,
+                48
+              ],
+              "2": [
+                180,
+                10,
+                18,
+                18
+              ],
+              "3": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "4": [
+                160,
+                10,
+                16,
+                16
+              ],
+              "5": [
+                300,
+                10,
+                30,
+                30
+              ],
+              "6": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "7": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "8": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "9": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "10": [
+                100,
+                10,
+                10,
+                10
+              ],
+              "11": [
+                330,
+                10,
+                33,
+                33
+              ],
+              "12": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "13": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "14": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "15": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "16": [
+                160,
+                10,
+                16,
+                16
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                1200,
+                10,
+                120,
+                120
+              ]
+            }
+          }
+        },
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 0.7506012879312038,
+          "residual_history_length": 88,
+          "last_history_absolute_residuals": [
+            1.589153663449763e-10,
+            9.163180724100636e-11,
+            2.3041520577926507e-10,
+            1.6889015511700988e-10,
+            7.067992136092665e-11,
+            9.228811442112307e-11,
+            1.556645870010199e-10,
+            6.11492845038286e-11,
+            3.213802380137285e-10,
+            3.429427188758742e-10,
+            2.887338443603456e-10,
+            3.262917006100198e-10,
+            2.776674278419896e-10,
+            1.4200167929374985e-10,
+            3.609791272189041e-10,
+            2.0285736913033935e-10,
+            3.3956928085697446e-10,
+            3.7875992175154166e-10,
+            2.164514371546678e-10,
+            1.7997584401929413e-10,
+            2.4540372604602804e-10,
+            1.1537056874190888e-10,
+            5.74607105953145e-10,
+            8.028445897307385e-10
+          ],
+          "returned_absolute_residuals": [
+            1.589147435234664e-10,
+            9.16320274767663e-11,
+            2.3041652098234876e-10,
+            1.6889167115557953e-10,
+            7.068030966480817e-11,
+            9.228849253921092e-11,
+            1.5566398440820503e-10,
+            6.114943693526187e-11,
+            3.2137963821312943e-10,
+            3.429428361188778e-10,
+            2.8873399446747684e-10,
+            3.262931837685379e-10,
+            2.776672585521308e-10,
+            1.420020580013546e-10,
+            3.60980080391734e-10,
+            2.0285739302267116e-10,
+            3.395690033973252e-10,
+            3.7876104947317747e-10,
+            2.164510922567417e-10,
+            1.7997617467231026e-10,
+            2.4540885905046384e-10,
+            1.1543550793460934e-10,
+            5.746077474739427e-10,
+            8.028523023081269e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 3.6098004897099796e-10,
+            "max_absolute_residual": 1.9203719777566297e-11,
+            "orthogonality": 1.4432899320127035e-15,
+            "spectrum_error": 3.8229142074186484e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 1.4048841482477093e-10,
+            "preconditioner_cg_stats": [
+              3620,
+              10,
+              362,
+              362
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                480,
+                10,
+                48,
+                48
+              ],
+              "2": [
+                180,
+                10,
+                18,
+                18
+              ],
+              "3": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "4": [
+                160,
+                10,
+                16,
+                16
+              ],
+              "5": [
+                300,
+                10,
+                30,
+                30
+              ],
+              "6": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "7": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "8": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "9": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "10": [
+                100,
+                10,
+                10,
+                10
+              ],
+              "11": [
+                330,
+                10,
+                33,
+                33
+              ],
+              "12": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "13": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "14": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "15": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "16": [
+                160,
+                10,
+                16,
+                16
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                1200,
+                10,
+                120,
+                120
+              ]
+            }
+          }
+        }
+      ],
+      "cupy_adapter": {
+        "width": 24,
+        "absolute_tolerance": 1e-09,
+        "padding_width": null,
+        "preallocated_active_widths": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24
+        ],
+        "inner_adapter_setup_capture_seconds": 0.11081000417470932,
+        "inner_adapter_device_memory_delta_bytes": 838860800,
+        "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+        "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+        "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+      }
+    },
+    {
+      "start": "previous_full_block",
+      "initial_perturbation": 0.0,
+      "solver_setup_seconds": 0.001442696899175644,
+      "capture_seconds": 0.048554446548223495,
+      "warmup_seconds": 0.5494921170175076,
+      "median_seconds": 0.5501416176557541,
+      "accepted": true,
+      "trials": [
+        {
+          "seconds": 0.5499093309044838,
+          "iterations": 18,
+          "quality": {
+            "accepted": true,
+            "residual": 5.754011973254613e-10,
+            "max_absolute_residual": 1.7083927588562586e-11,
+            "orthogonality": 1.2212453270876722e-15,
+            "spectrum_error": 3.6232128408641984e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.389481762960755e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4320,
+              10,
+              432,
+              432
+            ]
+          }
+        },
+        {
+          "seconds": 0.5501416176557541,
+          "iterations": 18,
+          "quality": {
+            "accepted": true,
+            "residual": 6.013338898240108e-10,
+            "max_absolute_residual": 2.5890080877777333e-11,
+            "orthogonality": 1.1102230246251565e-15,
+            "spectrum_error": 3.489430966396867e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.6057939110601106e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4320,
+              10,
+              432,
+              432
+            ]
+          }
+        },
+        {
+          "seconds": 0.5508210510015488,
+          "iterations": 18,
+          "quality": {
+            "accepted": true,
+            "residual": 7.68936025732063e-10,
+            "max_absolute_residual": 2.5299792209138028e-11,
+            "orthogonality": 1.7763568394002505e-15,
+            "spectrum_error": 3.3816005551301487e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 3.7208267893704057e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4320,
+              10,
+              432,
+              432
+            ]
+          }
+        }
+      ],
+      "cupy_trials": [
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 0.7410338409245014,
+          "residual_history_length": 91,
+          "last_history_absolute_residuals": [
+            1.4041109462420792e-10,
+            1.6555710019011694e-10,
+            2.9055481988583037e-10,
+            1.9051461196810102e-10,
+            1.7567460638627704e-10,
+            6.099311514704015e-11,
+            2.1467326879585732e-10,
+            5.78703355663658e-10,
+            4.945147243318064e-10,
+            2.7391836171967727e-10,
+            3.4242786743709435e-10,
+            1.0032240220307937e-10,
+            4.760086845566731e-11,
+            1.5440822144624583e-10,
+            3.9248885388550097e-10,
+            1.105291060623858e-10,
+            2.6075104610952554e-10,
+            1.7572665651686355e-10,
+            2.859604187110886e-10,
+            3.172248163315757e-10,
+            3.798831401087281e-10,
+            3.62902539919073e-10,
+            6.629610735074329e-10,
+            5.648245604227337e-10
+          ],
+          "returned_absolute_residuals": [
+            1.4041110829082955e-10,
+            1.655557841011856e-10,
+            2.905532750766773e-10,
+            1.9051509524013265e-10,
+            1.7567356220803298e-10,
+            6.099243931159844e-11,
+            2.146742981142993e-10,
+            5.787028922729612e-10,
+            4.945154981161604e-10,
+            2.7391839673996036e-10,
+            3.4242790329783497e-10,
+            1.0032259837988928e-10,
+            4.760090511572341e-11,
+            1.5440859689517714e-10,
+            3.9248942898799115e-10,
+            1.1052777058939411e-10,
+            2.6075126080798096e-10,
+            1.7572509719944943e-10,
+            2.859605735634087e-10,
+            3.172250684539388e-10,
+            3.798835675820869e-10,
+            3.6290169749321895e-10,
+            6.629613701254031e-10,
+            5.64824307583357e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 5.787029587617848e-10,
+            "max_absolute_residual": 1.9018573770967356e-11,
+            "orthogonality": 1.7763568394002505e-15,
+            "spectrum_error": 3.3208158445319214e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.0713054247542953e-10,
+            "preconditioner_cg_stats": [
+              3310,
+              10,
+              331,
+              331
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                650,
+                10,
+                65,
+                65
+              ],
+              "2": [
+                100,
+                10,
+                10,
+                10
+              ],
+              "3": [
+                30,
+                10,
+                3,
+                3
+              ],
+              "4": [
+                40,
+                10,
+                4,
+                4
+              ],
+              "5": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "6": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "7": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "8": [
+                80,
+                10,
+                8,
+                8
+              ],
+              "9": [
+                90,
+                10,
+                9,
+                9
+              ],
+              "10": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "11": [
+                220,
+                10,
+                22,
+                22
+              ],
+              "12": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "13": [
+                130,
+                10,
+                13,
+                13
+              ],
+              "14": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "15": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "16": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                1200,
+                10,
+                120,
+                120
+              ]
+            }
+          }
+        },
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 0.7384444698691368,
+          "residual_history_length": 91,
+          "last_history_absolute_residuals": [
+            1.404118740159601e-10,
+            1.655570054559137e-10,
+            2.905540159442274e-10,
+            1.9051609355739149e-10,
+            1.7567558791736276e-10,
+            6.099242943498033e-11,
+            2.1467427615232268e-10,
+            5.787033927514078e-10,
+            4.94514353590429e-10,
+            2.739178969034082e-10,
+            3.4242787871130135e-10,
+            1.0032230338483031e-10,
+            4.7602063333020974e-11,
+            1.544101664449379e-10,
+            3.9248953794822753e-10,
+            1.1053019153333934e-10,
+            2.6075020364902633e-10,
+            1.7572650841946132e-10,
+            2.859619130633755e-10,
+            3.1722576534916483e-10,
+            3.7988276154092894e-10,
+            3.62897918280621e-10,
+            6.62958285894517e-10,
+            5.648332264778009e-10
+          ],
+          "returned_absolute_residuals": [
+            1.4041174579993098e-10,
+            1.6555636378008503e-10,
+            2.90553908774537e-10,
+            1.905151654023952e-10,
+            1.7567583470202379e-10,
+            6.099117044573186e-11,
+            2.146750827528303e-10,
+            5.787027647327213e-10,
+            4.94514339598824e-10,
+            2.7391824610844866e-10,
+            3.424289621687947e-10,
+            1.0032380759685613e-10,
+            4.7603585320689546e-11,
+            1.5440982256273493e-10,
+            3.9248882611887075e-10,
+            1.1052922366080239e-10,
+            2.607510695443444e-10,
+            1.7572636300332017e-10,
+            2.8596271458964403e-10,
+            3.172253651678196e-10,
+            3.7988309718245274e-10,
+            3.628976982539272e-10,
+            6.629582963961739e-10,
+            5.648336988260418e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 5.787027609289567e-10,
+            "max_absolute_residual": 1.9019564189651922e-11,
+            "orthogonality": 1.9984014443252818e-15,
+            "spectrum_error": 3.3209546224099995e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.0713030206542272e-10,
+            "preconditioner_cg_stats": [
+              3310,
+              10,
+              331,
+              331
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                650,
+                10,
+                65,
+                65
+              ],
+              "2": [
+                100,
+                10,
+                10,
+                10
+              ],
+              "3": [
+                30,
+                10,
+                3,
+                3
+              ],
+              "4": [
+                40,
+                10,
+                4,
+                4
+              ],
+              "5": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "6": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "7": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "8": [
+                80,
+                10,
+                8,
+                8
+              ],
+              "9": [
+                90,
+                10,
+                9,
+                9
+              ],
+              "10": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "11": [
+                220,
+                10,
+                22,
+                22
+              ],
+              "12": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "13": [
+                130,
+                10,
+                13,
+                13
+              ],
+              "14": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "15": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "16": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                1200,
+                10,
+                120,
+                120
+              ]
+            }
+          }
+        },
+        {
+          "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+          "seconds": 0.7360533885657787,
+          "residual_history_length": 91,
+          "last_history_absolute_residuals": [
+            1.4040950005535426e-10,
+            1.6555614695874907e-10,
+            2.9055491785181416e-10,
+            1.9051595479591038e-10,
+            1.7567671658386414e-10,
+            6.099263395686285e-11,
+            2.1467503471304356e-10,
+            5.787042934796823e-10,
+            4.945158802946137e-10,
+            2.7391709644234176e-10,
+            3.4242743691996584e-10,
+            1.0032282435645802e-10,
+            4.7602052016018215e-11,
+            1.544067850108704e-10,
+            3.9249354650146865e-10,
+            1.1053028030321225e-10,
+            2.607549032766546e-10,
+            1.757265822853755e-10,
+            2.859594770318004e-10,
+            3.172253119333663e-10,
+            3.798842418131061e-10,
+            3.62898436754876e-10,
+            6.629707132050876e-10,
+            5.649108062840945e-10
+          ],
+          "returned_absolute_residuals": [
+            1.4040932743491023e-10,
+            1.6555577910846108e-10,
+            2.9055439730101627e-10,
+            1.9051591489171614e-10,
+            1.7567577257771785e-10,
+            6.099207840855465e-11,
+            2.1467490888226118e-10,
+            5.78703580318516e-10,
+            4.945149474878488e-10,
+            2.7391709497852066e-10,
+            3.4242664032613415e-10,
+            1.0032316949378623e-10,
+            4.760329158205298e-11,
+            1.544071077076397e-10,
+            3.9249316603923575e-10,
+            1.105311962150387e-10,
+            2.607553586257289e-10,
+            1.757272885964583e-10,
+            2.85958961373896e-10,
+            3.1722589392438274e-10,
+            3.798853315579494e-10,
+            3.6289875693496105e-10,
+            6.629708591567403e-10,
+            5.649099026169408e-10
+          ],
+          "returned_k_absolute_tolerance_met": true,
+          "full_block_absolute_tolerance_met": true,
+          "quality": {
+            "accepted": true,
+            "residual": 5.787035501375636e-10,
+            "max_absolute_residual": 1.9019748747966733e-11,
+            "orthogonality": 1.7763568394002505e-15,
+            "spectrum_error": 3.319566843629218e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.0713026918275584e-10,
+            "preconditioner_cg_stats": [
+              3310,
+              10,
+              331,
+              331
+            ],
+            "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+            "cg_stats_by_active_width": {
+              "1": [
+                650,
+                10,
+                65,
+                65
+              ],
+              "2": [
+                100,
+                10,
+                10,
+                10
+              ],
+              "3": [
+                30,
+                10,
+                3,
+                3
+              ],
+              "4": [
+                40,
+                10,
+                4,
+                4
+              ],
+              "5": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "6": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "7": [
+                140,
+                10,
+                14,
+                14
+              ],
+              "8": [
+                80,
+                10,
+                8,
+                8
+              ],
+              "9": [
+                90,
+                10,
+                9,
+                9
+              ],
+              "10": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "11": [
+                220,
+                10,
+                22,
+                22
+              ],
+              "12": [
+                120,
+                10,
+                12,
+                12
+              ],
+              "13": [
+                130,
+                10,
+                13,
+                13
+              ],
+              "14": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "15": [
+                150,
+                10,
+                15,
+                15
+              ],
+              "16": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "17": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "18": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "19": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "20": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "21": [
+                210,
+                10,
+                21,
+                21
+              ],
+              "22": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "23": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "24": [
+                1200,
+                10,
+                120,
+                120
+              ]
+            }
+          }
+        }
+      ],
+      "cupy_adapter": {
+        "width": 24,
+        "absolute_tolerance": 1e-09,
+        "padding_width": null,
+        "preallocated_active_widths": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24
+        ],
+        "inner_adapter_setup_capture_seconds": 0.11348465085029602,
+        "inner_adapter_device_memory_delta_bytes": 402653184,
+        "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+        "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+        "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+      }
+    },
+    {
+      "start": "previous_full_block_perturbed",
+      "initial_perturbation": 0.001,
+      "solver_setup_seconds": 0.00186171755194664,
+      "capture_seconds": 0.11648764088749886,
+      "warmup_seconds": 0.5784386545419693,
+      "median_seconds": 0.5812478922307491,
+      "accepted": true,
+      "trials": [
+        {
+          "seconds": 0.5812478922307491,
+          "iterations": 19,
+          "quality": {
+            "accepted": true,
+            "residual": 6.313430152859734e-10,
+            "max_absolute_residual": 1.695372618334967e-11,
+            "orthogonality": 6.661338147750939e-16,
+            "spectrum_error": 3.531619441332623e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.550277305124472e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4560,
+              10,
+              442,
+              456
+            ]
+          }
+        },
+        {
+          "seconds": 0.5798329003155231,
+          "iterations": 19,
+          "quality": {
+            "accepted": true,
+            "residual": 6.314062726165292e-10,
+            "max_absolute_residual": 1.62875780571059e-11,
+            "orthogonality": 6.661338147750939e-16,
+            "spectrum_error": 3.494010636373446e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 2.7801938454307943e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4560,
+              10,
+              442,
+              456
+            ]
+          }
+        },
+        {
+          "seconds": 0.5818451642990112,
+          "iterations": 19,
+          "quality": {
+            "accepted": true,
+            "residual": 7.231588579498674e-10,
+            "max_absolute_residual": 2.5200622838505993e-11,
+            "orthogonality": 6.661338147750939e-16,
+            "spectrum_error": 3.296390937990168e-13,
+            "recovered_nullity": 0,
+            "nullspace_subspace_error": 0.0,
+            "requested_subspace_error": 3.3096936652511225e-10,
+            "status": 0,
+            "converged": 20,
+            "preconditioner_cg_stats": [
+              4560,
+              10,
+              442,
+              456
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "/home/horde/projects/warpack/benchmarks/experimental/fem_starts.py": "058a19c73e144578a636e98d0aa275b18dcaf6423b5eb3afc086c855034e8cda",
+    "benchmarks/experimental/block_lobpcg.py": "1853838759eaf90a9fec6d775ac01221f06d7b7729e83332950bcafe6384d33e",
+    "warpack/block.py": "33ccb8eb43292a48330e11b101bf45c2e945d87eb1a1bb40f8701c43951db8ca",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "benchmarks/experimental/block_kernels.py": "da82ded4fdfc07859d49efa4dcbb432dc41f2a76c878c4f2babfc8b4ec28b0cd",
+    "benchmarks/experimental/block_updates.py": "ba4cba56f35f1b7e0bcc25558578d9f77fa17655b0219afd6a9fe0b51cb01d8c",
+    "benchmarks/experimental/batched_cg.py": "3d920e0f60de90bf1ecad94a675631919058cd84aa131ce822b19e0f6d2ef9bd",
+    "benchmarks/experimental/compare_block.py": "cbdff7099aa7c445b1f3a9475a26f6568a0fcd7d2d3971461aef56a303b47905"
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Optional perturbed full-block trial measures the explicit Warp exploration policy; CuPy comparisons use only identical unperturbed starts. Same changed pencil, preconditioner and stopping criteria for every Warp start; no GPU speed claim if contention is observed. Source solve and setup costs are separate."
+}

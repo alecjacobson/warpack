@@ -2,7 +2,7 @@
 
 This harness runs the eigensolver/SVD portion of CuPy's tests and exports Spectra's numerical solver fixtures. It also runs Spectra's own native suite and benchmarks. It does not claim that unrelated CuPy array operations or Spectra's private factorization classes have Warpack equivalents.
 
-See [recorded results and known failures](RESULTS.md). Production solver code was held fixed during this run.
+See [recorded results and known failures](RESULTS.md). Production solver code was held fixed during that original run. The [public block follow-up](BLOCK_API.md) now enables applicable CuPy LOBPCG fixtures; its supported/unsupported cases and reference-spectrum mismatch are reported separately.
 
 Pinned sources:
 
@@ -22,7 +22,7 @@ Spectra's C++ generators and Catch sections execute directly. `prepare_spectra.p
 
 Davidson fixtures exercise Warpack's symmetric Krylov solver; Warpack does not gain a Davidson implementation through this adapter. Partial SVD uses Warpack's augmented symmetric operator and the fixture's original `ncv`, which need not have the same convergence behavior as Spectra's SVD formulation.
 
-All inverse operations in the adapted Spectra/CuPy runs use cuDSS, including smallest-magnitude selections for real and complex general problems. Standard extremal problems use direct Warp iteration. Warpack runs captured graphs; references and assertions run outside capture. The runner records its outer-cycle budgets separately because algorithms' iteration counts are not interchangeable.
+The original eigsh/Spectra inverse operations use cuDSS, including smallest-magnitude selections for real and complex general problems. Standard extremal problems use direct Warp iteration. The new LOBPCG adapter applies only the fixture-supplied preconditioner; it inserts no cuDSS inverse. Warpack runs captured graphs; references and assertions run outside capture. The runner records its outer-cycle budgets separately because algorithms' iteration counts are not interchangeable.
 
 ## Reproduce
 

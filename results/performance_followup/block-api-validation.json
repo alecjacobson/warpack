@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "ba0e7cb66e81b4d4a05a109d80dea2495f73aac3",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "593 passed",
+    "seconds": 243.8
+  },
+  "minimum_version": {
+    "runtime": "Warp 1.15.0",
+    "command": "PYTHONPATH=\"$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_block_api.py tests/test_block_updates_experimental.py tests/test_lobpcg_experimental.py tests/test_block_products_experimental.py",
+    "result": "90 passed",
+    "seconds": 47.45
+  },
+  "focused_public_api": {
+    "result": "19 passed",
+    "seconds": 2.5
+  },
+  "upstream": {
+    "family": "Pinned CuPy LOBPCG",
+    "result": "54 passed, 1 failed, 533 skipped",
+    "report": "cupy-block-api.json",
+    "known_failure": "Fiedler high invariant start: 20-step strict count miss; native reference agreement accepts wrong requested spectrum. Independent 100-step requested-spectrum regression passes; #72, upstream cupy/cupy#10403."
+  },
+  "package": "block-api-wheel.json: 20 numerical modules; clean-source import away from checkout; no benchmarks/examples/application assembly",
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks/experimental benchmarks/upstream/adapters.py benchmarks/upstream/cupy_plugin.py examples/block_reuse.py: passed",
+  "large_cases": [
+    "block-api-anvil.json",
+    "block-api-hodge.json",
+    "block-api-related-consistent.json",
+    "block-api-related-lumped.json"
+  ],
+  "source_sha256": {
+    "warpack/block.py": "33ccb8eb43292a48330e11b101bf45c2e945d87eb1a1bb40f8701c43951db8ca",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/__init__.py": "ae4d8a9b73bb16408d13a46f84519dbe3d6c18d85433cd8b71239842b091a607",
+    "tests/test_block_api.py": "baa02e1ab0cb32450d3ae1ad46f6dce31b4365452c7f901d92d86c418fd247f1",
+    "examples/block_reuse.py": "ab29558d58513e7830f0d7231ffa6cba84e7fd2a007d0a686647e7df772ed9cc",
+    "benchmarks/upstream/adapters.py": "1f5259c64e82c7d1e6fa64d0e76c2ac1690dfc563fd50b8608445910927d0717",
+    "benchmarks/upstream/cupy_plugin.py": "2efc689964fe3b5d2c0bc1d3a0e216e19682608e34518e1d669e173e61054d60",
+    "benchmarks/experimental/block_lobpcg.py": "1853838759eaf90a9fec6d775ac01221f06d7b7729e83332950bcafe6384d33e",
+    "benchmarks/experimental/compare_block.py": "cbdff7099aa7c445b1f3a9475a26f6568a0fcd7d2d3971461aef56a303b47905",
+    "benchmarks/experimental/fem_starts.py": "058a19c73e144578a636e98d0aa275b18dcaf6423b5eb3afc086c855034e8cda",
+    "benchmarks/experimental/mode_crossings.py": "4e603e1d0472a36171a296e58ac095ea5a2259e607e24d5f8747810515fa6b83"
+  },
+  "scope": "Public symmetric FP64 block API, partial/full starts, metric constraints, explicit mode-crossing exploration. Existing Krylov defaults unchanged. Batched CG/sparse-product experiments stay outside installed package. Full local suite plus focused upstream family, not a full upstream rerun.",
+  "example": {
+    "command": "python -m examples.block_reuse",
+    "pinned_warp": "passed; 63/65 changed-problem steps",
+    "stock_warp_1_15": "passed; 63/65 changed-problem steps",
+    "reference": "Independent dense generalized SciPy checks; computed device starts only"
+  }
+}
