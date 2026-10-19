@@ -60,6 +60,59 @@ def realify_triplets(
 
 
 @wp.kernel
+def realified_value_map(
+    rows: wp.array[wp.int32],
+    cols: wp.array[wp.int32],
+    source_offsets: wp.array[wp.int32],
+    n: int,
+    capacity: int,
+    offsets: wp.array[wp.int32],
+    columns: wp.array[wp.int32],
+    mapping: wp.array[wp.int32],
+):
+    t = wp.tid()
+    mapping[t] = -1
+    # Source CSR may have unused trailing value/column capacity. Those triplets
+    # are initialized to zero at setup and must never read padding on replay.
+    if t < 4 * source_offsets[n] or t >= 4 * capacity:
+        row, col = rows[t], cols[t]
+        lo = int(offsets[row])
+        hi = int(offsets[row + 1])
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if columns[mid] < col:
+                lo = mid + 1
+            else:
+                hi = mid
+        if lo < offsets[row + 1] and columns[lo] == col:
+            mapping[t] = lo
+
+
+@wp.kernel
+def refresh_realified_values(
+    source: wp.array[wp.vec2d],
+    mapping: wp.array[wp.int32],
+    capacity: int,
+    sigma: wp.vec2d,
+    values: wp.array[wp.float64],
+):
+    t = wp.tid()
+    dest = mapping[t]
+    if dest >= 0:
+        entry, component = t // 4, t % 4
+        v = -sigma
+        if entry < capacity:
+            v = source[entry]
+        value = v[0]
+        if component == 1:
+            value = -v[1]
+        elif component == 2:
+            value = v[1]
+        # Includes duplicate source coordinates and the diagonal shift term.
+        wp.atomic_add(values, dest, value)
+
+
+@wp.kernel
 def unpack_complex(x: wp.array2d[wp.vec2d], out: wp.array2d[wp.float64], j: int, n: int):
     i = wp.tid()
     out[0, i] = x[j, i][0]
@@ -89,6 +142,10 @@ class ComplexShiftInverse:
 
     The complex matrix is represented as a real 2n system. Initial sparse
     topology/factor setup stays outside capture. Applies support multiple RHS.
+    GMRES refreshes realified coefficients from the current source values on
+    every apply, including captured replay with fixed topology/addresses.
+    cuDSS factors remain tied to the values at construction; recreate that
+    inverse and its graphs when source values change.
     """
 
     requires_static_outer_capture = True
@@ -103,9 +160,9 @@ class ComplexShiftInverse:
         self.n = 2 * n
         nnz = len(operator.values)
         size = 4 * (nnz + n)
-        rows = wp.empty(size, dtype=wp.int32, device=self.device)
-        cols = wp.empty_like(rows)
-        vals = wp.empty(size, dtype=wp.float64, device=self.device)
+        rows = wp.zeros(size, dtype=wp.int32, device=self.device)
+        cols = wp.zeros_like(rows)
+        vals = wp.zeros(size, dtype=wp.float64, device=self.device)
         self.sigma = wp.vec2d(float(complex(sigma).real), float(complex(sigma).imag))
         wp.launch(
             realify_triplets,
@@ -123,7 +180,29 @@ class ComplexShiftInverse:
             ],
             device=self.device,
         )
-        self.matrix = ws.bsr_from_triplets(2 * n, 2 * n, rows, cols, vals)
+        self.matrix = ws.bsr_from_triplets(
+            2 * n, 2 * n, rows, cols, vals, prune_numerical_zeros=backend != "gmres"
+        )
+        self._value_map = None
+        if backend == "gmres":
+            # Preserve every structural component, including zeros that may
+            # become nonzero later. Build only the mapping outside capture.
+            self._value_map = wp.empty(size, dtype=wp.int32, device=self.device)
+            wp.launch(
+                realified_value_map,
+                size,
+                [
+                    rows,
+                    cols,
+                    operator.offsets,
+                    n,
+                    nnz,
+                    self.matrix.offsets,
+                    self.matrix.columns,
+                    self._value_map,
+                ],
+                device=self.device,
+            )
         self.rhs = wp.zeros((1, 2 * n), dtype=wp.float64, device=self.device)
         self.solution = wp.empty_like(self.rhs)
         self.backend = backend
@@ -153,14 +232,32 @@ class ComplexShiftInverse:
             self.solution.zero_()
             self.state(b=self.rhs[0], x=self.solution[0])
 
+    def _refresh(self):
+        if self._value_map is not None:
+            self.matrix.values.zero_()
+            wp.launch(
+                refresh_realified_values,
+                self._value_map.size,
+                [
+                    self.original.values,
+                    self._value_map,
+                    len(self.original.values),
+                    self.sigma,
+                    self.matrix.values,
+                ],
+                device=self.device,
+            )
+
     def apply(self, x, y):
         """Apply to realified row vectors, as used by Hermitian Krylov."""
+        self._refresh()
         for j in range(x.shape[0]):
             wp.copy(self.rhs, x[j : j + 1])
             self._solve_real()
             wp.copy(y[j : j + 1], self.solution)
 
     def apply_complex(self, x, y):
+        self._refresh()
         for j in range(x.shape[0]):
             wp.launch(
                 unpack_complex,

@@ -1,0 +1,25 @@
+{
+  "base_revision": "b307447",
+  "issue": 73,
+  "pinned_gpu": {
+    "result": "63 passed",
+    "seconds": 11.36
+  },
+  "stock_gpu": {
+    "result": "63 passed",
+    "seconds": 14.08
+  },
+  "cpu": {
+    "result": "16 passed",
+    "seconds": 82.45
+  },
+  "scope": "Focused complex-shift and Hermitian validation after the preceding main full 664-test run; no new full/upstream suite claim.",
+  "source_sha256": {
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "tests/test_complex_shift_refresh.py": "290de2e40d295a237dc20c41725ac26533506a1485488b499e7f637f739a3b36",
+    "benchmarks/experimental/complex_gmres_profile.py": "bdac039c4a908838c0d0a05bec7ae2f070f6ab604735188fa6449f06e55f2ec1"
+  },
+  "captures": "All 16 new GPU cases audit no HOST/HtoD/DtoH; cuDSS vendor copies remain in its unchanged factor path.",
+  "control": "20,000 complex dimensions; three samples average 20 unchanged-value inverse applies each. 4.6274 ms old versus 4.6445 ms fixed; all residual gates and occupancy checks pass. Not an eigenproblem speedup claim.",
+  "driver_note": "Committed driver wraps the measured standalone script in main() and formats imports; numerical sequence is unchanged."
+}
