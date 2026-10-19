@@ -1,0 +1,209 @@
+{
+  "args": {
+    "case": "clamped_consistent",
+    "side": 16,
+    "modes": 6,
+    "fraction": 0.37,
+    "ncv": 48,
+    "steps": 5,
+    "restart": 128,
+    "maxiter": 768,
+    "inner_tol": 1e-12,
+    "preconditioner": "fsai",
+    "fsai_width": 64,
+    "repeats": 3,
+    "methods": "gmres,cudss",
+    "out": "results/performance_followup/interior-gmres128-large.json"
+  },
+  "n": 41616,
+  "k": 6,
+  "sigma": 4.833997759511441,
+  "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+  "expected": [
+    0.11421051650717595,
+    0.9226462836871908,
+    2.3465803593477257,
+    2.364091778623655,
+    2.7925140071972954,
+    8.310037662100394
+  ],
+  "selection_margin": 0.0011491619163184197,
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "rows": [
+    {
+      "method": "gmres",
+      "setup_seconds": 0.8822181820869446,
+      "setup_free_memory_decrease_bytes": 14575206400,
+      "capture_free_memory_decrease_bytes": 18874368,
+      "capture_seconds": 14.56218745931983,
+      "warmup_seconds": 26.539198379963636,
+      "free_memory_decrease_bytes": 14594080768,
+      "memory_scope": "Setup/capture pool and runtime free-memory decrease, not peak/live allocation",
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 152,
+          "KERNEL": 63940,
+          "MEMCPY": 290,
+          "CONDITIONAL": 96
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 290
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "trials": [
+        {
+          "seconds": 26.267455764114857,
+          "quality": {
+            "accepted": false,
+            "residual": 1.3387686874943267e-10,
+            "max_absolute_residual": 3.0008840600165634e-12,
+            "orthogonality": 1.8207657603852567e-14,
+            "spectrum_error": 1.0369483049998962e-12,
+            "requested_subspace_error": 2.54271477887829e-08,
+            "status": 0,
+            "converged": 6
+          },
+          "outer_iterations": 5,
+          "inner_stats": [
+            148736,
+            768,
+            18,
+            204
+          ],
+          "inner_fresh_residual_maxima": [
+            1.0798694190554586e-12,
+            7.312725973430406e-11
+          ]
+        },
+        {
+          "seconds": 26.249861020594835,
+          "quality": {
+            "accepted": false,
+            "residual": 1.3387686877419192e-10,
+            "max_absolute_residual": 3.000884114226672e-12,
+            "orthogonality": 1.8207657603852567e-14,
+            "spectrum_error": 1.0363931934875836e-12,
+            "requested_subspace_error": 2.54271477887829e-08,
+            "status": 0,
+            "converged": 6
+          },
+          "outer_iterations": 5,
+          "inner_stats": [
+            148736,
+            768,
+            18,
+            204
+          ],
+          "inner_fresh_residual_maxima": [
+            1.0798694190554588e-12,
+            7.312725973430406e-11
+          ]
+        },
+        {
+          "seconds": 26.255061950534582,
+          "quality": {
+            "accepted": false,
+            "residual": 1.3387686876253154e-10,
+            "max_absolute_residual": 3.0008840464640363e-12,
+            "orthogonality": 1.8207657603852567e-14,
+            "spectrum_error": 1.0371703496048212e-12,
+            "requested_subspace_error": 2.54271477887829e-08,
+            "status": 0,
+            "converged": 6
+          },
+          "outer_iterations": 5,
+          "inner_stats": [
+            148736,
+            768,
+            18,
+            204
+          ],
+          "inner_fresh_residual_maxima": [
+            1.0798694190554586e-12,
+            7.312725973430406e-11
+          ]
+        }
+      ],
+      "median_seconds": 26.255061950534582
+    },
+    {
+      "method": "cudss",
+      "setup_seconds": 0.33935418725013733,
+      "setup_free_memory_decrease_bytes": 591396864,
+      "capture_free_memory_decrease_bytes": 0,
+      "capture_seconds": 0.3417772352695465,
+      "warmup_seconds": 0.30766788125038147,
+      "free_memory_decrease_bytes": 591396864,
+      "memory_scope": "Setup/capture pool and runtime free-memory decrease, not peak/live allocation",
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1236,
+          "KERNEL": 7298,
+          "MEMCPY": 1026,
+          "CONDITIONAL": 199
+        },
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 408,
+          "DtoD (DEVICE to DEVICE)": 618
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "trials": [
+        {
+          "seconds": 0.27676138281822205,
+          "quality": {
+            "accepted": true,
+            "residual": 1.4507748265824047e-13,
+            "max_absolute_residual": 4.6371326917205025e-15,
+            "orthogonality": 1.8207657603852567e-14,
+            "spectrum_error": 1.035838081975271e-12,
+            "requested_subspace_error": 5.3246916729561636e-11,
+            "status": 0,
+            "converged": 6
+          },
+          "outer_iterations": 5
+        },
+        {
+          "seconds": 0.2767559736967087,
+          "quality": {
+            "accepted": true,
+            "residual": 1.5580649549374956e-13,
+            "max_absolute_residual": 4.17656360884866e-15,
+            "orthogonality": 1.509903313490213e-14,
+            "spectrum_error": 1.0366152380925087e-12,
+            "requested_subspace_error": 4.8628885204481646e-11,
+            "status": 0,
+            "converged": 6
+          },
+          "outer_iterations": 5
+        },
+        {
+          "seconds": 0.27674655616283417,
+          "quality": {
+            "accepted": true,
+            "residual": 1.1132889194238766e-13,
+            "max_absolute_residual": 3.830919956260281e-15,
+            "orthogonality": 1.7763568394002505e-14,
+            "spectrum_error": 1.0380585280245214e-12,
+            "requested_subspace_error": 4.277178209300051e-11,
+            "status": 0,
+            "converged": 6
+          },
+          "outer_iterations": 5
+        }
+      ],
+      "median_seconds": 0.2767559736967087
+    }
+  ],
+  "other_gpu_processes_before": [],
+  "source_sha256": {
+    "/home/horde/projects/warpack/benchmarks/experimental/interior_gmres.py": "5c0cc76b9df2c4642138170e7c5c1062450caf5050e9c3bc14ae12a22583ac7e",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e"
+  },
+  "protocol": "Sequential warm replay trials; setup includes preconditioner/inverse and solver allocation, capture separate. CPU reference and device matrix transfer excluded. Every original-pencil and complete requested-space gate retained. GMRES uses a fixed right preconditioner of SPD K+M, never an SPD factorization of K-sigma M. Actual inner iterations and fresh linear failures retained. cuDSS vendor HtoD metadata is tracked separately in #29.",
+  "other_gpu_processes_after": [],
+  "timing_eligible": true
+}

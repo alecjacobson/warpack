@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "b307447",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "664 passed",
+    "seconds": 339.53
+  },
+  "new_gmres_cases": 35,
+  "stock_warp_1_15": {
+    "command": "PYTHONPATH=\"$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_gmres_inverse.py",
+    "result": "35 passed",
+    "seconds": 431.71,
+    "scope": "All real GMRES component and complete interior-FEM tests, including rejection of unsupported adaptive opt-in and fixed outer graph replay."
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks/experimental: 95 files already formatted",
+  "source_sha256": {
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/__init__.py": "9a6da6ad0d921033f819c63606ab942690a616ef5ba5b2408c2dee18c0a58580",
+    "tests/test_gmres_inverse.py": "23fa075b816bb96e8b74c44a61d5468bc44e77fce8d7bb71043b9ba7a434aa5d",
+    "benchmarks/experimental/interior_gmres.py": "839ff34ef85724d3698c96c4f55937c44eae6060d68447aa628c4f6ed84ad4eb"
+  },
+  "reports": [
+    "interior-gmres64-screen",
+    "interior-gmres128-screen",
+    "interior-gmres128",
+    "interior-gmres128-large",
+    "interior-gmres256-large-screen",
+    "interior-gmres256-large",
+    "interior-gmres128-near"
+  ],
+  "accepted_repeated_profiles": [
+    "interior-gmres128",
+    "interior-gmres256-large",
+    "interior-gmres128-near"
+  ],
+  "rejected_repeated_profile": "interior-gmres128-large: unchanged subspace gate fails all three trials; physical/count gates pass",
+  "inner_failures": "Zero in accepted default-gap 10,890 and 41,616 runs; seven per replay in accepted near-gap outer problem, retained explicitly",
+  "wheel": "gmres-wheel.json: 21 core modules, isolated installed import, no benchmark modules",
+  "scope": "New real GMRES inverse, pure Warp diagnostics and existing upstream algorithm. Full local suite is not a new complete upstream CuPy/Spectra suite. Benchmark computation excludes host references. Complex realification fix #73 is developed separately and is not in this validation."
+}
