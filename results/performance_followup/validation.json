@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "4528a845592c526c82ace8309e6eb26574a3245f",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "472 passed",
+    "seconds": 211.28,
+    "scope": "Entire local suite before adding two compact-storage rejection tests; final adapter follow-up recorded separately."
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks/experimental benchmarks/monitor_gpu.py: passed",
+  "package": {
+    "python_files": 18,
+    "experimental_packaged": false,
+    "sha256": "7382e508fed7264194838d0dc807e682c78f0941862e35841b25fbf8949aea05"
+  },
+  "setup_accounting": "All four reports with total_setup_seconds pass exact sum and historical-alias checks",
+  "source_sha256": {
+    "benchmarks/experimental/batched_cg.py": "62fcc4d24610b5c5745dfde3f2a271efb78cfcc5206d3de20199abfe9a4edf43",
+    "benchmarks/experimental/compare_block.py": "d6d6ef1ef61eb9833f581014cd6141549063cdb9c993a276d8a643f58701c131",
+    "benchmarks/monitor_gpu.py": "caeee27c6ec5d75bdd6cab9d88c48ab3e04fa39ead31a55d0a3cd0584caba089",
+    "tests/test_batched_cg_experimental.py": "c1f328ce158c7813f0c82233d38920687191caf75ec8d4674d260732874d28df"
+  },
+  "scope": "New experimental batched/mixed-precision CG adapter; production numerical arithmetic unchanged. This is not a full upstream CuPy/Spectra rerun.",
+  "numerical_reports": [
+    "results/performance_followup/anvil-batched-cg10.json",
+    "results/performance_followup/anvil-batched-fp32-cg10.json",
+    "results/performance_followup/anvil-block-cg10-before.json",
+    "results/performance_followup/anvil-cg-baseline.json",
+    "results/performance_followup/anvil-cudss-baseline.json",
+    "results/performance_followup/anvil-fp32-fsai64-screen.json",
+    "results/performance_followup/fem-consistent-fp32.json",
+    "results/performance_followup/fem-lumped-large-fp32.json"
+  ],
+  "final_adapter_tests": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_batched_cg_experimental.py --tb=short",
+    "result": "22 passed",
+    "seconds": 2.08,
+    "includes": "Two additional compact-row rejection tests in FP32 and FP64"
+  }
+}

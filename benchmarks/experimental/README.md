@@ -4,7 +4,9 @@ This directory evaluates [#59](https://github.com/alecjacobson/warpack/issues/59
 under the large FEM iterative-performance issue
 [#15](https://github.com/alecjacobson/warpack/issues/15). It is **not a supported
 public LOBPCG API** and is excluded from the installed package. The production
-solver defaults and README's best Anvil timings are unchanged.
+solver defaults are unchanged. The [uncontended batched-CG follow-up](BATCHED_CG.md)
+now records a 4.84 s mixed-precision block replay versus 9.58 s production CG;
+the older contended results below remain historical work-budget evidence.
 
 The prototype computes the smallest algebraic eigenpairs of a symmetric pencil
 with SPD mass. An optional M-orthonormal invariant subspace can be excluded,
@@ -61,7 +63,7 @@ the existing independent reference. The preconditioner uses `A + 10000 I`.
 FSAI uses upstream FP32 factors and FP64 products. All runs below used the
 pinned Warp 1.18 FSAI environment documented in the main README.
 
-**Every timing in this report is ineligible for a performance claim:** other
+**Every timing in the original experiments below is ineligible for a performance claim:** other
 GPU jobs were running. These are numerical/work-budget screens, not replacements
 for the uncontended Anvil baseline. Setup and capture are recorded separately.
 

@@ -100,6 +100,8 @@ def main():
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
+    p.add_argument("--batched-cg", action="store_true")
+    p.add_argument("--inner-fp32", action="store_true")
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
     args = p.parse_args()
@@ -107,6 +109,10 @@ def main():
         p.error("CuPy adapter currently compares direct FSAI/BJ application only")
     if args.inner_cg < 0 or args.repeats < 1:
         p.error("require inner-cg >= 0 and repeats >= 1")
+    if args.batched_cg and not args.inner_cg:
+        p.error("--batched-cg requires --inner-cg")
+    if args.inner_fp32 and not args.batched_cg:
+        p.error("--inner-fp32 requires --batched-cg")
     before = other_gpu_processes()
     a, mass, shifted, constraints, sa, sb, k, check = prepare(args)
     print("Prepared", args.case, "n=", a.shape[0], flush=True)
@@ -126,28 +132,48 @@ def main():
     )
     print("Preconditioner ready", setup_seconds, flush=True)
     initial = np.random.default_rng(42).normal(size=(a.shape[0], args.width))
-    starts = wp.array(initial.T.copy(), dtype=wp.float64)
-    from benchmarks.experimental.block_kernels import BatchedSparseOperator, UpstreamSparseOperator
 
-    operator = UpstreamSparseOperator if args.native_products else SparseOperator
-    if args.batched_products:
-        operator = BatchedSparseOperator
-    preconditioner = (
-        CGInverse(shifted, tol=args.inner_tol, atol=0.0, maxiter=args.inner_cg, preconditioner=pre)
-        if args.inner_cg
-        else UpstreamPreconditioner(pre)
-    )
-    solver = BlockLOBPCG(
-        operator(a),
-        k,
-        args.width,
-        mass=operator(mass) if mass is not None else None,
-        preconditioner=preconditioner,
-        initial_vectors=starts,
-        constraints=constraints,
-        tol=args.tol,
-        gram_chunk=args.gram_chunk,
-    )
+    def create_solver():
+        starts = wp.array(initial.T.copy(), dtype=wp.float64)
+        from benchmarks.experimental.block_kernels import (
+            BatchedSparseOperator,
+            UpstreamSparseOperator,
+        )
+
+        operator = UpstreamSparseOperator if args.native_products else SparseOperator
+        if args.batched_products:
+            operator = BatchedSparseOperator
+        if args.batched_cg:
+            from benchmarks.experimental.batched_cg import BatchedCGInverse
+
+            preconditioner = BatchedCGInverse(
+                shifted,
+                args.width,
+                tol=args.inner_tol,
+                atol=0.0,
+                maxiter=args.inner_cg,
+                preconditioner=pre,
+                working_dtype=wp.float32 if args.inner_fp32 else wp.float64,
+            )
+        elif args.inner_cg:
+            preconditioner = CGInverse(
+                shifted, tol=args.inner_tol, atol=0.0, maxiter=args.inner_cg, preconditioner=pre
+            )
+        else:
+            preconditioner = UpstreamPreconditioner(pre)
+        return BlockLOBPCG(
+            operator(a),
+            k,
+            args.width,
+            mass=operator(mass) if mass is not None else None,
+            preconditioner=preconditioner,
+            initial_vectors=starts,
+            constraints=constraints,
+            tol=args.tol,
+            gram_chunk=args.gram_chunk,
+        ), preconditioner
+
+    solver_setup_seconds, (solver, preconditioner) = timed(create_solver)
     capture_seconds, graph = timed(lambda: solver.capture(args.steps))
     print("Captured", capture_seconds, flush=True)
     destination = Path(args.out)
@@ -163,7 +189,18 @@ def main():
         args=vars(args),
         n=a.shape[0],
         k=k,
+        # Preserve the historical field's meaning; total setup is explicit.
         setup_seconds=setup_seconds,
+        preconditioner_setup_seconds=setup_seconds,
+        solver_setup_seconds=solver_setup_seconds,
+        total_setup_seconds=setup_seconds + solver_setup_seconds,
+        setup_scope=(
+            "Preconditioner construction plus solver/operator/CG workspaces, input upload, "
+            "and optional FP32 matrix copy. Excludes mesh assembly, reference loading, "
+            "host random-start generation, graph capture and warmup. JIT work is included "
+            "where encountered; these are not warmed setup measurements. "
+            "Historical setup_seconds is an alias for preconditioner_setup_seconds."
+        ),
         capture_seconds=capture_seconds,
         warmup_seconds=warmup_seconds,
         graph=audit,
@@ -178,6 +215,7 @@ def main():
                 "benchmarks/experimental/block_lobpcg.py",
                 "benchmarks/experimental/block_kernels.py",
                 "benchmarks/experimental/compare_block.py",
+                "benchmarks/experimental/batched_cg.py",
                 "warpack/generalized.py",
             )
         },
@@ -192,6 +230,11 @@ def main():
         quality["accepted"] &= quality["status"] == 0 and quality["converged"] == k
         if args.inner_cg:
             quality["preconditioner_cg_stats"] = preconditioner.stats.numpy().tolist()
+            quality["cg_iteration_accounting"] = (
+                "scheduled vector iterations, including masked converged RHSs"
+                if args.batched_cg
+                else "sum of independently stopped RHS iterations"
+            )
         report["rows"].append(
             dict(
                 method="Warp experimental LOBPCG",
