@@ -31,6 +31,8 @@ Anvil adapted from [“Blacksmith's Anvil”](https://sketchfab.com/3d-models/bl
 
 `SparseOperator` accepts compact scalar FP64 CSR or 3×3 FP64 BSR matrices from `warp.sparse`. Complex inputs use `HermitianCSR` or `ComplexCSR`, with values stored as `wp.vec2d(real, imaginary)`; `SparseOperator` accepts real matrices only. The general and Hermitian paths are currently reference implementations; their performance has not been tuned to the level of the real symmetric path. The SVD path is validated for leading nonzero singular triplets; recovery of nullspace bases is not currently supported.
 
+Constrained replay refreshes current constraint transposes and row norms on device. Keep sparse topology and addresses fixed, and update the KKT inverse when coefficients change. See the [constraint replay repair and regression controls](benchmarks/upstream/CONSTRAINED_REFRESH.md).
+
 The installed `warpack` package contains the numerical solvers, inverse backends, spectral transforms, constraint operations, and diagnostics. Application matrix construction lives in [`examples/problems/`](examples/problems/README.md), shared by the showcase, benchmarks, and tests. This includes tetrahedral elasticity, mesh loading, rigid-motion bases, and skinning weight/rig matrices. These helpers require a source checkout and are not installed as library APIs.
 
 ## Install

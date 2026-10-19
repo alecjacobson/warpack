@@ -1,0 +1,114 @@
+{
+  "side": 8,
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "f728d75ffa582a65767477d26cefc512e2923cb1",
+  "matrix_hash": "4159d1c0d1796515c8ff4f45badb117e2fa36ba4a64c08e05529ac9dc95e6681",
+  "numerical_source_hash": "40c7ccd5c1995600a3ef042592a4f651c58e50548cc4e7d46e52f52364ba0475",
+  "reference_cache": "build/skinning-audit/reference-4159d1c0d1796515-shift-0.1-k20.npz",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz",
+  "cpu_contention": "Not isolated; CPU-heavy geometric_peel process observed during initial large run",
+  "blas_threads": "4",
+  "other_gpu_processes": [],
+  "reference": "independent enlarged ARPACK KKT transform (seed 913)",
+  "reference_check": {
+    "equilibrium_residual": 1.216287425135084e-13,
+    "constraint_residual": 1.507209327929254e-14,
+    "raw_rig_constraint_max": 1.1947907940790259e-14,
+    "eigenvalue_error": 0.0,
+    "mass_orthogonality": 3.5109893786188178e-15,
+    "subspace_error": 1.3322676295501878e-15,
+    "accepted": true
+  },
+  "raw_constraint_rows": 24,
+  "independent_constraints": 14,
+  "protocol": "Shared heterogeneous tet weight stiffness, lumped mass, rank-reduced Appendix B.1 constraints; sequential methods; one warmup and repeated synchronized solves, all independently checked. Assembly, reference and validation excluded. GPU setup includes uploads/KKT assembly/factors; CPU setup includes KKT factors. Spectra compilation excluded. Fixed Warp replay includes physical residuals and multipliers; CPU/CuPy physical checks are outside solve. No speedups from rejected trials.",
+  "cases": [
+    {
+      "method": "warp-cudss",
+      "n": 2025,
+      "constraints": 14,
+      "nnz": 13113,
+      "kkt_nnz": 61921,
+      "k": 20,
+      "ncv": 64,
+      "shift": -0.1,
+      "seed": 2026,
+      "tolerance": 1e-09,
+      "acceptance_tolerance": 1e-07,
+      "steps": 2,
+      "factor": "cuDSS general + matching + one Warp residual correction",
+      "cooperative_refinement": true,
+      "setup_seconds": 0.19853698834776878,
+      "graph_audit": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 954,
+          "MEMCPY": 1369,
+          "KERNEL": 4510,
+          "CONDITIONAL": 103
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 949,
+          "HtoD (HOST PAGEABLE to DEVICE)": 420
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "capture_warmup_seconds": 0.49615873023867607,
+      "samples": [
+        0.053347375243902206,
+        0.053349122405052185,
+        0.05334264039993286
+      ],
+      "solve_seconds": 0.053347375243902206,
+      "checks": [
+        {
+          "equilibrium_residual": 9.028645407966121e-14,
+          "constraint_residual": 2.0002298528930815e-16,
+          "raw_rig_constraint_max": 1.4354836763708079e-16,
+          "eigenvalue_error": 2.861559156738919e-14,
+          "mass_orthogonality": 2.2589617045217454e-14,
+          "subspace_error": 9.103828801926284e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 5.909634944696087e-14,
+          "constraint_residual": 2.2248920487619285e-16,
+          "raw_rig_constraint_max": 1.1839487723541708e-16,
+          "eigenvalue_error": 2.878099961113133e-14,
+          "mass_orthogonality": 2.4915039861319628e-14,
+          "subspace_error": 9.547918011776346e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 6.682072457757767e-14,
+          "constraint_residual": 2.94963502039754e-16,
+          "raw_rig_constraint_max": 1.0451708942760263e-16,
+          "eigenvalue_error": 2.861559156738919e-14,
+          "mass_orthogonality": 2.4466531333168892e-14,
+          "subspace_error": 9.103828801926284e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 1.1477354527479013e-13,
+          "constraint_residual": 2.7961557115579724e-16,
+          "raw_rig_constraint_max": 1.244664094013359e-16,
+          "eigenvalue_error": 2.878099961113133e-14,
+          "mass_orthogonality": 2.3605642075342756e-14,
+          "subspace_error": 9.103828801926284e-15,
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "outcome": "passed",
+      "strict_converged": 20,
+      "device_equilibrium_residual": 1.147981421730387e-13,
+      "device_constraint_residual": 1.2034680052452903e-16
+    }
+  ]
+}

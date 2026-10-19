@@ -7,6 +7,7 @@ import warp.sparse as ws
 
 from . import kernels as K
 from .generalized_krylov import GeneralizedKrylovSchur, quotient_parts, quotients
+from .sparse_utils import _Transpose
 
 
 def _scalar_csr(matrix):
@@ -162,13 +163,24 @@ def _restart_multiplier_images(
 
 
 @wp.kernel
-def _constraint_norms(
-    offsets: wp.array[wp.int32], values: wp.array[wp.float64], norms: wp.array[wp.float64]
+def _constraint_norm_parts(
+    offsets: wp.array[wp.int32], values: wp.array[wp.float64], parts: wp.array2d[wp.float64]
 ):
+    row, chunk, lane = wp.tid()
+    value = wp.float64(0.0)
+    for p in range(offsets[row] + chunk * 128 + lane, offsets[row + 1], 128 * parts.shape[1]):
+        value += values[p] * values[p]
+    total = wp.tile_extract(wp.tile_sum(wp.tile(value)), 0)
+    if lane == 0:
+        parts[row, chunk] = total
+
+
+@wp.kernel
+def _constraint_norms(parts: wp.array2d[wp.float64], norms: wp.array[wp.float64]):
     i = wp.tid()
     value = wp.float64(0.0)
-    for p in range(offsets[i], offsets[i + 1]):
-        value += values[p] * values[p]
+    for chunk in range(parts.shape[1]):
+        value += parts[i, chunk]
     norms[i] = wp.sqrt(value)
 
 
@@ -248,7 +260,10 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
     and restarts, avoiding extra inverse solves at finalization. As for cached
     physical products, this relies on a fixed linear inverse during each solve;
     approximate-inverse error is still checked in the original equilibrium.
-    Replay uses preallocated buffers; cuDSS requires a fixed outer cycle budget.
+    Replay refreshes the current constraint transpose and row norms on device.
+    Matrix values may change with fixed topology/addresses; updating the KKT
+    inverse remains the caller's responsibility. cuDSS requires a fixed outer
+    cycle budget.
     Owns no factors: release graphs before closing the caller-owned inverse.
     """
 
@@ -293,7 +308,8 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
         )
         self.physical_inverse = physical
         self.constraints = constraints
-        self.constraint_transpose = ws.bsr_transposed(constraints)
+        self._constraint_transpose = _Transpose(constraints)
+        self.constraint_transpose = self._constraint_transpose.matrix
         self.multipliers = wp.empty((k, r), dtype=wp.float64, device=self.device)
         self.constraint_values = wp.empty_like(self.multipliers)
         self.constraint_residuals = wp.empty(k, dtype=wp.float64, device=self.device)
@@ -304,12 +320,29 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
             (self.keep, r), dtype=wp.float64, device=self.device
         )
         self.constrained_sums = wp.zeros((k, 5), dtype=wp.float64, device=self.device)
-        wp.launch(
-            _constraint_norms,
-            r,
-            [constraints.offsets, constraints.values, self.constraint_norms],
+        chunks = max(1, min(16, (n + 2047) // 2048))
+        self._constraint_norm_parts = wp.empty((r, chunks), dtype=wp.float64, device=self.device)
+        self._refresh_constraints()
+
+    def _refresh_constraints(self):
+        self._constraint_transpose.refresh()
+        wp.launch_tiled(
+            _constraint_norm_parts,
+            dim=self._constraint_norm_parts.shape,
+            inputs=[self.constraints.offsets, self.constraints.values, self._constraint_norm_parts],
+            block_dim=128,
             device=self.device,
         )
+        wp.launch(
+            _constraint_norms,
+            self.constraints.shape[0],
+            [self._constraint_norm_parts, self.constraint_norms],
+            device=self.device,
+        )
+
+    def initialize(self, seed=42):
+        self._refresh_constraints()
+        super().initialize(seed)
 
     def _save_multiplier_image(self, j):
         wp.copy(
