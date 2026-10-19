@@ -73,3 +73,11 @@ tol=1e-12 and at most 300 cycles, retaining the original 1e-9 assertions.
 It also checks both SVD equations, leading subspaces, orthogonality and all
 three convergence counts on two graph replays, for this matrix and its transpose.
 The original ncv=10 strict-count failure remains in the upstream report.
+
+`spectra_shifted_far.npz` preserves exact real matrices from `SymEigsShift_2`
+and `SymEigsShift_7`, at the same pinned Spectra revision/exporter (seed 123).
+These generated numerical data have n=10/100, k=3/10, original ncv=6/20,
+and sigma=1/10. SM on the inverse selects physical eigenvalues farthest from
+sigma. The regressions use explicit ncv=8/48 profiles and retain the original
+100-cycle budget and accuracy bounds; they do not redefine SM as nearest-shift
+selection or claim convergence for the original compact profiles.

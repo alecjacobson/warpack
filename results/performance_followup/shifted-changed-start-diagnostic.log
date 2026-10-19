@@ -1,0 +1,67 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_shifted_far_modes_with_explicit_basis_and_changed_starts[SymEigsShift_7-10-40-10.0] _
+
+key = 'SymEigsShift_7', k = 10, ncv = 40, shift = 10.0
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-30/test_shifted_far_modes_with_ex0')
+
+    @pytest.mark.parametrize(
+        "key,k,ncv,shift", [("SymEigsShift_2", 3, 8, 1.0), ("SymEigsShift_7", 10, 40, 10.0)]
+    )
+    def test_shifted_far_modes_with_explicit_basis_and_changed_starts(key, k, ncv, shift, tmp_path):
+        a = np.load(Path(__file__).parent / "fixtures/spectra_shifted_far.npz")[key]
+        ref, basis = np.linalg.eigh(a)
+        # Independent physical-distance definition; do not reuse report selector.
+        selected = np.argsort(-abs(ref - shift))[:k]
+        expected = ref[selected]
+        allowed = basis[:, selected]
+        rng = np.random.default_rng(204)
+        starts = wp.array(rng.normal(size=len(a)), dtype=wp.float64)
+        inverse = CuDSSInverse(matrix(a - shift * np.eye(len(a))), 1, mtype="symmetric")
+        solver = KrylovSchur(inverse, k, ncv=ncv, which="SM", tol=1e-12, initial_vector=starts)
+        evaluation = EigenpairEvaluation(SparseOperator(matrix(a)), solver.eigenvectors, tol=1e-9)
+        graph = solver.capture(100, finalizer=evaluation.run)
+        try:
+            for _ in range(2):
+                starts.assign(rng.normal(size=len(a)))
+                wp.capture_launch(graph)
+                values, vectors = evaluation.values.numpy(), solver.eigenvectors.numpy().T
+                diagnostics = dict(
+                    inverse_count=int(solver.converged.numpy()[0]),
+                    physical_count=int(evaluation.converged.numpy()[0]),
+                    residual=float(np.max(abs(a @ vectors - vectors * values))),
+                )
+>               np.testing.assert_allclose(
+                    np.sort(values), np.sort(expected), atol=1e-9, rtol=0, err_msg=str(diagnostics)
+                )
+E               AssertionError: 
+E               Not equal to tolerance rtol=0, atol=1e-09
+E               {'inverse_count': 9, 'physical_count': 9, 'residual': 2.6959507568574117}
+E               Mismatched elements: 1 / 10 (10%)
+E               Max absolute difference among violations: 17.10100543
+E               Max relative difference among violations: 1.49058521
+E                ACTUAL: array([-15.286467, -14.491464, -14.202065, -13.215257, -13.124419,
+E                      -12.838085, -12.518768, -12.158591, -11.734373,   5.628327])
+E                DESIRED: array([-15.286467, -14.491464, -14.202065, -13.215257, -13.124419,
+E                      -12.838085, -12.518768, -12.158591, -11.734373, -11.472679])
+
+tests/test_transformed_selection.py:63: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Warp 1.18.0 initialized:
+   CUDA Toolkit 12.9, Driver 12.8
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA L40" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /home/horde/.cache/warp/1.18.0
+Module _bsr_accumulate_triplet_values_5520c14c 2336fbe load on device 'cuda:0' took 0.45 ms  (cached)
+Module warpack.kernels c731848 load on device 'cuda:0' took 1.45 ms  (cached)
+Module warpack.kernels 5816ae4 load on device 'cuda:0' took 1.64 ms  (cached)
+Module warpack.krylov_kernels c6c22a1 load on device 'cuda:0' took 0.85 ms  (cached)
+Module jacobi_kernel__locals__compute_90b82a43 90b82a4 load on device 'cuda:0' took 0.48 ms  (cached)
+Module warpack.linalg_tiles 1750f83 load on device 'cuda:0' took 124.06 ms  (cached)
+Module warpack.krylov_kernels e6afbee load on device 'cuda:0' took 0.86 ms  (cached)
+Module warpack.kernels fee4055 load on device 'cuda:0' took 1.45 ms  (cached)
+=========================== short test summary info ============================
+FAILED tests/test_transformed_selection.py::test_shifted_far_modes_with_explicit_basis_and_changed_starts[SymEigsShift_7-10-40-10.0]
+1 failed, 7 deselected in 23.19s

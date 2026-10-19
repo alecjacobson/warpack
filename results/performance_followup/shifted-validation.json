@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-19",
+  "production_revision": "bb49da7e9e387f8badd71f974a50c4010e3f2a78",
+  "production_changes": false,
+  "source_sha256": {
+    "benchmarks/upstream/run_spectra.py": "8799e8fce8c788d2eeb4f64f2c841441716b558e0038778c652addf8a4f4edeb",
+    "benchmarks/upstream/shifted_selection.py": "f40df43a60c1e0d27ea9bf76dc5bb65b1f01b021c3f05c7e595db6460fce6b1b",
+    "tests/test_transformed_selection.py": "6cd08778133497222bef43be6e856a2ff09d4c119e5d6abb70558bddb2c0e30a",
+    "tests/fixtures/spectra_shifted_far.npz": "f1f225a62172e1ac5b8fcf135c8e2ff42196251321e1ec048001d407f18526af"
+  },
+  "spectra_revision": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
+  "export_manifest": [
+    {
+      "family": "SymEigsShift",
+      "source_sha256": "23dc21792e302a1511dcb5c3b691309b02139d406db9a93fedd53cb7199c1c9a",
+      "exit_code": 0,
+      "max_size": null
+    }
+  ],
+  "profiles": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m benchmarks.upstream.shifted_selection --out results/performance_followup/shifted-selection-final.json",
+    "result": "Four accepted profiles; two original compact allowed-nonconvergence controls retained as strict failures.",
+    "accuracy": "Original absolute residual 1e-9, internal inverse tolerance 1e-12, independent physical spectrum/subspace and orthogonality. No tolerance relaxation.",
+    "graph": "100 fixed cycles; cuDSS-only inverse with one Warp correction; final public capture replay checked separately from diagnostic continuation graphs."
+  },
+  "focused": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_transformed_selection.py tests/test_multiplicity.py tests/test_upstream_contracts.py",
+    "result": "58 passed",
+    "seconds": 45.27
+  },
+  "additional_selector_tests": {
+    "result": "5 passed",
+    "scope": "Unshifted Hermitian selection preserved after reference-helper refactor"
+  },
+  "lint": "passed",
+  "format": "passed",
+  "scope": "Focused accuracy/profile and reporting change. No production algorithm/default change, full-suite rerun, or accepted timing comparison.",
+  "native": "Unmodified Spectra: n10 dense/sparse SM sections pass; dense n100 SM reports nconv3 after501 iterations in its allowed-failure branch; sparse n100 section passes."
+}

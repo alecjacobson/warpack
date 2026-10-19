@@ -82,6 +82,22 @@ def solver_metadata(solver):
     )
 
 
+def select_symmetric_reference(values, k, which, sigma=None):
+    """Select on the iteration spectrum, retaining physical reference indices."""
+    ranking = values if sigma is None else 1.0 / (values - sigma)
+    if which == "LM":
+        return np.argsort(-abs(ranking))[:k]
+    if which == "SM":
+        return np.argsort(abs(ranking))[:k]
+    order = np.argsort(ranking)
+    if which == "LA":
+        return order[-k:]
+    if which == "SA":
+        return order[:k]
+    # BothEnds: the larger transformed end gets the odd extra mode.
+    return np.r_[order[: k // 2], order[-(k - k // 2) :]]
+
+
 def run(
     case, accuracy_only=False, iteration_budget=None, tolerance_override=None, ncv_override=None
 ):
@@ -279,18 +295,11 @@ def run(
             residual = a @ v - (v if b is None else b @ v) * w
             err = float(np.max(np.abs(residual)))
             errors = {"max_absolute_residual": err, "returned_pairs": len(w)}
-            if name in ("HermEigs", "DavidsonSymEigs"):
+            if name in ("HermEigs", "DavidsonSymEigs", "SymEigsShift"):
                 ref, basis = la.eigh(a)
-                if which == "LM":
-                    selected = np.argsort(-abs(ref))[:k]
-                elif which == "SM":
-                    selected = np.argsort(abs(ref))[:k]
-                elif which == "LA":
-                    selected = np.arange(n - k, n)
-                elif which == "SA":
-                    selected = np.arange(k)
-                else:  # BothEnds: the larger end gets the odd extra mode.
-                    selected = np.r_[np.arange(k // 2), np.arange(n - (k - k // 2), n)]
+                selected = select_symmetric_reference(
+                    ref, k, which, sigma.real if name == "SymEigsShift" else None
+                )
                 expected = ref[selected]
                 allowed = basis[:, np.min(abs(ref[:, None] - expected), axis=1) <= 1e-9]
                 errors.update(
