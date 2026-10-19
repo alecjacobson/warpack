@@ -1,0 +1,462 @@
+{
+  "matrix_sha256": "14d64e9a7263be534d9b3f497af6a47d1c1ba09d82e3abded941e9682a93484b",
+  "args": {
+    "case": "clustered",
+    "size": 100000,
+    "modes": 20,
+    "snapshots": 128,
+    "ncv": 64,
+    "reference_ncv": 48,
+    "steps": 100,
+    "repeats": 3,
+    "compare": "cupy,scipy,spectra,warp",
+    "out": "/home/horde/projects/warpack-normal-guards/results/performance_followup/normal-guard-wide-snapshots.json"
+  },
+  "matrix_shape": [
+    100000,
+    128
+  ],
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "/home/horde/projects/warpack-normal-guards/benchmarks/experimental/normal_pod.py": "01aae723febe7a0722842d098aa9bce339ce62e26327ce66293d08e27ed86daf",
+    "/home/horde/projects/warpack-normal-guards/benchmarks/experimental/normal_svd.py": "7c202d9d7fa1287306e6d5df81cbf2bba032acbb2f34096a0a32d075601201b4",
+    "benchmarks/applications/pod_compare.py": "963e5bee72b78d7c4e5d5e9034738ce9a8313799348fa426729a5115cc38798e",
+    "warpack/solver.py": "b93a80478a139ac433dc59ddf06fd6e0fcae59d6f9db83eeea9c83f910a8852e",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a"
+  },
+  "protocol": "Sequential methods on identical input. Synchronized warm replays restore starts. Assembly/reference/validation excluded. Normal method has its own explicit ncv; reference methods use reference_ncv. Pure Warp; no formed Gram matrix; normal equations square conditioning. Physical triplets and requested spaces must pass unchanged 1e-8 gates and normal method strict 1e-11 counts.",
+  "normal": {
+    "setup_seconds": 0.2466249205172062,
+    "capture_seconds": 0.2533300407230854,
+    "warmup_seconds": 0.44076332822442055,
+    "ncv": 64,
+    "samples_seconds": [
+      0.4347318336367607,
+      0.43472587689757347,
+      0.4347083233296871
+    ],
+    "solve_seconds": 0.43472587689757347,
+    "validation": [
+      {
+        "accepted": true,
+        "residual": 2.1784515204588552e-14,
+        "orthogonality": 2.0872192862952943e-14,
+        "spectrum_error": 1.0592360951784892e-14,
+        "captured_energy": 0.8519834703937839,
+        "relative_reconstruction_error": 0.3847291639663109,
+        "optimal_relative_reconstruction_error": 0.3847291639663292,
+        "reconstruction_energy_error": 1.4100592186300771e-14,
+        "left_subspace_error": 1.0102769052971807e-14,
+        "right_subspace_error": 1.0771791075729898e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.5543122344752192e-15,
+          2.0650148258027912e-14
+        ],
+        "outer_iterations": 20,
+        "independent_recoveries": 19
+      },
+      {
+        "accepted": true,
+        "residual": 2.1784515204588552e-14,
+        "orthogonality": 2.0872192862952943e-14,
+        "spectrum_error": 1.0456561452403034e-14,
+        "captured_energy": 0.8519834703937839,
+        "relative_reconstruction_error": 0.3847291639663109,
+        "optimal_relative_reconstruction_error": 0.3847291639663292,
+        "reconstruction_energy_error": 1.4100592186300771e-14,
+        "left_subspace_error": 1.0083511192236818e-14,
+        "right_subspace_error": 1.0771791075729898e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.1102230246251565e-15,
+          2.0650148258027912e-14
+        ],
+        "outer_iterations": 20,
+        "independent_recoveries": 19
+      },
+      {
+        "accepted": true,
+        "residual": 2.2410753867086438e-14,
+        "orthogonality": 2.0872192862952943e-14,
+        "spectrum_error": 1.0592360951784892e-14,
+        "captured_energy": 0.851983470393784,
+        "relative_reconstruction_error": 0.3847291639663109,
+        "optimal_relative_reconstruction_error": 0.3847291639663292,
+        "reconstruction_energy_error": 1.4100592186300771e-14,
+        "left_subspace_error": 1.0115501235256959e-14,
+        "right_subspace_error": 1.0771791075729898e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.4432899320127035e-15,
+          2.0650148258027912e-14
+        ],
+        "outer_iterations": 20,
+        "independent_recoveries": 19
+      }
+    ],
+    "accepted": true,
+    "graph": {
+      "node_types_including_conditional_body": {
+        "KERNEL": 1320,
+        "MEMSET": 15,
+        "MEMCPY": 68,
+        "CONDITIONAL": 64
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 68
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "timing_uncontended": true
+  },
+  "references": [
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod_clustered",
+      "n": 100000,
+      "columns": 128,
+      "nnz": 12800000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 48,
+      "method": "cupy",
+      "matrix_sha256": "14d64e9a7263be534d9b3f497af6a47d1c1ba09d82e3abded941e9682a93484b",
+      "notes": "Known singular spectrum, two exact zero singular values, independent left/right requested subspaces; top multiplicity three for clustered variant",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "implementation": "CuPy svds with explicit ncv",
+      "reference_ncv": 48,
+      "reference_tolerance": 1e-11,
+      "setup_seconds": 0.08639955148100853,
+      "warmup_seconds": 0.3820083439350128,
+      "samples_seconds": [
+        0.1596747450530529,
+        0.1596953123807907,
+        0.16045786067843437
+      ],
+      "solve_seconds": 0.1596953123807907,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.1501802362291933e-14,
+          "orthogonality": 6.217248937900877e-15,
+          "spectrum_error": 1.782583856672846e-15,
+          "captured_energy": 0.8519834703937694,
+          "relative_reconstruction_error": 0.38472916396632784,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.100046198931266e-15,
+          "left_subspace_error": 2.0846793937090675e-14,
+          "right_subspace_error": 4.6327906834018643e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.261811003936829e-14,
+          "orthogonality": 4.218847493575595e-15,
+          "spectrum_error": 1.7763568394002505e-15,
+          "captured_energy": 0.851983470393769,
+          "relative_reconstruction_error": 0.38472916396632784,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.100046198931266e-15,
+          "left_subspace_error": 2.7901240084860378e-14,
+          "right_subspace_error": 5.0275828077733225e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.0774636297393242e-14,
+          "orthogonality": 4.218847493575595e-15,
+          "spectrum_error": 1.720904769139229e-15,
+          "captured_energy": 0.8519834703937691,
+          "relative_reconstruction_error": 0.3847291639663281,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 9.000377991255811e-16,
+          "left_subspace_error": 2.561068861522987e-14,
+          "right_subspace_error": 4.957635745319197e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod_clustered",
+      "n": 100000,
+      "columns": 128,
+      "nnz": 12800000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 48,
+      "method": "scipy",
+      "matrix_sha256": "14d64e9a7263be534d9b3f497af6a47d1c1ba09d82e3abded941e9682a93484b",
+      "notes": "Known singular spectrum, two exact zero singular values, independent left/right requested subspaces; top multiplicity three for clustered variant",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 48,
+      "implementation": "SciPy ARPACK explicit ncv=48",
+      "setup_seconds": 0.0016529001295566559,
+      "warmup_seconds": 1.94513376429677,
+      "samples_seconds": [
+        1.9666703194379807,
+        1.9858498349785805,
+        1.9686363637447357
+      ],
+      "solve_seconds": 1.9686363637447357,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.2441472005924019e-14,
+          "orthogonality": 1.2212453270876722e-14,
+          "spectrum_error": 1.295416747982963e-15,
+          "captured_energy": 0.8519834703937696,
+          "relative_reconstruction_error": 0.3847291639663273,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.5000629985426353e-15,
+          "left_subspace_error": 4.1875920373797515e-14,
+          "right_subspace_error": 5.1294051168155204e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.2441472005924019e-14,
+          "orthogonality": 1.2212453270876722e-14,
+          "spectrum_error": 1.295416747982963e-15,
+          "captured_energy": 0.8519834703937696,
+          "relative_reconstruction_error": 0.3847291639663273,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.5000629985426353e-15,
+          "left_subspace_error": 4.1875920373797515e-14,
+          "right_subspace_error": 5.1294051168155204e-14
+        },
+        {
+          "accepted": true,
+          "residual": 1.2441472005924019e-14,
+          "orthogonality": 1.2212453270876722e-14,
+          "spectrum_error": 1.295416747982963e-15,
+          "captured_energy": 0.8519834703937696,
+          "relative_reconstruction_error": 0.3847291639663273,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.5000629985426353e-15,
+          "left_subspace_error": 4.1875920373797515e-14,
+          "right_subspace_error": 5.1294051168155204e-14
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod_clustered",
+      "n": 100000,
+      "columns": 128,
+      "nnz": 12800000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 48,
+      "method": "spectra",
+      "matrix_sha256": "14d64e9a7263be534d9b3f497af6a47d1c1ba09d82e3abded941e9682a93484b",
+      "notes": "Known singular spectrum, two exact zero singular values, independent left/right requested subspaces; top multiplicity three for clustered variant",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Spectra built-in deterministic default; fresh solver each trial",
+      "implementation": "Spectra PartialSVDSolver sparse normal-equation products",
+      "reference_ncv": 48,
+      "reference_tolerance": 1e-11,
+      "setup_seconds": 0.2754964306950569,
+      "warmup_seconds": 1.775687251240015,
+      "samples_seconds": [
+        1.8036015182733536,
+        1.7800064980983734,
+        1.8093638643622398
+      ],
+      "solve_seconds": 1.8036015182733536,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 7.372862846270297e-14,
+          "orthogonality": 5.773159728050814e-15,
+          "spectrum_error": 3.552713678800501e-15,
+          "captured_energy": 0.8519834703937708,
+          "relative_reconstruction_error": 0.38472916396632917,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.0000419990284236e-16,
+          "left_subspace_error": 7.592499706136616e-14,
+          "right_subspace_error": 2.1128963960677944e-13
+        },
+        {
+          "accepted": true,
+          "residual": 7.372862846270297e-14,
+          "orthogonality": 5.773159728050814e-15,
+          "spectrum_error": 3.552713678800501e-15,
+          "captured_energy": 0.8519834703937708,
+          "relative_reconstruction_error": 0.38472916396632917,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.0000419990284236e-16,
+          "left_subspace_error": 7.592499706136616e-14,
+          "right_subspace_error": 2.1128963960677944e-13
+        },
+        {
+          "accepted": true,
+          "residual": 7.372862846270297e-14,
+          "orthogonality": 5.773159728050814e-15,
+          "spectrum_error": 3.552713678800501e-15,
+          "captured_energy": 0.8519834703937708,
+          "relative_reconstruction_error": 0.38472916396632917,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 1.0000419990284236e-16,
+          "left_subspace_error": 7.592499706136616e-14,
+          "right_subspace_error": 2.1128963960677944e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    },
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod_clustered",
+      "n": 100000,
+      "columns": 128,
+      "nnz": 12800000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 48,
+      "method": "warp",
+      "matrix_sha256": "14d64e9a7263be534d9b3f497af6a47d1c1ba09d82e3abded941e9682a93484b",
+      "notes": "Known singular spectrum, two exact zero singular values, independent left/right requested subspaces; top multiplicity three for clustered variant",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 100,
+      "start": "Warp seed 42; same start restored on every replay",
+      "iteration_method": "PartialSVD",
+      "cudss_refinement_steps": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.13618391379714012,
+      "capture_seconds": 0.08736858144402504,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 51
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.38319171220064163,
+      "samples_seconds": [
+        0.37840236723423004,
+        0.3784135989844799,
+        0.3784354403614998
+      ],
+      "solve_seconds": 0.3784135989844799,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.939997342593496e-14,
+          "orthogonality": 1.3322676295501878e-15,
+          "spectrum_error": 2.6037876634457557e-14,
+          "captured_energy": 0.8519834703937932,
+          "relative_reconstruction_error": 0.3847291639663299,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 5.000209995142118e-16,
+          "left_subspace_error": 3.309745059679361e-14,
+          "right_subspace_error": 3.492494791877189e-14,
+          "reported_converged": 20,
+          "solver_full_count": true,
+          "reported_max_residual": 3.5342278489089146e-14,
+          "left_converged": 20,
+          "right_converged": 20,
+          "outer_iterations": 23,
+          "breakdown_recoveries": 19,
+          "augmented_operator_products": 598
+        },
+        {
+          "accepted": true,
+          "residual": 1.954861216984899e-14,
+          "orthogonality": 1.3322676295501878e-15,
+          "spectrum_error": 2.6037876634457557e-14,
+          "captured_energy": 0.8519834703937932,
+          "relative_reconstruction_error": 0.3847291639663299,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 5.000209995142118e-16,
+          "left_subspace_error": 3.309974854499513e-14,
+          "right_subspace_error": 3.492494791877189e-14,
+          "reported_converged": 20,
+          "solver_full_count": true,
+          "reported_max_residual": 3.5347862613236974e-14,
+          "left_converged": 20,
+          "right_converged": 20,
+          "outer_iterations": 23,
+          "breakdown_recoveries": 19,
+          "augmented_operator_products": 598
+        },
+        {
+          "accepted": true,
+          "residual": 1.9552056812412172e-14,
+          "orthogonality": 1.2212453270876722e-15,
+          "spectrum_error": 2.6037876634457557e-14,
+          "captured_energy": 0.8519834703937932,
+          "relative_reconstruction_error": 0.3847291639663299,
+          "optimal_relative_reconstruction_error": 0.3847291639663292,
+          "reconstruction_energy_error": 5.000209995142118e-16,
+          "left_subspace_error": 3.30937809261331e-14,
+          "right_subspace_error": 3.492494791877189e-14,
+          "reported_converged": 20,
+          "solver_full_count": true,
+          "reported_max_residual": 3.5351374613908174e-14,
+          "left_converged": 20,
+          "right_converged": 20,
+          "outer_iterations": 23,
+          "breakdown_recoveries": 19,
+          "augmented_operator_products": 598
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 20,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    }
+  ],
+  "competing_gpu_processes": []
+}

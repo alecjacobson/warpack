@@ -1,0 +1,113 @@
+{
+  "args": {
+    "case": "clustered",
+    "size": 100000,
+    "modes": 20,
+    "ncv": 48,
+    "reference_ncv": 40,
+    "steps": 60,
+    "repeats": 3,
+    "compare": "",
+    "out": "/home/horde/projects/warpack-normal-guards/results/performance_followup/normal-guard-old-control.json"
+  },
+  "matrix_shape": [
+    100000,
+    48
+  ],
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "/home/horde/projects/warpack/benchmarks/experimental/normal_pod.py": "28b8e29e48f9ade4d64c70d8e9a40d920f0169a20d8f9af7c482b265ae6e04fe",
+    "/home/horde/projects/warpack/benchmarks/experimental/normal_svd.py": "47dd4d00b6fc418c2faed7ffb7b8f39414da8d38a1b9d45c26020edd1f2fe0dd",
+    "warpack/solver.py": "b93a80478a139ac433dc59ddf06fd6e0fcae59d6f9db83eeea9c83f910a8852e",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a"
+  },
+  "protocol": "Sequential methods on identical input. Synchronized warm replays restore starts. Assembly/reference/validation excluded. Normal method has its own explicit ncv; reference methods use reference_ncv. Pure Warp; no formed Gram matrix; normal equations square conditioning. Physical triplets and requested spaces must pass unchanged 1e-8 gates and normal method strict 1e-11 counts.",
+  "normal": {
+    "setup_seconds": 0.17208364605903625,
+    "capture_seconds": 0.22557353973388672,
+    "warmup_seconds": 0.01999172568321228,
+    "ncv": 48,
+    "samples_seconds": [
+      0.015414297580718994,
+      0.01542476937174797,
+      0.015415951609611511
+    ],
+    "solve_seconds": 0.015415951609611511,
+    "validation": [
+      {
+        "accepted": true,
+        "residual": 1.5913062454775e-14,
+        "orthogonality": 1.2656542480726785e-14,
+        "spectrum_error": 5.9563049548018185e-15,
+        "captured_energy": 0.9946568459831083,
+        "relative_reconstruction_error": 0.0730968810339503,
+        "optimal_relative_reconstruction_error": 0.07309688103401323,
+        "reconstruction_energy_error": 9.197356712463075e-15,
+        "left_subspace_error": 5.98787897791262e-15,
+        "right_subspace_error": 6.5968964312823796e-15,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      },
+      {
+        "accepted": true,
+        "residual": 1.6054153462471916e-14,
+        "orthogonality": 1.2656542480726785e-14,
+        "spectrum_error": 6.0636760008478234e-15,
+        "captured_energy": 0.9946568459831083,
+        "relative_reconstruction_error": 0.07309688103395184,
+        "optimal_relative_reconstruction_error": 0.07309688103401323,
+        "reconstruction_energy_error": 8.973030938988365e-15,
+        "left_subspace_error": 5.9952387436286665e-15,
+        "right_subspace_error": 6.5968964312823796e-15,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      },
+      {
+        "accepted": true,
+        "residual": 1.5770190555939006e-14,
+        "orthogonality": 1.2656542480726785e-14,
+        "spectrum_error": 6.156644169901561e-15,
+        "captured_energy": 0.9946568459831081,
+        "relative_reconstruction_error": 0.07309688103394878,
+        "optimal_relative_reconstruction_error": 0.07309688103401323,
+        "reconstruction_energy_error": 9.421682485937784e-15,
+        "left_subspace_error": 6.0291523429076476e-15,
+        "right_subspace_error": 6.5968964312823796e-15,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      }
+    ],
+    "accepted": true,
+    "graph": {
+      "node_types_including_conditional_body": {
+        "KERNEL": 996,
+        "MEMSET": 13,
+        "MEMCPY": 52,
+        "CONDITIONAL": 48
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 52
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "timing_uncontended": true
+  },
+  "references": [],
+  "competing_gpu_processes": []
+}

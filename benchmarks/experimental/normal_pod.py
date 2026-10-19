@@ -27,6 +27,7 @@ def main():
     )
     p.add_argument("--size", type=int, default=100000)
     p.add_argument("--modes", type=int, default=20)
+    p.add_argument("--snapshots", type=int, default=48)
     p.add_argument("--ncv", type=int, default=48)
     p.add_argument("--reference-ncv", type=int, default=40)
     p.add_argument("--steps", type=int, default=60)
@@ -43,7 +44,7 @@ def main():
     problem = (
         make_problem("I", args.size)
         if args.case == "application"
-        else snapshots(args.size, args.case, args.modes)
+        else snapshots(args.size, args.case, args.modes, columns=args.snapshots)
     )
     if problem.k != args.modes:
         p.error("the standard application fixture requires --modes 4")
@@ -67,6 +68,7 @@ def main():
             status=int(solver.core.status.numpy()[0]),
             left_converged=int(solver.count_left.numpy()[0]),
             right_converged=int(solver.count_right.numpy()[0]),
+            orthogonality_errors=solver.orthogonality_errors.numpy().tolist(),
             outer_iterations=int(solver.core.iterations.numpy()[0]),
             independent_recoveries=int(solver.core.recoveries.numpy()[0]),
         )
@@ -76,7 +78,11 @@ def main():
         )
         samples.append(seconds)
         checks.append(check)
+    matrix_hash = hashlib.sha256()
+    for array in (problem.a.indptr, problem.a.indices, problem.a.data):
+        matrix_hash.update(array.tobytes())
     report = dict(
+        matrix_sha256=matrix_hash.hexdigest(),
         args=vars(args),
         matrix_shape=problem.a.shape,
         gpu=wp.get_device().name,
@@ -89,6 +95,7 @@ def main():
             for path in (
                 Path(__file__),
                 Path(__file__).with_name("normal_svd.py"),
+                Path("benchmarks/applications/pod_compare.py"),
                 Path("warpack/solver.py"),
                 Path("warpack/svd.py"),
                 Path("warpack/krylov_kernels.py"),

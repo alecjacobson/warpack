@@ -17,10 +17,14 @@ from .compare import run
 from .problems import Problem
 
 
-def snapshots(size, variant="tall", modes=4):
-    if size < 96 or not 1 <= modes <= 44:
-        raise ValueError("require size >= 96 and 1 <= modes <= 44")
+def snapshots(size, variant="tall", modes=4, columns=48):
+    if columns < 8 or size < max(96, columns) or not 1 <= modes <= columns - 4:
+        raise ValueError(
+            "require columns >= 8, size >= max(96, columns), and 1 <= modes <= columns-4"
+        )
     if variant == "wave":
+        if columns != 48:
+            raise ValueError("Wave fixture requires 48 snapshots")
         if modes > 22:
             raise ValueError("Wave fixture has 22 excited spatial modes")
         # Fixed-end unit string: x_i=i/(n+1), t_j=2*j/48, wave speed 1.
@@ -45,9 +49,9 @@ def snapshots(size, variant="tall", modes=4):
             notes="48 equally spaced snapshots over a full fundamental period of a fixed-end unit string with 22 analytic cosine modal responses; normalized unweighted samples, not a general mass-weighted POD API",
         )
     rng = np.random.default_rng(2026)
-    u = la.qr(rng.normal(size=(size, 48)), mode="economic")[0]
-    v = la.qr(rng.normal(size=(48, 48)), mode="economic")[0]
-    spectrum = np.geomspace(20, 0.05, 48)
+    u = la.qr(rng.normal(size=(size, columns)), mode="economic")[0]
+    v = la.qr(rng.normal(size=(columns, columns)), mode="economic")[0]
+    spectrum = np.geomspace(20, 0.05, columns)
     spectrum[-2:] = 0
     if variant == "clustered":
         if modes < 4:

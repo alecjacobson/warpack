@@ -5,6 +5,8 @@ and changed-input replay [#63](https://github.com/alecjacobson/warpack/issues/63
 The normal-product SVD is **experimental**, outside the installed package.
 Production `PartialSVD` retains its augmented symmetric formulation.
 
+The [orthogonality and wider-snapshot follow-up](NORMAL_GUARDS.md) adds an explicit device-side basis rejection and 128-snapshot comparisons, including a slower partial-basis control.
+
 ## Formulation and limits
 
 For a tall matrix, the prototype applies `A.T @ (A @ x)` without forming a Gram

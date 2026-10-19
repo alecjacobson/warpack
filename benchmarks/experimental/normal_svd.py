@@ -5,6 +5,8 @@ unchanged. Both original SVD equations must pass, and unresolved/zero requested
 singular values are rejected rather than producing a false full count.
 """
 
+import math
+
 import warp as wp
 
 from warpack import kernels as K
@@ -100,16 +102,51 @@ def reject_unresolved(
             right_count[0] = 0
 
 
+@wp.kernel
+def check_orthogonality(
+    gram: wp.array2d[wp.float64],
+    errors: wp.array[wp.float64],
+    side: int,
+    tolerance: wp.float64,
+    status: wp.array[wp.int32],
+    left_count: wp.array[wp.int32],
+    right_count: wp.array[wp.int32],
+):
+    error = wp.float64(0.0)
+    for i in range(gram.shape[0]):
+        for j in range(gram.shape[1]):
+            expected = wp.float64(0.0)
+            if i == j:
+                expected = wp.float64(1.0)
+            value = wp.abs(gram[i, j] - expected)
+            if not wp.isfinite(value):
+                value = wp.float64(wp.inf)
+            error = wp.max(error, value)
+    errors[side] = error
+    if error > tolerance:
+        # Preserve earlier rank/conditioning failures while marking otherwise
+        # residual-passing triplets unsuitable as an orthonormal POD basis.
+        if status[0] == 0:
+            status[0] = 3
+        left_count[0] = 0
+        right_count[0] = 0
+
+
 class NormalSVD:
     """Prototype for well-resolved largest nonzero triplets; fixed sparse topology.
 
     ncv can equal min(matrix.shape), giving a complete normal-operator basis.
     The existing independent-chain guard is unchanged for partial bases.
     status=2 rejects requested zero/roundoff-scale values; it is not a rank
-    estimate. Matrix values can change in place before captured replay.
+    estimate. status=3 rejects triplets whose left/right Gram matrices differ
+    entrywise from identity by more than orthogonality_tol (default 1e-8).
+    Both rejection statuses clear accepted-triplet counts; equation residuals
+    remain available. Matrix values can change in place before captured replay.
     """
 
-    def __init__(self, matrix, k, ncv=None, tol=1e-11):
+    def __init__(self, matrix, k, ncv=None, tol=1e-11, orthogonality_tol=1e-8):
+        if not math.isfinite(orthogonality_tol) or orthogonality_tol <= 0:
+            raise ValueError("orthogonality_tol must be finite and positive")
         if not 1 <= k < min(matrix.shape):
             raise ValueError("require 1 <= k < min(matrix.shape)")
         ncv = min(min(matrix.shape), ncv or max(4 * k, 48))
@@ -131,6 +168,9 @@ class NormalSVD:
         self.count_right = wp.zeros_like(self.count_left)
         self.order = wp.empty(k, dtype=wp.int32, device=self.device)
         self.scratch_values = wp.empty_like(self.singular_values)
+        self.orthogonality_tol = orthogonality_tol
+        self.orthogonality_errors = wp.empty(2, dtype=wp.float64, device=self.device)
+        self.gram = wp.empty((k, k), dtype=wp.float64, device=self.device)
 
     def finalize(self):
         small, large = (self.v, self.u) if self.op.tall else (self.u, self.v)
@@ -196,6 +236,30 @@ class NormalSVD:
             ],
             device=self.device,
         )
+
+        for side, vectors in enumerate((self.u, self.v)):
+            self.gram.zero_()
+            wp.launch_tiled(
+                K.gram_partial,
+                dim=(self.k, self.k, (vectors.shape[1] + 255) // 256),
+                inputs=[vectors, vectors, self.gram],
+                block_dim=128,
+                device=self.device,
+            )
+            wp.launch(
+                check_orthogonality,
+                1,
+                [
+                    self.gram,
+                    self.orthogonality_errors,
+                    side,
+                    self.orthogonality_tol,
+                    self.core.status,
+                    self.count_left,
+                    self.count_right,
+                ],
+                device=self.device,
+            )
 
     def capture(self, max_iterations=100):
         self.graph = self.core.capture(max_iterations, finalizer=self.finalize)

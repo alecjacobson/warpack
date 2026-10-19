@@ -86,3 +86,99 @@ def test_normal_svd_replay_recovers_after_unresolved_input(transpose):
     np.testing.assert_allclose(solver.singular_values.numpy(), [10, 5, 2, 1], atol=1e-11)
     assert solver.core.status.numpy()[0] == 0
     assert solver.count_left.numpy()[0] == solver.count_right.numpy()[0] == 4
+
+
+@pytest.mark.parametrize("variant", ["tall", "wide", "clustered"])
+@pytest.mark.parametrize("ncv", [48, 96])
+def test_normal_svd_wider_snapshot_space(variant, ncv, tmp_path):
+    p = snapshots(257, variant, modes=12, columns=96)
+    solver = NormalSVD(matrix(p.a), p.k, ncv=ncv, tol=1e-11)
+    graph = solver.capture(100)
+    for _ in range(2):
+        wp.capture_launch(graph)
+        check = accuracy(p, solver.singular_values.numpy(), solver.u.numpy().T, solver.v.numpy().T)
+        assert check["accepted"], check
+        assert solver.count_left.numpy()[0] == solver.count_right.numpy()[0] == p.k
+        assert solver.core.status.numpy()[0] == 0
+    dot = tmp_path / "normal-wide-snapshots.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    text = dot.read_text()
+    assert not re.search(r'label="\{\s*HOST\b', text)
+    assert "DtoH" not in text and "HtoD" not in text
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), 0.1])
+def test_normal_orthogonality_guard_is_captured_and_resets(bad):
+    from benchmarks.experimental.normal_svd import check_orthogonality
+
+    gram = wp.array(np.eye(3), dtype=wp.float64)
+    errors = wp.zeros(2, dtype=wp.float64)
+    status = wp.zeros(1, dtype=wp.int32)
+    left, right = wp.zeros_like(status), wp.zeros_like(status)
+    args = [gram, errors, 0, 1e-8, status, left, right]
+    wp.launch(check_orthogonality, 1, args)
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        wp.launch(check_orthogonality, 1, args)
+    for value in (bad, 0.0, bad, 0.0):
+        host = np.eye(3)
+        host[0, 1] = value
+        gram.assign(host)
+        status.zero_()
+        left.assign(np.array([3], dtype=np.int32))
+        right.assign(np.array([3], dtype=np.int32))
+        wp.capture_launch(capture.graph)
+        invalid = not np.isfinite(value) or value > 1e-8
+        assert status.numpy()[0] == (3 if invalid else 0)
+        assert left.numpy()[0] == right.numpy()[0] == (0 if invalid else 3)
+        assert errors.numpy()[0] == (float("inf") if not np.isfinite(value) else value)
+
+
+@pytest.mark.parametrize("tolerance", [0, -1, float("nan"), float("inf")])
+def test_normal_invalid_orthogonality_tolerance(tolerance):
+    with pytest.raises(ValueError, match="orthogonality_tol"):
+        NormalSVD(None, 2, orthogonality_tol=tolerance)
+
+
+@pytest.mark.parametrize("transpose", [False, True])
+@pytest.mark.parametrize("scale", [1e-3, 1.0])
+def test_normal_svd_rejects_ill_conditioned_lift_and_recovers(transpose, scale, tmp_path):
+    rng = np.random.default_rng(394)
+    left = np.linalg.qr(rng.normal(size=(91, 32)))[0]
+    right = np.linalg.qr(rng.normal(size=(32, 32)))[0]
+
+    def fixture(tail):
+        singular = np.r_[np.geomspace(1, tail, 8), np.geomspace(tail * 0.1, tail * 0.001, 24)]
+        a = (left * (scale * singular)) @ right.T
+        return a.T.copy() if transpose else a
+
+    wa = matrix(fixture(2e-7))
+    solver = NormalSVD(wa, 8, ncv=32, tol=1e-11)
+    graph = solver.capture(3)
+    for tail in (2e-7, 1e-3, 2e-7, 1e-3):
+        a = fixture(tail)
+        wa.values.assign(a.ravel())
+        wp.capture_launch(graph)
+        u, v = solver.u.numpy().T, solver.v.numpy().T
+        errors = np.array([abs(u.T @ u - np.eye(8)).max(), abs(v.T @ v - np.eye(8)).max()])
+        np.testing.assert_allclose(
+            solver.orthogonality_errors.numpy(), errors, atol=2e-15, rtol=1e-5
+        )
+        if tail == 2e-7:
+            assert errors.max() > solver.orthogonality_tol
+            assert solver.core.status.numpy()[0] == 3
+            assert solver.count_left.numpy()[0] == solver.count_right.numpy()[0] == 0
+        else:
+            assert errors.max() < 1e-8
+            assert solver.core.status.numpy()[0] == 0
+            assert solver.count_left.numpy()[0] == solver.count_right.numpy()[0] == 8
+            values = solver.singular_values.numpy()
+            reference = np.linalg.svd(a, compute_uv=False)[:8]
+            np.testing.assert_allclose(values, reference, atol=1e-12, rtol=1e-10)
+            assert np.linalg.norm(a @ v - u * values, axis=0).max() < 1e-11
+            assert np.linalg.norm(a.T @ u - v * values, axis=0).max() < 1e-11
+    dot = tmp_path / "normal-conditioning.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    text = dot.read_text()
+    assert not re.search(r'label="\{\s*HOST\b', text)
+    assert "DtoH" not in text and "HtoD" not in text
