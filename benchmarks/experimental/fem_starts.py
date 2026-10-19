@@ -103,6 +103,7 @@ def main():
     p.add_argument("--symmetric-products", action="store_true")
     p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--paired-rotation", action="store_true")
+    p.add_argument("--reuse-x-image", action="store_true")
     p.add_argument(
         "--initial-perturbation",
         type=float,
@@ -123,6 +124,11 @@ def main():
     p.add_argument("--baseline-cg-tol", type=float, default=1e-15)
     p.add_argument("--out", required=True)
     args = p.parse_args()
+    solver_type = BlockLOBPCG
+    if args.reuse_x_image:
+        from benchmarks.experimental.cached_x_image import CachedXBlockLOBPCG
+
+        solver_type = CachedXBlockLOBPCG
     if not np.isfinite(args.change) or args.change <= 0 or args.repeats < 1:
         p.error("Require a finite positive stiffness change and repeats >= 1")
     if args.inner_cg < 0 or (args.inner_fp32 and not args.inner_cg):
@@ -153,7 +159,7 @@ def main():
     )
     source_solver_setup, bootstrap = timed(
         lambda: with_active_preconditioner(
-            BlockLOBPCG(
+            solver_type(
                 operator(matrix(source.a)),
                 source.k,
                 args.width,
@@ -229,6 +235,7 @@ def main():
                 Path("benchmarks/experimental/block_updates.py"),
                 Path("benchmarks/experimental/batched_cg.py"),
                 Path("benchmarks/experimental/active_cg.py"),
+                Path("benchmarks/experimental/cached_x_image.py"),
                 Path("benchmarks/experimental/compare_block.py"),
             ]
         },
@@ -243,7 +250,7 @@ def main():
     for name, start, perturbation in starts:
         solver_setup, solver = timed(
             lambda: with_active_preconditioner(
-                BlockLOBPCG(
+                solver_type(
                     op,
                     source.k,
                     args.width,

@@ -128,6 +128,7 @@ def main():
     p.add_argument("--symmetric-products", action="store_true")
     p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--paired-rotation", action="store_true")
+    p.add_argument("--reuse-x-image", action="store_true")
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
@@ -179,6 +180,11 @@ def main():
     initial = np.random.default_rng(42).normal(size=(a.shape[0], args.width))
 
     def create_solver():
+        solver_type = BlockLOBPCG
+        if args.reuse_x_image:
+            from benchmarks.experimental.cached_x_image import CachedXBlockLOBPCG
+
+            solver_type = CachedXBlockLOBPCG
         starts = wp.array(initial.T.copy(), dtype=wp.float64)
         from benchmarks.experimental.block_kernels import (
             BatchedSparseOperator,
@@ -206,7 +212,7 @@ def main():
             )
         else:
             preconditioner = UpstreamPreconditioner(pre)
-        solver = BlockLOBPCG(
+        solver = solver_type(
             operator(a),
             k,
             args.width,
@@ -281,6 +287,7 @@ def main():
                 "benchmarks/experimental/compare_block.py",
                 "benchmarks/experimental/batched_cg.py",
                 "benchmarks/experimental/active_cg.py",
+                "benchmarks/experimental/cached_x_image.py",
                 "warpack/generalized.py",
             )
         },
@@ -309,7 +316,8 @@ def main():
         report["rows"].append(
             dict(
                 method="Warp BlockLOBPCG"
-                + (" + device-bucketed CG" if args.active_cg_bucket_size else ""),
+                + (" + device-bucketed CG" if args.active_cg_bucket_size else "")
+                + (" + cached A X" if args.reuse_x_image else ""),
                 seconds=seconds,
                 iterations=int(solver.iterations.numpy()[0]),
                 quality=quality,
