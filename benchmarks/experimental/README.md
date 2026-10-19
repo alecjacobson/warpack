@@ -1,5 +1,7 @@
 # Experimental preconditioned block eigensolver
 
+Latest: the [matched-CG and related-FEM report](MATCHED_CG.md) removes CuPy active-block padding overhead, records the remaining Anvil gap, and compares computed warm starts.
+
 This directory evaluates [#59](https://github.com/alecjacobson/warpack/issues/59)
 under the large FEM iterative-performance issue
 [#15](https://github.com/alecjacobson/warpack/issues/15). It is **not a supported

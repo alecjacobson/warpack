@@ -221,3 +221,33 @@ def test_batched_cg_adaptive_hodge_nullspace_and_positive_guards(case, tmp_path)
     text = dot.read_text()
     assert not re.search(r'label="\{\s*HOST\b', text)
     assert "DtoH" not in text and "HtoD" not in text
+
+
+@pytest.mark.parametrize("dtype,tolerance", [(wp.float64, 1e-11), (wp.float32, 1e-5)])
+@pytest.mark.parametrize("active_widths", [False, True])
+def test_captured_cg_matches_changing_active_rhs_blocks(dtype, tolerance, active_widths):
+    from benchmarks.experimental.batched_cg import CapturedActiveCG, CapturedPaddedCG
+
+    a = sp.diags([-np.ones(36), np.full(37, 4.0), -np.ones(36)], [-1, 0, 1], format="csr")
+    inverse = BatchedCGInverse(matrix(a), 5, tol=tolerance * 0.1, maxiter=30, working_dtype=dtype)
+    adapter = CapturedActiveCG(inverse) if active_widths else CapturedPaddedCG(inverse)
+    if active_widths:
+        adapter.reset_stats()
+        for item in adapter.adapters.values():
+            assert item.inverse.operator.matrix.values.ptr == inverse.operator.matrix.values.ptr
+            assert item.inverse.operator.matrix.offsets.ptr == inverse.operator.matrix.offsets.ptr
+    else:
+        inverse.reset_stats()
+    rng = np.random.default_rng(840)
+    for width, scale in [(5, 1.0), (1, 1e-4), (3, 1e4), (2, 0.0), (5, 1.0)]:
+        source = rng.normal(size=(width, 37)) * scale
+        rhs = wp.array(source, dtype=wp.float64)
+        # In-place input/output must not overwrite input before the graph sees it.
+        adapter.apply(rhs, rhs)
+        actual = rhs.numpy()
+        residual = np.linalg.norm((a @ actual.T).T - source, axis=1)
+        assert np.all(residual <= tolerance * np.linalg.norm(source, axis=1))
+        assert np.isfinite(actual).all()
+    stats = adapter.collect_stats().numpy() if active_widths else inverse.stats.numpy()
+    assert stats[2] == 0
+    assert stats[3] == (16 if active_widths else 25)

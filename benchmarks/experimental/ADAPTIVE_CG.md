@@ -1,5 +1,7 @@
 # Adaptive outer graphs with upstream CG
 
+Latest: the [matched-CG and related-FEM report](MATCHED_CG.md) removes CuPy active-block padding overhead, records the remaining Anvil gap, and compares computed warm starts.
+
 2026-10-19 follow-up to [#64](https://github.com/alecjacobson/warpack/issues/64),
 [#15](https://github.com/alecjacobson/warpack/issues/15),
 [#40](https://github.com/alecjacobson/warpack/issues/40), and

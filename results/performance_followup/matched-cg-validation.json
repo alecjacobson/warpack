@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "6ea785a7a50f77606bcc3d1304dd5f86d758da7d",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "522 passed",
+    "seconds": 242.96
+  },
+  "focused": {
+    "result": "29 passed",
+    "seconds": 6.15,
+    "scope": "Experimental batched CG including active/padded adapters"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks/experimental benchmarks/monitor_gpu.py: passed",
+  "package": {
+    "command": "python -m pip wheel --no-deps CLEAN_SOURCE_COPY --wheel-dir build/matched-cg-wheel",
+    "python_files": 18,
+    "experimental_packaged": false,
+    "sha256": "c033cb4b10a342b07d63dac93b081d3340426b3ca071bf3874ed5d798ca7dc73"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/batched_cg.py": "09d13d319184b8cb2ad993cf078327ed2897405a151740ba3d43cf17c0b1776b",
+    "benchmarks/experimental/compare_block.py": "87a90d1047cf31d629de507a95f75dde6bfed551f7a64bc6c09aa0f0b035fdbd",
+    "benchmarks/experimental/fem_starts.py": "928d857876ccabc4c10ca617a6f6c88d3823e804ab6ff52e27abafc48b672abe",
+    "tests/test_batched_cg_experimental.py": "9994baad2323907082fe96098fc37926dcb9705a21bfbe67d773bb71b27ca060"
+  },
+  "scope": "Benchmark-only adapters and comparisons; production arithmetic/API unchanged. Not a full upstream CuPy/Spectra rerun.",
+  "performance": "Sequential L40 comparisons with occupancy records, per-trial original-problem quality, separate setup/capture; initial padded runs explicitly retained as biased diagnostics. CuPy native stopping is separately reported where fresh returned-vector absolute norms were recorded."
+}

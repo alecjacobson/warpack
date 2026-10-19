@@ -115,6 +115,11 @@ def main():
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--tol", type=float, default=1e-8)
     p.add_argument("--cupy", action="store_true")
+    p.add_argument("--cupy-width", type=int, help="CuPy starting block width; default matches Warp")
+    p.add_argument("--cupy-tol", type=float, help="explicit CuPy absolute residual tolerance")
+    p.add_argument(
+        "--cupy-padding", action="store_true", help="reproduce biased padded-CG diagnostics"
+    )
     p.add_argument("--profile", action="store_true")
     p.add_argument(
         "--keep-graph", action="store_true", help="Retain the potentially large DOT dump"
@@ -129,16 +134,20 @@ def main():
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
     args = p.parse_args()
-    if args.cupy and args.inner_cg:
-        p.error("CuPy adapter currently compares direct FSAI/BJ application only")
+    if args.cupy and args.inner_cg and not args.batched_cg:
+        p.error("CuPy iterative comparison requires --batched-cg")
     if args.inner_cg < 0 or args.repeats < 1:
         p.error("require inner-cg >= 0 and repeats >= 1")
+    if args.cupy_tol is not None and (not np.isfinite(args.cupy_tol) or args.cupy_tol <= 0):
+        p.error("cupy-tol must be finite and positive")
     if args.batched_cg and not args.inner_cg:
         p.error("--batched-cg requires --inner-cg")
     if args.inner_fp32 and not args.batched_cg:
         p.error("--inner-fp32 requires --batched-cg")
     before = other_gpu_processes()
     a, mass, shifted, constraints, sa, sb, k, check = prepare(args)
+    if args.cupy_width is not None and not k <= args.cupy_width <= args.width:
+        p.error("require k <= cupy-width <= width")
     print("Prepared", args.case, "n=", a.shape[0], flush=True)
     shifted.nnz_sync()
     setup_seconds, pre = timed(
@@ -271,7 +280,19 @@ def main():
         )
         print(report["rows"][-1], flush=True)
     if args.cupy:
-        report["rows"].extend(cupy_trials(sa, sb, pre, initial, constraints, args, k, check))
+        cupy_rows, cupy_metadata = cupy_trials(
+            sa,
+            sb,
+            pre,
+            initial,
+            constraints,
+            args,
+            k,
+            check,
+            cg=preconditioner if args.batched_cg else None,
+        )
+        report["rows"].extend(cupy_rows)
+        report["cupy_adapter"] = cupy_metadata
     if args.profile:
         report["profile"] = profile_step(solver)
         report["post_profile_quality"] = check(
@@ -282,7 +303,7 @@ def main():
         other_gpu_processes_before=before,
         other_gpu_processes_after=after,
         timing_eligible=not (before or after),
-        timing_note="Warm replay wall times; setup/capture separate. CuPy converges the entire oversampled block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence.",
+        timing_note="Warm replay wall times; setup/capture separate. CuPy converges its entire starting block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence.",
     )
     destination.write_text(json.dumps(report, indent=2) + "\n")
     print(destination, flush=True)
@@ -335,7 +356,7 @@ def profile_step(solver):
     )
 
 
-def cupy_trials(a, b, pre, initial, constraints, args, k, check):
+def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None):
     import cupy as cp
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
@@ -344,21 +365,43 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check):
     with stream:
         a = cs.csr_matrix(a)
         b = None if b is None else cs.csr_matrix(b)
-        start = cp.asarray(initial)
+        width = args.width if args.cupy_width is None else args.cupy_width
+        start = cp.asarray(initial[:, :width])
         y = None if constraints is None else cp.asarray(constraints).T
+        adapter, adapter_setup_seconds, adapter_memory_bytes = None, 0.0, 0
+        padded = getattr(args, "cupy_padding", False)
+        if cg is not None:
+            from benchmarks.experimental.batched_cg import CapturedActiveCG, CapturedPaddedCG
+
+            memory_before = cp.cuda.runtime.memGetInfo()[0]
+            adapter_setup_seconds, adapter = timed(
+                lambda: CapturedPaddedCG(cg) if padded else CapturedActiveCG(cg, max_width=width)
+            )
+            adapter_memory_bytes = memory_before - cp.cuda.runtime.memGetInfo()[0]
 
         def apply(x):
             one = x.ndim == 1
             rows = cp.ascontiguousarray(x.reshape(-1, 1).T if one else x.T)
             out = cp.empty_like(rows)
             wx, wy = wp.from_dlpack(rows), wp.from_dlpack(out)
-            for i in range(len(rows)):
-                pre.matvec(wx[i], wy[i], wy[i], 1.0, 0.0)
+            if adapter is None:
+                for i in range(len(rows)):
+                    pre.matvec(wx[i], wy[i], wy[i], 1.0, 0.0)
+            else:
+                adapter.apply(wx, wy)
             return out[0] if one else out.T
 
         preconditioner = cl.LinearOperator(a.shape, matvec=apply, matmat=apply, dtype=cp.float64)
+        cupy_tol = args.cupy_tol
+        if cupy_tol is None:
+            cupy_tol = 1e-5 if args.case == "anvil" else 1e-10
 
         def solve():
+            if cg is not None:
+                if padded:
+                    cg.reset_stats()
+                else:
+                    adapter.reset_stats()
             return cl.lobpcg(
                 a,
                 start.copy(),
@@ -366,7 +409,7 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check):
                 M=preconditioner,
                 Y=y,
                 largest=False,
-                tol=1e-5 if args.case == "anvil" else 1e-10,
+                tol=cupy_tol,
                 maxiter=args.steps,
                 retResidualNormsHistory=True,
             )
@@ -375,16 +418,53 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check):
         rows = []
         for _ in range(args.repeats):
             seconds, (w, v, history) = timed(solve)
+            quality = check(w[:k].get(), v[:, :k].get())
+            # CuPy's history can end before its last Ritz update; it is not
+            # the actual residual of the returned vectors. Check fresh products.
+            actual_residuals = cp.linalg.norm(a @ v - (v if b is None else b @ v) * w, axis=0)
+            absolute_residuals = actual_residuals.get().tolist()
+            if cg is not None:
+                stats = cg.stats if padded else adapter.collect_stats()
+                quality["preconditioner_cg_stats"] = stats.numpy().tolist()
+                quality["cg_iteration_accounting"] = (
+                    "scheduled vector iterations, including masked RHSs"
+                    + (" and padded zero RHSs" if padded else "; no padding")
+                )
+                if not padded:
+                    quality["cg_stats_by_active_width"] = {
+                        str(width): item.inverse.stats.numpy().tolist()
+                        for width, item in adapter.adapters.items()
+                    }
             rows.append(
                 dict(
-                    method="CuPy LOBPCG + same upstream Warp preconditioner",
+                    method=(
+                        "CuPy LOBPCG + same captured upstream Warp batched CG"
+                        if cg is not None
+                        else "CuPy LOBPCG + same upstream Warp preconditioner"
+                    ),
                     seconds=seconds,
                     residual_history_length=len(history),
-                    quality=check(w[:k].get(), v[:, :k].get()),
+                    last_history_absolute_residuals=history[-1].get().tolist(),
+                    returned_absolute_residuals=absolute_residuals,
+                    returned_k_absolute_tolerance_met=max(absolute_residuals[:k]) <= cupy_tol,
+                    full_block_absolute_tolerance_met=max(absolute_residuals) <= cupy_tol,
+                    quality=quality,
                 )
             )
             print(rows[-1], flush=True)
-        return rows
+        return rows, dict(
+            width=width,
+            absolute_tolerance=cupy_tol,
+            padding_width=cg.width if cg is not None and padded else None,
+            preallocated_active_widths=list(range(1, width + 1))
+            if cg is not None and not padded
+            else None,
+            inner_adapter_setup_capture_seconds=adapter_setup_seconds,
+            inner_adapter_device_memory_delta_bytes=adapter_memory_bytes,
+            memory_scope="Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+            setup_scope="Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+            stopping="CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes.",
+        )
 
 
 if __name__ == "__main__":
