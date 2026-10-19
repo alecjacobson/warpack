@@ -1,4 +1,4 @@
-"""Largest resolved nonzero SVD triplets using matrix-free normal products.
+"""Largest resolved nonzero SVD triplets using pure-Warp normal products.
 
 This deliberately squares conditioning; the augmented production method remains
 unchanged. Both original SVD equations must pass, and unresolved/zero requested
@@ -10,6 +10,7 @@ import math
 import warp as wp
 
 from . import kernels as K
+from .solver import SymmetricEigensolver
 from .svd import _LongRowProduct, _SVDKrylovSchur, _Transpose, rect_mv, rect_mv_cooperative
 
 
@@ -132,12 +133,43 @@ def check_orthogonality(
         right_count[0] = 0
 
 
+@wp.kernel
+def _coordinate_basis(q: wp.array2d[wp.float64]):
+    i, j = wp.tid()
+    q[i, j] = wp.float64(0.0)
+    if i == j:
+        q[i, j] = wp.float64(1.0)
+
+
+class _FullNormalCore(SymmetricEigensolver):
+    """Project onto every coordinate; valid only for a complete normal space."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.m != self.n:
+            raise ValueError("coordinate projection requires a complete basis")
+        self.recoveries = wp.zeros(1, dtype=wp.int32, device=self.device)
+
+    def initialize(self, seed=42):
+        self.op.refresh()
+        self.status.zero_()
+        self.recoveries.zero_()
+        wp.launch(_coordinate_basis, self.q.shape, [self.q], device=self.device)
+
+    def step(self):
+        # The coordinate basis already spans every dimension. The base
+        # finalizer computes products, projection and fresh Ritz residuals.
+        pass
+
+
 class NormalSVD:
     """Largest resolved nonzero triplets of compact scalar FP64 CSR matrices.
 
     Returns descending singular_values and row-vector arrays u and v. Sparse
-    products, reductions and projected solves use Warp; no Gram operator is
-    formed. Normal products square conditioning. Use PartialSVD when that
+    products, reductions and projected solves use Warp. A complete search space
+    of at most 64 dimensions uses batched coordinate projection, explicitly
+    forming its small normal matrix. Larger or partial spaces use matrix-free
+    Krylov normal products. Normal products square conditioning. Use PartialSVD when that
     conditioning tradeoff is unsuitable. Weighted/complex SVD and requested
     null singular bases are unsupported.
 
@@ -163,7 +195,8 @@ class NormalSVD:
             raise ValueError("require 1 <= k < min(matrix.shape)")
         ncv = min(min(matrix.shape), ncv or max(4 * k, 48))
         self.op = NormalOperator(matrix, max(k, ncv))
-        self.core = _SVDKrylovSchur(self.op, k, ncv=ncv, which="LA", tol=tol)
+        core_type = _FullNormalCore if ncv == self.op.n and ncv <= 64 else _SVDKrylovSchur
+        self.core = core_type(self.op, k, ncv=ncv, which="LA", tol=tol)
         self.k, self.device, self.tol = k, matrix.device, tol
         self.status = self.core.status
         self.u = wp.empty((k, matrix.shape[0]), dtype=wp.float64, device=self.device)

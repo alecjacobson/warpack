@@ -8,16 +8,18 @@ import warp as wp
 
 from benchmarks.experimental.full_normal_basis import FullBasisNormalSVD
 from benchmarks.upstream.adapters import matrix
+from warpack import NormalSVD
 
 
 @pytest.mark.parametrize("transpose", [False, True])
 @pytest.mark.parametrize("repeated", [False, True])
 @pytest.mark.parametrize("k", [4, 8])
-def test_full_normal_projection_changed_values(transpose, repeated, k, tmp_path):
+@pytest.mark.parametrize("dimension", [29, 96])
+def test_full_normal_projection_changed_values(transpose, repeated, k, dimension, tmp_path):
     rng = np.random.default_rng(485)
-    u = np.linalg.qr(rng.normal(size=(73, 29)))[0]
-    v = np.linalg.qr(rng.normal(size=(29, 29)))[0]
-    values = np.geomspace(20, 0.05, 29)
+    u = np.linalg.qr(rng.normal(size=(dimension + 44, dimension)))[0]
+    v = np.linalg.qr(rng.normal(size=(dimension, dimension)))[0]
+    values = np.geomspace(20, 0.05, dimension)
     values[-2:] = 0
     if repeated:
         values[:3] = 20
@@ -25,7 +27,8 @@ def test_full_normal_projection_changed_values(transpose, repeated, k, tmp_path)
     if transpose:
         a = a.T.copy()
     wa = matrix(a)
-    solver = FullBasisNormalSVD(wa, k, ncv=29, tol=1e-11)
+    solver_type = NormalSVD if dimension <= 64 else FullBasisNormalSVD
+    solver = solver_type(wa, k, ncv=dimension, tol=1e-11)
     graph = solver.capture(3)
     for host in (a, 2 * a, a * rng.uniform(0.9, 1.1, a.shape), a):
         wa.values.assign(host.ravel())
@@ -65,7 +68,7 @@ def test_full_normal_rejects_unresolved_values_and_recovers(transpose):
         return a.T.copy() if transpose else a
 
     wa = matrix(current(1e-9))
-    solver = FullBasisNormalSVD(wa, 4, tol=1e-11)
+    solver = NormalSVD(wa, 4, tol=1e-11)
     graph = solver.capture(3)
     for fourth in (1e-9, 1.0, 1e-9, 1.0):
         a = current(fourth)

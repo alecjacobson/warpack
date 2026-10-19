@@ -17,6 +17,7 @@ from benchmarks.applications.runner import accuracy
 from benchmarks.audit_profile import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import NormalSVD
+from warpack.normal_svd import _FullNormalCore
 
 
 def main():
@@ -92,6 +93,9 @@ def main():
         matrix_sha256=matrix_hash.hexdigest(),
         args=vars(args),
         matrix_shape=problem.a.shape,
+        formulation="complete_coordinate_projection"
+        if isinstance(solver.core, _FullNormalCore)
+        else "matrix_free_krylov",
         gpu=wp.get_device().name,
         versions={
             n: importlib.metadata.version(n)
@@ -114,7 +118,7 @@ def main():
         protocol="Sequential methods on identical input. Synchronized warm replays restore starts. Assembly/reference/validation excluded. Normal method has its own explicit ncv; reference methods use reference_ncv. Pure Warp; normal equations square conditioning. Physical triplets and requested spaces must pass unchanged 1e-8 gates and normal method strict 1e-11 counts. "
         + (
             "Full-basis products explicitly form the small normal matrix by projecting onto the entire coordinate basis; no Krylov expansion."
-            if args.full_basis_products
+            if isinstance(solver.core, _FullNormalCore)
             else "Matrix-free Krylov normal products; no formed Gram operator."
         ),
         normal=dict(

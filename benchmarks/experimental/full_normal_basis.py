@@ -1,35 +1,12 @@
-"""Explicit full normal-space projection, avoiding serial Krylov expansion.
+"""Explicit complete coordinate projection beyond the public small-space policy.
 
-An experimental control restricted to ncv == min(A.shape). It applies the
-normal operator to the entire coordinate basis in one batch, then uses the
-existing Warp projected eigensolve and guarded SVD finalization. It forms the
-small projected normal matrix explicitly; no partial-space shortcut is made.
+The installed API uses this numerical core automatically for complete spaces
+of at most 64 dimensions. This benchmark adapter additionally allows larger
+complete spaces; it is tied to private core interfaces in this checkout.
 """
 
-import warp as wp
-
-from warpack import NormalSVD, SymmetricEigensolver
-
-
-@wp.kernel
-def coordinate_basis(q: wp.array2d[wp.float64]):
-    i, j = wp.tid()
-    q[i, j] = wp.float64(0.0)
-    if i == j:
-        q[i, j] = wp.float64(1.0)
-
-
-class _FullNormalCore(SymmetricEigensolver):
-    def initialize(self, seed=42):
-        self.op.refresh()
-        self.status.zero_()
-        self.recoveries.zero_()
-        wp.launch(coordinate_basis, self.q.shape, [self.q], device=self.device)
-
-    def step(self):
-        # The full coordinate basis already spans the whole normal space.
-        # The base finalizer computes its products, projection and Ritz pairs.
-        pass
+from warpack import NormalSVD
+from warpack.normal_svd import _FullNormalCore
 
 
 class FullBasisNormalSVD(NormalSVD):
@@ -38,6 +15,6 @@ class FullBasisNormalSVD(NormalSVD):
         if ncv is not None and ncv != dimension:
             raise ValueError("full normal projection requires ncv == min(A.shape)")
         super().__init__(matrix, k, ncv=dimension, **kwargs)
-        self.core = _FullNormalCore(self.op, k, ncv=dimension, which="LA", tol=self.tol)
-        self.core.recoveries = wp.zeros(1, dtype=wp.int32, device=self.device)
-        self.status = self.core.status
+        if not isinstance(self.core, _FullNormalCore):
+            self.core = _FullNormalCore(self.op, k, ncv=dimension, which="LA", tol=self.tol)
+            self.status = self.core.status

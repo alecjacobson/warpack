@@ -71,3 +71,36 @@ investigation. The following implementation change limits automatic use to
 complete spaces of at most 64 dimensions; larger and partial searches retain
 the existing Krylov path. It does not change the augmented `PartialSVD` default
 or solve the remaining general adaptive-throughput issue.
+
+## Installed API follow-up
+
+`NormalSVD` now selects the coordinate path when the chosen search space is
+complete and has at most 64 dimensions. Larger and partial spaces retain Krylov
+expansion; the experimental adapter can force a larger complete projection.
+
+Post-promotion controls (three clean warm trials each):
+
+| Fixture, k=20 | Median ms | Path |
+|---|---:|---|
+| [clustered, 100000×48](../../results/performance_followup/small-normal-api-clustered-48.json) | 8.567 | complete_coordinate_projection |
+| [clustered, 100000×64](../../results/performance_followup/small-normal-api-clustered-64.json) | 14.575 | complete_coordinate_projection |
+| [clustered, 100000×128](../../results/performance_followup/small-normal-api-clustered-128.json) | 75.391 | matrix_free_krylov |
+| [wide, 48×100000](../../results/performance_followup/small-normal-api-wide-48.json) | 8.628 | complete_coordinate_projection |
+| [wave, 100000×48](../../results/performance_followup/small-normal-api-wave-48.json) | 9.324 | complete_coordinate_projection |
+
+All trials pass the independent original-equation, spectrum, requested-space,
+orthogonality and reconstruction gates, with status 0 and 20/20 paired counts.
+The small complete path records 54 kernels, one conditional and one device-to-device
+copy; its graph audit contains no HOST nodes or host/device transfers. The
+128-column control retains the Krylov path and 75.39 ms replay. These are warm
+solve timings on unlocked clocks; setup and capture are recorded separately.
+
+The expanded focused validation passes **59 tests in 5.64 s** on each tested
+Warp version (pinned 1.18 and stock 1.15): 18 complete-basis cases, 35 normal SVD
+cases and six SVD replay cases. Small cases exercise the public automatic path;
+96-dimensional cases exercise the explicit larger experimental projection.
+
+The [combined local suite](../../results/performance_followup/small-normal-validation.json)
+passes **750 tests in 338.29 s**, with lint and formatting checks passing. An
+[isolated wheel check](../../results/performance_followup/small-normal-wheel.json)
+imports the installed API with 23 core modules and no benchmark dependencies.

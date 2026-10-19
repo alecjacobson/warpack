@@ -1,0 +1,26 @@
+{
+  "base_revision": "a24a5b2",
+  "issue": 31,
+  "full_suite": {
+    "passed": 750,
+    "seconds": 338.29,
+    "command": "PYTHONPATH=\"/home/horde/projects/warpack/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "focused": {
+    "pinned_passed": 59,
+    "pinned_seconds": 5.64,
+    "stock_passed": 59,
+    "stock_seconds": 5.64
+  },
+  "source_sha256": {
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "benchmarks/experimental/full_normal_basis.py": "950de018a1d78bca53db3a0fcb7264e86415021638ce580ef074dbab2501406f",
+    "benchmarks/experimental/normal_pod.py": "6434c0163e769bc5a1cca5af846e4eab7443e6e8da61d8a58be7704953a16b11",
+    "tests/test_full_normal_basis.py": "67621fcdc5a9fa30508931af4ae5202e125394ec998a44dc17d6d9dd22963c4c"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: passed",
+  "wheel": "small-normal-wheel.json: 23 installed core modules, no benchmark dependencies",
+  "benchmark_policy": "Sequential three-trial accepted controls with clean occupancy; setup/capture/validation excluded and reported separately; clocks unlocked",
+  "scope": "Full local suite, not a full upstream conformance rerun"
+}

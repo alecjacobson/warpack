@@ -22,7 +22,10 @@ assert solver.count_left.numpy()[0] == solver.count_right.numpy()[0] == 20
 ```
 
 The search operator is `A.T @ (A @ x)` for tall matrices and
-`A @ (A.T @ x)` for wide ones; no Gram matrix of the original operator is formed.
+`A @ (A.T @ x)` for wide ones. If `ncv` spans the entire smaller dimension
+and is at most 64, the solver projects all coordinate vectors in one batch,
+explicitly forming the small normal matrix. Larger or partial search spaces
+use matrix-free Krylov expansion. The default basis-size formula is unchanged.
 Sparse transposes and workspaces are allocated at setup. In-place value changes
 are supported between replays at fixed sparse topology and array addresses;
 initialization refreshes transpose values on device. Changing topology requires
@@ -45,8 +48,9 @@ new setup. Eager `solve(iterations=...)` uses the same finalization checks.
   clear accepted-triplet counts while retaining residual diagnostics. A prior
   conditioning failure takes precedence over the orthogonality failure.
 - Status 0 alone is not convergence. Counts do not certify that a partial
-  search space contains every requested mode. The existing independent-chain
-  exploration guard is retained; no early-stopping shortcut was introduced.
+  search space contains every requested mode. Partial search spaces retain the
+  independent-chain exploration guard; a complete coordinate basis spans the
+  whole normal space.
 
 Normal products square conditioning. The cutoff is a conservative rejection
 policy, not a rank estimate or an accuracy certificate. Requested zero singular
@@ -58,6 +62,8 @@ A full basis in a small snapshot dimension can avoid expensive restart
 exploration and cover multiplicities. It also increases memory/setup costs;
 allocating a full basis for a large smaller dimension is not generally practical.
 Basis size is an explicit caller choice, not an automatic performance promise.
+The automatic coordinate projection applies only when the selected basis is
+already complete and has at most 64 vectors. It does not enlarge a partial basis.
 
 ## Evidence and implementation boundary
 
@@ -90,3 +96,10 @@ passes **710 tests in 348.92 s**, with lint and formatting checks passing.
 Stock Warp 1.15 passes 39 focused captured/component cases plus two additional
 public eager replay cases. This is local validation, not a new complete upstream
 CuPy/Spectra conformance run.
+
+The [small complete-basis follow-up](../experimental/FULL_NORMAL_BASIS.md) reduces
+100,000×48 replay from **15.76 to 8.57 ms** and 100,000×64 from **27.21 to
+14.58 ms**, with unchanged acceptance gates. Its 64-column native CuPy control
+is **93.49 ms**. A 128-column coordinate experiment was slightly slower and is
+kept outside automatic dispatch. Tall, wide, wave and changed-input regressions
+exercise the installed implementation; conditioning safeguards still apply.
