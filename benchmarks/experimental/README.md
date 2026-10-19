@@ -1,5 +1,9 @@
 # Block eigensolver experiments and historical evaluation
 
+Latest performance: [device-selected active CG batches](ACTIVE_CG.md) reduce the
+Anvil median to 3.3398 s, versus 3.1462 s for the matched CuPy comparison, with
+extra preallocated memory and fresh residual-based row reactivation.
+
 Current API: [`warpack.BlockLOBPCG`](../upstream/BLOCK_API.md). Only the numerical
 iteration and required dense block kernels moved into the installed package.
 The batched CG and sparse-product experiments, FEM construction, reference

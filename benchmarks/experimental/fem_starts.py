@@ -55,6 +55,25 @@ def preconditioner(host, args):
     return factor, inverse
 
 
+def with_active_preconditioner(solver, args):
+    if args.active_cg_bucket_size:
+        from benchmarks.experimental.active_cg import DeviceBucketedCG
+
+        solver.preconditioner = DeviceBucketedCG(
+            solver.preconditioner, solver.errors, solver.tol, args.active_cg_bucket_size
+        )
+    return solver
+
+
+def inner_quality(solver):
+    pre = solver.preconditioner
+    result = {"preconditioner_cg_stats": pre.stats.numpy().tolist()}
+    if hasattr(pre, "usage"):
+        result["preconditioner_cg_bucket_widths"] = pre.widths.numpy().tolist()
+        result["preconditioner_cg_bucket_usage"] = pre.usage.numpy().tolist()
+    return result
+
+
 def check(problem, solver):
     q = accuracy(problem, solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T)
     q.update(status=int(solver.status.numpy()[0]), converged=int(solver.converged.numpy()[0]))
@@ -76,6 +95,7 @@ def main():
     p.add_argument("--tol", type=float, default=1e-9)
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--inner-cg", type=int, default=0)
+    p.add_argument("--active-cg-bucket-size", type=int, default=0)
     p.add_argument("--inner-fp32", action="store_true")
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--batched-products", action="store_true")
@@ -111,6 +131,8 @@ def main():
         p.error("Require finite positive cupy-tol")
     if not np.isfinite(args.initial_perturbation) or args.initial_perturbation < 0:
         p.error("Require finite nonnegative initial-perturbation")
+    if args.active_cg_bucket_size < 0 or (args.active_cg_bucket_size and not args.inner_cg):
+        p.error("active-cg-bucket-size requires a positive size and inner-cg")
     before = other_gpu_processes()
     case = make_fem_case(args.case, args.side, args.modes)
     source = case.problem
@@ -130,25 +152,28 @@ def main():
         lambda: preconditioner(source.a - source.target * source.b, args)
     )
     source_solver_setup, bootstrap = timed(
-        lambda: BlockLOBPCG(
-            operator(matrix(source.a)),
-            source.k,
-            args.width,
-            mass=mass,
-            preconditioner=old_pre,
-            initial_vectors=random,
-            tol=1e-10,
-            gram_chunk=args.gram_chunk,
-            symmetric_products=args.symmetric_products,
-            fused_updates=args.fused_updates,
-            paired_rotation=args.paired_rotation,
+        lambda: with_active_preconditioner(
+            BlockLOBPCG(
+                operator(matrix(source.a)),
+                source.k,
+                args.width,
+                mass=mass,
+                preconditioner=old_pre,
+                initial_vectors=random,
+                tol=1e-10,
+                gram_chunk=args.gram_chunk,
+                symmetric_products=args.symmetric_products,
+                fused_updates=args.fused_updates,
+                paired_rotation=args.paired_rotation,
+            ),
+            args,
         )
     )
     source_capture, source_graph = timed(lambda: bootstrap.capture(args.steps))
     source_seconds, _ = timed(lambda: wp.capture_launch(source_graph))
     source_quality = check(source, bootstrap)
     if args.inner_cg:
-        source_quality["preconditioner_cg_stats"] = old_pre.stats.numpy().tolist()
+        source_quality.update(inner_quality(bootstrap))
     if not source_quality["accepted"]:
         raise RuntimeError(f"Source solve failed independent validation: {source_quality}")
     print("Source accepted", int(bootstrap.iterations.numpy()[0]), "iterations", flush=True)
@@ -190,8 +215,8 @@ def main():
         source_quality=source_quality,
         changed_preconditioner_setup_seconds=setup,
         changed_operator_setup_seconds=operator_setup,
-        setup_scope="Preconditioner setup includes upstream FSAI and optional batched CG state/copy. Solver/operator workspaces, capture, and source solve are separate. Host FEM assembly/reference and starting-block generation/upload are excluded. JIT is charged where encountered.",
-        cg_iteration_accounting="Scheduled vector iterations including masked RHSs; CuPy padding also includes zero RHSs. These are not sums of individual first-convergence counts.",
+        setup_scope="Preconditioner setup includes upstream FSAI and optional batched CG state/copy. Optional active-bucket states are charged to solver setup. Solver/operator workspaces, capture, and source solve are separate. Host FEM assembly/reference and starting-block generation/upload are excluded. JIT is charged where encountered.",
+        cg_iteration_accounting="Scheduled vector iterations including masked RHSs and within-bucket padding when enabled; CuPy padding also includes zero RHSs. These are not sums of individual first-convergence counts.",
         rows=[],
         source_sha256={
             str(f): hashlib.sha256(f.read_bytes()).hexdigest()
@@ -203,6 +228,7 @@ def main():
                 Path("benchmarks/experimental/block_kernels.py"),
                 Path("benchmarks/experimental/block_updates.py"),
                 Path("benchmarks/experimental/batched_cg.py"),
+                Path("benchmarks/experimental/active_cg.py"),
                 Path("benchmarks/experimental/compare_block.py"),
             ]
         },
@@ -216,19 +242,22 @@ def main():
         starts.append(("previous_full_block_perturbed", previous, args.initial_perturbation))
     for name, start, perturbation in starts:
         solver_setup, solver = timed(
-            lambda: BlockLOBPCG(
-                op,
-                source.k,
-                args.width,
-                mass=mass,
-                preconditioner=current_pre,
-                initial_vectors=start,
-                initial_perturbation=perturbation,
-                tol=args.tol,
-                gram_chunk=args.gram_chunk,
-                symmetric_products=args.symmetric_products,
-                fused_updates=args.fused_updates,
-                paired_rotation=args.paired_rotation,
+            lambda: with_active_preconditioner(
+                BlockLOBPCG(
+                    op,
+                    source.k,
+                    args.width,
+                    mass=mass,
+                    preconditioner=current_pre,
+                    initial_vectors=start,
+                    initial_perturbation=perturbation,
+                    tol=args.tol,
+                    gram_chunk=args.gram_chunk,
+                    symmetric_products=args.symmetric_products,
+                    fused_updates=args.fused_updates,
+                    paired_rotation=args.paired_rotation,
+                ),
+                args,
             )
         )
         capture_seconds, graph = timed(lambda: solver.capture(args.steps))
@@ -238,7 +267,7 @@ def main():
             seconds, _ = timed(lambda: wp.capture_launch(graph))
             quality = check(target, solver)
             if args.inner_cg:
-                quality["preconditioner_cg_stats"] = current_pre.stats.numpy().tolist()
+                quality.update(inner_quality(solver))
             trials.append(
                 dict(
                     seconds=seconds,

@@ -132,6 +132,12 @@ def main():
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
     p.add_argument("--batched-cg", action="store_true")
+    p.add_argument(
+        "--active-cg-bucket-size",
+        type=int,
+        default=0,
+        help="Experimental device-only residual packing; zero disables it",
+    )
     p.add_argument("--fixed-outer", action="store_true")
     p.add_argument("--inner-fp32", action="store_true")
     p.add_argument("--inner-tol", type=float, default=0.01)
@@ -147,6 +153,8 @@ def main():
         p.error("--batched-cg requires --inner-cg")
     if args.inner_fp32 and not args.batched_cg:
         p.error("--inner-fp32 requires --batched-cg")
+    if args.active_cg_bucket_size < 0 or (args.active_cg_bucket_size and not args.batched_cg):
+        p.error("active-cg-bucket-size requires a positive size and batched-cg")
     before = other_gpu_processes()
     a, mass, shifted, constraints, sa, sb, k, check = prepare(args)
     if args.cupy_width is not None and not k <= args.cupy_width <= args.width:
@@ -198,7 +206,7 @@ def main():
             )
         else:
             preconditioner = UpstreamPreconditioner(pre)
-        return BlockLOBPCG(
+        solver = BlockLOBPCG(
             operator(a),
             k,
             args.width,
@@ -211,7 +219,15 @@ def main():
             symmetric_products=args.symmetric_products,
             fused_updates=args.fused_updates,
             paired_rotation=args.paired_rotation,
-        ), preconditioner
+        )
+        if args.active_cg_bucket_size:
+            from benchmarks.experimental.active_cg import DeviceBucketedCG
+
+            preconditioner = DeviceBucketedCG(
+                preconditioner, solver.errors, solver.tol, args.active_cg_bucket_size
+            )
+            solver.preconditioner = preconditioner
+        return solver, preconditioner
 
     solver_setup_seconds, (solver, preconditioner) = timed(create_solver)
     capture_seconds, graph = timed(
@@ -264,6 +280,7 @@ def main():
                 "benchmarks/experimental/block_updates.py",
                 "benchmarks/experimental/compare_block.py",
                 "benchmarks/experimental/batched_cg.py",
+                "benchmarks/experimental/active_cg.py",
                 "warpack/generalized.py",
             )
         },
@@ -283,9 +300,16 @@ def main():
                 if args.batched_cg
                 else "sum of independently stopped RHS iterations"
             )
+        if args.active_cg_bucket_size:
+            quality["preconditioner_cg_bucket_widths"] = preconditioner.widths.numpy().tolist()
+            quality["preconditioner_cg_bucket_usage"] = preconditioner.usage.numpy().tolist()
+            quality["cg_iteration_accounting"] = (
+                "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs."
+            )
         report["rows"].append(
             dict(
-                method="Warp experimental LOBPCG",
+                method="Warp BlockLOBPCG"
+                + (" + device-bucketed CG" if args.active_cg_bucket_size else ""),
                 seconds=seconds,
                 iterations=int(solver.iterations.numpy()[0]),
                 quality=quality,
@@ -302,7 +326,9 @@ def main():
             args,
             k,
             check,
-            cg=preconditioner if args.batched_cg else None,
+            cg=(preconditioner.base if args.active_cg_bucket_size else preconditioner)
+            if args.batched_cg
+            else None,
         )
         report["rows"].extend(cupy_rows)
         report["cupy_adapter"] = cupy_metadata
