@@ -1,0 +1,139 @@
+{
+  "matrix_sha256": "4b8deff2c147937f040f037c881f8d7efc34dcb096cd21eb79b421a9ee995336",
+  "args": {
+    "case": "clustered",
+    "size": 100000,
+    "modes": 20,
+    "snapshots": 48,
+    "full_basis_products": true,
+    "ncv": 48,
+    "reference_ncv": 48,
+    "steps": 100,
+    "repeats": 3,
+    "compare": "",
+    "out": "/home/horde/projects/warpack-normal-full-basis/results/performance_followup/full-normal-corrected-48.json"
+  },
+  "matrix_shape": [
+    100000,
+    48
+  ],
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "/home/horde/projects/warpack-normal-full-basis/benchmarks/experimental/normal_pod.py": "8b2263a95abe737a11da67d4fd899f8b78726e3a463c1d67b2519d083a3a69e3",
+    "warpack/normal_svd.py": "02ac1a8ef597a47a6a033f2cd02a498c552747f61725962e8f36bf78fbd8a259",
+    "/home/horde/projects/warpack-normal-full-basis/benchmarks/experimental/full_normal_basis.py": "dd9dd5496ab6d4edf905717264eb7f148acafdb0c5c95b51578412495ae3a4ad",
+    "benchmarks/applications/pod_compare.py": "963e5bee72b78d7c4e5d5e9034738ce9a8313799348fa426729a5115cc38798e",
+    "warpack/solver.py": "e3b84d7ae06374b8cdec150d1ac53b6fded1fec25da807c5e5c5cdfe376cebb6",
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a"
+  },
+  "protocol": "Sequential methods on identical input. Synchronized warm replays restore starts. Assembly/reference/validation excluded. Normal method has its own explicit ncv; reference methods use reference_ncv. Pure Warp; normal equations square conditioning. Physical triplets and requested spaces must pass unchanged 1e-8 gates and normal method strict 1e-11 counts. Full-basis products explicitly form the small normal matrix by projecting onto the entire coordinate basis; no Krylov expansion.",
+  "normal": {
+    "setup_seconds": 0.20031286031007767,
+    "capture_seconds": 0.17125974223017693,
+    "warmup_seconds": 0.008844282478094101,
+    "ncv": 48,
+    "samples_seconds": [
+      0.008586995303630829,
+      0.008569777011871338,
+      0.008571460843086243
+    ],
+    "solve_seconds": 0.008571460843086243,
+    "validation": [
+      {
+        "accepted": true,
+        "residual": 1.7588223690842908e-14,
+        "orthogonality": 1.4210854715202004e-14,
+        "spectrum_error": 7.39209919343506e-15,
+        "captured_energy": 0.9946568459831099,
+        "relative_reconstruction_error": 0.07309688103393343,
+        "optimal_relative_reconstruction_error": 0.07309688103401323,
+        "reconstruction_energy_error": 1.1664940220684875e-14,
+        "left_subspace_error": 1.0961560418692892e-14,
+        "right_subspace_error": 1.9161210754277253e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          4.257445090916079e-15,
+          1.3988810110276972e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      },
+      {
+        "accepted": true,
+        "residual": 1.7588223690842908e-14,
+        "orthogonality": 1.4210854715202004e-14,
+        "spectrum_error": 7.224096939038808e-15,
+        "captured_energy": 0.99465684598311,
+        "relative_reconstruction_error": 0.07309688103393343,
+        "optimal_relative_reconstruction_error": 0.07309688103401323,
+        "reconstruction_energy_error": 1.1664940220684875e-14,
+        "left_subspace_error": 1.0958992366249208e-14,
+        "right_subspace_error": 1.9161210754277253e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          4.256767464558275e-15,
+          1.3988810110276972e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      },
+      {
+        "accepted": true,
+        "residual": 1.7588223690842904e-14,
+        "orthogonality": 1.4210854715202004e-14,
+        "spectrum_error": 7.224096939038808e-15,
+        "captured_energy": 0.99465684598311,
+        "relative_reconstruction_error": 0.07309688103393343,
+        "optimal_relative_reconstruction_error": 0.07309688103401323,
+        "reconstruction_energy_error": 1.1664940220684875e-14,
+        "left_subspace_error": 1.0937923593186241e-14,
+        "right_subspace_error": 1.9161210754277253e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          4.257858442994339e-15,
+          1.3988810110276972e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      }
+    ],
+    "accepted": true,
+    "graph": {
+      "node_types_including_conditional_body": {
+        "KERNEL": 54,
+        "MEMSET": 13,
+        "CONDITIONAL": 1,
+        "MEMCPY": 1
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 1
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "timing_uncontended": true
+  },
+  "references": [],
+  "competing_gpu_processes": [],
+  "core_source_sha256": {
+    "warpack/normal_svd.py": "02ac1a8ef597a47a6a033f2cd02a498c552747f61725962e8f36bf78fbd8a259",
+    "warpack/solver.py": "e3b84d7ae06374b8cdec150d1ac53b6fded1fec25da807c5e5c5cdfe376cebb6",
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93"
+  },
+  "base_revision": "a24a5b25a454835b9cddb5a37293448afbebe13f"
+}
