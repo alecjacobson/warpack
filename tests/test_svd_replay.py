@@ -8,9 +8,8 @@ import scipy.sparse as sp
 import warp as wp
 import warp.sparse as ws
 
-from benchmarks.experimental.normal_svd import NormalSVD
 from benchmarks.upstream.adapters import matrix
-from warpack import PartialSVD
+from warpack import NormalSVD, PartialSVD
 
 
 @pytest.mark.parametrize("transpose", [False, True])

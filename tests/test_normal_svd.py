@@ -1,4 +1,4 @@
-"""Normal-equation POD prototype: original equations, multiplicities and rank limits."""
+"""Normal-product POD: original equations, multiplicities and rank limits."""
 
 import re
 
@@ -8,8 +8,9 @@ import warp as wp
 
 from benchmarks.applications.pod_compare import snapshots
 from benchmarks.applications.runner import accuracy
-from benchmarks.experimental.normal_svd import NormalOperator, NormalSVD
 from benchmarks.upstream.adapters import matrix
+from warpack import NormalSVD
+from warpack.normal_svd import NormalOperator
 
 
 @pytest.mark.parametrize("transpose", [False, True])
@@ -109,7 +110,7 @@ def test_normal_svd_wider_snapshot_space(variant, ncv, tmp_path):
 
 @pytest.mark.parametrize("bad", [float("nan"), float("inf"), 0.1])
 def test_normal_orthogonality_guard_is_captured_and_resets(bad):
-    from benchmarks.experimental.normal_svd import check_orthogonality
+    from warpack.normal_svd import check_orthogonality
 
     gram = wp.array(np.eye(3), dtype=wp.float64)
     errors = wp.zeros(2, dtype=wp.float64)
@@ -182,3 +183,26 @@ def test_normal_svd_rejects_ill_conditioned_lift_and_recovers(transpose, scale, 
     text = dot.read_text()
     assert not re.search(r'label="\{\s*HOST\b', text)
     assert "DtoH" not in text and "HtoD" not in text
+
+
+@pytest.mark.parametrize("transpose", [False, True])
+def test_public_normal_svd_eager_observes_current_values(transpose):
+    host = np.random.default_rng(831).normal(size=(51, 19))
+    if transpose:
+        host = host.T.copy()
+    a = matrix(host)
+    solver = NormalSVD(a, 5, ncv=19, tol=1e-11)
+    reference = np.linalg.svd(host, compute_uv=False)[:5]
+    for scale in (1.0, 2.0, 1.0):
+        a.values.assign((scale * host).ravel())
+        assert solver.solve(iterations=2) is solver
+        assert solver.status is solver.core.status
+        assert solver.status.numpy()[0] == 0
+        assert solver.count_left.numpy()[0] == solver.count_right.numpy()[0] == 5
+        np.testing.assert_allclose(solver.singular_values.numpy(), scale * reference, atol=1e-11)
+        u, v = solver.u.numpy().T, solver.v.numpy().T
+        values = solver.singular_values.numpy()
+        assert np.linalg.norm(scale * host @ v - u * values, axis=0).max() < 1e-10
+        assert np.linalg.norm(scale * host.T @ u - v * values, axis=0).max() < 1e-10
+        np.testing.assert_allclose(u.T @ u, np.eye(5), atol=1e-11)
+        np.testing.assert_allclose(v.T @ v, np.eye(5), atol=1e-11)

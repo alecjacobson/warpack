@@ -12,6 +12,7 @@ from .generalized import CGInverse, GeneralizedEigensolver
 from .generalized_krylov import GeneralizedKrylovSchur
 from .hermitian import HermitianCSR, HermitianEigensolver
 from .iterative import GMRESInverse
+from .normal_svd import NormalSVD
 from .nullspace import NumericalNullspaceDiagnostics
 from .shift import ComplexShiftInverse, ShiftInvertEigensolver
 from .solver import (
@@ -39,6 +40,7 @@ __all__ = [
     "HermitianCSR",
     "HermitianEigensolver",
     "KrylovSchur",
+    "NormalSVD",
     "NumericalNullspaceDiagnostics",
     "OrthogonalComplementOperator",
     "MassOrthogonalComplementInverse",

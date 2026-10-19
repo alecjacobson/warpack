@@ -16,8 +16,7 @@ from benchmarks.applications.problems import make_problem
 from benchmarks.applications.runner import accuracy
 from benchmarks.audit_profile import graph_summary
 from benchmarks.upstream.adapters import matrix
-
-from .normal_svd import NormalSVD
+from warpack import NormalSVD
 
 
 def main():
@@ -94,7 +93,7 @@ def main():
             str(path): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in (
                 Path(__file__),
-                Path(__file__).with_name("normal_svd.py"),
+                Path("warpack/normal_svd.py"),
                 Path("benchmarks/applications/pod_compare.py"),
                 Path("warpack/solver.py"),
                 Path("warpack/svd.py"),

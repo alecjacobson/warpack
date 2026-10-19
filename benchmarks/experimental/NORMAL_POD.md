@@ -2,8 +2,9 @@
 
 Follow-up on 2026-10-19 to adaptive-throughput [#31](https://github.com/alecjacobson/warpack/issues/31)
 and changed-input replay [#63](https://github.com/alecjacobson/warpack/issues/63).
-The normal-product SVD is **experimental**, outside the installed package.
-Production `PartialSVD` retains its augmented symmetric formulation.
+This report records the original experimental implementation. The guarded
+formulation is now available through the explicit [NormalSVD API](../upstream/NORMAL_SVD.md).
+`PartialSVD` retains its augmented symmetric formulation.
 
 The [orthogonality and wider-snapshot follow-up](NORMAL_GUARDS.md) adds an explicit device-side basis rejection and 128-snapshot comparisons, including a slower partial-basis control.
 

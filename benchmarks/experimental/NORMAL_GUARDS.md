@@ -5,6 +5,8 @@ Follow-up to [#31](https://github.com/alecjacobson/warpack/issues/31) and
 formulation squares conditioning; small original-equation residuals alone do
 not certify an orthonormal POD basis.
 
+The guarded implementation is now exposed through the explicit [NormalSVD API](../upstream/NORMAL_SVD.md); measurements below record the pre-move implementation and the API report links its unchanged-arithmetic controls.
+
 ## Reproducer and repair
 
 A 91×32 fixture has independently generated orthogonal left/right factors,

@@ -1,4 +1,4 @@
-"""Experimental largest nonzero SVD triplets using matrix-free normal products.
+"""Largest resolved nonzero SVD triplets using matrix-free normal products.
 
 This deliberately squares conditioning; the augmented production method remains
 unchanged. Both original SVD equations must pass, and unresolved/zero requested
@@ -9,8 +9,8 @@ import math
 
 import warp as wp
 
-from warpack import kernels as K
-from warpack.svd import _LongRowProduct, _SVDKrylovSchur, _Transpose, rect_mv, rect_mv_cooperative
+from . import kernels as K
+from .svd import _LongRowProduct, _SVDKrylovSchur, _Transpose, rect_mv, rect_mv_cooperative
 
 
 class Product:
@@ -133,12 +133,24 @@ def check_orthogonality(
 
 
 class NormalSVD:
-    """Prototype for well-resolved largest nonzero triplets; fixed sparse topology.
+    """Largest resolved nonzero triplets of compact scalar FP64 CSR matrices.
+
+    Returns descending singular_values and row-vector arrays u and v. Sparse
+    products, reductions and projected solves use Warp; no Gram operator is
+    formed. Normal products square conditioning. Use PartialSVD when that
+    conditioning tradeoff is unsuitable. Weighted/complex SVD and requested
+    null singular bases are unsupported.
+
+    tol bounds each original equation norm divided by max(1, singular_value).
+    Require status==0 and count_left==count_right==k. These checks do not
+    certify completeness of a partial search space. All diagnostics are device
+    arrays; reading .numpy() is an explicit caller synchronization.
 
     ncv can equal min(matrix.shape), giving a complete normal-operator basis.
     The existing independent-chain guard is unchanged for partial bases.
     status=2 rejects requested zero/roundoff-scale values; it is not a rank
-    estimate. status=3 rejects triplets whose left/right Gram matrices differ
+    estimate. The requested normal Ritz values and squared lift norms must
+    exceed 1e-14 times the largest requested normal Ritz value. status=3 rejects triplets whose left/right Gram matrices differ
     entrywise from identity by more than orthogonality_tol (default 1e-8).
     Both rejection statuses clear accepted-triplet counts; equation residuals
     remain available. Matrix values can change in place before captured replay.
@@ -153,6 +165,7 @@ class NormalSVD:
         self.op = NormalOperator(matrix, max(k, ncv))
         self.core = _SVDKrylovSchur(self.op, k, ncv=ncv, which="LA", tol=tol)
         self.k, self.device, self.tol = k, matrix.device, tol
+        self.status = self.core.status
         self.u = wp.empty((k, matrix.shape[0]), dtype=wp.float64, device=self.device)
         self.v = wp.empty((k, matrix.shape[1]), dtype=wp.float64, device=self.device)
         self.av, self.atu = wp.empty_like(self.u), wp.empty_like(self.v)
