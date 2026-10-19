@@ -55,3 +55,44 @@ def test_upstream_sparse_block_products_replay(block, operator):
         x.assign(source)
         wp.capture_launch(capture.graph)
         np.testing.assert_allclose(y.numpy(), (a @ source.T).T, atol=1e-12, rtol=1e-12)
+
+
+@pytest.mark.parametrize("lanes", [1, 2, 4, 8, 16, 32])
+@pytest.mark.parametrize("block", [1, 3])
+@pytest.mark.parametrize("dtype,tolerance", [(wp.float32, 5e-6), (wp.float64, 2e-12)])
+def test_sparse_lane_layouts_scaled_replay_and_partial_rhs(lanes, block, dtype, tolerance):
+    from benchmarks.experimental.sparse_layout import product
+
+    rng = np.random.default_rng(391)
+    a = sp.random(93, 93, density=0.2, random_state=rng, format="lil")
+    a[7, :] = 0  # Include an empty scalar row.
+    a = a.tocsr()
+    if block == 1:
+        wa = matrix(a)
+    else:
+        b = a.tobsr(blocksize=(3, 3))
+        wa = ws.bsr_from_triplets(
+            31,
+            31,
+            wp.array(np.repeat(np.arange(31), np.diff(b.indptr)), dtype=wp.int32),
+            wp.array(b.indices, dtype=wp.int32),
+            wp.array(b.data, dtype=wp.mat33d),
+        )
+    if dtype == wp.float32:
+        wa = ws.bsr_copy(wa, scalar_type=dtype)
+    # Cross a full RHS group even for the one-lane layout, plus a partial tail.
+    x, y = [wp.empty((35, 93), dtype=dtype) for _ in range(2)]
+    x.zero_()
+    product(wa, x, y, lanes)
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        product(wa, x, y, lanes)
+    source = rng.normal(size=x.shape)
+    source[3] = 0
+    for scale in (1.0, 1e-10, -1e10):
+        x.assign(source * scale)
+        y.fill_(float("nan"))
+        wp.capture_launch(capture.graph)
+        np.testing.assert_allclose(
+            y.numpy() / scale, (a @ source.T).T, atol=tolerance, rtol=tolerance
+        )

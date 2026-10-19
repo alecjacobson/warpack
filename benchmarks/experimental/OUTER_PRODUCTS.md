@@ -152,3 +152,37 @@ inner tiles, changed inputs and separate independent references for both
 outputs. All 47 focused tests pass in the pinned environment (12.04 s) and stock Warp
 1.15 (11.50 s).
 Raw record: `anvil-paired-rotation-cg15.json` and its occupancy record.
+
+## Sparse lane-layout screen
+
+A separate microbenchmark varies the number of lanes cooperating on each row
+of the FP32 shifted stiffness and upstream FSAI factor products. It performs
+one `A X` product and one `G.T (G X)` application on the actual Anvil matrix,
+with width 24. All candidates pass independent FP64 product checks using the
+actual FP32 coefficients (relative Frobenius errors below 1.11e-7).
+
+| Lanes per row | RHSs per warp | Median of five graph replays (ms) |
+|---:|---:|---:|
+| 8 (current layout) | 4 | 2.9410 |
+| 4 | 8 | 2.9036 |
+| 2 | 16 | 3.1581 |
+| 1 | 32 | 5.0804 |
+| 16 | 2 | 4.4678 |
+| 32 | 1 | 8.6125 |
+
+The four-lane difference is small and isolated from CG/eigensolver work; it
+is not a demonstrated end-to-end gain. The current layout remains unchanged.
+The diagnostic does not replace upstream CG or construct different FSAI
+factors. Twenty-four additional tests cover both product precisions, CSR/3x3
+BSR, empty rows, partial RHS groups and changed/scaled captured input. All
+31 sparse-product tests pass (7.23 s). Raw data and occupancy are in
+`anvil-sparse-layout.json` and `anvil-sparse-layout.occupancy.json`.
+
+```bash
+python -m benchmarks.experimental.tune_sparse_layout --out build/sparse-layout.json
+```
+
+After these follow-ups, the complete local suite passes **570 tests in 256.74 s**,
+including the symmetric/fused/paired kernels and sparse-layout tests.
+[Validation provenance](../../results/performance_followup/sparse-layout-validation.json)
+records source hashes and checks; lint/format also pass.

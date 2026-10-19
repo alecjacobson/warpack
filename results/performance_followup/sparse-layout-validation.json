@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "8f46d69147890d9c10b2c2d6b3abfb5757b6b96d",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "570 passed",
+    "seconds": 256.74
+  },
+  "focused": {
+    "result": "31 sparse-product tests passed",
+    "seconds": 7.23
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks/experimental benchmarks/monitor_gpu.py: passed",
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "3cb61e17d0a30737f9cf16f194e212bd8a7c60c7151716e463fb0e894672337f",
+    "benchmarks/experimental/block_updates.py": "de8a4222a8ee73e54152cff77e705b7ba3d2b238314d87126a812adcbb0ca4cf",
+    "benchmarks/experimental/sparse_layout.py": "d70d404f802747065d8d61a9ab6e1cd25933c242bba004e2b069e7d2fea7e773",
+    "benchmarks/experimental/tune_sparse_layout.py": "bc36b94ff10da2ced45c482c894b0b772dddfffd40a9bb4e7124dfe49d27cbf1",
+    "tests/test_block_products_experimental.py": "37ec732927d4216664b9f545d7efcc9597b200ceee1b440a9510859713a01f2d"
+  },
+  "scope": "Full local regression after symmetric/fused/paired outer updates and sparse layout diagnostics. Not a full upstream CuPy/Spectra rerun. No production solver arithmetic change.",
+  "performance": "Six sparse layouts pass independent FP64 references on FP32 products. No convincing end-to-end gain established; default layout unchanged."
+}
