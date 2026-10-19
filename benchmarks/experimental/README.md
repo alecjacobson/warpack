@@ -1,5 +1,7 @@
 # Experimental preconditioned block eigensolver
 
+Latest: [symmetric products and fused projection updates](OUTER_PRODUCTS.md) reduce the accepted Anvil block replay to 3.9028 s, with matched-preconditioner and related-matrix checks.
+
 Latest: the [matched-CG and related-FEM report](MATCHED_CG.md) removes CuPy active-block padding overhead, records the remaining Anvil gap, and compares computed warm starts.
 
 This directory evaluates [#59](https://github.com/alecjacobson/warpack/issues/59)

@@ -80,6 +80,8 @@ def main():
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--gram-chunk", type=int, default=256)
+    p.add_argument("--symmetric-products", action="store_true")
+    p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--cupy", action="store_true")
     p.add_argument("--cupy-width", type=int)
     p.add_argument("--cupy-tol", type=float)
@@ -128,6 +130,8 @@ def main():
             initial_vectors=random,
             tol=1e-10,
             gram_chunk=args.gram_chunk,
+            symmetric_products=args.symmetric_products,
+            fused_updates=args.fused_updates,
         )
     )
     source_capture, source_graph = timed(lambda: bootstrap.capture(args.steps))
@@ -185,6 +189,7 @@ def main():
                 Path(__file__),
                 Path("benchmarks/experimental/block_lobpcg.py"),
                 Path("benchmarks/experimental/block_kernels.py"),
+                Path("benchmarks/experimental/block_updates.py"),
                 Path("benchmarks/experimental/batched_cg.py"),
                 Path("benchmarks/experimental/compare_block.py"),
             ]
@@ -205,6 +210,8 @@ def main():
                 initial_vectors=start,
                 tol=args.tol,
                 gram_chunk=args.gram_chunk,
+                symmetric_products=args.symmetric_products,
+                fused_updates=args.fused_updates,
             )
         )
         capture_seconds, graph = timed(lambda: solver.capture(args.steps))

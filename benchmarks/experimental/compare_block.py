@@ -125,6 +125,8 @@ def main():
         "--keep-graph", action="store_true", help="Retain the potentially large DOT dump"
     )
     p.add_argument("--gram-chunk", type=int, default=256)
+    p.add_argument("--symmetric-products", action="store_true")
+    p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
@@ -204,6 +206,8 @@ def main():
             constraints=constraints,
             tol=args.tol,
             gram_chunk=args.gram_chunk,
+            symmetric_products=args.symmetric_products,
+            fused_updates=args.fused_updates,
         ), preconditioner
 
     solver_setup_seconds, (solver, preconditioner) = timed(create_solver)
@@ -249,6 +253,7 @@ def main():
             for path in (
                 "benchmarks/experimental/block_lobpcg.py",
                 "benchmarks/experimental/block_kernels.py",
+                "benchmarks/experimental/block_updates.py",
                 "benchmarks/experimental/compare_block.py",
                 "benchmarks/experimental/batched_cg.py",
                 "warpack/generalized.py",

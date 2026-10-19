@@ -16,12 +16,18 @@ from warpack.generalized import generalized_residual
 from warpack.solver import SymmetricEigensolver
 
 
-def gram(x, y, out, chunk=256):
+def gram(x, y, out, chunk=256, symmetric=False):
     from .block_kernels import gram_kernel
 
+    if symmetric:
+        from .block_updates import symmetric_gram_kernel
+
+        kernel = symmetric_gram_kernel(chunk)
+    else:
+        kernel = T.gram_tiled if chunk == 256 else gram_kernel(chunk)
     out.zero_()
     wp.launch_tiled(
-        T.gram_tiled if chunk == 256 else gram_kernel(chunk),
+        kernel,
         dim=((x.shape[0] + 7) // 8, (y.shape[0] + 7) // 8, (x.shape[1] + chunk - 1) // chunk),
         inputs=[x, y, out],
         block_dim=128,
@@ -245,6 +251,8 @@ class BlockLOBPCG:
         tol=1e-8,
         rank_tol=1e-12,
         gram_chunk=256,
+        symmetric_products=False,
+        fused_updates=False,
     ):
         self.op, self.n, self.device = operator, operator.n, operator.device
         self.k, self.b = k, width or k
@@ -258,6 +266,8 @@ class BlockLOBPCG:
         if gram_chunk < 256 or gram_chunk % 256:
             raise ValueError("gram_chunk must be a positive multiple of 256")
         self.gram_chunk = gram_chunk
+        self.symmetric_products = symmetric_products
+        self.fused_updates = fused_updates
         if not math.isfinite(tol) or tol <= 0 or not 0 < rank_tol < 1:
             raise ValueError("require finite tol > 0 and 0 < rank_tol < 1")
         if self.mass.n != self.n or self.mass.device != self.device:
@@ -320,21 +330,35 @@ class BlockLOBPCG:
     def launch(self, kernel, shape, args):
         wp.launch(kernel, shape, args, device=self.device)
 
-    def gram(self, x, y, out):
-        gram(x, y, out, chunk=self.gram_chunk)
+    def gram(self, x, y, out, symmetric=False):
+        gram(x, y, out, chunk=self.gram_chunk, symmetric=symmetric and self.symmetric_products)
+
+    def subtract(self, basis, coeff, target, scratch):
+        if self.fused_updates:
+            from .block_updates import subtract_projection
+
+            wp.launch_tiled(
+                subtract_projection,
+                dim=((target.shape[0] + 3) // 4, (self.n + 31) // 32),
+                inputs=[basis, coeff, target],
+                block_dim=128,
+                device=self.device,
+            )
+        else:
+            rotate(basis, coeff, scratch)
+            self.launch(K.linear_residual, target.shape, [target, scratch])
+            wp.copy(target, scratch)
 
     def project(self):
         if self.constraints is not None:
             for _ in range(2):
                 self.gram(self.s, self.bconstraints, self.projection)
-                rotate(self.constraints, self.projection, self.z)
-                self.launch(K.linear_residual, self.s.shape, [self.s, self.z])
-                wp.copy(self.s, self.z)
+                self.subtract(self.constraints, self.projection, self.s, self.z)
 
     def orthogonalize_x(self):
         for i in range(2):
             self.mass.apply(self.sx, self.bx)
-            self.gram(self.sx, self.bx, self.gx)
+            self.gram(self.sx, self.bx, self.gx, symmetric=True)
             if i == 0:
                 self.launch(scales, self.b, [self.gx, self.xscale, self.status])
                 self.launch(scale_rows, self.sx.shape, [self.sx, self.xscale])
@@ -346,18 +370,14 @@ class BlockLOBPCG:
     def orthogonalize_search(self, x):
         for _ in range(2):
             self.gram(x, self.bx, self.projection_x)
-            rotate(self.sx, self.projection_x, self.bu)
-            self.launch(K.linear_residual, x.shape, [x, self.bu])
-            wp.copy(x, self.bu)
+            self.subtract(self.sx, self.projection_x, x, self.bu)
             if self.constraints is not None:
                 self.gram(x, self.bconstraints, self.projection_u)
-                rotate(self.constraints, self.projection_u, self.bu)
-                self.launch(K.linear_residual, x.shape, [x, self.bu])
-                wp.copy(x, self.bu)
+                self.subtract(self.constraints, self.projection_u, x, self.bu)
 
     def whiten(self, x, out, normalize=False):
         self.mass.apply(x, self.bu)
-        self.gram(x, self.bu, self.metric.g)
+        self.gram(x, self.bu, self.metric.g, symmetric=True)
         if normalize:
             self.launch(scales, 2 * self.b, [self.metric.g, self.scale, self.status])
             self.launch(scale_rows, x.shape, [x, self.scale])
@@ -393,7 +413,7 @@ class BlockLOBPCG:
         wp.copy(self.su, self.u2)
         self.launch(activate_x, self.b, [self.active_x, self.rank])
         self.op.apply(self.s, self.az)
-        self.gram(self.s, self.az, self.small.g)
+        self.gram(self.s, self.az, self.small.g, symmetric=True)
         self.launch(mask_projected, 1, [self.small.g, self.active, self.rank, self.status, self.b])
         self.small.which = 0
         self.small.diagonalize()
@@ -401,8 +421,12 @@ class BlockLOBPCG:
             K.rotation_coefficients, self.coeff.shape, [self.small.v, self.small.order, self.coeff]
         )
         rotate(self.s, self.coeff, self.x)
-        self.launch(discard_x, self.coeff.shape, [self.coeff, self.b])
-        rotate(self.s, self.coeff, self.p)
+        if self.fused_updates:
+            # P excludes the X contribution; avoid multiplying known zero columns.
+            rotate(self.su, self.coeff[:, self.b :], self.p)
+        else:
+            self.launch(discard_x, self.coeff.shape, [self.coeff, self.b])
+            rotate(self.s, self.coeff, self.p)
         self.launch(copy_values, self.b, [self.small.ritz, self.small.order, self.values])
         self.finalize()
 

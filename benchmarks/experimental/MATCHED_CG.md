@@ -1,5 +1,7 @@
 # Matched CG preconditioning and related FEM starts
 
+Latest: [symmetric products and fused projection updates](OUTER_PRODUCTS.md) reduce the accepted Anvil block replay to 3.9028 s, with matched-preconditioner and related-matrix checks.
+
 2026-10-19 follow-up to [#59](https://github.com/alecjacobson/warpack/issues/59),
 [#15](https://github.com/alecjacobson/warpack/issues/15), and
 [#66](https://github.com/alecjacobson/warpack/issues/66). These remain experimental

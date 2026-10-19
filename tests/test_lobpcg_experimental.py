@@ -17,7 +17,8 @@ def operator(a):
 
 @pytest.mark.parametrize("metric", [False, True])
 @pytest.mark.parametrize("kind", ["spd", "indefinite", "repeated", "rigid"])
-def test_original_pencil_and_requested_subspace(metric, kind):
+@pytest.mark.parametrize("optimized", [False, True])
+def test_original_pencil_and_requested_subspace(metric, kind, optimized):
     n, k, width = 64, 4, 8
     rng = np.random.default_rng(61)
     lower = np.eye(n)
@@ -47,6 +48,8 @@ def test_original_pencil_and_requested_subspace(metric, kind):
         preconditioner=operator(la.inv(a + 5 * mass)),
         initial_vectors=starts,
         constraints=constraints,
+        symmetric_products=optimized,
+        fused_updates=optimized,
         tol=1e-10,
     )
     graph = s.capture(100)
@@ -70,16 +73,23 @@ def test_original_pencil_and_requested_subspace(metric, kind):
 
 
 @pytest.mark.parametrize("value", [0.0, 1.0])
-def test_rank_deficient_search_at_exact_convergence(value):
+@pytest.mark.parametrize("optimized", [False, True])
+def test_rank_deficient_search_at_exact_convergence(value, optimized):
     op = operator(np.eye(48) * value)
-    s = BlockLOBPCG(op, 4, width=8, tol=1e-12)
+    s = BlockLOBPCG(
+        op, 4, width=8, symmetric_products=optimized, fused_updates=optimized, tol=1e-12
+    )
     # Keep stepping after exact convergence: zero/dependent residual and history
     # blocks must not destroy the full-rank current eigenvector block.
     s.solve(6)
     x = s.eigenvectors.numpy()
     assert s.status.numpy()[0] == 0
     assert s.converged.numpy()[0] == 4
-    np.testing.assert_allclose(s.eigenvalues.numpy(), value, atol=1e-12)
+    np.testing.assert_allclose(
+        s.eigenvalues.numpy(),
+        value,
+        atol=1e-12,
+    )
     np.testing.assert_allclose(x @ x.T, np.eye(4), atol=1e-11)
 
 
@@ -96,13 +106,22 @@ def test_invalid_initial_block_never_reports_convergence(bad):
     assert s.converged.numpy()[0] == 0
 
 
-def test_wide_block_preserves_accurate_modes_after_convergence():
+@pytest.mark.parametrize("optimized", [False, True])
+def test_wide_block_preserves_accurate_modes_after_convergence(optimized):
     # A first formulation whitened [X,W,P] together, amplifying roundoff in X
     # when W/P became dependent. It degraded from 1e-9 to 1e-5 residuals here.
     n = 100
     q = la.qr(np.random.default_rng(83).normal(size=(n, n)))[0]
     a = (q * np.arange(1.0, n + 1)) @ q.T
-    s = BlockLOBPCG(operator(a), 4, width=24, preconditioner=operator(la.inv(a)), tol=1e-10)
+    s = BlockLOBPCG(
+        operator(a),
+        4,
+        width=24,
+        preconditioner=operator(la.inv(a)),
+        symmetric_products=optimized,
+        fused_updates=optimized,
+        tol=1e-10,
+    )
     s.solve(10)
     for _ in range(20):
         s.step()
@@ -132,7 +151,8 @@ def test_truncated_cg_preconditioning_in_static_graph():
         assert stats[1] <= 5
 
 
-def test_changed_pencil_constraints_and_start_reuse_one_graph():
+@pytest.mark.parametrize("optimized", [False, True])
+def test_changed_pencil_constraints_and_start_reuse_one_graph(optimized):
     # Dense coupled fixtures preserve the sparse structure while every numerical
     # input changes. Both excluded and requested invariant spaces move.
     n, k, width, excluded = 48, 4, 8, 6
@@ -160,6 +180,8 @@ def test_changed_pencil_constraints_and_start_reuse_one_graph():
         preconditioner=pre,
         constraints=constraints,
         initial_vectors=starts,
+        symmetric_products=optimized,
+        fused_updates=optimized,
         tol=1e-10,
     )
     graph = s.capture(100)

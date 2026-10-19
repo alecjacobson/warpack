@@ -1,0 +1,69 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "hodge_large_disconnected",
+    "--side",
+    "81",
+    "--width",
+    "6",
+    "--cupy",
+    "--cupy-tol",
+    "5e-11",
+    "--steps",
+    "100",
+    "--shift",
+    ".001",
+    "--tol",
+    "1e-11",
+    "--fsai-width",
+    "32",
+    "--inner-cg",
+    "10",
+    "--batched-cg",
+    "--inner-fp32",
+    "--inner-tol",
+    ".01",
+    "--gram-chunk",
+    "256",
+    "--batched-products",
+    "--symmetric-products",
+    "--fused-updates",
+    "--repeats",
+    "3",
+    "--out",
+    "results/performance_followup/hodge-outer-products-cg10-tight-cupy.json"
+  ],
+  "pid": 93328,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792441113.4846444,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792441114.587137,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792441115.7009704,
+      "other": [],
+      "gpu": "86 %, 2276 MiB, 2490 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792441116.8529994,
+      "other": [],
+      "gpu": "57 %, 2226 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

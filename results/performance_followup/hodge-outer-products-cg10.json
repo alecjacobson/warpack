@@ -1,0 +1,396 @@
+{
+  "args": {
+    "case": "hodge_large_disconnected",
+    "side": 81,
+    "modes": 6,
+    "width": 6,
+    "steps": 100,
+    "shift": 0.001,
+    "fsai_width": 32,
+    "preconditioner": "fsai",
+    "repeats": 3,
+    "tol": 1e-11,
+    "cupy": true,
+    "cupy_width": null,
+    "cupy_tol": null,
+    "cupy_padding": false,
+    "profile": false,
+    "keep_graph": false,
+    "gram_chunk": 256,
+    "symmetric_products": true,
+    "fused_updates": true,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 10,
+    "batched_cg": true,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "results/performance_followup/hodge-outer-products-cg10.json"
+  },
+  "n": 39366,
+  "k": 6,
+  "setup_seconds": 0.050063710659742355,
+  "preconditioner_setup_seconds": 0.050063710659742355,
+  "solver_setup_seconds": 0.013628214597702026,
+  "total_setup_seconds": 0.06369192525744438,
+  "setup_scope": "Preconditioner construction plus solver/operator/CG workspaces, input upload, and optional FP32 matrix copy. Excludes mesh assembly, reference loading, host random-start generation, graph capture and warmup. JIT work is included where encountered; these are not warmed setup measurements. Historical setup_seconds is an alias for preconditioner_setup_seconds.",
+  "capture_seconds": 0.3439718447625637,
+  "warmup_seconds": 0.07687751948833466,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 33,
+      "MEMCPY": 19,
+      "KERNEL": 123,
+      "CONDITIONAL": 2
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 19
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.07653352618217468,
+      "iterations": 24,
+      "quality": {
+        "accepted": true,
+        "residual": 5.2297136680000475e-12,
+        "max_absolute_residual": 1.451443118304086e-13,
+        "orthogonality": 7.771561172376096e-16,
+        "spectrum_error": 2.727852665973529e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.0020053761437182575,
+        "nullspace_subspace_error": 1.8929330927258992e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1440,
+          10,
+          144,
+          144
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    },
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.07638924196362495,
+      "iterations": 24,
+      "quality": {
+        "accepted": true,
+        "residual": 4.4682887374660095e-12,
+        "max_absolute_residual": 1.240538707000734e-13,
+        "orthogonality": 1.1102230246251565e-15,
+        "spectrum_error": 2.714842239903703e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.002005376143718253,
+        "nullspace_subspace_error": 1.6946036913828798e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1440,
+          10,
+          144,
+          144
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    },
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.07663852721452713,
+      "iterations": 24,
+      "quality": {
+        "accepted": true,
+        "residual": 3.936660767634534e-12,
+        "max_absolute_residual": 1.1248326484588432e-13,
+        "orthogonality": 1.3322676295501878e-15,
+        "spectrum_error": 2.732189474663471e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.0020053761437182566,
+        "nullspace_subspace_error": 1.5379633136671919e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1440,
+          10,
+          144,
+          144
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.11376454681158066,
+      "residual_history_length": 22,
+      "last_history_absolute_residuals": [
+        4.287135844008012e-11,
+        5.600859387191359e-11,
+        1.0643617257666622e-10,
+        1.1725789448127029e-11,
+        8.27189670165959e-11,
+        8.344528619693409e-11
+      ],
+      "returned_absolute_residuals": [
+        4.287134514359284e-11,
+        5.6008578334660334e-11,
+        1.0643617447804847e-10,
+        1.1725794548266331e-11,
+        8.271897798020208e-11,
+        8.344528492969668e-11
+      ],
+      "returned_k_absolute_tolerance_met": false,
+      "full_block_absolute_tolerance_met": false,
+      "quality": {
+        "accepted": true,
+        "residual": 1.064361753556918e-10,
+        "max_absolute_residual": 3.189887589673229e-12,
+        "orthogonality": 1.5543122344752192e-15,
+        "spectrum_error": 2.749536709423239e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.002005376143718251,
+        "nullspace_subspace_error": 3.9949930151265044e-09,
+        "preconditioner_cg_stats": [
+          1150,
+          10,
+          115,
+          115
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3": [
+            30,
+            10,
+            3,
+            3
+          ],
+          "4": [
+            160,
+            10,
+            16,
+            16
+          ],
+          "5": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "6": [
+            960,
+            10,
+            96,
+            96
+          ]
+        }
+      }
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.11358780041337013,
+      "residual_history_length": 22,
+      "last_history_absolute_residuals": [
+        4.287135844008012e-11,
+        5.600859387191359e-11,
+        1.0643617257666622e-10,
+        1.1725789448127029e-11,
+        8.27189670165959e-11,
+        8.344528619693409e-11
+      ],
+      "returned_absolute_residuals": [
+        4.287134514359284e-11,
+        5.6008578334660334e-11,
+        1.0643617447804847e-10,
+        1.1725794548266331e-11,
+        8.271897798020208e-11,
+        8.344528492969668e-11
+      ],
+      "returned_k_absolute_tolerance_met": false,
+      "full_block_absolute_tolerance_met": false,
+      "quality": {
+        "accepted": true,
+        "residual": 1.064361753556918e-10,
+        "max_absolute_residual": 3.189887589673229e-12,
+        "orthogonality": 1.5543122344752192e-15,
+        "spectrum_error": 2.749536709423239e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.002005376143718251,
+        "nullspace_subspace_error": 3.9949930151265044e-09,
+        "preconditioner_cg_stats": [
+          1150,
+          10,
+          115,
+          115
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3": [
+            30,
+            10,
+            3,
+            3
+          ],
+          "4": [
+            160,
+            10,
+            16,
+            16
+          ],
+          "5": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "6": [
+            960,
+            10,
+            96,
+            96
+          ]
+        }
+      }
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.11351417750120163,
+      "residual_history_length": 22,
+      "last_history_absolute_residuals": [
+        4.287135844008012e-11,
+        5.600859387191359e-11,
+        1.0643617257666622e-10,
+        1.1725789448127029e-11,
+        8.27189670165959e-11,
+        8.344528619693409e-11
+      ],
+      "returned_absolute_residuals": [
+        4.287134514359284e-11,
+        5.6008578334660334e-11,
+        1.0643617447804847e-10,
+        1.1725794548266331e-11,
+        8.271897798020208e-11,
+        8.344528492969668e-11
+      ],
+      "returned_k_absolute_tolerance_met": false,
+      "full_block_absolute_tolerance_met": false,
+      "quality": {
+        "accepted": true,
+        "residual": 1.064361753556918e-10,
+        "max_absolute_residual": 3.189887589673229e-12,
+        "orthogonality": 1.5543122344752192e-15,
+        "spectrum_error": 2.749536709423239e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.002005376143718251,
+        "nullspace_subspace_error": 3.9949930151265044e-09,
+        "preconditioner_cg_stats": [
+          1150,
+          10,
+          115,
+          115
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3": [
+            30,
+            10,
+            3,
+            3
+          ],
+          "4": [
+            160,
+            10,
+            16,
+            16
+          ],
+          "5": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "6": [
+            960,
+            10,
+            96,
+            96
+          ]
+        }
+      }
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "577a0172df1fb0c5bcfe329f0bb57c0bf7b6146ff6ecfcf1d3c5e8ec7fdeedad",
+    "benchmarks/experimental/block_kernels.py": "f50706ba93b91252c7b66d2aa0e98629f94801491c2c2767df931f3dc0634dcd",
+    "benchmarks/experimental/block_updates.py": "c064fb99f43159ddfc3fb9bc13a7a3dba4ca25c1e21962dd5d4a0a6fd5819cef",
+    "benchmarks/experimental/compare_block.py": "6bcd03513b3ad1fd467c051cfcb75d9c7aa761bf2554187fa18a2e05e6f656fa",
+    "benchmarks/experimental/batched_cg.py": "09d13d319184b8cb2ad993cf078327ed2897405a151740ba3d43cf17c0b1776b",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7"
+  },
+  "cupy_adapter": {
+    "width": 6,
+    "absolute_tolerance": 1e-10,
+    "padding_width": null,
+    "preallocated_active_widths": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "inner_adapter_setup_capture_seconds": 0.03858775272965431,
+    "inner_adapter_device_memory_delta_bytes": 35651584,
+    "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+    "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+    "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges its entire starting block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence."
+}
