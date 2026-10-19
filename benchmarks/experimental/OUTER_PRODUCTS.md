@@ -69,7 +69,9 @@ shift .001 and Gram chunk 256. Warp takes 24 steps. CuPy with absolute tolerance
 1e-10 stops after 22 history entries but returns maximum absolute residual
 1.06436e-10 in each trial. All shared physical gates pass, but **its native
 tolerance does not**. [#69](https://github.com/alecjacobson/warpack/issues/69)
-tracks this soft-locking/reference limitation separately. The 113.59 ms figure
+tracks this soft-locking/reference limitation separately. A native 128-by-128
+positive diagonal reproducer, with no Warp or preconditioner, was filed as
+[CuPy #10402](https://github.com/cupy/cupy/issues/10402). The 113.59 ms figure
 must not be described as a native-tolerance success. A separately recorded
 profile tightens CuPy to 5e-11: all three trials meet that native tolerance
 (maximum 4.59435e-11) at a 118.56 ms median. The table uses this fully accepted
