@@ -111,6 +111,35 @@ Artifacts: [Warp 1.18](../../results/block_followup/ordering-118.json),
 These diagnostics deliberately preserve failing outcomes; they are not passing
 production regression tests.
 
+### Upstream driver comparisons, reviewed 2026-10-19
+
+The upstream issue now includes a
+[standalone CUDA C++ reproducer](https://github.com/NVIDIA/warp/issues/2096#issuecomment-6220552322),
+removing both Python frameworks from the failure. Subsequent
+[cross-machine L40 tests](https://github.com/NVIDIA/warp/issues/2096#issuecomment-6225142865)
+report:
+
+| GPU / driver | Toolkit | Default upload with pending warmup | Controls |
+|---|---|---|---|
+| L40 / 570.158.01 | CUDA 12.9 | 50/50 processes fail | 30/30 pass |
+| Same L40 / 570.158.01 | CUDA 12.8 | 50/50 processes fail | 30/30 pass |
+| Separate L40 / 580.105.08 | CUDA 12.9 | 100/100 processes pass | 15/15 pass |
+
+Each process uses three replays. Failures occur only on the first replay;
+controls omit explicit upload, synchronize warmup, or both. The diagnostic
+stream query confirms pending work immediately before upload on both L40
+systems. No competing GPU workload was present. These are **upstream-reported
+correctness observations**, not new local runs or performance measurements.
+
+This makes a driver-dependent explanation more likely and shows the observed
+failure is not specific to CUDA 12.9 or concurrent GPU load. Separate machines
+still differ in host configuration; no same-machine driver upgrade or confirmed
+first fixed release has been established. Passing Blackwell and RTX 3090
+observations are recorded upstream too. The issue has been
+[escalated to the CUDA driver team](https://github.com/NVIDIA/warp/issues/2096#issuecomment-6222945864).
+Keep #61 open and preserve Warpack's existing warmup synchronization. No driver
+upgrade, runtime change or additional replay synchronization is made here.
+
 ## Benchmark housekeeping
 
 The block-comparison driver now performs a full graph warmup before timed trials.
