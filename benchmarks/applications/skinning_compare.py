@@ -313,7 +313,7 @@ def main():
             ),
             "unknown",
         ),
-        cpu_contention="Not isolated; CPU-heavy geometric_peel process observed during initial large run",
+        cpu_contention="Not isolated; this driver does not sample CPU contention",
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
         other_gpu_processes=other_gpu_processes(),
         reference=reference_label,

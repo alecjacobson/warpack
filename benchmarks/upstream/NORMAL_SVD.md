@@ -29,7 +29,7 @@ use matrix-free Krylov expansion. The default basis-size formula is unchanged.
 Sparse transposes and workspaces are allocated at setup. In-place value changes
 are supported between replays at fixed sparse topology and array addresses;
 initialization refreshes transpose values on device. Changing topology requires
-new setup. Eager `solve(iterations=...)` uses the same finalization checks.
+new setup. Eager `solve(iterations=...)` uses the same finalization checks. Duplicate CSR coordinates sum into logical coefficients; source rows may be unsorted.
 
 ## Contract and limitations
 

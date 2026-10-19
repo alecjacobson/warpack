@@ -106,6 +106,7 @@ def main():
             for path in (
                 Path(__file__),
                 Path("warpack/normal_svd.py"),
+                Path("warpack/sparse_utils.py"),
                 Path(__file__).with_name("full_normal_basis.py"),
                 Path("benchmarks/applications/pod_compare.py"),
                 Path("warpack/solver.py"),

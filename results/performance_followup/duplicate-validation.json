@@ -1,0 +1,33 @@
+{
+  "issue": 78,
+  "base_revision": "288f8d8",
+  "full_suite": {
+    "passed": 770,
+    "seconds": 350.82,
+    "command": "PYTHONPATH=\"/home/horde/projects/warpack/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "focused": {
+    "pinned_passed": 87,
+    "pinned_seconds": 13.18,
+    "stock_passed": 87,
+    "stock_seconds": 16.64,
+    "scope": "Duplicate CSR, constrained replay/solver, ordinary SVD replay and normal SVD; before integration of small full-basis optimization"
+  },
+  "cpu_only": {
+    "passed": 4,
+    "seconds": 0.58,
+    "scope": "Duplicate transpose refresh, both shapes and source orderings; cooperative constraint reductions tested on CUDA"
+  },
+  "source_sha256": {
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "tests/test_duplicate_sparse.py": "b3e9e8d7477d804ee4d7291732460cc413ed7b1a73a4c89996d18509ca403ffe",
+    "tests/test_constrained_replay.py": "061b10a033e69e9e48d0356ce816a2c75d7b9a4ca4a2f786da6e7738f11f0066",
+    "benchmarks/applications/skinning_compare.py": "1562327afd703e96d7072323a2e3a99204dd1cd7458078d3d1f2aed342122f0b",
+    "benchmarks/experimental/normal_pod.py": "2450d9748cfe12b9d71bc4715fbe577df4d4a4c8bb4398e4d88b4c87605ac943"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: passed",
+  "wheel": "duplicate-refresh-wheel.json: isolated installed import, 23 core modules",
+  "scope": "Full local suite, not a full upstream conformance rerun"
+}

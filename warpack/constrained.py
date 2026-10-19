@@ -164,12 +164,19 @@ def _restart_multiplier_images(
 
 @wp.kernel
 def _constraint_norm_parts(
-    offsets: wp.array[wp.int32], values: wp.array[wp.float64], parts: wp.array2d[wp.float64]
+    offsets: wp.array[wp.int32],
+    indices: wp.array[wp.int32],
+    owners: wp.array[wp.int32],
+    transposed_values: wp.array[wp.float64],
+    parts: wp.array2d[wp.float64],
 ):
     row, chunk, lane = wp.tid()
     value = wp.float64(0.0)
     for p in range(offsets[row] + chunk * 128 + lane, offsets[row + 1], 128 * parts.shape[1]):
-        value += values[p] * values[p]
+        index = indices[p]
+        if owners[index] == p:
+            coefficient = transposed_values[index]
+            value += coefficient * coefficient
     total = wp.tile_extract(wp.tile_sum(wp.tile(value)), 0)
     if lane == 0:
         parts[row, chunk] = total
@@ -308,7 +315,7 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
         )
         self.physical_inverse = physical
         self.constraints = constraints
-        self._constraint_transpose = _Transpose(constraints)
+        self._constraint_transpose = _Transpose(constraints, with_source_owners=True)
         self.constraint_transpose = self._constraint_transpose.matrix
         self.multipliers = wp.empty((k, r), dtype=wp.float64, device=self.device)
         self.constraint_values = wp.empty_like(self.multipliers)
@@ -329,7 +336,13 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
         wp.launch_tiled(
             _constraint_norm_parts,
             dim=self._constraint_norm_parts.shape,
-            inputs=[self.constraints.offsets, self.constraints.values, self._constraint_norm_parts],
+            inputs=[
+                self.constraints.offsets,
+                self._constraint_transpose.indices,
+                self._constraint_transpose.owners,
+                self.constraint_transpose.values,
+                self._constraint_norm_parts,
+            ],
             block_dim=128,
             device=self.device,
         )

@@ -5,6 +5,7 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 import warp.sparse as ws
+from test_duplicate_sparse import duplicate_matrix
 
 from benchmarks.upstream.adapters import matrix
 from warpack import ConstrainedKrylovSchur, SparseOperator
@@ -24,10 +25,11 @@ def stored(a, pattern=None):
     )
 
 
+@pytest.mark.parametrize("duplicates", [False, True])
 @pytest.mark.parametrize("metric", [False, True])
 @pytest.mark.parametrize("repeated", [False, True])
 @pytest.mark.parametrize("shift", [-0.3, 2.4])
-def test_constrained_changed_values_complete_replay(metric, repeated, shift, tmp_path):
+def test_constrained_changed_values_complete_replay(metric, repeated, shift, duplicates, tmp_path):
     n, r, k = 32, 5, 6
     rng = np.random.default_rng(742)
     lower = np.eye(n)
@@ -50,7 +52,7 @@ def test_constrained_changed_values_complete_replay(metric, repeated, shift, tmp
         for i in range(r):
             c[i, np.flatnonzero(pattern[i])[0]] = 0  # Stored zero later becomes nonzero.
         changed = rng.normal(size=(r, n)) * pattern
-    cd = stored(c, pattern)
+    cd = duplicate_matrix(c) if duplicates else stored(c, pattern)
 
     def inverse_values(current):
         return la.inv(np.block([[h - shift * mass, current.T], [current, np.zeros((r, r))]]))
@@ -70,7 +72,7 @@ def test_constrained_changed_values_complete_replay(metric, repeated, shift, tmp
     )
     graph = solver.capture(2)
     for current in [c, 2 * c, changed, c]:
-        coeff = current[pattern].copy()
+        coeff = duplicate_matrix(current).values.numpy() if duplicates else current[pattern].copy()
         cd.values.assign(coeff)
         inverse.matrix.values.assign(inverse_values(current).ravel())
         wp.capture_launch(graph)
@@ -116,12 +118,16 @@ def test_parallel_constraint_norms_irregular_rows(length):
     values = np.random.default_rng(491).normal(size=offsets[-1])
     device = wp.array(np.r_[values, np.full(7, np.nan)], dtype=wp.float64)
     rows = wp.array(offsets, dtype=wp.int32)
+    identity = wp.array(np.arange(len(values) + 7), dtype=wp.int32)
     parts = wp.empty((4, max(1, min(16, (length + 2047) // 2048))), dtype=wp.float64)
     norms = wp.empty(4, dtype=wp.float64)
 
     def apply():
         wp.launch_tiled(
-            _constraint_norm_parts, dim=parts.shape, inputs=[rows, device, parts], block_dim=128
+            _constraint_norm_parts,
+            dim=parts.shape,
+            inputs=[rows, identity, identity, device, parts],
+            block_dim=128,
         )
         wp.launch(_constraint_norms, 4, [parts, norms])
 

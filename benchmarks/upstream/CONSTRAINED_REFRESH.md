@@ -73,3 +73,8 @@ Sibling `.occupancy.json` files preserve the monitor records. Runs use
 `benchmarks.applications.skinning_compare --side 8` (or `24`), `--steps 2
 --repeats 3 --methods warp-cudss`, with the old report passed as `--baseline`
 to the repaired run. No new large CPU factorization was performed.
+
+The [duplicate-CSR follow-up](DUPLICATE_CSR.md) additionally sums duplicate
+transpose coefficients and computes constraint row norms from logical, coalesced
+coefficients. It retains the fixed-topology replay and caller-owned inverse
+contracts described above.
