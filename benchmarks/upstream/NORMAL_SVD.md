@@ -84,3 +84,9 @@ The 128-column matrix hash matches the preceding all-method comparison.
 An [isolated clean-source wheel check](../../results/performance_followup/normal-api-wheel.json)
 imports the new API away from the source tree, with 23 core modules and no
 benchmark modules installed.
+
+The [combined local suite](../../results/performance_followup/normal-api-validation.json)
+passes **710 tests in 348.92 s**, with lint and formatting checks passing.
+Stock Warp 1.15 passes 39 focused captured/component cases plus two additional
+public eager replay cases. This is local validation, not a new complete upstream
+CuPy/Spectra conformance run.
