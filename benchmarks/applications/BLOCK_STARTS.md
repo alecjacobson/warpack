@@ -11,8 +11,13 @@ LOBPCG or close the fresh-Anvil iterative performance gap in
 ```python
 starts = wp.clone(previous.eigenvectors)  # (k, n), FP64 device storage
 solver = GeneralizedEigensolver(
-    stiffness, mass, current_inverse, k=k, ncv=ncv,
-    initial_vectors=starts, tol=1e-8,
+    stiffness,
+    mass,
+    current_inverse,
+    k=k,
+    ncv=ncv,
+    initial_vectors=starts,
+    tol=1e-8,
 )
 graph = solver.capture(8, adaptive=False)
 wp.capture_launch(graph)

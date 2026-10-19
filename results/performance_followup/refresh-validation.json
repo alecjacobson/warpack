@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-19",
+  "revision": "c272fbc",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "691 passed",
+    "seconds": 338.25
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: 213 files already formatted",
+  "stock_focused": {
+    "complex_shift_hermitian": {
+      "passed": 63,
+      "seconds": 14.08
+    },
+    "constrained_svd": {
+      "passed": 63,
+      "seconds": 12.7
+    }
+  },
+  "source_sha256": {
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/constrained.py": "4e738370446fbbe538ada7f2205547558d4b315c87d70e5ee73891c035296f1a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/sparse_utils.py": "6dc47ae8dbe4414f639e705c53195d6fdbe3b6807e4934faecc988d52344ef3d"
+  },
+  "wheel": "refresh-wheel.json: 22 core modules; isolated installed import; application/benchmark modules excluded",
+  "scope": "Full local suite including complex and constrained value-replay fixes. Not a new full upstream conformance rerun."
+}

@@ -36,6 +36,9 @@ HtoD or DtoH nodes.
 
 The pinned focused suite passes **48 tests in 6.75 s**. Stock Warp 1.15 passes
 **63 tests in 12.70 s**, including the additional ordinary SVD suite.
+After integration with the complex coefficient replay repair, the [combined
+full suite](../../results/performance_followup/refresh-validation.json) passes
+**691 tests in 338.25 s**. The [clean-source wheel](../../results/performance_followup/refresh-wheel.json) includes all 22 core modules and imports away from the checkout.
 
 ```bash
 PYTHONPATH="$PWD/build/warp-fsai:$PWD" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \

@@ -60,8 +60,14 @@ setup work; its cost has not been benchmarked in this follow-up.
 
 ```python
 solver = ShiftInvertEigensolver(
-    A, k=10, sigma=0.25, ncv=24, backend="cudss",
-    hermitian=True, initial_vector=start, tol=1e-10,
+    A,
+    k=10,
+    sigma=0.25,
+    ncv=24,
+    backend="cudss",
+    hermitian=True,
+    initial_vector=start,
+    tol=1e-10,
 )
 graph = solver.capture(30)
 wp.capture_launch(graph)

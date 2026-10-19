@@ -139,3 +139,5 @@ python -m benchmarks.experimental.interior_gmres \
 enclosing gap. `--case` also accepts lumped mass, heterogeneous stiffness,
 disconnected repeated modes and repeated bending. The reference construction
 is shared with the existing interior-FEM comparisons.
+
+The capability issue [#49](https://github.com/alecjacobson/warpack/issues/49) is closed. Remaining interior GMRES throughput and FP64 FSAI setup-memory costs are tracked separately in [#75](https://github.com/alecjacobson/warpack/issues/75); the accepted near-pole profile still has seven failed inner tolerance checks as recorded above.
