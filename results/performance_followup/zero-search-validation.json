@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "fbac5b3",
+  "proposal_patch": "results/performance_followup/zero-search-prototype.patch",
+  "patch_sha256": "d23fa93d1ea6e72e0e318206ae09412426addec3c5eb9a1c7c6f1c81e1cac4c2",
+  "focused_tests": {
+    "result": "80 passed",
+    "seconds": 47.26,
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_block_prefix_products.py tests/test_block_api.py tests/test_lobpcg_experimental.py tests/test_active_cg_experimental.py"
+  },
+  "result": "Accuracy passed; no meaningful end-to-end improvement established. Prototype removed from core/API; patch retained for reproducibility.",
+  "warp_median_seconds": 3.338823687285185,
+  "cupy_median_seconds": 3.183881886303425,
+  "preceding_active_cg_warp_median_seconds": 3.339829385280609,
+  "source_sha256": {
+    "warpack/block.py": "0fa9d2bef4915ac822ee292bcdc739ad6983ec19ac1969f56e17143683709c51",
+    "warpack/block_products.py": "14a0bb7381874013322c2fc48a40b4e25f3bec9a2f035e50ad18669a285d86f1",
+    "benchmarks/experimental/compare_block.py": "4a02a52bc09fd79328e327e562620ed9c62c4b1836eefb291f006af0a0aa164c",
+    "benchmarks/experimental/fem_starts.py": "70ef47b4eb0700f9f095f03a56180c696b388126fb9271ae83ae1b1efef66107",
+    "tests/test_block_prefix_products.py": "de5cbc80ffc4810e895ba9672275d2831c789cf333179ded723c4ffca82efd33",
+    "tests/test_block_api.py": "52b649c8643010812acb33bed2a1f98a16fda7f5b59179d56d675621db60593e",
+    "tests/test_lobpcg_experimental.py": "b0ab05eb9cec628f308279570b501bd37983ef63a405e03f04b5b63da6949646",
+    "tests/test_active_cg_experimental.py": "172a7c2615a09d56846fc9293eee8375721623ed8ed4909ba8a6a9daa277d256"
+  }
+}

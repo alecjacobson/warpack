@@ -1,0 +1,400 @@
+diff --git a/benchmarks/experimental/compare_block.py b/benchmarks/experimental/compare_block.py
+index 507a0a7..3329e64 100644
+--- a/benchmarks/experimental/compare_block.py
++++ b/benchmarks/experimental/compare_block.py
+@@ -128,6 +128,7 @@ def main():
+     p.add_argument("--symmetric-products", action="store_true")
+     p.add_argument("--fused-updates", action="store_true")
+     p.add_argument("--paired-rotation", action="store_true")
++    p.add_argument("--skip-zero-search", action="store_true")
+     p.add_argument("--native-products", action="store_true")
+     p.add_argument("--batched-products", action="store_true")
+     p.add_argument("--inner-cg", type=int, default=0)
+@@ -219,6 +220,7 @@ def main():
+             symmetric_products=args.symmetric_products,
+             fused_updates=args.fused_updates,
+             paired_rotation=args.paired_rotation,
++            skip_zero_search=args.skip_zero_search,
+         )
+         if args.active_cg_bucket_size:
+             from benchmarks.experimental.active_cg import DeviceBucketedCG
+@@ -290,7 +292,9 @@ def main():
+         w, v = solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
+         quality = check(w, v)
+         quality.update(
+-            status=int(solver.status.numpy()[0]), converged=int(solver.converged.numpy()[0])
++            status=int(solver.status.numpy()[0]),
++            converged=int(solver.converged.numpy()[0]),
++            final_search_rank=int(solver.rank.numpy()[0]) - solver.b,
+         )
+         quality["accepted"] &= quality["status"] == 0 and quality["converged"] == k
+         if args.inner_cg:
+diff --git a/benchmarks/experimental/fem_starts.py b/benchmarks/experimental/fem_starts.py
+index e388e69..48b3239 100644
+--- a/benchmarks/experimental/fem_starts.py
++++ b/benchmarks/experimental/fem_starts.py
+@@ -103,6 +103,7 @@ def main():
+     p.add_argument("--symmetric-products", action="store_true")
+     p.add_argument("--fused-updates", action="store_true")
+     p.add_argument("--paired-rotation", action="store_true")
++    p.add_argument("--skip-zero-search", action="store_true")
+     p.add_argument(
+         "--initial-perturbation",
+         type=float,
+@@ -165,6 +166,7 @@ def main():
+                 symmetric_products=args.symmetric_products,
+                 fused_updates=args.fused_updates,
+                 paired_rotation=args.paired_rotation,
++                skip_zero_search=args.skip_zero_search,
+             ),
+             args,
+         )
+@@ -256,6 +258,7 @@ def main():
+                     symmetric_products=args.symmetric_products,
+                     fused_updates=args.fused_updates,
+                     paired_rotation=args.paired_rotation,
++                    skip_zero_search=args.skip_zero_search,
+                 ),
+                 args,
+             )
+diff --git a/tests/test_active_cg_experimental.py b/tests/test_active_cg_experimental.py
+index a60534b..10526ab 100644
+--- a/tests/test_active_cg_experimental.py
++++ b/tests/test_active_cg_experimental.py
+@@ -95,9 +95,10 @@ def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
+     assert "DtoH" not in graph and "HtoD" not in graph and "HOST" not in graph
+ 
+ 
++@pytest.mark.parametrize("skip_zero", [False, True])
+ @pytest.mark.parametrize("metric", [False, True])
+ @pytest.mark.parametrize("kind", ["spd", "indefinite", "repeated", "rigid"])
+-def test_bucketed_eigensolver_keeps_complete_requested_space(metric, kind):
++def test_bucketed_eigensolver_keeps_complete_requested_space(metric, kind, skip_zero):
+     import scipy.linalg as la
+ 
+     from warpack import BlockLOBPCG, SparseOperator
+@@ -138,6 +139,7 @@ def test_bucketed_eigensolver_keeps_complete_requested_space(metric, kind):
+         symmetric_products=True,
+         fused_updates=True,
+         paired_rotation=True,
++        skip_zero_search=skip_zero,
+     )
+     solver.preconditioner = DeviceBucketedCG(inner, solver.errors, solver.tol, bucket_size=2)
+     graph = solver.capture(150)
+diff --git a/tests/test_block_api.py b/tests/test_block_api.py
+index f1fdae1..ccbb63b 100644
+--- a/tests/test_block_api.py
++++ b/tests/test_block_api.py
+@@ -74,6 +74,7 @@ def test_normalized_constraints_and_coupled_mass_refresh_with_partial_start(tmp_
+         symmetric_products=True,
+         fused_updates=True,
+         paired_rotation=True,
++        skip_zero_search=True,
+     )
+     graph = solver.capture(100)
+     for seed in (19, 31):
+@@ -142,6 +143,7 @@ def test_seeded_full_start_explores_modes_after_crossing(metric, repeated, compu
+         symmetric_products=True,
+         fused_updates=True,
+         paired_rotation=True,
++        skip_zero_search=True,
+     )
+     graph = solver.capture(100)
+     wp.capture_launch(graph)
+@@ -155,9 +157,10 @@ def test_seeded_full_start_explores_modes_after_crossing(metric, repeated, compu
+         np.testing.assert_array_equal(start.numpy(), initial)
+ 
+ 
++@pytest.mark.parametrize("skip_zero", [False, True])
+ @pytest.mark.parametrize("normalize", [False, True])
+ @pytest.mark.parametrize("kind", ["dependent", "nan"])
+-def test_invalid_constraint_basis_cannot_report_convergence(normalize, kind):
++def test_invalid_constraint_basis_cannot_report_convergence(normalize, kind, skip_zero):
+     constraints = np.eye(24)[:2].copy()
+     if kind == "dependent":
+         constraints[1] = constraints[0]
+@@ -169,6 +172,7 @@ def test_invalid_constraint_basis_cannot_report_convergence(normalize, kind):
+         width=4,
+         constraints=wp.array(constraints, dtype=wp.float64),
+         normalize_constraints=normalize,
++        skip_zero_search=skip_zero,
+     )
+     wp.capture_launch(solver.capture(5))
+     assert solver.status.numpy()[0] != 0
+diff --git a/tests/test_lobpcg_experimental.py b/tests/test_lobpcg_experimental.py
+index 35a2de7..7050bcb 100644
+--- a/tests/test_lobpcg_experimental.py
++++ b/tests/test_lobpcg_experimental.py
+@@ -1,4 +1,4 @@
+-"""Independent checks for the experimental, unexported pure-Warp block method."""
++"""Original prototype regressions for the public pure-Warp block method."""
+ 
+ import numpy as np
+ import pytest
+@@ -51,6 +51,7 @@ def test_original_pencil_and_requested_subspace(metric, kind, optimized):
+         symmetric_products=optimized,
+         fused_updates=optimized,
+         paired_rotation=optimized,
++        skip_zero_search=optimized,
+         tol=1e-10,
+     )
+     graph = s.capture(100)
+@@ -84,6 +85,7 @@ def test_rank_deficient_search_at_exact_convergence(value, optimized):
+         symmetric_products=optimized,
+         fused_updates=optimized,
+         paired_rotation=optimized,
++        skip_zero_search=optimized,
+         tol=1e-12,
+     )
+     # Keep stepping after exact convergence: zero/dependent residual and history
+@@ -128,6 +130,7 @@ def test_wide_block_preserves_accurate_modes_after_convergence(optimized):
+         symmetric_products=optimized,
+         fused_updates=optimized,
+         paired_rotation=optimized,
++        skip_zero_search=optimized,
+         tol=1e-10,
+     )
+     s.solve(10)
+@@ -191,6 +194,7 @@ def test_changed_pencil_constraints_and_start_reuse_one_graph(optimized):
+         symmetric_products=optimized,
+         fused_updates=optimized,
+         paired_rotation=optimized,
++        skip_zero_search=optimized,
+         tol=1e-10,
+     )
+     graph = s.capture(100)
+diff --git a/warpack/block.py b/warpack/block.py
+index 0b357d1..5dfd46a 100644
+--- a/warpack/block.py
++++ b/warpack/block.py
+@@ -18,10 +18,14 @@ from .generalized import generalized_residual
+ from .solver import SymmetricEigensolver
+ 
+ 
+-def gram(x, y, out, chunk=256, symmetric=False):
++def gram(x, y, out, chunk=256, symmetric=False, active_rank=None):
+     from .block_products import gram_kernel
+ 
+-    if symmetric:
++    if active_rank is not None:
++        from .block_products import prefix_gram_kernel
++
++        kernel = prefix_gram_kernel(chunk, symmetric)
++    elif symmetric:
+         from .block_products import symmetric_gram_kernel
+ 
+         kernel = symmetric_gram_kernel(chunk)
+@@ -31,7 +35,7 @@ def gram(x, y, out, chunk=256, symmetric=False):
+     wp.launch_tiled(
+         kernel,
+         dim=((x.shape[0] + 7) // 8, (y.shape[0] + 7) // 8, (x.shape[1] + chunk - 1) // chunk),
+-        inputs=[x, y, out],
++        inputs=[x, y, out] + ([] if active_rank is None else [active_rank]),
+         block_dim=128,
+         device=x.device,
+     )
+@@ -274,6 +278,8 @@ class BlockLOBPCG:
+     proof. Rank-deficient/non-finite inputs set nonzero device status, not a
+     numerical host exception. Budget exhaustion leaves an incomplete count.
+ 
++    ``skip_zero_search`` skips products for rows already set to zero by metric
++    whitening; it does not change rank thresholds or remove either stability pass.
+     The product/rotation tuning switches are opt-in. Existing Krylov defaults
+     are unaffected. All numerical work here is FP64 Warp; a supplied inverse
+     may independently use upstream CG or optional cuDSS.
+@@ -296,6 +302,7 @@ class BlockLOBPCG:
+         paired_rotation=False,
+         normalize_constraints=False,
+         initial_perturbation=0.0,
++        skip_zero_search=False,
+     ):
+         if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
+             raise ValueError("operator must expose n, device and apply")
+@@ -334,6 +341,7 @@ class BlockLOBPCG:
+         self.symmetric_products = symmetric_products
+         self.fused_updates = fused_updates
+         self.paired_rotation = paired_rotation
++        self.skip_zero_search = skip_zero_search
+         if not math.isfinite(tol) or tol <= 0 or not 0 < rank_tol < 1:
+             raise ValueError("require finite tol > 0 and 0 < rank_tol < 1")
+         if constraints is not None and (
+@@ -409,8 +417,15 @@ class BlockLOBPCG:
+     def launch(self, kernel, shape, args):
+         wp.launch(kernel, shape, args, device=self.device)
+ 
+-    def gram(self, x, y, out, symmetric=False):
+-        gram(x, y, out, chunk=self.gram_chunk, symmetric=symmetric and self.symmetric_products)
++    def gram(self, x, y, out, symmetric=False, active_rank=None):
++        gram(
++            x,
++            y,
++            out,
++            chunk=self.gram_chunk,
++            symmetric=symmetric and self.symmetric_products,
++            active_rank=active_rank,
++        )
+ 
+     def subtract(self, basis, coeff, target, scratch):
+         if self.fused_updates:
+@@ -456,7 +471,13 @@ class BlockLOBPCG:
+ 
+     def whiten(self, x, out, normalize=False):
+         self.mass.apply(x, self.bu)
+-        self.gram(x, self.bu, self.metric.g, symmetric=True)
++        self.gram(
++            x,
++            self.bu,
++            self.metric.g,
++            symmetric=True,
++            active_rank=self.rank if self.skip_zero_search and not normalize else None,
++        )
+         if normalize:
+             self.launch(scales, 2 * self.b, [self.metric.g, self.scale, self.status])
+             self.launch(scale_rows, x.shape, [x, self.scale])
+@@ -480,7 +501,18 @@ class BlockLOBPCG:
+                 self.rank_tol,
+             ],
+         )
+-        rotate(x, self.transform, out)
++        if self.skip_zero_search:
++            from .block_products import rotate_prefix
++
++            wp.launch_tiled(
++                rotate_prefix,
++                dim=((out.shape[0] + 3) // 4, (self.n + 31) // 32),
++                inputs=[x, self.transform, out, self.rank],
++                block_dim=128,
++                device=self.device,
++            )
++        else:
++            rotate(x, self.transform, out)
+ 
+     def rayleigh_ritz(self):
+         self.project()
+diff --git a/warpack/block_products.py b/warpack/block_products.py
+index ce29675..3de1873 100644
+--- a/warpack/block_products.py
++++ b/warpack/block_products.py
+@@ -111,3 +111,53 @@ def paired_ritz_rotation(
+         wp.tile_matmul(a, b, acc_u)
+     wp.tile_store(x, acc_x + acc_u, offset=(i * 4, j * 32))
+     wp.tile_store(p, acc_u, offset=(i * 4, j * 32))
++
++
++@functools.lru_cache(None)
++def prefix_gram_kernel(chunk, symmetric):
++    """Gram with a known nonzero row prefix; caller clears the output.
++
++    Both inputs have zero rows at and beyond rank[0], as produced by metric
++    whitening. Rank is read on device; no extra truncation decision is made.
++    """
++    blocks = wp.constant(chunk // 32)
++    stride = wp.constant(chunk)
++    triangle = wp.constant(symmetric)
++
++    @wp.kernel(enable_backward=False, module="unique")
++    def compute(
++        x: wp.array2d[wp.float64],
++        y: wp.array2d[wp.float64],
++        g: wp.array2d[wp.float64],
++        rank: wp.array[wp.int32],
++    ):
++        i, j, piece = wp.tid()
++        if i * 8 < rank[0] and j * 8 < rank[0] and (not triangle or i <= j):
++            acc = wp.tile_zeros(shape=(8, 8), dtype=wp.float64)
++            for k in range(blocks):
++                a = wp.tile_load(x, shape=(8, 32), offset=(i * 8, piece * stride + k * 32))
++                b = wp.tile_load(y, shape=(8, 32), offset=(j * 8, piece * stride + k * 32))
++                wp.tile_matmul(a, wp.tile_transpose(b), acc)
++            wp.tile_atomic_add(g, acc, offset=(i * 8, j * 8))
++            if triangle and i != j:
++                wp.tile_atomic_add(g, wp.tile_transpose(acc), offset=(j * 8, i * 8))
++
++    return compute
++
++
++@wp.kernel
++def rotate_prefix(
++    q: wp.array2d[wp.float64],
++    coeff: wp.array2d[wp.float64],
++    out: wp.array2d[wp.float64],
++    rank: wp.array[wp.int32],
++):
++    # Whitening writes zero coefficient rows outside the retained prefix.
++    i, j = wp.tid()
++    acc = wp.tile_zeros(shape=(4, 32), dtype=wp.float64)
++    if i * 4 < rank[0]:
++        for block in range((q.shape[0] + 7) // 8):
++            a = wp.tile_load(coeff, shape=(4, 8), offset=(i * 4, block * 8))
++            b = wp.tile_load(q, shape=(8, 32), offset=(block * 8, j * 32))
++            wp.tile_matmul(a, b, acc)
++    wp.tile_store(out, acc, offset=(i * 4, j * 32))
+diff --git a/tests/test_block_prefix_products.py b/tests/test_block_prefix_products.py
+new file mode 100644
+index 0000000..57819e3
+--- /dev/null
++++ b/tests/test_block_prefix_products.py
+@@ -0,0 +1,63 @@
++"""Skip only rows already known to be zero, retaining every partial tile."""
++
++import numpy as np
++import pytest
++import warp as wp
++
++from warpack.block import gram
++from warpack.block_products import rotate_prefix
++
++
++@pytest.mark.parametrize("symmetric", [False, True])
++@pytest.mark.parametrize("chunk", [256, 1024])
++def test_prefix_gram_changed_rank_and_coefficients(symmetric, chunk):
++    rng = np.random.default_rng(927)
++    x = wp.zeros((20, 513), dtype=wp.float64)
++    y = wp.zeros_like(x)
++    result = wp.empty((20, 20), dtype=wp.float64)
++    rank = wp.zeros(1, dtype=wp.int32)
++    gram(x, y, result, chunk=chunk, symmetric=symmetric, active_rank=rank)
++    wp.synchronize()
++    with wp.ScopedCapture() as capture:
++        gram(x, y, result, chunk=chunk, symmetric=symmetric, active_rank=rank)
++    for active in (0, 1, 9, 20, 7, 0, 17):
++        source = rng.normal(size=x.shape)
++        source[active:] = 0
++        image = source * np.linspace(1, 2, source.shape[1])
++        x.assign(source)
++        y.assign(image)
++        rank.fill_(active)
++        result.fill_(float("nan"))
++        wp.capture_launch(capture.graph)
++        actual = result.numpy()
++        np.testing.assert_allclose(actual, source @ image.T, rtol=2e-13, atol=1e-11)
++        np.testing.assert_array_equal(actual[active:], 0)
++        np.testing.assert_array_equal(actual[:, active:], 0)
++
++
++def test_prefix_rotation_partial_output_inner_and_column_tiles():
++    rng = np.random.default_rng(971)
++    x = wp.array(rng.normal(size=(19, 137)), dtype=wp.float64)
++    coeff = wp.zeros((13, 19), dtype=wp.float64)
++    result = wp.empty((13, 137), dtype=wp.float64)
++    rank = wp.zeros(1, dtype=wp.int32)
++
++    def run():
++        wp.launch_tiled(rotate_prefix, dim=(4, 5), inputs=[x, coeff, result, rank], block_dim=128)
++
++    run()
++    wp.synchronize()
++    with wp.ScopedCapture() as capture:
++        run()
++    for active in (0, 1, 3, 7, 13, 4, 0):
++        source = rng.normal(size=x.shape)
++        transform = rng.normal(size=coeff.shape)
++        transform[active:] = 0
++        x.assign(source)
++        coeff.assign(transform)
++        rank.fill_(active)
++        result.fill_(float("nan"))
++        wp.capture_launch(capture.graph)
++        actual = result.numpy()
++        np.testing.assert_allclose(actual, transform @ source, rtol=2e-13, atol=1e-12)
++        np.testing.assert_array_equal(actual[active:], 0)
