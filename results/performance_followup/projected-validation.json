@@ -1,0 +1,37 @@
+{
+  "base_revision": "f00326b",
+  "issue": 77,
+  "full_suite": {
+    "result": "730 passed",
+    "seconds": 357.34,
+    "command": "PYTHONPATH=\"/home/horde/projects/warpack/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "source_sha256": {
+      "warpack/solver.py": "82be606696cf920df92e18f96baf59426722807f037890bd2517a3ec1cd2fe24",
+      "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+      "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93"
+    }
+  },
+  "subsequent_compatibility_change": "Metadata gate preserves fixed30 fallback without CUDA conditional support; two additional regressions. Same numeric path as full suite on tested GPU.",
+  "final_projected_focused": {
+    "pinned_passed": 22,
+    "pinned_seconds": 2.28,
+    "stock_passed": 22,
+    "stock_seconds": 2.36
+  },
+  "preceding_stock_focused": {
+    "passed": 81,
+    "seconds": 11.8,
+    "scope": "Projected, public normal SVD/replay, cached block image suites"
+  },
+  "source_sha256": {
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/solver.py": "e3b84d7ae06374b8cdec150d1ac53b6fded1fec25da807c5e5c5cdfe376cebb6",
+    "tests/test_projected_convergence.py": "55d8a226b3fc71d91504dd07b6a73543e3bc4af3633c7d2eb314e9465b47bef2",
+    "benchmarks/experimental/projected_profile.py": "2c1c8f2531f304f45205439bfa7e4932c67fbb06c4ed403a1b56628020a36792"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: passed",
+  "wheel": "projected-wheel.json: 23 core modules, isolated installed import",
+  "benchmark_policy": "Rejected ten-sweep records retained; fixed30 and adaptive projected controls pass complete original-equation gates. Sequential uncontended Anvil block, cuDSS and normal-POD controls pass. Cached Anvil references only; no CPU sparse factorization.",
+  "scope": "Full local suite plus later targeted compatibility validation, not a full upstream conformance rerun."
+}

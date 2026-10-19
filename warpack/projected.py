@@ -34,7 +34,7 @@ def jacobi_kernel(size, block_dim=256):
         wp.tile_scatter_masked(
             v, wp.min(lane, n - 1), wp.min(lane, n - 1), wp.float64(1.0), lane < n
         )
-        for sweep in range(10):
+        for sweep in range(30):
             for r in range(n - 1):
                 ip = wp.min(lane, half - 1)
                 p = pair_left(ip, r, n)
@@ -112,3 +112,106 @@ def jacobi_kernel(size, block_dim=256):
         wp.tile_store(vectors, v)
 
     return compute
+
+
+@wp.kernel
+def global_jacobi_update(
+    h: wp.array2d[wp.float64],
+    sweeps: wp.array[wp.int32],
+    running: wp.array[wp.int32],
+):
+    block, lane = wp.tid()
+    n = h.shape[0]
+    off = wp.float64(0.0)
+    diagonal = wp.float64(0.0)
+    for entry in range(lane, n * n, 128):
+        i, j = entry // n, entry % n
+        value = wp.abs(h[i, j])
+        if not wp.isfinite(value):
+            off = wp.float64(wp.inf)
+        elif i == j:
+            diagonal = wp.max(diagonal, value)
+        else:
+            off = wp.max(off, value)
+    max_off = wp.tile_extract(wp.tile_max(wp.tile(off)), 0)
+    max_diagonal = wp.tile_extract(wp.tile_max(wp.tile(diagonal)), 0)
+    if lane == 0:
+        sweeps[0] += 1
+        running[0] = 0
+        if sweeps[0] < 30 and (
+            not wp.isfinite(max_off) or max_off > wp.float64(2.0e-15) * max_diagonal
+        ):
+            running[0] = 1
+
+
+class GlobalJacobi:
+    """Bounded device convergence for the global-memory projected solver.
+
+    Arrays and loop state are allocated at solver setup. Captured callers embed
+    the loop; eager calls reuse a lazily prepared graph. Its first preparation
+    may synchronize/load modules, as for outer capture; replay never does.
+    """
+
+    def __init__(self, h, v, cs, ss, partners, temp, vtemp):
+        self.h, self.v = h, v
+        self.cs, self.ss, self.partners = cs, ss, partners
+        self.temp, self.vtemp = temp, vtemp
+        self.n, self.device = h.shape[0], h.device
+        self.sweeps = wp.zeros(1, dtype=wp.int32, device=self.device)
+        self.running = wp.zeros_like(self.sweeps)
+        self.graph = None
+
+    def _sweep(self):
+        from . import kernels as K
+
+        for r in range(self.n - 1):
+            wp.launch(
+                K.jacobi_pairs,
+                self.n // 2,
+                [self.h, self.cs, self.ss, self.partners, r],
+                device=self.device,
+            )
+            wp.launch(
+                K.jacobi_right,
+                self.h.shape,
+                [self.h, self.v, self.temp, self.vtemp, self.cs, self.ss, self.partners],
+                device=self.device,
+            )
+            wp.launch(
+                K.jacobi_left,
+                self.h.shape,
+                [self.h, self.v, self.temp, self.vtemp, self.cs, self.ss, self.partners],
+                device=self.device,
+            )
+        wp.launch_tiled(
+            global_jacobi_update,
+            dim=1,
+            inputs=[self.h, self.sweeps, self.running],
+            block_dim=128,
+            device=self.device,
+        )
+
+    def _capture(self):
+        from . import kernels as K
+
+        wp.launch(K.jacobi_init, self.h.shape, [self.h, self.v], device=self.device)
+        self.sweeps.zero_()
+        self.running.fill_(1)
+        wp.capture_while(self.running, self._sweep)
+
+    def apply(self):
+        if wp.get_stream(self.device).is_capturing:
+            self._capture()
+            return
+        if self.graph is None:
+            from . import kernels as K
+
+            wp.load_module(module=K.jacobi_init.module, device=self.device)
+            wp.load_module(module=global_jacobi_update.module, device=self.device, block_dim=128)
+            # Keep setup graph upload behind pending initialization on drivers
+            # affected by #61. No synchronization is performed on later calls.
+            wp.synchronize_device(self.device)
+            with wp.ScopedCapture(device=self.device) as capture:
+                self._capture()
+            self.graph = capture.graph
+        wp.capture_launch(self.graph)

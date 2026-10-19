@@ -252,6 +252,18 @@ class SymmetricEigensolver:
         self.converged = empty(1, wp.int32)
         self.iterations = empty(1, wp.int32)
         self.running = empty(1, wp.int32)
+        self._global_jacobi = None
+        if (
+            self.m > 64
+            and self.m % 2 == 0
+            and self.device.is_cuda
+            and wp.is_conditional_graph_supported()
+        ):
+            from .projected import GlobalJacobi
+
+            self._global_jacobi = GlobalJacobi(
+                self.g, self.v, self.cs, self.ss, self.partners, self.jtmp, self.vtmp
+            )
 
     def rotate(self, q, out):
         wp.launch(
@@ -310,8 +322,17 @@ class SymmetricEigensolver:
                 device=self.device,
             )
             return
+        if self._global_jacobi is not None:
+            self._global_jacobi.apply()
+            wp.launch(
+                K.sort_diagonal,
+                self.m,
+                [self.g, self.ritz, self.order, self.which],
+                device=self.device,
+            )
+            return
         wp.launch(K.jacobi_init, (self.m, self.m), [self.g, self.v], device=self.device)
-        for _ in range(10):
+        for _ in range(30):
             for r in range(self.m - 1):
                 wp.launch(
                     K.jacobi_pairs,
