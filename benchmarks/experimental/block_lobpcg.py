@@ -253,6 +253,7 @@ class BlockLOBPCG:
         gram_chunk=256,
         symmetric_products=False,
         fused_updates=False,
+        paired_rotation=False,
     ):
         self.op, self.n, self.device = operator, operator.n, operator.device
         self.k, self.b = k, width or k
@@ -268,6 +269,7 @@ class BlockLOBPCG:
         self.gram_chunk = gram_chunk
         self.symmetric_products = symmetric_products
         self.fused_updates = fused_updates
+        self.paired_rotation = paired_rotation
         if not math.isfinite(tol) or tol <= 0 or not 0 < rank_tol < 1:
             raise ValueError("require finite tol > 0 and 0 < rank_tol < 1")
         if self.mass.n != self.n or self.mass.device != self.device:
@@ -420,13 +422,31 @@ class BlockLOBPCG:
         self.launch(
             K.rotation_coefficients, self.coeff.shape, [self.small.v, self.small.order, self.coeff]
         )
-        rotate(self.s, self.coeff, self.x)
-        if self.fused_updates:
-            # P excludes the X contribution; avoid multiplying known zero columns.
-            rotate(self.su, self.coeff[:, self.b :], self.p)
+        if self.paired_rotation:
+            from .block_updates import paired_ritz_rotation
+
+            wp.launch_tiled(
+                paired_ritz_rotation,
+                dim=((self.b + 3) // 4, (self.n + 31) // 32),
+                inputs=[
+                    self.sx,
+                    self.su,
+                    self.coeff[:, : self.b],
+                    self.coeff[:, self.b :],
+                    self.x,
+                    self.p,
+                ],
+                block_dim=128,
+                device=self.device,
+            )
         else:
-            self.launch(discard_x, self.coeff.shape, [self.coeff, self.b])
-            rotate(self.s, self.coeff, self.p)
+            rotate(self.s, self.coeff, self.x)
+            if self.fused_updates:
+                # P excludes X; avoid multiplying known zero columns.
+                rotate(self.su, self.coeff[:, self.b :], self.p)
+            else:
+                self.launch(discard_x, self.coeff.shape, [self.coeff, self.b])
+                rotate(self.s, self.coeff, self.p)
         self.launch(copy_values, self.b, [self.small.ritz, self.small.order, self.values])
         self.finalize()
 

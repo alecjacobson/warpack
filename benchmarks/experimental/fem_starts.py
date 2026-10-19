@@ -82,6 +82,7 @@ def main():
     p.add_argument("--gram-chunk", type=int, default=256)
     p.add_argument("--symmetric-products", action="store_true")
     p.add_argument("--fused-updates", action="store_true")
+    p.add_argument("--paired-rotation", action="store_true")
     p.add_argument("--cupy", action="store_true")
     p.add_argument("--cupy-width", type=int)
     p.add_argument("--cupy-tol", type=float)
@@ -132,6 +133,7 @@ def main():
             gram_chunk=args.gram_chunk,
             symmetric_products=args.symmetric_products,
             fused_updates=args.fused_updates,
+            paired_rotation=args.paired_rotation,
         )
     )
     source_capture, source_graph = timed(lambda: bootstrap.capture(args.steps))
@@ -212,6 +214,7 @@ def main():
                 gram_chunk=args.gram_chunk,
                 symmetric_products=args.symmetric_products,
                 fused_updates=args.fused_updates,
+                paired_rotation=args.paired_rotation,
             )
         )
         capture_seconds, graph = timed(lambda: solver.capture(args.steps))

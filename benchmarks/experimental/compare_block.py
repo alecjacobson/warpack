@@ -127,6 +127,7 @@ def main():
     p.add_argument("--gram-chunk", type=int, default=256)
     p.add_argument("--symmetric-products", action="store_true")
     p.add_argument("--fused-updates", action="store_true")
+    p.add_argument("--paired-rotation", action="store_true")
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
@@ -208,6 +209,7 @@ def main():
             gram_chunk=args.gram_chunk,
             symmetric_products=args.symmetric_products,
             fused_updates=args.fused_updates,
+            paired_rotation=args.paired_rotation,
         ), preconditioner
 
     solver_setup_seconds, (solver, preconditioner) = timed(create_solver)

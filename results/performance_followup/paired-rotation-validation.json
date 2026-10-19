@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "d31adffcccb2b17176af3ab6471c97279f13f264",
+  "focused": {
+    "result": "47 passed",
+    "seconds": 12.04,
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_block_updates_experimental.py tests/test_lobpcg_experimental.py tests/test_block_products_experimental.py"
+  },
+  "minimum_version": {
+    "result": "47 passed",
+    "seconds": 11.5,
+    "runtime": "Warp 1.15.0",
+    "command": "Same focused command with PYTHONPATH=\"$PWD\""
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "3cb61e17d0a30737f9cf16f194e212bd8a7c60c7151716e463fb0e894672337f",
+    "benchmarks/experimental/block_updates.py": "de8a4222a8ee73e54152cff77e705b7ba3d2b238314d87126a812adcbb0ca4cf",
+    "benchmarks/experimental/compare_block.py": "7f48a49bfa86c2edb4d619770489402f18587c47e0a56b44339a6fe7630560b2",
+    "benchmarks/experimental/fem_starts.py": "fe8ec31155f93c4b47dffabe81ba49a33101b27a38f9dc1f23daf428545cd950",
+    "tests/test_lobpcg_experimental.py": "aa64e1be9fd4a153db66310d7c8cf053737eabe6891c292208a05f793703ce22",
+    "tests/test_block_updates_experimental.py": "b47c6b45a35b519f172b0aea502b416fa829e6547e3359f49673a27a9f7213c0"
+  },
+  "scope": "Optional experimental paired FP64 Ritz rotation. No production defaults/API change. Three Anvil trials pass independent physical/count/native-tolerance gates; modest timing difference not a robust isolated speedup claim."
+}

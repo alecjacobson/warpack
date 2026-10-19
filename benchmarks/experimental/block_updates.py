@@ -47,3 +47,29 @@ def subtract_projection(
         wp.tile_matmul(a, b, acc)
     old = wp.tile_load(out, shape=(4, 32), offset=(i * 4, j * 32))
     wp.tile_store(out, old - acc, offset=(i * 4, j * 32))
+
+
+@wp.kernel
+def paired_ritz_rotation(
+    sx: wp.array2d[wp.float64],
+    su: wp.array2d[wp.float64],
+    cx: wp.array2d[wp.float64],
+    cu: wp.array2d[wp.float64],
+    x: wp.array2d[wp.float64],
+    p: wp.array2d[wp.float64],
+):
+    # X_new = Cx X_old + Cu U; P_new = Cu U. Reuse the shared product.
+    # Separate bounded views keep partial inner tiles from crossing X/U.
+    i, j = wp.tid()
+    acc_x = wp.tile_zeros(shape=(4, 32), dtype=wp.float64)
+    acc_u = wp.tile_zeros(shape=(4, 32), dtype=wp.float64)
+    for block in range((sx.shape[0] + 7) // 8):
+        a = wp.tile_load(cx, shape=(4, 8), offset=(i * 4, block * 8))
+        b = wp.tile_load(sx, shape=(8, 32), offset=(block * 8, j * 32))
+        wp.tile_matmul(a, b, acc_x)
+    for block in range((su.shape[0] + 7) // 8):
+        a = wp.tile_load(cu, shape=(4, 8), offset=(i * 4, block * 8))
+        b = wp.tile_load(su, shape=(8, 32), offset=(block * 8, j * 32))
+        wp.tile_matmul(a, b, acc_u)
+    wp.tile_store(x, acc_x + acc_u, offset=(i * 4, j * 32))
+    wp.tile_store(p, acc_u, offset=(i * 4, j * 32))

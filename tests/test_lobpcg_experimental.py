@@ -50,6 +50,7 @@ def test_original_pencil_and_requested_subspace(metric, kind, optimized):
         constraints=constraints,
         symmetric_products=optimized,
         fused_updates=optimized,
+        paired_rotation=optimized,
         tol=1e-10,
     )
     graph = s.capture(100)
@@ -77,7 +78,13 @@ def test_original_pencil_and_requested_subspace(metric, kind, optimized):
 def test_rank_deficient_search_at_exact_convergence(value, optimized):
     op = operator(np.eye(48) * value)
     s = BlockLOBPCG(
-        op, 4, width=8, symmetric_products=optimized, fused_updates=optimized, tol=1e-12
+        op,
+        4,
+        width=8,
+        symmetric_products=optimized,
+        fused_updates=optimized,
+        paired_rotation=optimized,
+        tol=1e-12,
     )
     # Keep stepping after exact convergence: zero/dependent residual and history
     # blocks must not destroy the full-rank current eigenvector block.
@@ -120,6 +127,7 @@ def test_wide_block_preserves_accurate_modes_after_convergence(optimized):
         preconditioner=operator(la.inv(a)),
         symmetric_products=optimized,
         fused_updates=optimized,
+        paired_rotation=optimized,
         tol=1e-10,
     )
     s.solve(10)
@@ -182,6 +190,7 @@ def test_changed_pencil_constraints_and_start_reuse_one_graph(optimized):
         initial_vectors=starts,
         symmetric_products=optimized,
         fused_updates=optimized,
+        paired_rotation=optimized,
         tol=1e-10,
     )
     graph = s.capture(100)

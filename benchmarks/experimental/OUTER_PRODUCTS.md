@@ -132,3 +132,23 @@ python -m benchmarks.monitor_gpu --out build/outer.occupancy.json --log build/ou
 The outer-method gap remains open in #67, the larger iterative-versus-cuDSS
 gap in #15, and supported block-API promotion in #68. The evaluation milestone
 #59 is complete; that closure does not promote this prototype into the API.
+
+## Paired Ritz-rotation follow-up
+
+The opt-in `--paired-rotation` computes the new current block and history block
+in one kernel. If the search basis is `[X,U]` with coefficient blocks `[Cx,Cu]`,
+the two outputs are `X_new = Cx X + Cu U` and `P_new = Cu U`. Reusing `Cu U`
+reduces arithmetic; bounded input views preserve partial inner tiles. FP64
+precision, orthogonalization and fresh residual evaluation remain unchanged.
+
+A three-trial Anvil CG15 run, otherwise matching the profile above, takes
+**3.8442 s** with Warp versus **3.2612 s** with the same-preconditioner CuPy
+reference. All physical gates, Warp counts and CuPy native tolerances pass.
+Warp takes 29–30 steps, with worst returned-pair residual 9.8595e-9. The roughly
+1.5% difference from the earlier 3.9028 s median is modest and includes ordinary
+run-to-run convergence variation; it does not establish a robust 1.5% speedup.
+The setting remains opt-in. Three additional product tests cover partial
+inner tiles, changed inputs and separate independent references for both
+outputs. All 47 focused tests pass in the pinned environment (12.04 s) and stock Warp
+1.15 (11.50 s).
+Raw record: `anvil-paired-rotation-cg15.json` and its occupancy record.

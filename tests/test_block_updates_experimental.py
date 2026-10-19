@@ -4,7 +4,11 @@ import numpy as np
 import pytest
 import warp as wp
 
-from benchmarks.experimental.block_updates import subtract_projection, symmetric_gram_kernel
+from benchmarks.experimental.block_updates import (
+    paired_ritz_rotation,
+    subtract_projection,
+    symmetric_gram_kernel,
+)
 
 
 @pytest.mark.parametrize("chunk", [256, 4096])
@@ -69,3 +73,32 @@ def test_fused_projection_partial_tiles_and_changed_input(width, basis):
         x.assign(xh * scale)
         wp.capture_launch(capture.graph)
         np.testing.assert_allclose(x.numpy() / scale, xh - ch @ qh, atol=5e-13, rtol=2e-12)
+
+
+@pytest.mark.parametrize("width", [6, 13, 24])
+def test_paired_ritz_rotations_partial_inner_tiles_and_replay(width):
+    rng = np.random.default_rng(412)
+    n = 137
+    sh, ch = rng.normal(size=(3 * width, n)), rng.normal(size=(width, 3 * width))
+    s, c = wp.array(sh, dtype=wp.float64), wp.array(ch, dtype=wp.float64)
+    x, p = [wp.empty((width, n), dtype=wp.float64) for _ in range(2)]
+
+    def apply():
+        wp.launch_tiled(
+            paired_ritz_rotation,
+            dim=((width + 3) // 4, (n + 31) // 32),
+            inputs=[s[:width], s[width:], c[:, :width], c[:, width:], x, p],
+            block_dim=128,
+        )
+
+    apply()
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        apply()
+    for scale in (1.0, -1e-12, 1e12):
+        s.assign(sh * scale)
+        wp.capture_launch(capture.graph)
+        np.testing.assert_allclose(x.numpy() / scale, ch @ sh, atol=5e-13, rtol=2e-12)
+        np.testing.assert_allclose(
+            p.numpy() / scale, ch[:, width:] @ sh[width:], atol=5e-13, rtol=2e-12
+        )
