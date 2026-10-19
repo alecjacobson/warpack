@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "342c8994d04d22567f80b486e450929c2b3c46e5",
+  "focused": {
+    "result": "33 passed",
+    "seconds": 2.73,
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_batched_cg_experimental.py"
+  },
+  "preceding_full_suite": {
+    "result": "570 passed",
+    "seconds": 256.74,
+    "scope": "Predates this changed-source fix."
+  },
+  "source_sha256": {
+    "benchmarks/experimental/batched_cg.py": "3d920e0f60de90bf1ecad94a675631919058cd84aa131ce822b19e0f6d2ef9bd",
+    "benchmarks/experimental/compare_block.py": "c0047b858c6be3c121517e4da14866368b2ae8756b7c36fbb1e6f89dd04b3d25",
+    "tests/test_batched_cg_experimental.py": "9a69cd3c8b75a012c02d44d91545efd2896562a483fa23feb698e49243613619"
+  },
+  "scope": "Experimental FP32 working matrix refresh on each application. No production API/arithmetic change. Source topology and captured storage identities stay fixed; factor updates are caller-controlled."
+}

@@ -326,6 +326,11 @@ def profile_step(solver):
         (implementation, "gram", "gram"),
         (implementation, "rotate", "rotate"),
         (solver.preconditioner, "apply", "preconditioner"),
+        *(
+            [(solver.preconditioner, "refresh", "working_matrix_refresh")]
+            if hasattr(solver.preconditioner, "refresh")
+            else []
+        ),
         (solver.op, "apply", "operator"),
         (solver.mass, "apply", "mass"),
         (solver.small, "diagonalize", "rayleigh_ritz_eigh"),

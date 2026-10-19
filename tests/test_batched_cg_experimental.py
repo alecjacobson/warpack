@@ -239,15 +239,62 @@ def test_captured_cg_matches_changing_active_rhs_blocks(dtype, tolerance, active
     else:
         inverse.reset_stats()
     rng = np.random.default_rng(840)
-    for width, scale in [(5, 1.0), (1, 1e-4), (3, 1e4), (2, 0.0), (5, 1.0)]:
+    original_values = inverse.source_matrix.values.numpy()
+    for i, (width, scale) in enumerate([(5, 1.0), (1, 1e-4), (3, 1e4), (2, 0.0), (5, 1.0)]):
+        matrix_scale = [1.0, 1.3, 0.7, 2.0, 1.05][i]
+        inverse.source_matrix.values.assign(original_values * matrix_scale)
         source = rng.normal(size=(width, 37)) * scale
         rhs = wp.array(source, dtype=wp.float64)
         # In-place input/output must not overwrite input before the graph sees it.
         adapter.apply(rhs, rhs)
         actual = rhs.numpy()
-        residual = np.linalg.norm((a @ actual.T).T - source, axis=1)
+        residual = np.linalg.norm(matrix_scale * (a @ actual.T).T - source, axis=1)
         assert np.all(residual <= tolerance * np.linalg.norm(source, axis=1))
         assert np.isfinite(actual).all()
     stats = adapter.collect_stats().numpy() if active_widths else inverse.stats.numpy()
     assert stats[2] == 0
     assert stats[3] == (16 if active_widths else 25)
+
+
+@pytest.mark.parametrize("block", [1, 3])
+@pytest.mark.parametrize("dtype,tolerance", [(wp.float64, 1e-11), (wp.float32, 1e-5)])
+def test_batched_cg_changed_source_values_replay(block, dtype, tolerance, tmp_path):
+    a, wa = fixture(block)
+    pre = linear.FSAI(wa, max_row_size=8, factor_dtype=wp.float32)
+    inverse = BatchedCGInverse(
+        wa, 3, tol=tolerance * 0.1, maxiter=50, preconditioner=pre, working_dtype=dtype
+    )
+    rhs = wp.zeros((3, len(a)), dtype=wp.float64)
+    inverse.apply(rhs, rhs)
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        inverse.reset_stats()
+        inverse.apply(rhs, rhs)
+    rng = np.random.default_rng(51)
+    for spread in (0.0, 0.4, -0.2):
+        diagonal = np.linspace(1, 1 + spread, len(a))
+        current = diagonal[:, None] * a * diagonal[None, :]
+        host = sp.csr_matrix(current)
+        if block == 3:
+            host = host.tobsr(blocksize=(3, 3))
+        np.testing.assert_array_equal(wa.columns.numpy()[: len(host.indices)], host.indices)
+        values = np.zeros_like(wa.values.numpy())
+        values[: len(host.data)] = host.data
+        wa.values.assign(values)
+        source = rng.normal(size=rhs.shape)
+        rhs.assign(source)
+        wp.capture_launch(capture.graph)
+        actual = rhs.numpy()
+        residual = np.linalg.norm(actual @ current.T - source, axis=1)
+        assert np.all(residual <= tolerance * np.linalg.norm(source, axis=1))
+        expected = np.linalg.solve(current, source.T).T
+        assert np.all(
+            np.linalg.norm(actual - expected, axis=1)
+            <= tolerance * np.linalg.norm(expected, axis=1)
+        )
+        assert inverse.stats.numpy()[2:].tolist() == [0, 3]
+    dot = tmp_path / "changed-source.dot"
+    wp.capture_debug_dot_print(capture.graph, str(dot))
+    text = dot.read_text()
+    assert not re.search(r'label="\{\s*HOST\b', text)
+    assert "DtoH" not in text and "HtoD" not in text

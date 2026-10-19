@@ -1,5 +1,7 @@
 # Reducing experimental block-iteration work
 
+Latest: [FP32 working-matrix refresh](BATCHED_REFRESH.md) fixes changed-source replay and records a fresh accepted 3.7232 s Anvil profile.
+
 2026-10-19 follow-up to [#67](https://github.com/alecjacobson/warpack/issues/67).
 The numerical code remains experimental and outside the installed package.
 Production Krylov defaults and the main production timing table are unchanged.

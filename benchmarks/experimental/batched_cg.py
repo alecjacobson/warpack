@@ -162,6 +162,11 @@ class BatchedCGInverse:
     stats: scheduled vector iterations, maximum batch iterations, unconverged
     RHSs, RHS calls. Scheduled iterations include masked already-converged RHSs;
     they are not the sum of independent first-convergence iteration counts.
+
+    FP32 working values refresh from the FP64 source on every application,
+    including graph replay. Sparse topology and captured buffer identities
+    must remain fixed. Updating/rebuilding a supplied factor is the caller's
+    responsibility; the working matrix itself must never silently remain old.
     """
 
     requires_static_outer_capture = True
@@ -242,7 +247,7 @@ class BatchedCGInverse:
         self.requires_static_outer_capture = not _cg_preallocates_loop_control(self.state)
 
     def for_width(self, width):
-        """Independent CG workspaces sharing this fixed matrix and upstream factor."""
+        """Independent CG workspaces sharing matrix topology/storage and factor."""
         return BatchedCGInverse(
             self.source_matrix,
             width,
@@ -257,6 +262,14 @@ class BatchedCGInverse:
     def reset_stats(self):
         self.stats.zero_()
 
+    def refresh(self):
+        """Refresh the reduced-precision copy using current source values on device."""
+        if self.working_dtype != self.source_matrix.scalar_type:
+            source, target = self.source_matrix.values, self.operator.matrix.values
+            # Copy live capacity common to both matrices. Extra allocator
+            # capacity beyond the CSR/BSR offsets is not part of the matrix.
+            wp.launch(cast, min(source.size, target.size), [source, target], device=self.device)
+
     def apply(self, x, y):
         if x.shape != (self.width, self.n) or y.shape != x.shape:
             raise ValueError("RHS arrays must match the configured (width,n) shape")
@@ -267,6 +280,7 @@ class BatchedCGInverse:
             or y.device != self.device
         ):
             raise ValueError("RHS arrays must be FP64 on the matrix device")
+        self.refresh()
         if self.working_dtype == wp.float64:
             wp.copy(self.b, x.flatten())
         else:
