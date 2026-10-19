@@ -4,8 +4,8 @@ This directory evaluates [#59](https://github.com/alecjacobson/warpack/issues/59
 under the large FEM iterative-performance issue
 [#15](https://github.com/alecjacobson/warpack/issues/15). It is **not a supported
 public LOBPCG API** and is excluded from the installed package. The production
-solver defaults are unchanged. The [uncontended batched-CG follow-up](BATCHED_CG.md)
-now records a 4.84 s mixed-precision block replay versus 9.58 s production CG;
+solver defaults are unchanged. The [adaptive batched-CG follow-up](ADAPTIVE_CG.md)
+now records a 4.46 s mixed-precision block replay versus 9.58 s production CG;
 the older contended results below remain historical work-budget evidence.
 
 The prototype computes the smallest algebraic eigenpairs of a symmetric pencil
@@ -26,8 +26,11 @@ whitening twice to those search directions. Inactive directions receive a
 finite bound outside the requested projected spectrum. Rayleigh--Ritz selects
 the smallest modes, followed by fresh products and original-equation residuals.
 All workspaces are allocated before capture. Direct preconditioners support a
-device-controlled outer loop; CG uses a fixed outer graph because its own
-conditional graph cannot be nested through the current wrapper.
+device-controlled outer loop. The batched CG adapter also supports adaptive
+outer capture when the upstream state preallocates conditional-loop storage.
+The original serial-CG measurements below use fixed outer graphs; production
+`CGInverse` retains that default and provides an explicit `adaptive_capture=True`
+opt-in for compatible states. Stock Warp 1.15 rejects that opt-in.
 
 A rejected formulation whitened the entire `[X,W,P]` together. With a 24-wide
 block on a 100-dimensional fixture, accurate eigenvectors degraded from about

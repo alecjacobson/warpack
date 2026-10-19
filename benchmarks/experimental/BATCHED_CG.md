@@ -18,6 +18,9 @@ original-pencil residuals remain FP64. This uses low-accuracy solves as an
 **eigenvector preconditioner**; it does not establish FP32 accuracy for a
 shift-invert eigenproblem. Mixed precision is explicit, never a production default.
 
+The later [adaptive-CG follow-up](ADAPTIVE_CG.md) reduces replay to 4.46 s.
+The fixed-budget measurements below remain a record of the batched/precision controls.
+
 ## Uncontended Anvil comparison
 
 NVIDIA L40, 283,857 DOFs, 20 computed elastic modes plus six analytic rigid
@@ -113,7 +116,7 @@ export PYTHONPATH="$PWD/build/warp-fsai:$PWD"
 export OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 python -m benchmarks.monitor_gpu --out build/anvil.occupancy.json --log build/anvil.log -- \
   python -m benchmarks.experimental.compare_block --case anvil --width 24 \
-  --steps 40 --shift 10000 --fsai-width 32 --inner-cg 10 --batched-cg --inner-fp32 \
+  --steps 40 --fixed-outer --shift 10000 --fsai-width 32 --inner-cg 10 --batched-cg --inner-fp32 \
   --inner-tol .01 --gram-chunk 4096 --batched-products --repeats 3 --profile \
   --out build/anvil-fp32.json
 ```

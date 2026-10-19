@@ -174,3 +174,50 @@ def test_batched_cg_requires_compact_sparse_rows(dtype):
     wa.row_counts = wp.zeros(wa.nrow, dtype=wp.int32, device=wa.device)
     with pytest.raises(ValueError, match="bsr_compress"):
         BatchedCGInverse(wa, 7, working_dtype=dtype)
+
+
+@pytest.mark.parametrize("case", ["torus", "disconnected", "weak_positive"])
+def test_batched_cg_adaptive_hodge_nullspace_and_positive_guards(case, tmp_path):
+    from benchmarks.applications.hodge import make_hodge_case
+    from benchmarks.applications.runner import accuracy
+    from benchmarks.experimental.block_kernels import BatchedSparseOperator
+    from benchmarks.experimental.block_lobpcg import BlockLOBPCG
+
+    if not hasattr(linear, "FSAI"):
+        pytest.skip("pinned upstream FSAI required")
+    p = make_hodge_case(case, side=4).problem
+    shifted = matrix(p.a - p.target * p.b)
+    fsai = linear.FSAI(shifted, max_row_size=16, factor_dtype=wp.float32)
+    inverse = BatchedCGInverse(
+        shifted, 8, preconditioner=fsai, tol=0.01, maxiter=10, working_dtype=wp.float32
+    )
+    if inverse.requires_static_outer_capture:
+        pytest.skip("upstream CG must preallocate conditional-loop control")
+    starts = wp.zeros((8, p.n), dtype=wp.float64)
+    rng = np.random.default_rng(681)
+    starts.assign(rng.normal(size=starts.shape))
+    solver = BlockLOBPCG(
+        BatchedSparseOperator(matrix(p.a)),
+        p.k,
+        8,
+        mass=BatchedSparseOperator(matrix(p.b)),
+        preconditioner=inverse,
+        initial_vectors=starts,
+        tol=1e-12,
+    )
+    graph = solver.capture(200)
+    for _ in range(2):
+        starts.assign(rng.normal(size=starts.shape))
+        wp.capture_launch(graph)
+        check = accuracy(p, solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T)
+        assert check["accepted"], check
+        assert check["recovered_nullity"] == p.nullity
+        assert check["positive_guard"] > 0
+        assert solver.status.numpy()[0] == 0
+        assert solver.converged.numpy()[0] == p.k
+        assert 0 < solver.iterations.numpy()[0] < 200
+    dot = tmp_path / "hodge-batched-adaptive.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    text = dot.read_text()
+    assert not re.search(r'label="\{\s*HOST\b', text)
+    assert "DtoH" not in text and "HtoD" not in text

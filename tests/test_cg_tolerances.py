@@ -47,3 +47,42 @@ def test_default_keeps_upstream_absolute_tolerance_and_zero_rhs():
 def test_invalid_absolute_tolerance(atol):
     with pytest.raises(ValueError, match="atol"):
         CGInverse(matrix(sp.eye(4, format="csr")), atol=atol)
+
+
+def test_adaptive_cg_capture_opt_in_and_changed_starts(tmp_path):
+    import re
+
+    from warpack import SparseOperator, SymmetricEigensolver
+
+    a = np.diag(np.arange(1.0, 41.0))
+    a += np.diag(np.full(39, -0.1), 1) + np.diag(np.full(39, -0.1), -1)
+    wa = matrix(a)
+    default = CGInverse(wa)
+    assert default.requires_static_outer_capture  # Preserve production default.
+    if not hasattr(default.state, "_cur_iter_and_condition"):
+        with pytest.raises(ValueError, match="preallocated loop control"):
+            CGInverse(wa, adaptive_capture=True)
+        return
+    inverse = CGInverse(wa, tol=1e-13, maxiter=100, adaptive_capture=True)
+    rng = np.random.default_rng(41)
+    starts = wp.array(rng.normal(size=(8, 40)), dtype=wp.float64)
+    solver = SymmetricEigensolver(
+        SparseOperator(wa), 3, ncv=8, iteration_operator=inverse, initial_vectors=starts, tol=1e-10
+    )
+    graph = solver.capture(100)
+    expected = np.linalg.eigvalsh(a)[:3]
+    for _ in range(2):
+        starts.assign(rng.normal(size=starts.shape))
+        wp.capture_launch(graph)
+        w, v = solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
+        np.testing.assert_allclose(w, expected, atol=1e-9, rtol=0)
+        np.testing.assert_allclose(v.T @ v, np.eye(3), atol=1e-10, rtol=0)
+        assert np.linalg.norm(a @ v - v * w, axis=0).max() < 1e-8
+        assert solver.converged.numpy()[0] == 3
+        assert solver.status.numpy()[0] == 0
+        assert 0 < solver.iterations.numpy()[0] < 100
+    dot = tmp_path / "adaptive-cg.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    text = dot.read_text()
+    assert not re.search(r'label="\{\s*HOST\b', text)
+    assert "DtoH" not in text and "HtoD" not in text

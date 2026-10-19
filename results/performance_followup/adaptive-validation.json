@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-19",
+  "base_revision": "e90f5d61aa500fa335f848c39b23de49c3535359",
+  "full_suite": {
+    "command": "PYTHONPATH=\"$PWD/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "result": "500 passed",
+    "seconds": 195.17
+  },
+  "minimum_version": {
+    "command": "PYTHONPATH=\"$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_cg_tolerances.py tests/test_block_products_experimental.py",
+    "runtime": "Warp 1.15.0",
+    "result": "13 passed",
+    "seconds": 9.09
+  },
+  "focused": {
+    "result": "54 passed",
+    "seconds": 4.69,
+    "scope": "CG tolerance, batched CG, block products, experimental LOBPCG"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks/experimental benchmarks/monitor_gpu.py: passed",
+  "package": {
+    "command": "python -m pip wheel --no-deps CLEAN_SOURCE_COPY --wheel-dir build/adaptive-wheel",
+    "wheel": "warpack-0.1.3-py3-none-any.whl",
+    "sha256": "8c15b896c61e8b3f226005e40121e7bf22d12c2be022e6ee1a44892d634617dd",
+    "python_files": 18,
+    "experimental_packaged": false
+  },
+  "source_sha256": {
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "benchmarks/experimental/batched_cg.py": "3d430f4a5f38c6c3043ccfc011610eaeeecf5df92cf3e27cc476440fd82ddd04",
+    "benchmarks/experimental/block_kernels.py": "f50706ba93b91252c7b66d2aa0e98629f94801491c2c2767df931f3dc0634dcd",
+    "benchmarks/experimental/compare_block.py": "e2c8332977af9a3dce23906c31339e28670a26ccd1dfe8d3c5626ac7a51cc825",
+    "tests/test_cg_tolerances.py": "dfa2f0d4e73236e180c816e47251c36c216234f6ba0b18846e52dabefb5cb109",
+    "tests/test_batched_cg_experimental.py": "2a8fa481a8ed3058e169065ef276fb76f1a7d80314ca3524622017c1efcceec2"
+  },
+  "production_scope": "Explicit CGInverse.adaptive_capture opt-in for preallocated upstream loop control; default stays fixed. No upstream CG arithmetic change.",
+  "experimental_scope": "Adaptive batched upstream CG; shared scalar sparse block products; implicit identity mass in Hodge driver.",
+  "upstream_scope": "Not a full upstream CuPy/Spectra conformance rerun.",
+  "performance": "Sequential uncontended Anvil and Hodge runs; separate occupancy and per-trial accuracy records. Setup and capture separate from warm solve."
+}

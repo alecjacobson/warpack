@@ -1,0 +1,243 @@
+{
+  "args": {
+    "case": "hodge_large_disconnected",
+    "side": 81,
+    "modes": 6,
+    "width": 8,
+    "steps": 100,
+    "shift": 0.001,
+    "fsai_width": 32,
+    "preconditioner": "fsai",
+    "repeats": 3,
+    "tol": 1e-11,
+    "cupy": false,
+    "profile": true,
+    "keep_graph": false,
+    "gram_chunk": 256,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 10,
+    "batched_cg": true,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "results/performance_followup/hodge-block-adaptive.json"
+  },
+  "n": 39366,
+  "k": 6,
+  "setup_seconds": 0.044620662927627563,
+  "preconditioner_setup_seconds": 0.044620662927627563,
+  "solver_setup_seconds": 0.01448756828904152,
+  "total_setup_seconds": 0.05910823121666908,
+  "setup_scope": "Preconditioner construction plus solver/operator/CG workspaces, input upload, and optional FP32 matrix copy. Excludes mesh assembly, reference loading, host random-start generation, graph capture and warmup. JIT work is included where encountered; these are not warmed setup measurements. Historical setup_seconds is an alias for preconditioner_setup_seconds.",
+  "capture_seconds": 0.953947838395834,
+  "warmup_seconds": 0.0856076218187809,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 33,
+      "MEMCPY": 27,
+      "KERNEL": 133,
+      "CONDITIONAL": 2
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 27
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.08490115776658058,
+      "iterations": 23,
+      "quality": {
+        "accepted": true,
+        "residual": 7.600307963582225e-12,
+        "max_absolute_residual": 2.336883943972187e-13,
+        "orthogonality": 1.7763568394002505e-15,
+        "spectrum_error": 2.697495005143935e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.002005376143718253,
+        "nullspace_subspace_error": 3.1752980667181954e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1840,
+          10,
+          184,
+          184
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    },
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.0848228856921196,
+      "iterations": 23,
+      "quality": {
+        "accepted": true,
+        "residual": 6.965071539815918e-12,
+        "max_absolute_residual": 2.6114440426098737e-13,
+        "orthogonality": 8.881784197001252e-16,
+        "spectrum_error": 2.732189474663471e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.0020053761437182566,
+        "nullspace_subspace_error": 3.122247934727417e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1840,
+          10,
+          184,
+          184
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    },
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.08521522581577301,
+      "iterations": 23,
+      "quality": {
+        "accepted": true,
+        "residual": 6.526506595706635e-12,
+        "max_absolute_residual": 2.1523061389742038e-13,
+        "orthogonality": 1.1102230246251565e-15,
+        "spectrum_error": 2.719179048593645e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.0020053761437182557,
+        "nullspace_subspace_error": 3.091343068273531e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1840,
+          10,
+          184,
+          184
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "2a084158ddc36cd693c112818abb9ae9994bf81d5d5f2192b6ec74c5904517e3",
+    "benchmarks/experimental/block_kernels.py": "f50706ba93b91252c7b66d2aa0e98629f94801491c2c2767df931f3dc0634dcd",
+    "benchmarks/experimental/compare_block.py": "e2c8332977af9a3dce23906c31339e28670a26ccd1dfe8d3c5626ac7a51cc825",
+    "benchmarks/experimental/batched_cg.py": "3d430f4a5f38c6c3043ccfc011610eaeeecf5df92cf3e27cc476440fd82ddd04",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7"
+  },
+  "profile": {
+    "samples_ms": [
+      {
+        "preconditioner": 1.8835200071334839,
+        "project": 0.0017920000245794654,
+        "mass": 0.0342719997279346,
+        "gram": 0.483231995254755,
+        "orthogonalize_x": 0.14105600118637085,
+        "rotate": 0.2584639973938465,
+        "orthogonalize_search": 0.3460480123758316,
+        "metric_eigh": 0.3065280057489872,
+        "whiten": 0.5724799931049347,
+        "operator": 0.17849599942564964,
+        "rayleigh_ritz_eigh": 0.37990400195121765,
+        "finalize": 0.07628799974918365,
+        "step": 3.8032960891723633
+      },
+      {
+        "preconditioner": 1.8884799480438232,
+        "project": 0.0017920000245794654,
+        "mass": 0.03241599956527352,
+        "gram": 0.48022400215268135,
+        "orthogonalize_x": 0.1379839926958084,
+        "rotate": 0.25830399990081787,
+        "orthogonalize_search": 0.3432319909334183,
+        "metric_eigh": 0.3137599974870682,
+        "whiten": 0.5793919861316681,
+        "operator": 0.17772799357771873,
+        "rayleigh_ritz_eigh": 0.3805440068244934,
+        "finalize": 0.07539200037717819,
+        "step": 3.8046720027923584
+      },
+      {
+        "preconditioner": 1.8891839981079102,
+        "project": 0.0017920000245794654,
+        "mass": 0.03228799952194095,
+        "gram": 0.4876159969717264,
+        "orthogonalize_x": 0.13820800185203552,
+        "rotate": 0.2580159977078438,
+        "orthogonalize_search": 0.34908799827098846,
+        "metric_eigh": 0.27612800151109695,
+        "whiten": 0.5420799851417542,
+        "operator": 0.17744000256061554,
+        "rayleigh_ritz_eigh": 0.38144001364707947,
+        "finalize": 0.07481600344181061,
+        "step": 3.7750720977783203
+      },
+      {
+        "preconditioner": 1.888767957687378,
+        "project": 0.0017920000245794654,
+        "mass": 0.03219199972227216,
+        "gram": 0.48195199854671955,
+        "orthogonalize_x": 0.13884800672531128,
+        "rotate": 0.2575040031224489,
+        "orthogonalize_search": 0.3449280112981796,
+        "metric_eigh": 0.3043519854545593,
+        "whiten": 0.5697600096464157,
+        "operator": 0.17795200273394585,
+        "rayleigh_ritz_eigh": 0.38335999846458435,
+        "finalize": 0.07516799867153168,
+        "step": 3.7992639541625977
+      },
+      {
+        "preconditioner": 1.8896960020065308,
+        "project": 0.0017920000245794654,
+        "mass": 0.032447999343276024,
+        "gram": 0.4837440010160208,
+        "orthogonalize_x": 0.1380160003900528,
+        "rotate": 0.2577600032091141,
+        "orthogonalize_search": 0.345567986369133,
+        "metric_eigh": 0.3033920004963875,
+        "whiten": 0.5715519934892654,
+        "operator": 0.1775679998099804,
+        "rayleigh_ritz_eigh": 0.38281598687171936,
+        "finalize": 0.07516799867153168,
+        "step": 3.800895929336548
+      }
+    ],
+    "medians_ms": {
+      "preconditioner": 1.888767957687378,
+      "project": 0.0017920000245794654,
+      "mass": 0.03241599956527352,
+      "gram": 0.483231995254755,
+      "orthogonalize_x": 0.13820800185203552,
+      "rotate": 0.2580159977078438,
+      "orthogonalize_search": 0.345567986369133,
+      "metric_eigh": 0.3043519854545593,
+      "whiten": 0.5715519934892654,
+      "operator": 0.17772799357771873,
+      "rayleigh_ritz_eigh": 0.38144001364707947,
+      "finalize": 0.07516799867153168,
+      "step": 3.800895929336548
+    },
+    "note": "Instrumented fixed single-step graph, continued from last solve. Nested totals overlap; not additive or equivalent to adaptive whole-solve timings."
+  },
+  "post_profile_quality": {
+    "accepted": true,
+    "residual": 4.514952194194052e-14,
+    "max_absolute_residual": 1.3392120748371453e-15,
+    "orthogonality": 1.3322676295501878e-15,
+    "spectrum_error": 2.701831813833877e-16,
+    "recovered_nullity": 4,
+    "positive_guard": 0.002005376143718255,
+    "nullspace_subspace_error": 1.6099728606039765e-12
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges the entire oversampled block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence."
+}

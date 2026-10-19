@@ -23,6 +23,14 @@ def accumulate_cg_statistics(
     wp.atomic_add(stats, 3, 1)
 
 
+def _cg_preallocates_loop_control(state):
+    # Warp 1.15 allocates conditional-loop storage inside each solve, which
+    # CUDA forbids inside an outer conditional body. The tested 1.18 state
+    # preallocates it. No public capability flag exists; fail conservatively
+    # if a future upstream layout no longer exposes this storage.
+    return getattr(state, "_cur_iter_and_condition", None) is not None
+
+
 class CGInverse:
     """Pure-Warp SPD inverse with optional upstream Warp preconditioning.
 
@@ -39,11 +47,24 @@ class CGInverse:
     relative and absolute residual tolerance. Pass ``atol=0.0`` for relative
     stopping on small right-hand sides, such as eigenvector residuals used
     for preconditioning. Warp still applies its dtype-dependent safety floor.
+
+    ``adaptive_capture=True`` opts into nested device-controlled outer graphs
+    when the upstream CG state preallocates loop control (tested on Warp 1.18).
+    Older states, including stock Warp 1.15, reject the opt-in. The default
+    preserves fixed outer capture for compatibility.
     """
 
     requires_static_outer_capture = True
 
-    def __init__(self, matrix, tol=1.0e-12, maxiter=1000, preconditioner=None, atol=None):
+    def __init__(
+        self,
+        matrix,
+        tol=1.0e-12,
+        maxiter=1000,
+        preconditioner=None,
+        atol=None,
+        adaptive_capture=False,
+    ):
         if atol is not None and (not math.isfinite(atol) or atol < 0):
             raise ValueError("atol must be finite and nonnegative, or None")
         self.n, self.device = matrix.shape[0], matrix.device
@@ -69,6 +90,10 @@ class CGInverse:
             check_every=0,
             run=False,
         )
+
+        if adaptive_capture and not _cg_preallocates_loop_control(self.state):
+            raise ValueError("adaptive_capture requires upstream CG with preallocated loop control")
+        self.requires_static_outer_capture = not adaptive_capture
 
     def reset_stats(self):
         self.stats.zero_()

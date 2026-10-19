@@ -15,6 +15,7 @@ import warp.sparse as ws
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.applications.fem_cases import make_fem_case
+from benchmarks.applications.hodge import make_hodge_case
 from benchmarks.applications.runner import accuracy
 from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
@@ -61,6 +62,20 @@ def prepare(args):
             return quality
 
         return a, None, shifted, constraints, sa, None, 20, check
+    if args.case.startswith("hodge_"):
+        c = make_hodge_case(args.case.removeprefix("hodge_"), args.side)
+        p = c.problem
+        identity_mass = (p.b - sp.eye(p.n, format="csr")).nnz == 0
+        return (
+            matrix(p.a),
+            None if identity_mass else matrix(p.b),
+            matrix(p.a + args.shift * p.b),
+            None,
+            p.a,
+            None if identity_mass else p.b,
+            p.k,
+            lambda w, v: accuracy(p, w, v),
+        )
     c = make_fem_case(args.case, args.side, args.modes)
     p = c.problem
     shifted_host = p.a + args.shift * p.b
@@ -79,7 +94,15 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "--case",
-        choices=["anvil", "clamped_consistent", "clamped_lumped"],
+        choices=[
+            "anvil",
+            "clamped_consistent",
+            "clamped_lumped",
+            "hodge_large_disconnected",
+            "hodge_torus",
+            "hodge_disconnected",
+            "hodge_weak_positive",
+        ],
         default="clamped_consistent",
     )
     p.add_argument("--side", type=int, default=6)
@@ -101,6 +124,7 @@ def main():
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
     p.add_argument("--batched-cg", action="store_true")
+    p.add_argument("--fixed-outer", action="store_true")
     p.add_argument("--inner-fp32", action="store_true")
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
@@ -174,7 +198,9 @@ def main():
         ), preconditioner
 
     solver_setup_seconds, (solver, preconditioner) = timed(create_solver)
-    capture_seconds, graph = timed(lambda: solver.capture(args.steps))
+    capture_seconds, graph = timed(
+        lambda: solver.capture(args.steps, adaptive=False if args.fixed_outer else None)
+    )
     print("Captured", capture_seconds, flush=True)
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)

@@ -1,11 +1,41 @@
 """Experimental block-product tuning; production defaults remain unchanged."""
 
 import functools
+from typing import Any
 
 import warp as wp
 import warp.sparse as ws
 
 from warpack import SparseOperator
+
+
+@wp.kernel(module="unique")
+def csr_four_rhs(
+    offsets: wp.array[wp.int32],
+    columns: wp.array[wp.int32],
+    values: wp.array(dtype=Any),
+    x: wp.array2d(dtype=Any),
+    y: wp.array2d(dtype=Any),
+):
+    group, row, lane = wp.tid()
+    rhs, slot = group * 4 + lane // 8, lane % 8
+    value = x.dtype(0.0)
+    if rhs < x.shape[0]:
+        for e in range(offsets[row] + slot, offsets[row + 1], 8):
+            value += x.dtype(values[e]) * x[rhs, columns[e]]
+    totals = wp.tile_sum(wp.tile_reshape(wp.tile(value), shape=(4, 8)), axis=1)
+    if rhs < x.shape[0] and slot == 0:
+        y[rhs, row] = wp.tile_extract(totals, lane // 8)
+
+
+def csr_block_product(matrix, x, y):
+    wp.launch_tiled(
+        csr_four_rhs,
+        dim=((x.shape[0] + 3) // 4, matrix.nrow),
+        inputs=[matrix.offsets, matrix.columns, matrix.values, x, y],
+        block_dim=32,
+        device=matrix.device,
+    )
 
 
 @functools.lru_cache(None)
@@ -82,6 +112,9 @@ def bsr_four_rhs(
 class BatchedSparseOperator(UpstreamSparseOperator):
     def apply(self, x, y):
         a = self.matrix
+        if a.values.dtype == wp.float64 and self.shift == 0 and self.sign == 1:
+            csr_block_product(a, x, y)
+            return
         if a.values.dtype != wp.mat33d or self.shift != 0 or self.sign != 1:
             return super().apply(x, y)
         wp.launch_tiled(

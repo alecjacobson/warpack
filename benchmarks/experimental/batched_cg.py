@@ -12,26 +12,10 @@ import warp as wp
 import warp.optim.linear as linear
 import warp.sparse as ws
 
+from warpack.generalized import _cg_preallocates_loop_control
+
 from .block_kernels import BatchedSparseOperator
-
-
-@wp.kernel(module="unique")
-def csr_product(
-    offsets: wp.array[wp.int32],
-    columns: wp.array[wp.int32],
-    values: wp.array(dtype=Any),
-    x: wp.array2d(dtype=Any),
-    y: wp.array2d(dtype=Any),
-):
-    group, row, lane = wp.tid()
-    rhs, slot = group * 4 + lane // 8, lane % 8
-    value = x.dtype(0.0)
-    if rhs < x.shape[0]:
-        for e in range(offsets[row] + slot, offsets[row + 1], 8):
-            value += x.dtype(values[e]) * x[rhs, columns[e]]
-    totals = wp.tile_sum(wp.tile_reshape(wp.tile(value), shape=(4, 8)), axis=1)
-    if rhs < x.shape[0] and slot == 0:
-        y[rhs, row] = wp.tile_extract(totals, lane // 8)
+from .block_kernels import csr_block_product as product
 
 
 @wp.kernel
@@ -63,16 +47,6 @@ def accumulate_statistics(
     if residual_sq[rhs] > tolerance_sq[rhs] or not wp.isfinite(residual_sq[rhs]):
         wp.atomic_add(stats, 2, 1)
     wp.atomic_add(stats, 3, 1)
-
-
-def product(matrix, x, y):
-    wp.launch_tiled(
-        csr_product,
-        dim=((x.shape[0] + 3) // 4, matrix.nrow),
-        inputs=[matrix.offsets, matrix.columns, matrix.values, x, y],
-        block_dim=32,
-        device=matrix.device,
-    )
 
 
 @wp.kernel
@@ -250,6 +224,8 @@ class BatchedCGInverse:
             check_every=0,
             run=False,
         )
+
+        self.requires_static_outer_capture = not _cg_preallocates_loop_control(self.state)
 
     def reset_stats(self):
         self.stats.zero_()

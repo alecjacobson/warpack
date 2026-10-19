@@ -1,0 +1,90 @@
+{
+  "args": {
+    "case": "hodge_large_disconnected",
+    "side": 81,
+    "modes": 6,
+    "width": 6,
+    "steps": 100,
+    "shift": 0.001,
+    "fsai_width": 32,
+    "preconditioner": "fsai",
+    "repeats": 1,
+    "tol": 1e-11,
+    "cupy": false,
+    "profile": false,
+    "keep_graph": false,
+    "gram_chunk": 256,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 10,
+    "batched_cg": true,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "results/performance_followup/hodge-block-width6-screen.json"
+  },
+  "n": 39366,
+  "k": 6,
+  "setup_seconds": 0.049563124775886536,
+  "preconditioner_setup_seconds": 0.049563124775886536,
+  "solver_setup_seconds": 0.013731207698583603,
+  "total_setup_seconds": 0.06329433247447014,
+  "setup_scope": "Preconditioner construction plus solver/operator/CG workspaces, input upload, and optional FP32 matrix copy. Excludes mesh assembly, reference loading, host random-start generation, graph capture and warmup. JIT work is included where encountered; these are not warmed setup measurements. Historical setup_seconds is an alias for preconditioner_setup_seconds.",
+  "capture_seconds": 0.7172425426542759,
+  "warmup_seconds": 0.07942475378513336,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 33,
+      "MEMCPY": 27,
+      "KERNEL": 133,
+      "CONDITIONAL": 2
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 27
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp experimental LOBPCG",
+      "seconds": 0.07919061556458473,
+      "iterations": 24,
+      "quality": {
+        "accepted": true,
+        "residual": 3.8609230650161584e-12,
+        "max_absolute_residual": 1.0685029201779045e-13,
+        "orthogonality": 1.1102230246251565e-15,
+        "spectrum_error": 2.714842239903703e-16,
+        "recovered_nullity": 4,
+        "positive_guard": 0.002005376143718255,
+        "nullspace_subspace_error": 1.578919559512651e-10,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1440,
+          10,
+          144,
+          144
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked converged RHSs"
+      }
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "2a084158ddc36cd693c112818abb9ae9994bf81d5d5f2192b6ec74c5904517e3",
+    "benchmarks/experimental/block_kernels.py": "f50706ba93b91252c7b66d2aa0e98629f94801491c2c2767df931f3dc0634dcd",
+    "benchmarks/experimental/compare_block.py": "e2c8332977af9a3dce23906c31339e28670a26ccd1dfe8d3c5626ac7a51cc825",
+    "benchmarks/experimental/batched_cg.py": "3d430f4a5f38c6c3043ccfc011610eaeeecf5df92cf3e27cc476440fd82ddd04",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7"
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges the entire oversampled block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence."
+}
