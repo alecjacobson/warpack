@@ -1,0 +1,63 @@
+{
+  "args": {
+    "sizes": "72",
+    "repeats": 3,
+    "batch": 10,
+    "out": "results/performance_followup/regular-projected72-shared.json"
+  },
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "rows": [
+    {
+      "n": 72,
+      "samples": [
+        0.009890314936637879,
+        0.009890568628907203,
+        0.009890371561050415
+      ],
+      "seconds": 0.009890371561050415,
+      "checks": [
+        {
+          "residual": 1.5675173746718928e-14,
+          "orthogonality": 1.9317880628477724e-14,
+          "spectrum_error": 1.5347723092418165e-14,
+          "sweeps": null,
+          "accepted": true
+        },
+        {
+          "residual": 1.5675173746718928e-14,
+          "orthogonality": 1.9317880628477724e-14,
+          "spectrum_error": 1.5347723092418165e-14,
+          "sweeps": null,
+          "accepted": true
+        },
+        {
+          "residual": 1.5675173746718928e-14,
+          "orthogonality": 1.9317880628477724e-14,
+          "spectrum_error": 1.5347723092418165e-14,
+          "sweeps": null,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 1,
+          "KERNEL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    }
+  ],
+  "competing_gpu_processes": [],
+  "source_sha256": {
+    "warpack/solver.py": "ad629273ebe3a75a9cccec02af8d68f95ece8d553052c868aab7b092c6a16a7b",
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93",
+    "/home/horde/projects/warpack-regular-diagonal/benchmarks/experimental/projected_profile.py": "2c1c8f2531f304f45205439bfa7e4932c67fbb06c4ed403a1b56628020a36792"
+  },
+  "protocol": "Isolated projected diagonalization; three warm samples of ten captured solves each. Restore identical input before each solve. Original dense equation, complete spectrum and orthogonality checked after every sample. Setup/capture/host reference excluded. No eigensolver end-to-end speedup claim."
+}

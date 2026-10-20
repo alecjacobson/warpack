@@ -19,7 +19,14 @@ import warp.optim.linear as linear
 
 from .problems import make_problem
 from .references import Unsupported, cupy_setup, spectra_setup
-from .runner import accuracy, reference_values, scipy_setup, warp_output, warp_setup
+from .runner import (
+    accuracy,
+    has_positive_diagonal_mass,
+    reference_values,
+    scipy_setup,
+    warp_output,
+    warp_setup,
+)
 
 
 def timed(fn):
@@ -96,6 +103,8 @@ def run(
         if method.startswith("warp"):
             selected = {
                 "warp": "krylov",
+                "warp-diagonal": "diagonal",
+                "warp-scaled": "scaled",
                 "warp-block": "block",
                 "warp-cg": "cg",
                 "warp-cg-bj": "cg-bj",
@@ -114,6 +123,19 @@ def run(
                 linear.preconditioner
             ):
                 raise Unsupported("Requires upstream Warp block-Jacobi support")
+            if selected in ("diagonal", "scaled"):
+                if not has_positive_diagonal_mass(p):
+                    raise Unsupported(
+                        "Exact diagonal inverse requires regular mode with positive diagonal mass"
+                    )
+                row["inverse_method"] = (
+                    "Exact diagonal mass inverse using upstream Warp diagonal preconditioner"
+                    if selected == "diagonal"
+                    else "Explicit Warp diagonal congruence to standard form, physical vector recovery"
+                )
+                row["count_metric"] = (
+                    "Original pencil" if selected == "diagonal" else "Scaled standard problem"
+                )
             if selected.startswith("cg") and api_class == "B":
                 raise Unsupported("Interior shifted matrix is not guaranteed SPD")
             if steps is None:
@@ -240,6 +262,15 @@ def run(
                 else tuple(x.get() if hasattr(x, "get") else x for x in output)
             )
             check = accuracy(p, *host_output, reference=ref)
+            if method.startswith("warp") and has_positive_diagonal_mass(p):
+                values, vectors = host_output[:2]
+                standard_residual = (p.a @ vectors - (p.b @ vectors) * values) / np.sqrt(
+                    p.b.diagonal()
+                )[:, None]
+                check["standard_form_frobenius_residual"] = float(np.linalg.norm(standard_residual))
+                check["standard_form_max_absolute_residual"] = float(
+                    np.linalg.norm(standard_residual, axis=0).max()
+                )
             if method == "cupy-eigsh":
                 values, vectors = host_output[:2]
                 original_residual = p.a @ vectors - (p.b @ vectors) * values
@@ -255,6 +286,12 @@ def run(
                 check["native_absolute_residuals"] = absolute_norms.tolist()
                 check["native_stopping_passed"] = bool(np.all(absolute_norms <= lobpcg_tol))
             if method.startswith("warp"):
+                check["outer_iterations"] = (
+                    int(solver.iterations.numpy()[0]) if hasattr(solver, "iterations") else None
+                )
+                check["breakdown_recoveries"] = (
+                    int(solver.recoveries.numpy()[0]) if hasattr(solver, "recoveries") else None
+                )
                 check["solver_status"] = (
                     int(solver.status.numpy()[0]) if hasattr(solver, "status") else None
                 )

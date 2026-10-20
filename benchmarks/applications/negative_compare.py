@@ -23,6 +23,8 @@ METHODS = [
     "cupy",
     "cupy-eigsh",
     "warp",
+    "warp-diagonal",
+    "warp-scaled",
     "warp-cg",
     "warp-cg-bj",
     "warp-cg-fsai",
@@ -137,7 +139,7 @@ def main():
             nullity=0,
             negative_modes=int((case.full_spectrum < 0).sum()),
             largest_magnitude_is_largest_algebraic=case.largest_magnitude_is_largest_algebraic,
-            selection_contract="SM uses shift-invert at zero; SA uses a shift below the spectrum; LM uses mass-inverse regular iteration. CuPy generalized LM is compared only when its LA target is the same set. No Euclidean eigsh on M^-1 K.",
+            selection_contract="SM uses shift-invert at zero; SA uses a shift below the spectrum; LM uses mass-inverse regular iteration, or explicit standard-form scaling for positive diagonal mass. CuPy generalized LM is compared only when its LA target is the same set. No Euclidean eigsh on M^-1 K.",
         )
         destination.write_text(json.dumps(row, indent=2) + "\n")
         return
@@ -171,13 +173,14 @@ def main():
                 + [
                     Path(__file__),
                     Path(__file__).with_name("negative_foundation.py"),
+                    Path(__file__).with_name("diagonal_mass.py"),
                     Path(__file__).with_name("runner.py"),
                     Path(__file__).with_name("references.py"),
                     Path(__file__).with_name("compare.py"),
                 ]
             )
         },
-        protocol="Sequential isolated workers; warm synchronized samples; every trial checked against the original pencil, complete analytic requested space, eigenvalues and mass orthogonality at unchanged 1e-8 bounds. Setup/capture/reference/validation excluded and recorded separately. Native CPU factorizations are for this cube fixture only. CuPy generalized LOBPCG uses a supplied cuDSS SPD preconditioner; native CuPy eigsh is a separate diagonal-mass SA/LM path with explicit scaling; generalized SM and CG on indefinite shifted systems are explicit unsupported routes. Full Warp counts and fresh native CuPy absolute stopping residuals are required in addition to common physical gates; vendor graph transfers are reported separately. Failed and timed-out results are retained, never counted as speedups.",
+        protocol="Sequential isolated workers; warm synchronized samples; every trial checked against the original pencil, complete analytic requested space, eigenvalues and mass orthogonality at unchanged 1e-8 bounds. Setup/capture/reference/validation excluded and recorded separately. Native CPU factorizations are for this cube fixture only. Warp diagonal-mass regular routes use exact upstream diagonal inversion or explicit device congruence and physical output recovery; the scaled route reports standard-form counts while all original physical gates remain mandatory. CuPy generalized LOBPCG uses a supplied cuDSS SPD preconditioner; native CuPy eigsh is a separate diagonal-mass SA/LM path with explicit scaling; generalized SM and CG on indefinite shifted systems are explicit unsupported routes. Full Warp counts and fresh native CuPy absolute stopping residuals are required in addition to common physical gates; vendor graph transfers are reported separately. Failed and timed-out results are retained, never counted as speedups.",
         cases=[],
     )
     folder = Path("build/negative-foundation") / destination.stem

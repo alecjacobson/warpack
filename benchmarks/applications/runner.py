@@ -20,6 +20,7 @@ from warpack import (
     ShiftInvertEigensolver,
     SparseOperator,
 )
+from warpack.block import UpstreamPreconditioner
 
 
 def reference_values(p):
@@ -122,6 +123,15 @@ def accuracy(p, values, vectors, right=None, reference=None):
     return result
 
 
+def has_positive_diagonal_mass(p):
+    if p.mode != "regular" or p.b is None:
+        return False
+    diagonal = p.b.diagonal()
+    return bool(
+        np.all(np.isfinite(diagonal) & (diagonal > 0)) and (p.b - sp.diags(diagonal)).nnz == 0
+    )
+
+
 def warp_setup(
     p,
     method="krylov",
@@ -142,9 +152,21 @@ def warp_setup(
         return PartialSVD(matrix(p.a), p.k, ncv=ncv, tol=tol), None
     a, b = matrix(p.a), matrix(p.b)
     shifted = p.b if p.mode == "regular" else p.a - p.target * p.b
-    block = method == "block" or (p.api_class in "DG" and not force_krylov)
+    block = method == "block" or (p.api_class in "DG" and not force_krylov and method != "diagonal")
     width = ncv if block else 1
-    if method.startswith("cg"):
+    if method in ("diagonal", "scaled"):
+        if not has_positive_diagonal_mass(p):
+            raise ValueError(
+                "exact diagonal inverse requires regular mode with positive diagonal mass"
+            )
+        if method == "scaled":
+            from .diagonal_mass import ScaledRegular
+
+            return ScaledRegular(a, b, p.k, ncv=ncv, tol=tol), None
+        # Upstream Warp constructs and applies the reciprocal on device. This
+        # is exact only for the explicitly checked diagonal-mass route.
+        inv = UpstreamPreconditioner(linear.preconditioner(b, ptype="diag"))
+    elif method.startswith("cg"):
         if p.api_class not in "ACD" or p.mode not in ("shift-invert", "regular"):
             raise ValueError(
                 "CG benchmark only supplies known SPD shifted systems or SPD mass inverses"

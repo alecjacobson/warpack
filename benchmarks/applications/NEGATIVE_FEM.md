@@ -100,12 +100,12 @@ failed trials or a blanket passing claim about a mixed batch.
 | SA / consistent | 5705.5 | 6090.6 | LOBPCG 390.5 | 110.4 | 514.1 |
 | SM / lumped | 1939.0 | 2054.5 | unsupported | 59.4 | CG invalid |
 | SM / consistent | 3533.6 | 3879.2 | unsupported | 68.6 | CG invalid |
-| LM / lumped | 1316.2 | 2392.7 | eigsh 165.2 | 639.6 | 694.3 |
-| LM / consistent | 18022.9 | 18816.9 | rejected | 1593.0 | 2040.1 |
+| LM / lumped | 1316.2 | 2392.7 | eigsh 118.5 | 243.3 | 263.5 |
+| LM / consistent | 18022.9 | 18816.9 | rejected | 606.5 | 775.5 |
 
-Direct SA uses two cycles and SM one; regular LM uses 32. The SA FSAI profile uses three
+Direct SA uses two cycles and SM one; regular LM uses 12. The SA FSAI profile uses three
 cycles, relative inner tolerance 1e-13 and `atol=0`. LM FSAI uses the same inner
-policy and 32 cycles. Native CuPy eigsh uses tolerance 1e-8; the accepted
+policy and 12 cycles. Native CuPy eigsh uses tolerance 1e-8; the accepted
 LOBPCG SA follow-up uses 1e-9 with a 1,000-iteration cap. CPU references use
 1e-11, and Warp outer counts use 1e-11. These are explicit, separately checked
 algorithm settings, not identical iteration budgets or identical definitions
@@ -126,10 +126,18 @@ The same-setting direct and relative-CG regression replays differ by less than
 
 The six-cycle LM rows are rejected for insufficient work; all returned pairs
 are not claimed converged. With 32 cycles both Warp inverse routes pass all
-20 modes for both masses. Native diagonal-mass CuPy eigsh is faster on the LM
+20 modes for both masses; the newer 12-cycle profiles also pass. Native diagonal-mass CuPy eigsh is faster on the LM
 case; the remaining regular/adaptive throughput work belongs to #31. The
 longer CuPy LOBPCG runs remain rejected, including the independent instability
 tracked in #80. They are not used as timing wins for Warp.
+
+The [regular-mode follow-up](REGULAR_FEM.md) records the accepted 12-cycle LM
+profiles, exact diagonal mass inversion, explicit device scaling, fresh native
+CuPy controls and preserved rejected shorter budgets. The table above uses its
+latest LM profiles. Pure-Warp exact diagonal inversion further reduces lumped
+LM to 201.6 ms and meets the fresh native CuPy absolute residual threshold;
+the slightly faster scaled route has an additional stopping-metric caveat.
+The broader adaptive exploration guard and Anvil showcase are unchanged.
 
 ## Direct work-budget calibration
 

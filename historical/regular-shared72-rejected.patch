@@ -1,0 +1,62 @@
+diff --git a/warpack/block.py b/warpack/block.py
+index 0b357d1..24f198a 100644
+--- a/warpack/block.py
++++ b/warpack/block.py
+@@ -219,27 +219,7 @@ class UpstreamPreconditioner:
+ 
+ 
+ class ProjectedSolver(SymmetricEigensolver):
+-    def _diagonalize_projected(self):
+-        # The 72x72 two-tile kernel fits devices with enough block shared memory.
+-        # Other projected dimensions use the common symmetric dispatch.
+-        if self.m == 72 and self.device.max_shared_memory_per_block >= 98304:
+-            from warpack.projected import jacobi_kernel
+-
+-            wp.launch_tiled(
+-                jacobi_kernel(self.m),
+-                dim=1,
+-                inputs=[self.g, self.v],
+-                block_dim=256,
+-                device=self.device,
+-            )
+-            wp.launch(
+-                K.sort_diagonal,
+-                self.m,
+-                [self.g, self.ritz, self.order, self.which],
+-                device=self.device,
+-            )
+-        else:
+-            super()._diagonalize_projected()
++    """Block projection using the common capability-aware Jacobi dispatch."""
+ 
+ 
+ class BlockLOBPCG:
+diff --git a/warpack/solver.py b/warpack/solver.py
+index 2e63d35..29257ac 100644
+--- a/warpack/solver.py
++++ b/warpack/solver.py
+@@ -252,9 +252,14 @@ class SymmetricEigensolver:
+         self.converged = empty(1, wp.int32)
+         self.iterations = empty(1, wp.int32)
+         self.running = empty(1, wp.int32)
++        # The 72-column shared Jacobi path was already used by BlockLOBPCG.
++        # Keep its capability threshold when sharing dispatch with Krylov.
++        self._shared_projected = self.m <= 64 or (
++            self.m == 72 and self.device.max_shared_memory_per_block >= 98304
++        )
+         self._global_jacobi = None
+         if (
+-            self.m > 64
++            not self._shared_projected
+             and self.m % 2 == 0
+             and self.device.is_cuda
+             and wp.is_conditional_graph_supported()
+@@ -305,7 +310,7 @@ class SymmetricEigensolver:
+                 device=self.device,
+             )
+             return
+-        if self.m <= 64:
++        if self._shared_projected:
+             from .projected import jacobi_kernel
+ 
+             wp.launch_tiled(

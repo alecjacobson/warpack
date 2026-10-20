@@ -1,0 +1,65 @@
+{
+  "args": {
+    "sizes": "72",
+    "repeats": 3,
+    "batch": 10,
+    "out": "results/performance_followup/regular-projected72-global.json"
+  },
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "rows": [
+    {
+      "n": 72,
+      "samples": [
+        0.005333711206912994,
+        0.005333869904279709,
+        0.005334556475281716
+      ],
+      "seconds": 0.005333869904279709,
+      "checks": [
+        {
+          "residual": 1.6484160947541695e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 1,
+          "KERNEL": 219,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    }
+  ],
+  "competing_gpu_processes": [],
+  "source_sha256": {
+    "warpack/solver.py": "e3b84d7ae06374b8cdec150d1ac53b6fded1fec25da807c5e5c5cdfe376cebb6",
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93",
+    "/home/horde/projects/warpack-regular-diagonal/benchmarks/experimental/projected_profile.py": "2c1c8f2531f304f45205439bfa7e4932c67fbb06c4ed403a1b56628020a36792"
+  },
+  "protocol": "Isolated projected diagonalization; three warm samples of ten captured solves each. Restore identical input before each solve. Original dense equation, complete spectrum and orthogonality checked after every sample. Setup/capture/host reference excluded. No eigensolver end-to-end speedup claim."
+}
