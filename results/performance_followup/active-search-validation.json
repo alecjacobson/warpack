@@ -1,0 +1,63 @@
+{
+  "base_commit": "cb3f329",
+  "initial_prototype_commit": "a1e5342",
+  "issue": 15,
+  "scope": "Experimental benchmark-only search compaction; installed core unchanged.",
+  "tests": {
+    "pinned_related": {
+      "passed": 167,
+      "seconds": 9.02
+    },
+    "stock_new": {
+      "passed": 27,
+      "seconds": 6.42
+    }
+  },
+  "source_sha256": {
+    "benchmarks/experimental/active_search.py": "49f935d40fd7a867ed8d1d3b9e8933ef40f664849f3ee8d1a7dbcb1f1a98d78f",
+    "benchmarks/experimental/compare_block.py": "f0b683ed1b65d956e44fd56081cb220a468ba07e413dae1dac01a2a9d578fb3b",
+    "tests/test_active_search_experimental.py": "335d3b8d1287366acd3695951572c4afaeff095d8a30b7e07119ca8bce0ea297"
+  },
+  "input_sha256": {
+    "anvil for export-ftetwild.mesh": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+    "build/anvil_reference.npz": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898"
+  },
+  "profiles": {
+    "anvil-active-search-baseline": {
+      "accepted": true,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.35636455565691
+    },
+    "anvil-active-search-cg15": {
+      "accepted": true,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.51264800876379
+    },
+    "anvil-active-search-cg25": {
+      "accepted": true,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.297468688338995
+    },
+    "anvil-active-search-keep-history-cg25": {
+      "accepted": true,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.270281355828047
+    },
+    "anvil-active-search-full-width": {
+      "accepted": true,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.363476149737835
+    }
+  },
+  "ratio_to_fresh_original": 0.9634677921027951,
+  "limitations": [
+    "Small Anvil-specific gain; no automatic default or public API promotion.",
+    "Original physical and returned-pair normalized tolerances differ from CuPy absolute tolerance. All original gates retained.",
+    "Per-process assembly of the same mesh does not assert bitwise matrix identity.",
+    "Setup/capture memory measurement is free-memory decrease, not peak.",
+    "About4.9x gap to preceding accepted cuDSS control remains."
+  ],
+  "lint": "ruff check warpack tests benchmarks examples:passed",
+  "format": "ruff format --check warpack tests benchmarks examples:265 files formatted",
+  "full_suite_scope": "Preceding full local suite941 passed at cb3f329. This benchmark-only change ran167 focused related cases, not a redundant full-suite rerun."
+}

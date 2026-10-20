@@ -2,6 +2,7 @@
 
 All Ritz vectors remain in the trial space. Only residual/history search rows
 whose fresh errors exceed tolerance are packed into smaller preallocated spaces.
+`keep_history=True` retains all P rows and compacts only R.
 Directions may reactivate after every Ritz update. Private block hooks are used;
 this adapter is tied to this checkout and is not an installed API.
 """
@@ -55,8 +56,9 @@ def record_search(usage: wp.array[wp.int32], bucket: int):
 class ActiveSearchBlockLOBPCG(CachedXBlockLOBPCG):
     """Keep the full X block; compact R/P on device into fixed graph branches."""
 
-    def __init__(self, *args, search_bucket_size=4, **kwargs):
+    def __init__(self, *args, search_bucket_size=4, keep_history=False, **kwargs):
         super().__init__(*args, **kwargs)
+        self.keep_history = bool(keep_history)
         size = index(search_bucket_size)
         if size < 1:
             raise ValueError("search_bucket_size must be positive")
@@ -72,7 +74,8 @@ class ActiveSearchBlockLOBPCG(CachedXBlockLOBPCG):
 
     def _specialize(self, width):
         branch = copy.copy(self)
-        branch.m = self.b + 2 * width
+        search_width = width + (self.b if self.keep_history else width)
+        branch.m = self.b + search_width
         branch.s = self.s[: branch.m]
         branch.z = self.z[: branch.m]
         branch.az = self.az[: branch.m]
@@ -80,15 +83,19 @@ class ActiveSearchBlockLOBPCG(CachedXBlockLOBPCG):
         branch.sw = branch.s[self.b : self.b + width]
         branch.sp = branch.s[self.b + width :]
         branch.su = branch.s[self.b :]
-        branch.u1 = self.u1[: 2 * width]
-        branch.u2 = self.u2[: 2 * width]
-        branch.bu = self.bu[: 2 * width]
+        branch.u1 = self.u1[:search_width]
+        branch.u2 = self.u2[:search_width]
+        branch.bu = self.bu[:search_width]
         branch.small = SymmetricEigensolver(Identity(branch.m, self.device), self.b, ncv=branch.m)
-        branch.metric = SymmetricEigensolver(Identity(2 * width, self.device), width, ncv=2 * width)
-        branch.transform = wp.zeros((2 * width, 2 * width), dtype=wp.float64, device=self.device)
+        branch.metric = SymmetricEigensolver(
+            Identity(search_width, self.device), search_width // 2, ncv=search_width
+        )
+        branch.transform = wp.zeros(
+            (search_width, search_width), dtype=wp.float64, device=self.device
+        )
         branch.coeff = wp.zeros((self.b, branch.m), dtype=wp.float64, device=self.device)
-        branch.projection_x = wp.zeros((2 * width, self.b), dtype=wp.float64, device=self.device)
-        branch.scale = wp.zeros(2 * width, dtype=wp.float64, device=self.device)
+        branch.projection_x = wp.zeros((search_width, self.b), dtype=wp.float64, device=self.device)
+        branch.scale = wp.zeros(search_width, dtype=wp.float64, device=self.device)
         branch.active = self.active[: branch.m]
         branch.active_x = branch.active[: self.b]
         branch.active_u = branch.active[self.b :]
@@ -138,12 +145,15 @@ class ActiveSearchBlockLOBPCG(CachedXBlockLOBPCG):
             [self._search_correction, self.search_rows, self.search_count, branch.sw],
             device=self.device,
         )
-        wp.launch(
-            pack_rows,
-            branch.sp.shape,
-            [self.p, self.search_rows, self.search_count, branch.sp],
-            device=self.device,
-        )
+        if self.keep_history:
+            wp.copy(branch.sp, self.p)
+        else:
+            wp.launch(
+                pack_rows,
+                branch.sp.shape,
+                [self.p, self.search_rows, self.search_count, branch.sp],
+                device=self.device,
+            )
         wp.copy(branch._image_x, self.ax)
         branch._reuse_image = True
         try:

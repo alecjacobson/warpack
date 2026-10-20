@@ -1,5 +1,8 @@
 # Anvil block width and inner-CG budget
 
+A subsequent [device search-width experiment](ACTIVE_SEARCH.md) records an
+accepted 2.270s profile; the budget-only results below are retained.
+
 Increasing the truncated-CG preconditioner budget from 15 to 25 steps improves
 the accepted Anvil block solve from **2.545 to 2.385 seconds** (about 6.3%).
 The matrix, shift 100, FSAI32, FP32 inner arithmetic, normalized outer tolerance,

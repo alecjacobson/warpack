@@ -16,10 +16,13 @@ def operator(a):
     return SparseOperator(matrix(sp.csr_matrix(a)))
 
 
+@pytest.mark.parametrize("keep_history", [False, True])
 @pytest.mark.parametrize("fused", [False, True])
 @pytest.mark.parametrize("metric", [False, True])
 @pytest.mark.parametrize("excluded", [0, 2])
-def test_captured_coupled_repeated_modes_and_changed_inputs(metric, excluded, fused, tmp_path):
+def test_captured_coupled_repeated_modes_and_changed_inputs(
+    metric, excluded, fused, keep_history, tmp_path
+):
     n, k, width = 64, 4, 8
 
     def fixture(seed):
@@ -52,6 +55,7 @@ def test_captured_coupled_repeated_modes_and_changed_inputs(metric, excluded, fu
         fused_updates=fused,
         paired_rotation=fused,
         search_bucket_size=2,
+        keep_history=keep_history,
     )
     graph = solver.capture(100)
     for seed in [19, 31, 19]:
@@ -115,8 +119,9 @@ def test_selection_reactivates_and_handles_zero_or_nonfinite_rows():
         np.testing.assert_array_equal(flags.numpy(), expected)
 
 
+@pytest.mark.parametrize("keep_history", [False, True])
 @pytest.mark.parametrize("exact,adaptive", [(False, True), (True, True), (True, False)])
-def test_odd_width_and_zero_search_fixed_or_adaptive_replay(exact, adaptive):
+def test_odd_width_and_zero_search_fixed_or_adaptive_replay(exact, adaptive, keep_history):
     n, k, width = 45, 3, 5
     a = np.diag(np.arange(1.0, n + 1))
     op = operator(a)
@@ -128,6 +133,7 @@ def test_odd_width_and_zero_search_fixed_or_adaptive_replay(exact, adaptive):
         preconditioner=operator(np.diag(1 / np.diag(a))),
         initial_vectors=start,
         search_bucket_size=1,
+        keep_history=keep_history,
         tol=1e-10,
     )
     graph = solver.capture(3 if exact else 100, adaptive=adaptive)
@@ -140,3 +146,68 @@ def test_odd_width_and_zero_search_fixed_or_adaptive_replay(exact, adaptive):
             usage = solver.search_usage.numpy()
             assert usage[0] == (1 if adaptive else 3)
             assert usage[1:].sum() == 0
+
+
+@pytest.mark.parametrize("keep_history", [False, True])
+def test_nonfinite_matrix_recovers_on_same_graph(keep_history):
+    n, k = 48, 4
+    diagonal = np.arange(1.0, n + 1)
+    op = operator(np.diag(diagonal))
+    solver = ActiveSearchBlockLOBPCG(
+        op,
+        k,
+        8,
+        preconditioner=operator(np.diag(1 / diagonal)),
+        search_bucket_size=2,
+        keep_history=keep_history,
+        tol=1e-9,
+    )
+    graph = solver.capture(100)
+    bad = diagonal.copy()
+    bad[0] = np.nan
+    op.matrix.values.assign(bad)
+    wp.capture_launch(graph)
+    assert solver.status.numpy()[0] != 0
+    assert solver.converged.numpy()[0] < k
+    op.matrix.values.assign(diagonal)
+    wp.capture_launch(graph)
+    assert solver.status.numpy()[0] == 0
+    assert solver.converged.numpy()[0] == k
+    np.testing.assert_allclose(solver.eigenvalues.numpy(), diagonal[:k], atol=1e-9)
+
+
+@pytest.mark.parametrize("keep_history", [False, True])
+def test_perturbed_old_modes_explore_after_crossing(keep_history):
+    n, k, width = 64, 4, 8
+    diagonal = np.arange(1.0, n + 1)
+    op = operator(np.diag(diagonal))
+    pre = operator(np.diag(1 / diagonal))
+    starts = wp.array(np.eye(n)[:width], dtype=wp.float64)
+    solver = ActiveSearchBlockLOBPCG(
+        op,
+        k,
+        width,
+        preconditioner=pre,
+        initial_vectors=starts,
+        initial_perturbation=1e-3,
+        search_bucket_size=2,
+        keep_history=keep_history,
+        tol=1e-10,
+    )
+    graph = solver.capture(100)
+    for crossed in [True, False, True]:
+        values = diagonal.copy()
+        if crossed:
+            values[:width] += 100
+        op.matrix.values.assign(values)
+        pre.matrix.values.assign(1 / values)
+        wp.capture_launch(graph)
+        order = np.argsort(values)[:k]
+        assert solver.status.numpy()[0] == 0
+        assert solver.converged.numpy()[0] == k
+        np.testing.assert_allclose(solver.eigenvalues.numpy(), values[order], atol=1e-9)
+        v = solver.eigenvectors.numpy().T
+        wanted = np.eye(n)[:, order]
+        assert np.linalg.norm(v - wanted @ (wanted.T @ v)) < 1e-8
+        np.testing.assert_allclose(v.T @ v, np.eye(k), atol=1e-10)
+        np.testing.assert_array_equal(starts.numpy(), np.eye(n)[:width])

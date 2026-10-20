@@ -145,6 +145,7 @@ def main():
     p.add_argument("--paired-rotation", action="store_true")
     p.add_argument("--reuse-x-image", action="store_true")
     p.add_argument("--active-search-bucket-size", type=int, default=0)
+    p.add_argument("--active-search-keep-history", action="store_true")
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
@@ -160,6 +161,8 @@ def main():
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
     args = p.parse_args()
+    if args.active_search_keep_history and not args.active_search_bucket_size:
+        p.error("--active-search-keep-history requires active search")
     if args.active_search_bucket_size < 0:
         p.error("active-search-bucket-size must be nonnegative")
     if args.active_search_bucket_size and (not args.reuse_x_image or args.profile):
@@ -211,6 +214,7 @@ def main():
 
             solver_type = ActiveSearchBlockLOBPCG
             solver_options["search_bucket_size"] = args.active_search_bucket_size
+            solver_options["keep_history"] = args.active_search_keep_history
         starts = wp.array(initial.T.copy(), dtype=wp.float64)
         from benchmarks.experimental.block_kernels import (
             BatchedSparseOperator,
