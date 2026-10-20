@@ -112,7 +112,16 @@ def spectra_svd_setup(p, ncv):
     return solve, lambda: lib.app_svd_free(context)
 
 
-def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
+def cupy_setup(
+    p,
+    ncv,
+    lobpcg_tol=1e-8,
+    standard=False,
+    batched=False,
+    standard_which="SA",
+    eigsh_tol=1e-11,
+    lobpcg_maxiter=200,
+):
     import cupy as cp
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
@@ -121,7 +130,11 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
         raise Unsupported("Batched cuDSS comparison requires a generalized CuPy LOBPCG path")
     mass_diagonal = None
     if standard:
-        if p.api_class not in "AD" or p.b is None:
+        if standard_which not in ("SA", "LA", "LM"):
+            raise Unsupported(
+                "Native CuPy eigsh supports SA/LA/LM, not SM or a shift-invert argument"
+            )
+        if p.api_class not in "ACD" or p.b is None:
             raise Unsupported(
                 "Explicit CuPy eigsh comparison requires diagonal-mass FEM or Hodge data"
             )
@@ -155,16 +168,20 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
                     w, v = cl.eigsh(
                         a,
                         k=p.k,
-                        which="SA",
+                        which=standard_which,
                         ncv=effective_ncv,
-                        tol=1e-11,
+                        tol=eigsh_tol,
                         maxiter=10000,
                         v0=initial.copy(),
                     )
                     return w, v if scale is None else scale[:, None] * v, None
 
             mass_label = "identity mass" if scale is None else "diagonal mass scaling"
-            return solve, lambda: None, f"CuPy eigsh SA, {mass_label}, ncv={effective_ncv}"
+            return (
+                solve,
+                lambda: None,
+                f"CuPy eigsh {standard_which}, {mass_label}, ncv={effective_ncv}",
+            )
         if p.api_class in "EI":
             initial = cp.asarray(
                 np.random.default_rng(2026).normal(size=min(p.a.shape)), dtype=a.dtype
@@ -232,7 +249,7 @@ def cupy_setup(p, ncv, lobpcg_tol=1e-8, standard=False, batched=False):
                     B=b,
                     M=pre,
                     tol=lobpcg_tol,
-                    maxiter=200,
+                    maxiter=lobpcg_maxiter,
                     largest=p.mode == "regular",
                 )
                 return w, v, None

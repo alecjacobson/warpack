@@ -1,0 +1,92 @@
+{
+  "api_class": "A",
+  "requested_size": 162,
+  "problem": "fem_clamped_consistent",
+  "n": 162,
+  "columns": 162,
+  "nnz": 3748,
+  "mass_nnz": 1488,
+  "k": 6,
+  "ncv": 48,
+  "method": "warp-cg-fsai",
+  "matrix_sha256": "7c6875a97c4c9da81b09f70c74bd6f08d918e08e960a7878e7b873cfb180fa73",
+  "notes": "Dense generalized LAPACK; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included",
+  "target": [
+    -0.01,
+    0.0
+  ],
+  "seed": 2026,
+  "outer_cycles": 2,
+  "cg_preconditioner": "upstream FSAI max_row_size=32 max_step_size=3 apply_lanes=8 factor_dtype=float32",
+  "cg_block_size": 3,
+  "cg_tolerance": 1e-13,
+  "cg_absolute_tolerance": 0.0,
+  "cg_maxiter": 10000,
+  "start": "Warp seed 42; same start restored on every replay",
+  "iteration_method": "GeneralizedKrylovSchur",
+  "cudss_refinement_steps": null,
+  "cudss_reordering": null,
+  "cudss_matching": null,
+  "cudss_mtype": null,
+  "setup_seconds": 0.20769595727324486,
+  "capture_seconds": 0.5719890221953392,
+  "graph_audit": {
+    "host_nodes": 0,
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 351
+    },
+    "method": "CUDA graph DOT including nested bodies; not an API trace"
+  },
+  "warmup_seconds": 0.10647619143128395,
+  "cg_statistics": [
+    {
+      "total_iterations": 2993,
+      "max_iterations_per_rhs": 35,
+      "unconverged_rhs": 0,
+      "rhs_calls": 87
+    }
+  ],
+  "samples_seconds": [
+    0.0859556719660759
+  ],
+  "solve_seconds": 0.0859556719660759,
+  "validation": [
+    {
+      "accepted": true,
+      "residual": 1.0789228319071318e-13,
+      "max_absolute_residual": 3.6762259902900496e-14,
+      "orthogonality": 1.6209256159527285e-14,
+      "spectrum_error": 2.0775267120743314e-13,
+      "recovered_nullity": 0,
+      "nullspace_subspace_error": 0.0,
+      "requested_subspace_error": 2.0018046536103678e-14,
+      "solver_status": 0,
+      "reported_converged": 6,
+      "solver_full_count": true,
+      "reported_max_residual": 1.0782891645623683e-13
+    }
+  ],
+  "accepted": true,
+  "other_gpu_processes": [],
+  "timing_uncontended": true,
+  "reported_converged": 6,
+  "status": 0,
+  "device_only_graph": true,
+  "outcome": "passed",
+  "contract_accepted": true,
+  "fixture": "clamped_consistent",
+  "side": 2,
+  "requested_nontrivial_modes": 6,
+  "nontrivial_modes": 6,
+  "known_rigid_modes": 0,
+  "projected_rigid_modes": 0,
+  "reference": "Dense generalized LAPACK",
+  "reference_positive_guard": 16.357724528384363,
+  "nullspace_policy": "Retain all known rigid modes in the solve, then use the nontrivial block for ROM. No automatic weighted deflation API is implied.",
+  "boundary_conditions": "Clamped",
+  "material": "Uniform",
+  "mass": "Consistent",
+  "tetrahedra": 144,
+  "worker_wall_limit_seconds": 180,
+  "scope": "CLI correctness/forwarding probe, not a performance claim"
+}

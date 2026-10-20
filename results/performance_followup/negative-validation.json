@@ -1,0 +1,36 @@
+{
+  "issues": [
+    22,
+    79,
+    80
+  ],
+  "base_revision": "8d2837e",
+  "production_source_unchanged": true,
+  "full_suite": {
+    "passed": 801,
+    "seconds": 359.41,
+    "command": "PYTHONPATH=\"/home/horde/projects/warpack/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "focused": {
+    "preceding_pinned_passed": 49,
+    "preceding_pinned_seconds": 39.73,
+    "final_stock_passed": 49,
+    "final_stock_seconds": 41.49
+  },
+  "source_sha256": {
+    "benchmarks/applications/compare.py": "0782e37ef74afc771af88b2adb4ef3149b32dcbb954705f0b1d8026594358f4b",
+    "benchmarks/applications/fem_compare.py": "2850039cd5f82c9c81d2ca502b2cb8b7a5116f5c45b2b3792627d5fbe354f4b0",
+    "benchmarks/applications/negative_compare.py": "0bbcd1a67224236c425a2d1596ef0cc6d75a306794eb9bd5124b0883e62f9b49",
+    "benchmarks/applications/negative_cupy_repro.py": "792d9584e0f1f824d4b274f2ced78c8f51b49876fb6d39b44a5b6c5eca629c8b",
+    "benchmarks/applications/negative_foundation.py": "551a150882fcaafaaf601779c023aad3fa0d63d223958b537e1f4fe6a471fc56",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/applications/runner.py": "45150e745ce8f6e9baade5ad7df3a1e5b97c75766b31f07c6af09c2b9f033311",
+    "tests/test_negative_foundation.py": "f6ea5e166bd2c06582a592208f79fb6319ca0d581814f564a3563eb948c1f759",
+    "tests/test_cg_absolute_tolerance.py": "74868fb84bd9ba7befb82979395408e312bdef31d27664413c423fee55ce30b2"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: passed",
+  "packaging": "No production/packaging change; preceding duplicate-refresh-wheel.json remains applicable",
+  "benchmark_policy": "Per-trial original spectrum, equations, complete subspace, orthogonality, full Warp counts, fresh native stopping and inner-CG failures; sequential GPU jobs. Rejected profiles retained. Same-setting direct and relative-CG controls pass, under 0.2% timing variation.",
+  "scope": "Full local suite, not full upstream conformance or a claim that every benchmark profile passed. Native CuPy misses/instability remain tracked in #69/#80. No Anvil CPU factorization run."
+}

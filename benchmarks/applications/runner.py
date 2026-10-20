@@ -123,7 +123,14 @@ def accuracy(p, values, vectors, right=None, reference=None):
 
 
 def warp_setup(
-    p, method="krylov", ncv=32, tol=1e-11, inverse_transform=None, cg_tol=1e-13, force_krylov=False
+    p,
+    method="krylov",
+    ncv=32,
+    tol=1e-11,
+    inverse_transform=None,
+    cg_tol=1e-13,
+    force_krylov=False,
+    cg_atol=None,
 ):
     if force_krylov and p.api_class != "D":
         raise ValueError("Explicit alternative Krylov benchmark is limited to Hodge class D")
@@ -138,8 +145,10 @@ def warp_setup(
     block = method == "block" or (p.api_class in "DG" and not force_krylov)
     width = ncv if block else 1
     if method.startswith("cg"):
-        if p.api_class not in "ACD" or p.mode != "shift-invert":
-            raise ValueError("CG benchmark only supplies known SPD shifted systems")
+        if p.api_class not in "ACD" or p.mode not in ("shift-invert", "regular"):
+            raise ValueError(
+                "CG benchmark only supplies known SPD shifted systems or SPD mass inverses"
+            )
         if method == "cg":
             shifted_device = matrix(shifted)
             preconditioner = "diag"
@@ -168,7 +177,9 @@ def warp_setup(
                 )
             else:
                 raise ValueError(method)
-        inv = CGInverse(shifted_device, tol=cg_tol, maxiter=10000, preconditioner=preconditioner)
+        inv = CGInverse(
+            shifted_device, tol=cg_tol, atol=cg_atol, maxiter=10000, preconditioner=preconditioner
+        )
     else:
         inv = CuDSSInverse(
             matrix(shifted),

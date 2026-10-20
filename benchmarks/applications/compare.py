@@ -57,6 +57,10 @@ def run(
     lobpcg_tol=1e-8,
     warp_inverse_transform=None,
     cg_tol=1e-13,
+    cupy_which="SA",
+    eigsh_tol=1e-11,
+    cg_atol=None,
+    lobpcg_maxiter=200,
 ):
     p = make_problem(api_class, size) if problem is None else problem
     ref = reference_values(p)
@@ -127,6 +131,7 @@ def run(
                 }[selected]
                 row["cg_block_size"] = p.block_size if selected != "cg" else 1
                 row["cg_tolerance"] = cg_tol
+                row["cg_absolute_tolerance"] = cg_atol
                 row["cg_maxiter"] = 10000
             row["start"] = "Warp seed 42; same start restored on every replay"
             setup, (solver, inverse) = timed(
@@ -136,6 +141,7 @@ def run(
                     ncv,
                     inverse_transform=warp_inverse_transform,
                     cg_tol=cg_tol,
+                    cg_atol=cg_atol,
                     force_krylov=method.endswith("-krylov"),
                 )
             )
@@ -192,6 +198,9 @@ def run(
                         lobpcg_tol=lobpcg_tol,
                         standard=method == "cupy-eigsh",
                         batched=method == "cupy-batched",
+                        standard_which=cupy_which,
+                        eigsh_tol=eigsh_tol,
+                        lobpcg_maxiter=lobpcg_maxiter,
                     )
                 )
                 if method == "cupy-eigsh":
@@ -199,12 +208,15 @@ def run(
                 elif p.api_class not in "EI":
                     row["reference_ncv"] = None
                     row["reference_block_size"] = p.k
+                    row["reference_maxiter"] = lobpcg_maxiter
                 row["implementation"] = label
                 if p.mode == "svd":
                     row["implementation"] = "CuPy svds with explicit ncv"
                     row["reference_ncv"] = min(max(ncv, p.k + 2), min(p.a.shape) - 1)
                 row["reference_tolerance"] = (
-                    1e-11 if api_class in "EI" or method == "cupy-eigsh" else lobpcg_tol
+                    eigsh_tol
+                    if method == "cupy-eigsh"
+                    else (1e-11 if api_class in "EI" else lobpcg_tol)
                 )
             else:
                 raise ValueError(method)
@@ -228,7 +240,24 @@ def run(
                 else tuple(x.get() if hasattr(x, "get") else x for x in output)
             )
             check = accuracy(p, *host_output, reference=ref)
+            if method == "cupy-eigsh":
+                values, vectors = host_output[:2]
+                original_residual = p.a @ vectors - (p.b @ vectors) * values
+                transformed_residual = original_residual / np.sqrt(p.b.diagonal())[:, None]
+                absolute_norms = np.linalg.norm(transformed_residual, axis=0)
+                check["native_absolute_residuals"] = absolute_norms.tolist()
+                check["native_frobenius_residual"] = float(np.linalg.norm(absolute_norms))
+                check["native_stopping_passed"] = check["native_frobenius_residual"] <= eigsh_tol
+            if method in ("cupy", "cupy-batched") and p.api_class in "ACDF":
+                values, vectors = host_output[:2]
+                original_residual = p.a @ vectors - (p.b @ vectors) * values
+                absolute_norms = np.linalg.norm(original_residual, axis=0)
+                check["native_absolute_residuals"] = absolute_norms.tolist()
+                check["native_stopping_passed"] = bool(np.all(absolute_norms <= lobpcg_tol))
             if method.startswith("warp"):
+                check["solver_status"] = (
+                    int(solver.status.numpy()[0]) if hasattr(solver, "status") else None
+                )
                 check["reported_converged"] = (
                     int(solver.converged.numpy()[0]) if hasattr(solver, "converged") else None
                 )
@@ -324,8 +353,18 @@ def compare_baseline(rows, baseline, limit):
         if b is None:
             continue
         same = all(
-            r.get(key, 0 if key == "projected_rigid_modes" else None)
-            == b.get(key, 0 if key == "projected_rigid_modes" else None)
+            r.get(
+                key,
+                0
+                if key == "projected_rigid_modes"
+                else (200 if key == "reference_maxiter" else None),
+            )
+            == b.get(
+                key,
+                0
+                if key == "projected_rigid_modes"
+                else (200 if key == "reference_maxiter" else None),
+            )
             for key in [
                 "matrix_sha256",
                 "target",
@@ -337,6 +376,8 @@ def compare_baseline(rows, baseline, limit):
                 "cg_preconditioner",
                 "cg_block_size",
                 "cg_tolerance",
+                "cg_absolute_tolerance",
+                "reference_maxiter",
                 "cg_maxiter",
                 "projected_rigid_modes",
             ]
@@ -371,6 +412,8 @@ def main():
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument("--steps", type=int)
     parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
+    parser.add_argument("--cg-tol", type=float, default=1e-13)
+    parser.add_argument("--cg-atol", type=float)
     parser.add_argument("--out", default="results/application_coverage.json")
     parser.add_argument("--baseline")
     parser.add_argument("--regression-limit", type=float, default=1.25)
@@ -388,6 +431,8 @@ def main():
             args.ncv,
             args.steps,
             lobpcg_tol=args.lobpcg_tol,
+            cg_tol=args.cg_tol,
+            cg_atol=args.cg_atol,
         )
         dest.write_text(json.dumps(row, indent=2) + "\n")
         return
@@ -434,6 +479,9 @@ def main():
                     "--lobpcg-tol",
                     str(args.lobpcg_tol),
                 ]
+                command += ["--cg-tol", str(args.cg_tol)]
+                if args.cg_atol is not None:
+                    command += ["--cg-atol", str(args.cg_atol)]
                 if args.steps is not None:
                     command += ["--steps", str(args.steps)]
                 try:

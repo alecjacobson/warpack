@@ -1,0 +1,75 @@
+{
+  "api_class": "C",
+  "requested_size": 80,
+  "problem": "bar_C",
+  "n": 80,
+  "columns": 80,
+  "nnz": 238,
+  "mass_nnz": 238,
+  "k": 4,
+  "ncv": 32,
+  "method": "warp-cg",
+  "matrix_sha256": "b2b39bb718b63ea7a3b633be976038592169418e38c275a22489e4875f338184",
+  "notes": "P1 clamped axial FEM; non-diagonal consistent mass; negative tangent stiffness; target below spectrum selects most negative",
+  "target": [
+    -251.0,
+    0.0
+  ],
+  "seed": 2026,
+  "outer_cycles": 5,
+  "cg_preconditioner": "upstream diagonal",
+  "cg_block_size": 1,
+  "cg_tolerance": 1e-13,
+  "cg_absolute_tolerance": 0.0,
+  "cg_maxiter": 10000,
+  "start": "Warp seed 42; same start restored on every replay",
+  "iteration_method": "GeneralizedKrylovSchur",
+  "cudss_refinement_steps": null,
+  "cudss_reordering": null,
+  "cudss_matching": null,
+  "cudss_mtype": null,
+  "setup_seconds": 0.10948307812213898,
+  "capture_seconds": 0.635546512901783,
+  "graph_audit": {
+    "host_nodes": 0,
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 534
+    },
+    "method": "CUDA graph DOT including nested bodies; not an API trace"
+  },
+  "warmup_seconds": 0.1724795624613762,
+  "cg_statistics": [
+    {
+      "total_iterations": 7913,
+      "max_iterations_per_rhs": 80,
+      "unconverged_rhs": 0,
+      "rhs_calls": 132
+    }
+  ],
+  "samples_seconds": [
+    0.14192751795053482
+  ],
+  "solve_seconds": 0.14192751795053482,
+  "validation": [
+    {
+      "accepted": true,
+      "residual": 8.397238049182863e-13,
+      "max_absolute_residual": 5.4081183975540625e-12,
+      "orthogonality": 1.176836406102666e-14,
+      "spectrum_error": 1.0065513030442878e-14,
+      "solver_status": 0,
+      "reported_converged": 4,
+      "solver_full_count": true,
+      "reported_max_residual": 8.393876530259769e-13
+    }
+  ],
+  "accepted": true,
+  "other_gpu_processes": [],
+  "timing_uncontended": true,
+  "reported_converged": 4,
+  "status": 0,
+  "device_only_graph": true,
+  "outcome": "passed",
+  "contract_accepted": true,
+  "scope": "CLI correctness/forwarding probe, not a performance claim"
+}

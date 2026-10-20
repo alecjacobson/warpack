@@ -52,6 +52,7 @@ def main():
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--lobpcg-tol", type=float, default=1e-8)
     parser.add_argument("--cg-tol", type=float, default=1e-13)
+    parser.add_argument("--cg-atol", type=float)
     parser.add_argument("--timeout", type=int, default=180)
     parser.add_argument("--out", default="results/fem_comparisons.json")
     parser.add_argument("--baseline")
@@ -68,6 +69,8 @@ def main():
         parser.error("Rigid projection requires free/disconnected cases and a one-RHS Warp method")
     if not math.isfinite(args.cg_tol) or args.cg_tol <= 0:
         parser.error("CG tolerance must be finite and positive")
+    if args.cg_atol is not None and (not math.isfinite(args.cg_atol) or args.cg_atol < 0):
+        parser.error("CG absolute tolerance must be finite and nonnegative")
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)
     if args.worker:
@@ -86,6 +89,7 @@ def main():
             problem=p,
             lobpcg_tol=args.lobpcg_tol,
             cg_tol=args.cg_tol,
+            cg_atol=args.cg_atol,
             warp_inverse_transform=rigid_inverse_transform(c) if args.project_rigid else None,
         )
         row.update(
@@ -174,6 +178,8 @@ def main():
                 "--cg-tol",
                 str(args.cg_tol),
             ]
+            if args.cg_atol is not None:
+                command += ["--cg-atol", str(args.cg_atol)]
             if args.project_rigid:
                 command.append("--project-rigid")
             output.unlink(missing_ok=True)
