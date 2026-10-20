@@ -83,7 +83,9 @@ retain the failure evidence and 53 passing focused checks after repair.
 The [fresh compact adaptive inventory](../../results/performance_followup/public-checkpoint-compact-inventory.json)
 retains exactly the preceding 11 accepted and nine rejected cases. Neither
 its acceptance gates nor its original ncv=20/30, k=10, tol=1e-10, budget-300
-configuration is relaxed. Issue #104 remains open.
+configuration is relaxed. Issue #104 remains open. The subsequent
+[compact fixed-300 audit and search diagnostics](../experimental/GENERAL_SEARCH.md)
+pass only 12/20 cases; extra cycles alone do not resolve missing modes.
 
 ## Performance controls
 

@@ -27,8 +27,25 @@ def main():
         "--checkpoint", action="store_true", help="Experimental converged-set preservation"
     )
     parser.add_argument(
+        "--frontier-search",
+        action="store_true",
+        help="Retain an unfinished exploratory Ritz vector",
+    )
+    parser.add_argument(
+        "--independent-search",
+        action="store_true",
+        help="Experimental independent probes after requested convergence",
+    )
+    parser.add_argument(
+        "--guard-search",
+        action="store_true",
+        help="Experimental guard residual search after requested convergence",
+    )
+    parser.add_argument(
         "--no-preserve", action="store_true", help="Disable public fixed-budget preservation"
     )
+    parser.add_argument("--subspace-iteration", action="store_true")
+    parser.add_argument("--restart-rounds", type=int, help="Independent restart round length")
     parser.add_argument("--fixed", action="store_true", help="Execute every budgeted cycle")
     parser.add_argument("--ncv", type=int, help="Explicit width instead of the multiplier")
     parser.add_argument("--repeats", type=int, default=3)
@@ -38,6 +55,38 @@ def main():
         parser.error("width multiplier, budget and repeats must be positive")
     if args.checkpoint and not args.fixed:
         parser.error("The checkpoint experiment requires --fixed")
+    if args.guard_search and (not args.fixed or args.checkpoint):
+        parser.error(
+            "guard search requires --fixed and cannot combine with the historical prototype"
+        )
+    if args.independent_search and (not args.fixed or args.checkpoint or args.guard_search):
+        parser.error(
+            "independent search requires --fixed and cannot combine with other search experiments"
+        )
+    if args.frontier_search and (
+        not args.fixed or args.checkpoint or args.guard_search or args.independent_search
+    ):
+        parser.error(
+            "frontier search requires --fixed and cannot combine with other search experiments"
+        )
+    if args.restart_rounds is not None and (
+        args.restart_rounds < 1
+        or not args.fixed
+        or args.checkpoint
+        or args.guard_search
+        or args.independent_search
+        or args.frontier_search
+    ):
+        parser.error("restart rounds require a positive length, --fixed and no other experiment")
+    if args.subspace_iteration and (
+        not args.fixed
+        or args.checkpoint
+        or args.guard_search
+        or args.independent_search
+        or args.frontier_search
+        or args.restart_rounds
+    ):
+        parser.error("subspace iteration requires --fixed and no other experiment")
     cases = [
         json.loads(line)
         for line in (args.fixtures / "benchmark_gen.jsonl").read_text().splitlines()
@@ -51,8 +100,29 @@ def main():
         from benchmarks.experimental.general_checkpoint import CheckpointGeneral
 
         solver_type = CheckpointGeneral
+    if args.guard_search:
+        from benchmarks.experimental.general_guard_search import GuardSearchGeneral
+
+        solver_type = GuardSearchGeneral
+    if args.independent_search:
+        from benchmarks.experimental.general_independent_search import IndependentSearchGeneral
+
+        solver_type = IndependentSearchGeneral
+    if args.frontier_search:
+        from benchmarks.experimental.general_frontier_search import FrontierSearchGeneral
+
+        solver_type = FrontierSearchGeneral
+    if args.restart_rounds:
+        from benchmarks.experimental.general_restart_rounds import RestartRoundsGeneral
+
+        solver_type = RestartRoundsGeneral
+    if args.subspace_iteration:
+        from benchmarks.experimental.general_subspace_iteration import SubspaceIterationGeneral
+
+        solver_type = SubspaceIterationGeneral
     report = dict(
-        protocol="Accuracy-only reset graph replays; public GeneralEigensolver with original "
+        solver_class=solver_type.__module__ + "." + solver_type.__qualname__,
+        protocol="Accuracy-only reset graph replays of the explicitly named solver with original "
         "Spectra v0, LM, tol=1e-10 and explicit ncv multiplier. No performance claims. "
         "Every replay must pass fresh original residuals, target assignment, "
         "mandatory modes, vector norms, independence, subspace and device counters.",
@@ -70,12 +140,22 @@ def main():
                 "benchmarks/upstream/run_benchmarks.py",
                 "benchmarks/upstream/general_reference.py",
                 "benchmarks/experimental/general_selection_profiles.py",
+                "benchmarks/experimental/general_guard_search.py",
+                "benchmarks/experimental/general_independent_search.py",
+                "benchmarks/experimental/general_frontier_search.py",
+                "benchmarks/experimental/general_restart_rounds.py",
+                "benchmarks/experimental/general_subspace_iteration.py",
                 "benchmarks/experimental/general_checkpoint.py",
             )
         },
         budget=args.budget,
         fixed=args.fixed,
         checkpoint=args.checkpoint,
+        guard_search=args.guard_search,
+        independent_search=args.independent_search,
+        frontier_search=args.frontier_search,
+        restart_round_length=args.restart_rounds,
+        subspace_iteration=args.subspace_iteration,
         public_preserve_converged=not args.no_preserve and not args.checkpoint,
         requested_ncv=args.ncv,
         repeats=args.repeats,
@@ -97,6 +177,7 @@ def main():
             which="LM",
             tol=1e-10,
             preserve_converged=not args.no_preserve and not args.checkpoint,
+            **({"round_length": args.restart_rounds} if args.restart_rounds else {}),
         )
         solver.start_vector = wp.array(np.column_stack([initial, np.zeros(len(a))]), dtype=wp.vec2d)
         graph = solver.capture(args.budget, adaptive=not args.fixed)
@@ -125,6 +206,13 @@ def main():
             if solver._checkpoint is not None:
                 trial["checkpoint_updates"] = int(solver._checkpoint.updates.numpy()[0])
                 trial["checkpoint_valid"] = int(solver._checkpoint.valid.numpy()[0])
+            if args.guard_search:
+                trial["guard_selections"] = int(solver.guard_selections.numpy()[0])
+            if args.independent_search:
+                trial["independent_probes"] = int(solver.independent_probes.numpy()[0])
+            if args.frontier_search:
+                trial["frontier_selections"] = int(solver.frontier_selections.numpy()[0])
+                trial["independent_probes"] = int(solver.independent_probes.numpy()[0])
             row["trials"].append(trial)
         row["accepted"] = all(trial["accepted"] for trial in row["trials"])
         report["cases"].append(row)

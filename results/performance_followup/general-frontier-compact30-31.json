@@ -1,0 +1,450 @@
+{
+  "solver_class": "benchmarks.experimental.general_frontier_search.FrontierSearchGeneral",
+  "protocol": "Accuracy-only reset graph replays of the explicitly named solver with original Spectra v0, LM, tol=1e-10 and explicit ncv multiplier. No performance claims. Every replay must pass fresh original residuals, target assignment, mandatory modes, vector norms, independence, subspace and device counters.",
+  "warp": "1.18.0",
+  "gpu": "NVIDIA L40",
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "warp_cg_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_preconditioner_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_fsai_implementation": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp_sparse_implementation": "ec75cde6ace8704d7043700353b6132ff8450dd83840fd1558a89a0d012dc274",
+    "spectra_binary": null
+  },
+  "source_sha256": {
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "benchmarks/upstream/run_benchmarks.py": "fe4972ea7a43fb296312e541e51ee1c8f3b9326bd9a99909a628c344f99f6461",
+    "benchmarks/upstream/general_reference.py": "9c40ac32d5c81879e8cddb3ee655539a08474d2ae3844818495e3859f18b3354",
+    "benchmarks/experimental/general_selection_profiles.py": "cf1d5e3d18ab31886de12dcfafda4eae50c7ca2704256afc966ad9c1646ec80a",
+    "benchmarks/experimental/general_guard_search.py": "9146c5cfafa5398aeb804b4b890c9dec1f4aa271c115b322e80063b775d6329d",
+    "benchmarks/experimental/general_independent_search.py": "4768b6074882d5f73111bd442635a22a3cf7640cb9634d74f6f3a25ba86d7228",
+    "benchmarks/experimental/general_frontier_search.py": "20517f7d6ebfc444636e96b89b983a2a4bd9ff026c37c2b3558dc0f23dd76f63",
+    "benchmarks/experimental/general_checkpoint.py": "14224ff7c51cc01d522687e01b3de4ffccfb2621b4cbd745f17ac9a62bbf21a7"
+  },
+  "budget": 300,
+  "fixed": true,
+  "checkpoint": false,
+  "guard_search": false,
+  "independent_search": false,
+  "frontier_search": true,
+  "public_preserve_converged": true,
+  "requested_ncv": null,
+  "repeats": 3,
+  "ncv_multiplier": 1,
+  "cases": [
+    {
+      "case": {
+        "id": "benchmark_gen_30",
+        "family": "benchmark_gen",
+        "name": "upstream benchmark",
+        "k": 10,
+        "ncv": 30,
+        "selection": 0,
+        "sigma_real": 0,
+        "sigma_imag": 0,
+        "upstream_allows_nonconvergence": false
+      },
+      "ncv": 30,
+      "keep": 14,
+      "matrix_sha256": "b746548dd24dd224783823cb76f10e96f50398be1603f70e57156f5334ca5618",
+      "start_sha256": "2dd2e22319e956af19a842c63fb0ced3feb35866728020a6f99195b8bc4f79b0",
+      "trials": [
+        {
+          "minimum_vector_singular_value": 0.8804406997102847,
+          "vector_rank_threshold": 2.470224968254832e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 1.8256334036598848e-14,
+          "max_normalized_residual": 6.40640076024588e-15,
+          "spectrum_error": 13.31285808687029,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 0.975579072665301,
+          "accepted": false,
+          "converged": 10,
+          "status": 0,
+          "iterations": 300,
+          "values": [
+            [
+              17.053219297490266,
+              -8.254358854681822
+            ],
+            [
+              17.053219297490227,
+              8.254358854681785
+            ],
+            [
+              9.0929934053119,
+              -16.361090167636416
+            ],
+            [
+              9.092993405311894,
+              16.361090167636394
+            ],
+            [
+              -5.9863973172034814,
+              -17.591765539521454
+            ],
+            [
+              -5.986397317203478,
+              17.59176553952143
+            ],
+            [
+              -18.33917553177088,
+              -8.947927548977546e-15
+            ],
+            [
+              -16.465787340850124,
+              -7.923601758405742
+            ],
+            [
+              17.671783176613683,
+              4.566681594415105
+            ],
+            [
+              -17.411138963082152,
+              -5.355649001764782
+            ]
+          ],
+          "checkpoint_updates": 29,
+          "checkpoint_valid": 1,
+          "frontier_selections": 113,
+          "independent_probes": 0
+        },
+        {
+          "minimum_vector_singular_value": 0.8929774048194076,
+          "vector_rank_threshold": 2.4967485752959914e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 1.847604705781089e-11,
+          "max_normalized_residual": 1.1734179355827016e-11,
+          "spectrum_error": 1.7528561128505493e-11,
+          "required_spectrum_covered": false,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 3.136835334985702e-11,
+          "accepted": false,
+          "converged": 10,
+          "status": 0,
+          "iterations": 300,
+          "values": [
+            [
+              17.053219297490273,
+              -8.254358854681826
+            ],
+            [
+              17.05321929749026,
+              8.254358854681838
+            ],
+            [
+              9.092993405311901,
+              -16.361090167636426
+            ],
+            [
+              9.092993405311885,
+              16.361090167636434
+            ],
+            [
+              -5.986397317203482,
+              17.591765539521443
+            ],
+            [
+              -5.986397317203466,
+              -17.59176553952142
+            ],
+            [
+              -18.339175531770945,
+              -1.4364421450304733e-14
+            ],
+            [
+              -16.465787340850177,
+              -7.923601758405754
+            ],
+            [
+              17.671783176613708,
+              4.566681594415122
+            ],
+            [
+              17.67178317659975,
+              -4.566681594425716
+            ]
+          ],
+          "checkpoint_updates": 34,
+          "checkpoint_valid": 1,
+          "frontier_selections": 111,
+          "independent_probes": 0
+        },
+        {
+          "minimum_vector_singular_value": 0.8929774048219055,
+          "vector_rank_threshold": 2.49674857529302e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 1.6653345369377348e-14,
+          "max_normalized_residual": 1.0535987853414212e-14,
+          "spectrum_error": 2.313358494583275e-13,
+          "required_spectrum_covered": false,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 3.352532991916351e-14,
+          "accepted": false,
+          "converged": 10,
+          "status": 0,
+          "iterations": 300,
+          "values": [
+            [
+              17.05321929749025,
+              -8.254358854681865
+            ],
+            [
+              17.053219297490273,
+              8.254358854681817
+            ],
+            [
+              9.092993405311892,
+              -16.361090167636437
+            ],
+            [
+              9.092993405311894,
+              16.361090167636412
+            ],
+            [
+              -5.986397317203481,
+              -17.59176553952145
+            ],
+            [
+              -5.9863973172034886,
+              17.59176553952144
+            ],
+            [
+              -18.339175531770934,
+              1.3757836009546136e-14
+            ],
+            [
+              -16.465787340850174,
+              -7.9236017584057485
+            ],
+            [
+              17.67178317661371,
+              -4.566681594415123
+            ],
+            [
+              17.67178317661369,
+              4.566681594415111
+            ]
+          ],
+          "checkpoint_updates": 52,
+          "checkpoint_valid": 1,
+          "frontier_selections": 106,
+          "independent_probes": 0
+        }
+      ],
+      "accepted": false
+    },
+    {
+      "case": {
+        "id": "benchmark_gen_31",
+        "family": "benchmark_gen",
+        "name": "upstream benchmark",
+        "k": 10,
+        "ncv": 30,
+        "selection": 0,
+        "sigma_real": 0,
+        "sigma_imag": 0,
+        "upstream_allows_nonconvergence": false
+      },
+      "ncv": 30,
+      "keep": 14,
+      "matrix_sha256": "55257934904d6ce1c1887cc00749d997e2b2d883ec5d5976a1008cc513bbaa3b",
+      "start_sha256": "ed7fc888dc3748ecc21146a5a09d54294c5d1c0deb3dd0282980c634cf1c46d8",
+      "trials": [
+        {
+          "minimum_vector_singular_value": 0.8533130453915859,
+          "vector_rank_threshold": 2.4902184360963813e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 2.7363112626664695e-14,
+          "max_normalized_residual": 1.4186938391745479e-14,
+          "spectrum_error": 14.935670407541325,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 1.000549051429012,
+          "accepted": false,
+          "converged": 10,
+          "status": 0,
+          "iterations": 300,
+          "values": [
+            [
+              5.138432161468328,
+              17.97171389806692
+            ],
+            [
+              5.138432161468316,
+              -17.971713898066845
+            ],
+            [
+              -18.311866569798095,
+              -2.3592012202467556
+            ],
+            [
+              -18.311866569798035,
+              2.3592012202467836
+            ],
+            [
+              -9.66149546292106,
+              15.68037948739505
+            ],
+            [
+              -9.661495462921069,
+              -15.680379487395026
+            ],
+            [
+              13.221314891556776,
+              12.734602030477264
+            ],
+            [
+              13.22131489155679,
+              -12.734602030477225
+            ],
+            [
+              -17.881610663239837,
+              -3.3603767264142594
+            ],
+            [
+              -5.482543921162421,
+              17.310406657355223
+            ]
+          ],
+          "checkpoint_updates": 50,
+          "checkpoint_valid": 1,
+          "frontier_selections": 177,
+          "independent_probes": 0
+        },
+        {
+          "minimum_vector_singular_value": 0.8346955476069587,
+          "vector_rank_threshold": 2.60094921468138e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 2.161874283662945e-14,
+          "max_normalized_residual": 1.3814964171262379e-14,
+          "spectrum_error": 4.212706458903292,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 1.015834478662443,
+          "accepted": false,
+          "converged": 10,
+          "status": 0,
+          "iterations": 300,
+          "values": [
+            [
+              5.138432161468309,
+              17.971713898066866
+            ],
+            [
+              5.138432161468296,
+              -17.97171389806685
+            ],
+            [
+              -18.311866569798056,
+              2.3592012202468076
+            ],
+            [
+              -18.311866569798028,
+              -2.3592012202467614
+            ],
+            [
+              -9.661495462921057,
+              15.680379487395033
+            ],
+            [
+              -9.661495462921058,
+              -15.680379487395014
+            ],
+            [
+              13.221314891556796,
+              -12.734602030477253
+            ],
+            [
+              13.221314891556775,
+              12.73460203047724
+            ],
+            [
+              -17.88161066323983,
+              3.360376726414257
+            ],
+            [
+              -17.881610663239826,
+              -3.3603767264142514
+            ]
+          ],
+          "checkpoint_updates": 28,
+          "checkpoint_valid": 1,
+          "frontier_selections": 132,
+          "independent_probes": 0
+        },
+        {
+          "minimum_vector_singular_value": 0.8533130453915867,
+          "vector_rank_threshold": 2.490218436096379e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 2.8471106123948994e-14,
+          "max_normalized_residual": 1.4523756271087232e-14,
+          "spectrum_error": 14.935670407541311,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 1.0005490514290118,
+          "accepted": false,
+          "converged": 10,
+          "status": 0,
+          "iterations": 300,
+          "values": [
+            [
+              5.138432161468297,
+              -17.971713898066877
+            ],
+            [
+              5.138432161468318,
+              17.971713898066866
+            ],
+            [
+              -18.31186656979806,
+              -2.3592012202467565
+            ],
+            [
+              -18.311866569798056,
+              2.3592012202467596
+            ],
+            [
+              -9.661495462921057,
+              15.68037948739503
+            ],
+            [
+              -9.661495462921058,
+              -15.680379487395028
+            ],
+            [
+              13.221314891556803,
+              12.734602030477246
+            ],
+            [
+              13.221314891556752,
+              -12.73460203047724
+            ],
+            [
+              -17.88161066323983,
+              -3.3603767264142586
+            ],
+            [
+              -5.482543921162403,
+              17.310406657355184
+            ]
+          ],
+          "checkpoint_updates": 53,
+          "checkpoint_valid": 1,
+          "frontier_selections": 177,
+          "independent_probes": 0
+        }
+      ],
+      "accepted": false
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "total": 2
+  }
+}
