@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -20,7 +21,7 @@ from benchmarks.runtime import warp_runtime_hashes
 from benchmarks.upstream.adapters import output
 
 from .damped import coupled_chain, quality
-from .damped_backends import scipy_setup, spectra_setup, warp_setup
+from .damped_backends import initial, scipy_setup, spectra_setup, warp_setup
 
 
 def accepted_physical(check, statistics, k):
@@ -44,6 +45,11 @@ def main():
         choices=["scipy", "spectra", "warp-cudss", "warp-gmres", "cupy"],
         default=["scipy", "spectra", "warp-cudss", "cupy"],
     )
+    parser.add_argument("--reference-tol", type=float)
+    parser.add_argument("--reference-refinement", type=int, default=0)
+    parser.add_argument("--kinematic", action="store_true")
+    parser.add_argument("--polish", type=int, default=0)
+    parser.add_argument("--balance", type=float, default=1.0)
     parser.add_argument("--cycles", type=int, default=20)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--tol", type=float, default=1e-10)
@@ -54,6 +60,14 @@ def main():
         or not args.k + 2 <= args.ncv <= 4 * args.nodes
     ):
         parser.error("require positive repeats/cycles/tolerance and k+2<=ncv<=4*nodes")
+    if not np.isfinite(args.balance) or args.balance <= 0:
+        parser.error("balance must be finite and positive")
+    if args.reference_tol is not None and (
+        not np.isfinite(args.reference_tol) or args.reference_tol <= 0
+    ):
+        parser.error("reference tolerance must be finite and positive")
+    if args.polish < 0 or args.reference_refinement < 0:
+        parser.error("polish must be nonnegative")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     begin = time.perf_counter()
     case = coupled_chain(args.nodes, args.k, args.kind)
@@ -68,6 +82,16 @@ def main():
         target=[case.target.real, case.target.imag],
         tol=args.tol,
         cycles=args.cycles,
+        coordinate_scale=args.balance,
+        inverse_polish_steps=args.polish,
+        recover_velocity=args.kinematic,
+        reference_refinement_steps=args.reference_refinement,
+        reference_tol=args.tol if args.reference_tol is None else args.reference_tol,
+        gpu=wp.get_device().name,
+        warp_runtime=wp.__version__,
+        start_sha256=hashlib.sha256(initial(case, args.balance).tobytes()).hexdigest(),
+        blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
+        omp_threads=os.environ.get("OMP_NUM_THREADS"),
         repeats=args.repeats,
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         matrix_sha256=hashlib.sha256(
@@ -82,6 +106,7 @@ def main():
             str(p): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in [
                 *Path("warpack").glob("*.py"),
+                Path("benchmarks/experimental/damped_coordinates.py"),
                 *Path("benchmarks/applications").glob("damped*.*"),
             ]
         },
@@ -103,7 +128,15 @@ def main():
         try:
             begin = time.perf_counter()
             if method.startswith("warp-"):
-                solver = warp_setup(case, args.ncv, args.tol, method[5:])
+                solver = warp_setup(
+                    case,
+                    args.ncv,
+                    args.tol,
+                    method[5:],
+                    balance=args.balance,
+                    polish=args.polish,
+                    kinematic=args.kinematic,
+                )
                 close = solver.close
                 wp.synchronize()
                 row["setup_seconds"] = time.perf_counter() - begin
@@ -132,7 +165,13 @@ def main():
                     )
             else:
                 solve, close = (scipy_setup if method == "scipy" else spectra_setup)(
-                    case, args.ncv, args.tol
+                    case,
+                    args.ncv,
+                    args.tol if args.reference_tol is None else args.reference_tol,
+                    balance=args.balance,
+                    polish=args.polish,
+                    reference_refinement=args.reference_refinement,
+                    kinematic=args.kinematic,
                 )
                 row["setup_seconds"] = time.perf_counter() - begin
                 latest = None

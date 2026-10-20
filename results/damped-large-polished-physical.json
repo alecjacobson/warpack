@@ -1,0 +1,284 @@
+{
+  "protocol": "Sparse damped/gyroscopic comparison with independent physical-mode gates.\n\nRun under benchmarks.monitor_gpu. Each synchronized timed replay is validated;\nsetup, capture, warmup and reference construction are reported separately.\n",
+  "reference_setup_seconds": 0.12089427560567856,
+  "kind": "nonproportional",
+  "n": 65536,
+  "nnz": 229372,
+  "k": 20,
+  "ncv": 64,
+  "target": [
+    -0.15,
+    6.3
+  ],
+  "tol": 2e-08,
+  "cycles": 2,
+  "coordinate_scale": 1.0,
+  "inverse_polish_steps": 1,
+  "reference_refinement_steps": 1,
+  "gpu": "NVIDIA L40",
+  "warp_runtime": "1.18.0",
+  "start_sha256": "5894f1d57adec7cfdc7674dd24fa52c296fbb7d1fa80a6405e66469615b56783",
+  "blas_threads": "4",
+  "omp_threads": "4",
+  "repeats": 3,
+  "git_head": "108ef42f98f2f559a2d703f3c17a2411ff80a944",
+  "matrix_sha256": "d86fd1fc15df98f5fd8b175bfbc19a81e2d1b14016f7676bc18e515538686876",
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "warp_cg_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_preconditioner_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_fsai_implementation": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp_sparse_implementation": "ec75cde6ace8704d7043700353b6132ff8450dd83840fd1558a89a0d012dc274",
+    "spectra_binary": "ffb7fd7efb47afb1ab8ecbf16ad60d863b5548fae5c6bb731835ef5345c08aae"
+  },
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "warp-lang": "1.18.0+cu12",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "554fd6e6b51725707325d878e660df48a825db8ff41e3423031facaecccc4b78",
+    "warpack/solver.py": "1b2bfb4887cf18d6c0ed94af2980119d1d441ce345dd3772e6bb8f8d85eaaa92",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "warpack/arnoldi.py": "2580c76e0d0165aac04c0457f3d9edd82e85d2e6d7219570ec615962b88bad70",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "benchmarks/experimental/damped_coordinates.py": "bdac1f70c64635c189e82e54f9f72c61ab18540017c2fdc3d20886aecf5aaf14",
+    "benchmarks/applications/damped.py": "1b197c686450b783f01337730c0f20f1f197940ead3fbe6a887e6ebe41d99537",
+    "benchmarks/applications/damped_spectra.cpp": "4e958197fa806ea0149fbe3e19b413bd4831e9cf3f73ec8d14c662999ccd05d9",
+    "benchmarks/applications/damped_backends.py": "0c75c48f26fb7af4f8466facf7fa5de2c022df335a1242e185e0205f217d084f",
+    "benchmarks/applications/damped_compare.py": "c4412081b7bc88eb639a8802d03dc2d528de2c7591c5f11ec6ec12a3da561750"
+  },
+  "methods": {
+    "scipy": {
+      "setup_seconds": 0.05514536798000336,
+      "warmup_seconds": 1.2938386835157871,
+      "trials": [
+        {
+          "seconds": 1.3197218477725983,
+          "quality": {
+            "residual": 1.5209019574708397e-08,
+            "quadratic_residual": 1.9536285790683434e-08,
+            "velocity_relation": 5.914427388756284e-08,
+            "spectrum_error": 1.7835583810263363e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 1.26053049820881e-09,
+            "minimum_vector_singular_value": 0.11355197351079815,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 20
+          }
+        },
+        {
+          "seconds": 1.4139951579272747,
+          "quality": {
+            "residual": 1.5209019574708397e-08,
+            "quadratic_residual": 1.9536285790683434e-08,
+            "velocity_relation": 5.914427388756284e-08,
+            "spectrum_error": 1.7835583810263363e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 1.26053049820881e-09,
+            "minimum_vector_singular_value": 0.11355197351079815,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 20
+          }
+        },
+        {
+          "seconds": 1.384543552994728,
+          "quality": {
+            "residual": 1.5209019574708397e-08,
+            "quadratic_residual": 1.9536285790683434e-08,
+            "velocity_relation": 5.914427388756284e-08,
+            "spectrum_error": 1.7835583810263363e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 1.26053049820881e-09,
+            "minimum_vector_singular_value": 0.11355197351079815,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 20
+          }
+        }
+      ],
+      "accepted": false,
+      "median_seconds": 1.384543552994728
+    },
+    "spectra": {
+      "setup_seconds": 0.08820554241538048,
+      "warmup_seconds": 2.3957414776086807,
+      "trials": [
+        {
+          "seconds": 2.36765331402421,
+          "quality": {
+            "residual": 1.2222018869161381e-08,
+            "quadratic_residual": 2.010778320739094e-08,
+            "velocity_relation": 3.995284862190004e-08,
+            "spectrum_error": 2.5756886729001084e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 1.941691877594767e-09,
+            "minimum_vector_singular_value": 0.11355197350820533,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 20,
+            "iterations": 1,
+            "operations": 65,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 2.3801590874791145,
+          "quality": {
+            "residual": 1.2222018869161381e-08,
+            "quadratic_residual": 2.010778320739094e-08,
+            "velocity_relation": 3.995284862190004e-08,
+            "spectrum_error": 2.5756886729001084e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 1.941691877594767e-09,
+            "minimum_vector_singular_value": 0.11355197350820533,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 20,
+            "iterations": 1,
+            "operations": 65,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 2.429587882012129,
+          "quality": {
+            "residual": 1.2222018869161381e-08,
+            "quadratic_residual": 2.010778320739094e-08,
+            "velocity_relation": 3.995284862190004e-08,
+            "spectrum_error": 2.5756886729001084e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 1.941691877594767e-09,
+            "minimum_vector_singular_value": 0.11355197350820533,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 20,
+            "iterations": 1,
+            "operations": 65,
+            "status": 0
+          }
+        }
+      ],
+      "accepted": false,
+      "median_seconds": 2.3801590874791145
+    },
+    "warp-cudss": {
+      "setup_seconds": 0.5471157059073448,
+      "capture_seconds": 0.277579415589571,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "KERNEL": 6732,
+          "MEMSET": 2646,
+          "MEMCPY": 1824
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1060,
+          "HtoD (HOST PAGEABLE to DEVICE)": 764
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "warmup_seconds": 0.2610354349017143,
+      "trials": [
+        {
+          "seconds": 0.22067288681864738,
+          "quality": {
+            "residual": 1.432567267943138e-08,
+            "quadratic_residual": 2.60112554441824e-09,
+            "velocity_relation": 2.8866222079677818e-08,
+            "spectrum_error": 3.308326055084461e-10,
+            "norm_error": 4.440892098500626e-16,
+            "subspace_error": 2.7488918985315355e-10,
+            "minimum_vector_singular_value": 0.11355197351114575,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 19,
+            "status": 0,
+            "core_count": 19
+          }
+        },
+        {
+          "seconds": 0.22092094272375107,
+          "quality": {
+            "residual": 1.3439355741861485e-08,
+            "quadratic_residual": 2.559331302378114e-09,
+            "velocity_relation": 2.709839392468447e-08,
+            "spectrum_error": 3.136366653564044e-10,
+            "norm_error": 2.220446049250313e-16,
+            "subspace_error": 2.670277039338224e-10,
+            "minimum_vector_singular_value": 0.11355197351062181,
+            "independent_vectors": true,
+            "accepted": false
+          },
+          "statistics": {
+            "count": 19,
+            "status": 0,
+            "core_count": 19
+          }
+        },
+        {
+          "seconds": 0.22078105062246323,
+          "quality": {
+            "residual": 2.778211157638679e-09,
+            "quadratic_residual": 2.571253094849793e-09,
+            "velocity_relation": 5.448215434591625e-09,
+            "spectrum_error": 2.9044222064679087e-10,
+            "norm_error": 6.661338147750939e-16,
+            "subspace_error": 2.623358492303894e-10,
+            "minimum_vector_singular_value": 0.11355197351024625,
+            "independent_vectors": true,
+            "accepted": true
+          },
+          "statistics": {
+            "count": 20,
+            "status": 0,
+            "core_count": 19
+          }
+        }
+      ],
+      "accepted": false,
+      "median_seconds": 0.22078105062246323
+    },
+    "cupy": {
+      "status": "unsupported",
+      "reason": "CuPy has no sparse general eigs; this matrix is not Hermitian and LOBPCG is not a substitute."
+    }
+  },
+  "accepted": false
+}

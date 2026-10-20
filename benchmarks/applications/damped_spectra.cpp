@@ -8,23 +8,32 @@ using Sparse = Eigen::SparseMatrix<Complex>;
 using Vec = Eigen::VectorXcd;
 struct Inverse {
     using Scalar = Complex;
-    Sparse a;
+    Sparse a, shifted;
+    int refinement_steps;
     Eigen::SparseLU<Sparse> factor;
     Complex shift;
     int rows() const { return a.rows(); }
     int cols() const { return a.cols(); }
     void perform_op(const Complex* x, Complex* y) const {
-        Eigen::Map<Vec>(y, rows()) = factor.solve(Eigen::Map<const Vec>(x, rows()));
+        const Eigen::Map<const Vec> rhs(x, rows());
+        Vec solution = factor.solve(rhs);
+        for(int i=0;i<refinement_steps;i++) {
+            const Vec residual = rhs - shifted*solution;
+            solution += factor.solve(residual);
+        }
+        Eigen::Map<Vec>(y, rows()) = solution;
     }
 };
 extern "C" void* damped_factor(int n, int nnz, const int* offsets, const int* columns,
-                              const Complex* values, double sr, double si) {
+                              const Complex* values, double sr, double si, int refinements) {
     try {
         auto op = std::make_unique<Inverse>();
         op->a = Eigen::Map<const Sparse>(n,n,nnz,offsets,columns,values);
         op->shift = Complex(sr,si);
         Sparse identity(n,n); identity.setIdentity();
-        op->factor.compute(op->a - op->shift*identity);
+        op->shifted = op->a - op->shift*identity;
+        op->refinement_steps = refinements;
+        op->factor.compute(op->shifted);
         if(op->factor.info() != Eigen::Success) return nullptr;
         return op.release();
     } catch (...) { return nullptr; }
@@ -49,3 +58,14 @@ extern "C" int damped_solve(void* ptr, int k, int ncv, const Complex* initial,
     } catch (...) { return -1; }
 }
 extern "C" void damped_free(void* ptr) { delete static_cast<Inverse*>(ptr); }
+
+extern "C" int damped_polish(void* ptr, int k, Complex* vectors) {
+    try {
+        auto& op = *static_cast<Inverse*>(ptr);
+        Eigen::Map<Eigen::MatrixXcd> input(vectors,op.rows(),k);
+        Eigen::MatrixXcd result(op.rows(),k);
+        for(int j=0;j<k;j++) op.perform_op(input.col(j).data(),result.col(j).data());
+        input = result;
+        return op.factor.info()==Eigen::Success ? 0 : -1;
+    } catch (...) { return -1; }
+}

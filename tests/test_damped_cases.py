@@ -59,3 +59,29 @@ def test_recorded_physical_convergence_is_not_rejected_by_tighter_core_count():
     assert not accepted_physical(quality, dict(stats, count=k - 1), k)
     assert not accepted_physical(dict(quality, accepted=False), stats, k)
     assert not accepted_physical(quality, dict(stats, status=2), k)
+
+
+def test_balanced_coordinates_preserve_original_modes():
+    from benchmarks.applications.damped_backends import coordinates, physical
+
+    case = coupled_chain(nodes=12, k=8, kind="gyroscopic")
+    scale = 13.0
+    balanced = coordinates(case, scale)
+    vectors = case.right.copy()
+    vectors[: len(vectors) // 2] *= scale
+    assert np.linalg.norm(balanced @ vectors - vectors * case.values) < 1e-10
+    restored = physical(vectors, scale)
+    assert quality(case, case.values, restored)["accepted"]
+
+
+def test_velocity_recovery_still_checks_displacement_equation():
+    from benchmarks.applications.damped_backends import physical
+
+    case = coupled_chain(nodes=12, k=8, kind="nonproportional")
+    vectors = case.right.copy()
+    vectors[len(vectors) // 2 :] = 0
+    recovered = physical(vectors, 1.0, case.values, kinematic=True)
+    assert quality(case, case.values, recovered)["accepted"]
+    vectors[0, 0] += 0.1
+    wrong = physical(vectors, 1.0, case.values, kinematic=True)
+    assert not quality(case, case.values, wrong)["accepted"]

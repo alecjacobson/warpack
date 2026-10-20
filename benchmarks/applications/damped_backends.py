@@ -12,16 +12,49 @@ from benchmarks.upstream.adapters import complex_matrix
 from warpack import ShiftInvertEigensolver
 
 
-def initial(case):
+def initial(case, balance=1.0):
     rng = np.random.default_rng(2026)
-    return rng.normal(size=case.a.shape[0]) + 1j * rng.normal(size=case.a.shape[0])
+    vector = rng.normal(size=case.a.shape[0]) + 1j * rng.normal(size=case.a.shape[0])
+    vector[: len(vector) // 2] *= balance
+    return vector
 
 
-def scipy_setup(case, ncv, tol=1e-10):
-    matrix = case.a.astype(complex)
-    factor = sla.splu((matrix - case.target * sp.eye(matrix.shape[0])).tocsc())
-    inverse = sla.LinearOperator(matrix.shape, matvec=factor.solve, dtype=complex)
-    start = initial(case)
+def coordinates(case, balance):
+    if not np.isfinite(balance) or balance <= 0:
+        raise ValueError("coordinate scale must be finite and positive")
+    a = case.a.astype(complex)
+    half = a.shape[0] // 2
+    rows = np.repeat(np.arange(a.shape[0]), np.diff(a.indptr))
+    a.data *= np.where(rows < half, balance, 1.0) / np.where(a.indices < half, balance, 1.0)
+    return a
+
+
+def physical(vectors, balance, values=None, kinematic=False):
+    if balance == 1.0 and not kinematic:
+        return vectors
+    vectors = vectors.copy()
+    vectors[: len(vectors) // 2] /= balance
+    if kinematic:
+        vectors[len(vectors) // 2 :] = vectors[: len(vectors) // 2] * values
+    vectors /= np.linalg.norm(vectors, axis=0)
+    return vectors
+
+
+def scipy_setup(
+    case, ncv, tol=1e-10, balance=1.0, polish=0, reference_refinement=0, kinematic=False
+):
+    matrix = coordinates(case, balance)
+    shifted = (matrix - case.target * sp.eye(matrix.shape[0])).tocsc()
+    factor = sla.splu(shifted)
+
+    def apply(rhs):
+        result = factor.solve(rhs)
+        for _ in range(reference_refinement):
+            result += factor.solve(rhs - shifted @ result)
+        return result
+
+    inverse = sla.LinearOperator(matrix.shape, matvec=apply, dtype=complex)
+    start = initial(case, balance)
 
     def solve():
         values, vectors = sla.eigs(
@@ -34,12 +67,24 @@ def scipy_setup(case, ncv, tol=1e-10):
             tol=tol,
             maxiter=1000,
         )
-        return values, vectors, {"count": len(values)}
+        for _ in range(polish):
+            vectors = apply(vectors)
+            vectors /= np.linalg.norm(vectors, axis=0)
+        return values, physical(vectors, balance, values, kinematic), {"count": len(values)}
 
     return solve, lambda: None
 
 
-def spectra_setup(case, ncv, tol=1e-10, library="build/damped_spectra.so"):
+def spectra_setup(
+    case,
+    ncv,
+    tol=1e-10,
+    library="build/damped_spectra.so",
+    balance=1.0,
+    polish=0,
+    reference_refinement=0,
+    kinematic=False,
+):
     lib = ctypes.CDLL(str(Path(library).resolve()))
     ints = np.ctypeslib.ndpointer(dtype=np.int32, flags="C_CONTIGUOUS")
     data = np.ctypeslib.ndpointer(dtype=np.complex128, flags="C_CONTIGUOUS")
@@ -52,6 +97,7 @@ def spectra_setup(case, ncv, tol=1e-10, library="build/damped_spectra.so"):
         data,
         ctypes.c_double,
         ctypes.c_double,
+        ctypes.c_int,
     ]
     lib.damped_factor.restype = raw
     lib.damped_solve.argtypes = [
@@ -67,7 +113,10 @@ def spectra_setup(case, ncv, tol=1e-10, library="build/damped_spectra.so"):
     ]
     lib.damped_solve.restype = ctypes.c_int
     lib.damped_free.argtypes = [raw]
-    matrix = case.a.astype(complex).tocsc()
+    if polish:
+        lib.damped_polish.argtypes = [raw, ctypes.c_int, data]
+        lib.damped_polish.restype = ctypes.c_int
+    matrix = coordinates(case, balance).tocsc()
     matrix.sort_indices()
     context = lib.damped_factor(
         matrix.shape[0],
@@ -77,10 +126,11 @@ def spectra_setup(case, ncv, tol=1e-10, library="build/damped_spectra.so"):
         matrix.data,
         case.target.real,
         case.target.imag,
+        reference_refinement,
     )
     if not context:
         raise RuntimeError("Spectra/Eigen sparse factorization failed")
-    start = np.ascontiguousarray(initial(case))
+    start = np.ascontiguousarray(initial(case, balance))
 
     def solve():
         values = np.empty(case.k, complex)
@@ -89,9 +139,16 @@ def spectra_setup(case, ncv, tol=1e-10, library="build/damped_spectra.so"):
         result = lib.damped_solve(context, case.k, ncv, start, tol, 1000, values, vectors, stats)
         if result != 0:
             raise RuntimeError(f"Spectra returned {result}, statistics {stats.tolist()}")
+        for _ in range(polish):
+            if lib.damped_polish(context, case.k, vectors) != 0:
+                raise RuntimeError("Spectra reference inverse polishing failed")
+            shaped = vectors.reshape((matrix.shape[0], case.k), order="F")
+            shaped /= np.linalg.norm(shaped, axis=0)
         return (
             values,
-            vectors.reshape((matrix.shape[0], case.k), order="F"),
+            physical(
+                vectors.reshape((matrix.shape[0], case.k), order="F"), balance, values, kinematic
+            ),
             dict(
                 count=int(stats[0]),
                 iterations=int(stats[1]),
@@ -103,11 +160,22 @@ def spectra_setup(case, ncv, tol=1e-10, library="build/damped_spectra.so"):
     return solve, lambda: lib.damped_free(context)
 
 
-def warp_setup(case, ncv, tol=1e-10, backend="cudss"):
-    start = initial(case)
+def warp_setup(case, ncv, tol=1e-10, backend="cudss", balance=1.0, polish=0, kinematic=False):
+    start = initial(case, balance)
     device_start = wp.array(np.stack([start.real, start.imag], axis=-1), dtype=wp.vec2d)
-    return ShiftInvertEigensolver(
-        complex_matrix(case.a),
+    cls = ShiftInvertEigensolver
+    operators = [complex_matrix(case.a)]
+    kwargs = {}
+    if balance != 1.0 or polish or kinematic:
+        from benchmarks.experimental.damped_coordinates import DampedCoordinates
+
+        cls = DampedCoordinates
+        operators.append(complex_matrix(coordinates(case, balance)))
+        kwargs["coordinate_scale"] = balance
+        kwargs["polish_steps"] = polish
+        kwargs["kinematic"] = kinematic
+    return cls(
+        *operators,
         case.k,
         case.target,
         ncv=ncv,
@@ -116,4 +184,5 @@ def warp_setup(case, ncv, tol=1e-10, backend="cudss"):
         inner_tol=1e-13,
         inner_maxiter=1000,
         initial_vector=device_start,
+        **kwargs,
     )

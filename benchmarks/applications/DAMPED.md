@@ -30,6 +30,30 @@ GMRES solve. [Focused validation](../../results/performance_followup/damped-cove
 The tests are additional to the preceding 1,213-test full-suite report; this
 coverage addition has not been represented as another full upstream run.
 
+## Accepted large recovery profile
+
+The same 65,536-unknown problem now passes every timed sample using an explicit
+coordinate/extraction profile: scale 8, one inverse polish, velocity recovery,
+two fixed Warp cycles,physical tol 2e-8 and reference iterative tol 1e-12.
+The independent physical/quadratic/spectrum/subspace/norm bound remains 1e-8.
+All methods recover 20 modes; the original tighter-count profile below remains
+rejected. These are adapted reference pipelines, with extraction included.
+
+| Method | Setup(s) | Capture(s) | Median solve(s) | Max physical residual |
+|---|---:|---:|---:|---:|
+| ARPACK + SuperLU + correction/recovery |0.05049|—|1.119790|3.01e-9|
+| Spectra + Eigen SparseLU + correction/recovery |0.06635|—|2.106111|3.07e-9|
+| Warp + cuDSS + recovery |0.53466|0.26413|0.218344|2.91e-9|
+| CuPy |unsupported|—|—|—|
+
+Warp's warmed solve is about 5.1x faster than ARPACK and 9.6x faster than Spectra
+on this profile. Setup/capture/warmup are excluded from solve samples and
+recorded separately; this is not a cold-start claim. The problem is two coupled
+one-dimensional FEM branches, not the irregular 3D Anvil mesh.
+[Method, rejected alternatives and reproduction](../experimental/DAMPED_RECOVERY.md),
+[every trial](../../results/damped-large-balanced8.json),
+[occupancy](../../results/damped-large-balanced8.occupancy.json).
+
 ## Retained large failure
 
 The first large nonproportional problem has 65,536 first-order unknowns,
