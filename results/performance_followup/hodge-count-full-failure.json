@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-20",
+  "issue": 103,
+  "full_validation": {
+    "passed": 1163,
+    "failed": 1,
+    "seconds": 470.9
+  },
+  "failed_test": "tests/test_hodge.py::test_mass_krylov_hodge_preserves_complete_harmonic_space[krylov]",
+  "observed_count": 5,
+  "requested_count": 6,
+  "budget": 3,
+  "n": 294,
+  "k": 6,
+  "ncv": 32,
+  "tol": 1e-11,
+  "traceback": "\n_______ test_mass_krylov_hodge_preserves_complete_harmonic_space[krylov] _______\n\nmethod = 'krylov'\n\n    @pytest.mark.parametrize(\"method\", [\"krylov\", \"cg\", \"cg-fsai\"])\n    def test_mass_krylov_hodge_preserves_complete_harmonic_space(method):\n        import warp.optim.linear as linear\n    \n        if method == \"cg-fsai\" and not hasattr(linear, \"FSAI\"):\n            pytest.skip(\"Requires pinned upstream Warp FSAI\")\n        problem = make_hodge_case(\"large_disconnected\", side=7).problem\n        solver, inverse = warp_setup(problem, method, ncv=32, force_krylov=True)\n        # Two direct cycles intermittently leave a guard pair just above 1e-11.\n        # Preserve the strict accuracy checks; give the direct method expansion room.\n        graph = solver.capture(3 if method == \"krylov\" else 2)\n        try:\n            for _ in range(2):\n                wp.capture_launch(graph)\n                result = accuracy(problem, *warp_output(problem, solver))\n                assert result[\"accepted\"], result\n                assert result[\"recovered_nullity\"] == 4\n                assert result[\"positive_guard\"] > 1e-8\n                assert result[\"nullspace_subspace_error\"] < 1e-9\n>               assert solver.converged.numpy()[0] == problem.k\nE               AssertionError: assert np.int32(5) == 6\nE                +  where 6 = Problem(name='hodge_large_disconnected', api_class='D', a=<Compressed Sparse Row sparse matrix of dtype 'float64'\\n\twit...]],\\n      shape=(294, 4)), require_positive_guard=True, requested_basis=None, block_size=1, right_requested_basis=None).k\n\ntests/test_hodge.py:172: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_hodge.py::test_mass_krylov_hodge_preserves_complete_harmonic_space[krylov]\n1 failed, 1163 passed in 470.90s (0:07:50)\n",
+  "note": "The real generalized Hodge path does not use cooperative complex Schur. Failure retained; isolated repeats have not reproduced it."
+}
