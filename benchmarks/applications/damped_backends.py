@@ -8,6 +8,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
+from benchmarks.experimental.damped_coordinates import normalize, recover_velocity, row_norms
 from benchmarks.experimental.pencil_polish import PolishedPencil
 from benchmarks.upstream.adapters import complex_matrix
 from warpack import ComplexShiftInverse, ShiftInvertEigensolver
@@ -15,6 +16,44 @@ from warpack import ComplexShiftInverse, ShiftInvertEigensolver
 
 class _OwnedPencil(PolishedPencil):
     """Application setup owns the inverse it constructs; the public API borrows it."""
+
+    def __init__(self, *args, kinematic=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.kinematic = kinematic
+        if kinematic:
+            if self.eigenvectors.ptr == self.core.eigenvectors.ptr:
+                self.eigenvectors = wp.empty_like(self.core.eigenvectors)
+            if self.polish_norms is None:
+                self.polish_norms = wp.zeros((self.k, 1), dtype=wp.float64, device=self.device)
+
+    def finalize(self):
+        super().finalize()
+        if self.kinematic:
+            # The first block of this application's pencil is v=lambda*q.
+            # It is not an identity assumed by the generic public solver.
+            wp.launch(
+                recover_velocity,
+                (self.k, self.op.complex_n // 2),
+                [self.eigenvectors, self.eigenvalues],
+                device=self.device,
+            )
+            self.polish_norms.zero_()
+            wp.launch_tiled(
+                row_norms,
+                dim=(self.k, (self.op.complex_n + 255) // 256),
+                inputs=[self.eigenvectors, self.polish_norms],
+                block_dim=128,
+                device=self.device,
+            )
+            wp.launch(
+                normalize,
+                self.eigenvectors.shape,
+                [self.eigenvectors, self.polish_norms],
+                device=self.device,
+            )
+            self.op.apply_complex(self.eigenvectors, self.evaluation.ax)
+            self.mass.apply_complex(self.eigenvectors, self.evaluation.bx)
+            self.refresh_counts()
 
     def close(self):
         super().close()
@@ -237,7 +276,7 @@ def warp_setup(
     start = initial(case, balance)
     device_start = wp.array(np.stack([start.real, start.imag], axis=-1), dtype=wp.vec2d)
     if case.b is not None:
-        if balance != 1.0 or kinematic:
+        if balance != 1.0:
             raise ValueError("generalized pencil benchmark currently uses original coordinates")
         inverse = ComplexShiftInverse(
             complex_matrix(case.a - case.target * case.b),
@@ -258,6 +297,7 @@ def warp_setup(
                 initial_vector=device_start,
                 polish_steps=polish,
                 rayleigh=pencil_rayleigh,
+                kinematic=kinematic,
             )
         except Exception:
             inverse.close()

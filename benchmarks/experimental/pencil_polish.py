@@ -72,7 +72,7 @@ class PolishedPencil(GeneralizedShiftInvertEigensolver):
             )
             wp.launch(normalize, result.shape, [result, self.polish_norms], device=self.device)
             source = result
-        if self.polish_steps:
+        if self.eigenvectors.ptr != source.ptr:
             wp.copy(self.eigenvectors, source)
         super().finalize()
         if self.rayleigh:
@@ -95,24 +95,28 @@ class PolishedPencil(GeneralizedShiftInvertEigensolver):
                 [self.numerator, self.denominator, self.eigenvalues],
                 device=self.device,
             )
-            evaluation.norms.zero_()
-            wp.launch_tiled(
-                pencil_norms,
-                dim=(self.k, (self.op.complex_n + 255) // 256),
-                inputs=[evaluation.ax, evaluation.bx, self.eigenvalues, evaluation.norms],
-                block_dim=128,
-                device=self.device,
-            )
-            wp.launch(
-                pencil_errors,
-                self.k,
-                [self.eigenvalues, evaluation.norms, evaluation.errors_squared],
-                device=self.device,
-            )
-            self.converged.zero_()
-            wp.launch(
-                pencil_outputs,
-                self.k,
-                [evaluation.errors_squared, self.residuals, self.status, self.converged, self.tol],
-                device=self.device,
-            )
+            self.refresh_counts()
+
+    def refresh_counts(self):
+        evaluation = self.evaluation
+        evaluation.norms.zero_()
+        wp.launch_tiled(
+            pencil_norms,
+            dim=(self.k, (self.op.complex_n + 255) // 256),
+            inputs=[evaluation.ax, evaluation.bx, self.eigenvalues, evaluation.norms],
+            block_dim=128,
+            device=self.device,
+        )
+        wp.launch(
+            pencil_errors,
+            self.k,
+            [self.eigenvalues, evaluation.norms, evaluation.errors_squared],
+            device=self.device,
+        )
+        self.converged.zero_()
+        wp.launch(
+            pencil_outputs,
+            self.k,
+            [evaluation.errors_squared, self.residuals, self.status, self.converged, self.tol],
+            device=self.device,
+        )

@@ -128,3 +128,23 @@ def test_declared_pencil_polish_preserves_physical_modes(polish, rayleigh):
                 np.testing.assert_allclose(output(solver.eigenvalues), expected, atol=1e-12)
     finally:
         solver.close()
+
+
+@pytest.mark.parametrize("polish", [0, 1])
+def test_consistent_pencil_kinematic_recovery_uses_fresh_equations(polish):
+    case = consistent_chain(nodes=24, k=6, kind="gyroscopic")
+    solver = warp_setup(case, 32, tol=1e-10, polish=polish, kinematic=True)
+    try:
+        graph = solver.capture(3)
+        for _ in range(2):
+            wp.capture_launch(graph)
+            w, v = output(solver.eigenvalues), output(solver.eigenvectors).T
+            assert quality(case, w, v)["accepted"]
+            assert solver.converged.numpy()[0] == case.k and solver.status.numpy()[0] == 0
+            av, bv = case.a @ v, case.b @ v
+            errors = np.linalg.norm(av - bv * w, axis=0) / (
+                np.linalg.norm(av, axis=0) + np.maximum(1, abs(w)) * np.linalg.norm(bv, axis=0)
+            )
+            np.testing.assert_allclose(solver.residuals.numpy(), errors, atol=1e-13)
+    finally:
+        solver.close()

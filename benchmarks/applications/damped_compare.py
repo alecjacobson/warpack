@@ -75,7 +75,7 @@ def main():
     if args.pencil_rayleigh and not args.consistent_mass:
         parser.error("pencil Rayleigh postprocessing requires --consistent-mass")
     if args.consistent_mass and (
-        args.kind not in ("nonproportional", "gyroscopic") or args.balance != 1.0 or args.kinematic
+        args.kind not in ("nonproportional", "gyroscopic") or args.balance != 1.0
     ):
         parser.error("consistent mass supports nonproportional/gyroscopic original coordinates")
     args.out.parent.mkdir(parents=True, exist_ok=True)
