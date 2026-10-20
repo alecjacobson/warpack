@@ -135,3 +135,9 @@ when the overall case remains `failed` in both reports. Its CPU-only regression
 tests include small residuals with wrong spectra, short counts with correct
 numerics, allowed nonconvergence, invalid numbers, missing evidence, and SVD
 vector failures. Raw per-case assertions and outcome labels remain available.
+
+Accuracy-only Spectra runs now validate each of two graph replays and retain
+`accuracy_trials`. Summary errors/counts cover the worst replay, and any replay
+failure rejects the case. See [the generalized regular/per-replay follow-up](SPECTRA_REGULAR.md)
+for45 original cases, independent requested-spectrum/metric/subspace checks,
+and the distinction between the full frozen baseline and a focused composite.
