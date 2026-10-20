@@ -1,0 +1,91 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "clamped_consistent",
+    "--side",
+    "10",
+    "--modes",
+    "6",
+    "--width",
+    "12",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "3",
+    "--out",
+    "results/fem_fast_block_v020/clamped_consistent_s10_k6.json"
+  ],
+  "pid": 200953,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792519593.9930327,
+      "other": [],
+      "gpu": "100 %, 1 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792519595.1123934,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792519596.2285705,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 660 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792519597.3735995,
+      "other": [],
+      "gpu": "3 %, 14272 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519598.5019636,
+      "other": [],
+      "gpu": "23 %, 14370 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519599.6253734,
+      "other": [],
+      "gpu": "61 %, 14520 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

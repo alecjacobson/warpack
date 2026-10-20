@@ -1,0 +1,687 @@
+{
+  "args": {
+    "case": "clamped_consistent",
+    "side": 10,
+    "modes": 6,
+    "width": 12,
+    "steps": 300,
+    "shift": 0.01,
+    "fsai_width": 64,
+    "fsai_layout": "columns",
+    "matrix_layout": "columns",
+    "preconditioner": "fsai",
+    "repeats": 3,
+    "tol": 1e-11,
+    "cupy": true,
+    "cupy_width": null,
+    "cupy_tol": 1e-10,
+    "cupy_padding": false,
+    "profile": false,
+    "public_api": true,
+    "keep_graph": false,
+    "gram_chunk": 4096,
+    "symmetric_products": true,
+    "fused_updates": true,
+    "paired_rotation": true,
+    "reuse_x_image": true,
+    "active_search_bucket_size": 4,
+    "active_search_keep_history": true,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 25,
+    "batched_cg": true,
+    "active_cg_bucket_size": 4,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "results/fem_fast_block_v020/clamped_consistent_s10_k6.json"
+  },
+  "n": 10890,
+  "k": 6,
+  "fixture": {
+    "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+    "requested_nontrivial_modes": 6,
+    "actual_nontrivial_modes": 6,
+    "retained_rigid_modes": 0,
+    "boundary_cluster_complete": true,
+    "first_excluded_eigenvalue": 8.648173499808227,
+    "preconditioner_block_size": 3,
+    "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 6 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included"
+  },
+  "setup_seconds": 0.7610114216804504,
+  "preconditioner_setup_seconds": 0.7610114216804504,
+  "solver_setup_seconds": 0.07322424277663231,
+  "total_setup_seconds": 0.8342356644570827,
+  "setup_scope": "Preconditioner construction plus solver/operator/CG workspaces, input upload, and optional FP32 matrix copy. Excludes mesh assembly, reference loading, host random-start generation, graph capture and warmup. JIT work is included where encountered; these are not warmed setup measurements. Historical setup_seconds is an alias for preconditioner_setup_seconds.",
+  "setup_capture_device_free_memory_decrease_bytes": 14573109248,
+  "memory_scope": "Device free-memory decrease from after fixture preparation through preconditioner/workspace setup and capture. Includes allocator pools/runtime/JIT allocations; excludes original fixture storage and CuPy adapter. Not peak memory or a pure live-workspace count.",
+  "capture_seconds": 0.4058109000325203,
+  "warmup_seconds": 0.05093146860599518,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 74,
+      "MEMCPY": 21,
+      "KERNEL": 342,
+      "CONDITIONAL": 10
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 21
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.04958644136786461,
+      "iterations": 8,
+      "quality": {
+        "accepted": true,
+        "residual": 2.080863293248581e-12,
+        "max_absolute_residual": 8.227186293341404e-14,
+        "orthogonality": 4.773959005888173e-15,
+        "spectrum_error": 1.1564360580251787e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 2.8915923813408384e-13,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1656,
+          25,
+          24,
+          96
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          0,
+          8,
+          93
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12
+        ],
+        "search_bucket_usage": [
+          0,
+          0,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.04957683011889458,
+      "iterations": 8,
+      "quality": {
+        "accepted": true,
+        "residual": 2.080863293248581e-12,
+        "max_absolute_residual": 8.227186293341404e-14,
+        "orthogonality": 4.773959005888173e-15,
+        "spectrum_error": 1.1564360580251787e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 2.8915923813408384e-13,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1656,
+          25,
+          24,
+          96
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          0,
+          8,
+          93
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12
+        ],
+        "search_bucket_usage": [
+          0,
+          0,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.04958042502403259,
+      "iterations": 8,
+      "quality": {
+        "accepted": true,
+        "residual": 2.080863293248581e-12,
+        "max_absolute_residual": 8.227186293341404e-14,
+        "orthogonality": 4.773959005888173e-15,
+        "spectrum_error": 1.1564360580251787e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 2.8915923813408384e-13,
+        "status": 0,
+        "converged": 6,
+        "preconditioner_cg_stats": [
+          1656,
+          25,
+          24,
+          96
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          0,
+          8,
+          93
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12
+        ],
+        "search_bucket_usage": [
+          0,
+          0,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.12923158705234528,
+      "residual_history_length": 30,
+      "last_history_absolute_residuals": [
+        9.289507280318321e-11,
+        2.960050098396366e-11,
+        2.0316891285486275e-12,
+        9.932220460058186e-12,
+        1.0601254073782917e-11,
+        4.2648700601554203e-11,
+        4.415619788798951e-11,
+        2.915789587740772e-11,
+        8.355638213562585e-11,
+        5.9873846362866106e-12,
+        2.8479546666984037e-11,
+        8.15271966825466e-11
+      ],
+      "returned_absolute_residuals": [
+        9.289480003162413e-11,
+        2.959992094228562e-11,
+        2.034433314960826e-12,
+        9.93321446463118e-12,
+        1.0599597045487026e-11,
+        4.264676212994664e-11,
+        4.41559308554051e-11,
+        2.915926198113897e-11,
+        8.355691392177517e-11,
+        5.987433736496543e-12,
+        2.8479430390096004e-11,
+        8.152791250931411e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 9.28945232016717e-11,
+        "max_absolute_residual": 3.9443152113601346e-12,
+        "orthogonality": 2.6645352591003757e-15,
+        "spectrum_error": 1.0080825063596421e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 6.270285830627226e-12,
+        "preconditioner_cg_stats": [
+          2113,
+          25,
+          24,
+          138
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            115,
+            13,
+            0,
+            10
+          ],
+          "2": [
+            20,
+            10,
+            0,
+            2
+          ],
+          "3": [
+            237,
+            13,
+            0,
+            21
+          ],
+          "4": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "5": [
+            55,
+            11,
+            0,
+            5
+          ],
+          "6": [
+            186,
+            11,
+            0,
+            18
+          ],
+          "7": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "8": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            120,
+            12,
+            0,
+            10
+          ],
+          "11": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "12": [
+            1380,
+            25,
+            24,
+            72
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.1289922185242176,
+      "residual_history_length": 30,
+      "last_history_absolute_residuals": [
+        9.288132648356252e-11,
+        2.95957576982583e-11,
+        2.0330819058688904e-12,
+        9.936808159476197e-12,
+        1.0611429862937863e-11,
+        4.264053468606069e-11,
+        4.415899569802732e-11,
+        2.915754887820302e-11,
+        8.355570210682492e-11,
+        5.9962647800055365e-12,
+        2.8480059745676403e-11,
+        8.153106209225223e-11
+      ],
+      "returned_absolute_residuals": [
+        9.288287997937279e-11,
+        2.959362756296043e-11,
+        2.0357874544368e-12,
+        9.9373685143392e-12,
+        1.0610158527173787e-11,
+        4.26392330120558e-11,
+        4.4159833662094626e-11,
+        2.915786900414751e-11,
+        8.355632127300048e-11,
+        5.996111415396789e-12,
+        2.847997829189391e-11,
+        8.153051307182451e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 9.288288718693607e-11,
+        "max_absolute_residual": 3.9480288748514406e-12,
+        "orthogonality": 2.9976021664879227e-15,
+        "spectrum_error": 1.0311196341206141e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 6.269789929783152e-12,
+        "preconditioner_cg_stats": [
+          2113,
+          25,
+          24,
+          138
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            115,
+            13,
+            0,
+            10
+          ],
+          "2": [
+            20,
+            10,
+            0,
+            2
+          ],
+          "3": [
+            237,
+            13,
+            0,
+            21
+          ],
+          "4": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "5": [
+            55,
+            11,
+            0,
+            5
+          ],
+          "6": [
+            186,
+            11,
+            0,
+            18
+          ],
+          "7": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "8": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            120,
+            12,
+            0,
+            10
+          ],
+          "11": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "12": [
+            1380,
+            25,
+            24,
+            72
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.1291479729115963,
+      "residual_history_length": 30,
+      "last_history_absolute_residuals": [
+        9.28905105115906e-11,
+        2.959124918551109e-11,
+        2.0353297317007185e-12,
+        9.922926028856905e-12,
+        1.060388575225761e-11,
+        4.263970899824044e-11,
+        4.4159466732373e-11,
+        2.915770129949385e-11,
+        8.355714049560353e-11,
+        5.99375096292902e-12,
+        2.8482332215922287e-11,
+        8.15610596423716e-11
+      ],
+      "returned_absolute_residuals": [
+        9.288959333013106e-11,
+        2.95909783352312e-11,
+        2.0374299448428618e-12,
+        9.92294872090757e-12,
+        1.060242317511249e-11,
+        4.2639953493201625e-11,
+        4.415905551580765e-11,
+        2.915658672253813e-11,
+        8.35559135917327e-11,
+        5.9936017984988724e-12,
+        2.8483424060852108e-11,
+        8.156193428661091e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 9.288972972528492e-11,
+        "max_absolute_residual": 3.942523025169016e-12,
+        "orthogonality": 2.7755575615628914e-15,
+        "spectrum_error": 1.1871059690804486e-13,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 6.269528291921606e-12,
+        "preconditioner_cg_stats": [
+          2113,
+          25,
+          24,
+          138
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            115,
+            13,
+            0,
+            10
+          ],
+          "2": [
+            20,
+            10,
+            0,
+            2
+          ],
+          "3": [
+            237,
+            13,
+            0,
+            21
+          ],
+          "4": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "5": [
+            55,
+            11,
+            0,
+            5
+          ],
+          "6": [
+            186,
+            11,
+            0,
+            18
+          ],
+          "7": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "8": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            120,
+            12,
+            0,
+            10
+          ],
+          "11": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "12": [
+            1380,
+            25,
+            24,
+            72
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "1853838759eaf90a9fec6d775ac01221f06d7b7729e83332950bcafe6384d33e",
+    "warpack/__init__.py": "1092fa8edcaa9a6c7982bdeb2630aa2de8158062c8ca73e9fc9897b2bace8097",
+    "warpack/_active_cg.py": "22de5741e7718a63bd5a184c5b33fa9d9fcc3f9195b7b8a05cae5c264a42d650",
+    "warpack/_block_search.py": "0a2f5e190cf36fa173ed47998774a7db9c984215897b5e34cb25d2eb52606fa2",
+    "warpack/_coalesced_fsai.py": "caf01798dbaf1217566113f29a0846b2d48e5c2f75b9e6e5f23da99969b023ca",
+    "warpack/_coalesced_operator.py": "c12914049fb2dba837ce1526f20c1bdcc170d0680348e8256184f0e8e07686b3",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "38b5c7bb8320a682ee9aa6c64403dddc6adf78b20bbadf27232aacfde17f2f6c",
+    "warpack/batched_sparse.py": "9a7b03e763592404fa77da660d8d10486efc2bcec6bc39b243fe15c5a67c1ef2",
+    "warpack/block.py": "ff417cd6734d1eb4b9dd62e0b1d76f7258132e13ffd48d906402a375fdcd572d",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "1b2bfb4887cf18d6c0ed94af2980119d1d441ce345dd3772e6bb8f8d85eaaa92",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "benchmarks/experimental/block_kernels.py": "eaab62a6274e995e710f4b3b3666520ec6eb50449e104babec883ef0aa289a8f",
+    "benchmarks/experimental/block_updates.py": "ba4cba56f35f1b7e0bcc25558578d9f77fa17655b0219afd6a9fe0b51cb01d8c",
+    "benchmarks/experimental/compare_block.py": "16b0735a8ffff526f887adfa36970025023af1f484833721fd4adb99c0c3c197",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/runner.py": "45a4ba1321eca6cc7ca70c55db0b570a5e886704c83231b83b9a6c79b47f847b",
+    "benchmarks/experimental/batched_cg.py": "b52ef7f795036acc2aa1c7a4859ff6db25726aed4ce034a4f7070a51bd196bfc",
+    "benchmarks/experimental/coalesced_fsai.py": "97578e47d47293aa0a4c966ce06129a9d853f34b38f029e2021f3245e78f18eb",
+    "benchmarks/experimental/coalesced_operator.py": "92eeec4add8ee1766b3297b78a4a8126651730d2a45bf2545f897ba5a63a3361",
+    "benchmarks/experimental/active_cg.py": "8b26f68e144b8b2387182b34d9888d05f7483316022e311793ad4bf955d35863",
+    "benchmarks/experimental/cached_x_image.py": "d9ce02e7ec77fd6c68f18754b2def83d5c30e2101a4cf6862702b7d15816b239",
+    "benchmarks/experimental/active_search.py": "5be7e186d32331886de833fbd33bfcba17f595e91eb82c0d584f1e991e3df0b5"
+  },
+  "cupy_adapter": {
+    "width": 12,
+    "absolute_tolerance": 1e-10,
+    "padding_width": null,
+    "preallocated_active_widths": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "inner_adapter_setup_capture_seconds": 0.08231155574321747,
+    "inner_adapter_device_memory_delta_bytes": 67108864,
+    "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+    "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+    "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges its entire starting block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence.",
+  "accepted": true
+}

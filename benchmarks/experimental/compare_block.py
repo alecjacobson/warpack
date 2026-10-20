@@ -23,8 +23,17 @@ from benchmarks.upstream.adapters import matrix
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh, rigid_body_basis
 from warpack import CGInverse, SparseOperator
 
+FEM_CASES = (
+    "clamped_consistent",
+    "clamped_lumped",
+    "free",
+    "disconnected",
+    "heterogeneous",
+    "repeated_bending",
+)
 
-def prepare(args):
+
+def prepare(args, *, metadata=None):
     if args.case == "anvil":
         reference = np.load("build/anvil_reference.npz")
         x, t = read_mesh("anvil for export-ftetwild.mesh")
@@ -79,14 +88,30 @@ def prepare(args):
     c = make_fem_case(args.case, args.side, args.modes)
     p = c.problem
     shifted_host = p.a + args.shift * p.b
-    blocks = shifted_host.tobsr(blocksize=(3, 3))
-    shifted = ws.bsr_from_triplets(
-        p.n // 3,
-        p.n // 3,
-        wp.array(np.repeat(np.arange(p.n // 3), np.diff(blocks.indptr)), dtype=wp.int32),
-        wp.array(blocks.indices, dtype=wp.int32),
-        wp.array(blocks.data, dtype=wp.mat33d),
-    )
+    # Tet elasticity groups xyz DOFs into 3x3 blocks. The bending fixture has
+    # displacement/rotation pairs; use scalar CSR instead of regrouping them.
+    if p.block_size == 3:
+        blocks = shifted_host.tobsr(blocksize=(3, 3))
+        shifted = ws.bsr_from_triplets(
+            p.n // 3,
+            p.n // 3,
+            wp.array(np.repeat(np.arange(p.n // 3), np.diff(blocks.indptr)), dtype=wp.int32),
+            wp.array(blocks.indices, dtype=wp.int32),
+            wp.array(blocks.data, dtype=wp.mat33d),
+        )
+    else:
+        shifted = matrix(shifted_host)
+    if metadata is not None:
+        metadata.update(
+            reference=c.reference,
+            requested_nontrivial_modes=args.modes,
+            actual_nontrivial_modes=c.nontrivial_modes,
+            retained_rigid_modes=p.nullity,
+            boundary_cluster_complete=True,
+            first_excluded_eigenvalue=float(c.spectrum[p.k]),
+            preconditioner_block_size=3 if p.block_size == 3 else 1,
+            notes=p.notes,
+        )
     return (matrix(p.a), matrix(p.b), shifted, None, p.a, p.b, p.k, lambda w, v: accuracy(p, w, v))
 
 
@@ -105,14 +130,30 @@ def finalize_acceptance(report):
     return report["accepted"]
 
 
+def collect_reference(report, run):
+    """Keep completed trials if the optional reference fails during setup/solve."""
+    try:
+        report["cupy_adapter"] = run(report["rows"])
+    except Exception as error:
+        report["rows"].append(
+            dict(
+                method="CuPy LOBPCG reference failure",
+                seconds=None,
+                error_type=type(error).__name__,
+                error=str(error),
+                quality=dict(accepted=False),
+                full_block_absolute_tolerance_met=False,
+            )
+        )
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "--case",
         choices=[
             "anvil",
-            "clamped_consistent",
-            "clamped_lumped",
+            *FEM_CASES,
             "hodge_large_disconnected",
             "hodge_torus",
             "hodge_disconnected",
@@ -189,7 +230,12 @@ def main():
     if args.matrix_layout == "columns" and not args.batched_cg:
         p.error("column matrix layout requires batched CG")
     before = other_gpu_processes()
-    a, mass, shifted, constraints, sa, sb, k, check = prepare(args)
+    fixture = {}
+    a, mass, shifted, constraints, sa, sb, k, check = prepare(args, metadata=fixture)
+    if args.width < k:
+        p.error(f"width must be at least {k}, including rigid modes and complete boundary clusters")
+    if 3 * args.width > a.shape[0]:
+        p.error("block iteration requires 3*width <= n")
     if args.cupy_width is not None and not k <= args.cupy_width <= args.width:
         p.error("require k <= cupy-width <= width")
     print("Prepared", args.case, "n=", a.shape[0], flush=True)
@@ -304,6 +350,7 @@ def main():
         args=vars(args),
         n=a.shape[0],
         k=k,
+        fixture=fixture,
         # Preserve the historical field's meaning; total setup is explicit.
         setup_seconds=setup_seconds,
         preconditioner_setup_seconds=setup_seconds,
@@ -334,6 +381,8 @@ def main():
                 "benchmarks/experimental/block_kernels.py",
                 "benchmarks/experimental/block_updates.py",
                 "benchmarks/experimental/compare_block.py",
+                "benchmarks/applications/fem_cases.py",
+                "benchmarks/applications/runner.py",
                 "benchmarks/experimental/batched_cg.py",
                 "benchmarks/experimental/coalesced_fsai.py",
                 "benchmarks/experimental/coalesced_operator.py",
@@ -380,21 +429,23 @@ def main():
         )
         print(report["rows"][-1], flush=True)
     if args.cupy:
-        cupy_rows, cupy_metadata = cupy_trials(
-            sa,
-            sb,
-            pre,
-            initial,
-            constraints,
-            args,
-            k,
-            check,
-            cg=(preconditioner.base if args.active_cg_bucket_size else preconditioner)
-            if args.batched_cg
-            else None,
+        collect_reference(
+            report,
+            lambda rows: cupy_trials(
+                sa,
+                sb,
+                pre,
+                initial,
+                constraints,
+                args,
+                k,
+                check,
+                cg=(preconditioner.base if args.active_cg_bucket_size else preconditioner)
+                if args.batched_cg
+                else None,
+                completed_rows=rows,
+            )[1],
         )
-        report["rows"].extend(cupy_rows)
-        report["cupy_adapter"] = cupy_metadata
     if args.profile:
         report["profile"] = profile_step(solver)
         report["post_profile_quality"] = check(
@@ -471,7 +522,7 @@ def profile_step(solver):
     )
 
 
-def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None):
+def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, completed_rows=None):
     import cupy as cp
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
@@ -566,6 +617,8 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None):
                     quality=quality,
                 )
             )
+            if completed_rows is not None:
+                completed_rows.append(rows[-1])
             print(rows[-1], flush=True)
         return rows, dict(
             width=width,

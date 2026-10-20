@@ -1,6 +1,24 @@
 """A benchmark must not hide failed outer/native gates in a successful job."""
 
-from benchmarks.experimental.compare_block import finalize_acceptance
+from benchmarks.experimental.compare_block import collect_reference, finalize_acceptance
+
+
+def test_reference_crash_preserves_completed_trials_and_rejects_report():
+    warp = dict(method="Warp", quality=dict(accepted=True))
+    cupy = dict(method="CuPy", quality=dict(accepted=True))
+    report = dict(rows=[warp])
+
+    def crashing_reference(rows):
+        rows.append(cupy)
+        raise AttributeError("'NoneType' object has no attribute 'ndim'")
+
+    collect_reference(report, crashing_reference)
+    assert report["rows"][:2] == [warp, cupy]
+    failure = report["rows"][2]
+    assert failure["error_type"] == "AttributeError"
+    assert failure["seconds"] is None
+    assert not finalize_acceptance(report)
+    assert not failure["accepted"]
 
 
 def test_block_benchmark_rejects_incomplete_native_block():

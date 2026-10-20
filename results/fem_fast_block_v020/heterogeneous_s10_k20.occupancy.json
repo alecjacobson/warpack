@@ -1,0 +1,97 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "heterogeneous",
+    "--side",
+    "10",
+    "--modes",
+    "20",
+    "--width",
+    "24",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "3",
+    "--out",
+    "results/fem_fast_block_v020/heterogeneous_s10_k20.json"
+  ],
+  "pid": 201551,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792519802.0559096,
+      "other": [],
+      "gpu": "37 %, 1 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792519803.1923075,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792519804.266613,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 585 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792519805.411573,
+      "other": [],
+      "gpu": "0 %, 21 MiB, 330 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519806.5415578,
+      "other": [],
+      "gpu": "100 %, 14408 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792519807.6002207,
+      "other": [],
+      "gpu": "91 %, 14464 MiB, 2490 MHz, 34",
+      "error": null
+    },
+    {
+      "time": 1792519808.7376778,
+      "other": [],
+      "gpu": "69 %, 14734 MiB, 2490 MHz, 35",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

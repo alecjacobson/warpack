@@ -1,0 +1,73 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "repeated_bending",
+    "--side",
+    "6",
+    "--modes",
+    "6",
+    "--width",
+    "12",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-8",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy",
+    "--cupy-tol",
+    "1e-7",
+    "--repeats",
+    "3",
+    "--out",
+    "results/fem_fast_block_v020/repeated_bending_s6_k6_practical.json"
+  ],
+  "pid": 201364,
+  "exit_code": 1,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792519756.751514,
+      "other": [],
+      "gpu": "32 %, 1 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792519757.8532834,
+      "other": [],
+      "gpu": "3 %, 14312 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792519758.9573348,
+      "other": [],
+      "gpu": "3 %, 14386 MiB, 2490 MHz, 31",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

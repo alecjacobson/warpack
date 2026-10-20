@@ -1,0 +1,91 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "heterogeneous",
+    "--side",
+    "10",
+    "--modes",
+    "6",
+    "--width",
+    "12",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "3",
+    "--out",
+    "results/fem_fast_block_v020/heterogeneous_s10_k6.json"
+  ],
+  "pid": 201008,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792519600.2899487,
+      "other": [],
+      "gpu": "97 %, 1 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519601.409367,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519602.5443695,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 510 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792519603.617256,
+      "other": [],
+      "gpu": "0 %, 14272 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792519604.6970267,
+      "other": [],
+      "gpu": "20 %, 14364 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519605.8252773,
+      "other": [],
+      "gpu": "43 %, 14520 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

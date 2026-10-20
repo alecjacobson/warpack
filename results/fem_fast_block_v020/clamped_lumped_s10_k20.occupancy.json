@@ -1,0 +1,109 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "clamped_lumped",
+    "--side",
+    "10",
+    "--modes",
+    "20",
+    "--width",
+    "24",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "3",
+    "--out",
+    "results/fem_fast_block_v020/clamped_lumped_s10_k20.json"
+  ],
+  "pid": 201443,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792519783.9608445,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 27",
+      "error": null
+    },
+    {
+      "time": 1792519785.0626962,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 27",
+      "error": null
+    },
+    {
+      "time": 1792519786.225296,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 27",
+      "error": null
+    },
+    {
+      "time": 1792519787.376788,
+      "other": [],
+      "gpu": "0 %, 4 MiB, 210 MHz, 27",
+      "error": null
+    },
+    {
+      "time": 1792519788.462424,
+      "other": [],
+      "gpu": "100 %, 14376 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792519789.556594,
+      "other": [],
+      "gpu": "90 %, 14464 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792519790.640621,
+      "other": [],
+      "gpu": "32 %, 14724 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792519791.7642615,
+      "other": [],
+      "gpu": "47 %, 14736 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792519792.84214,
+      "other": [],
+      "gpu": "0 %, 14736 MiB, 2490 MHz, 31",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
