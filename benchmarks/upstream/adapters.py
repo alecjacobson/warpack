@@ -220,8 +220,9 @@ def svds(a, k=6, ncv=None, tol=0, which="LM", maxiter=None, return_singular_vect
 
     # rng=0 in upstream's ordinary fixtures only requests a reproducible start;
     # Warpack already uses a fixed seed. Other RNG semantics are tested separately.
+    v0 = kwargs.pop("v0", None)
     if kwargs.pop("rng", 0) != 0 or kwargs:
-        pytest.skip("PartialSVD has no configurable rng/v0 API")
+        pytest.skip("PartialSVD has no configurable CuPy RNG API")
     if len(a.shape) != 2:
         raise ValueError("invalid shape")
     if a.dtype.kind not in "fc":
@@ -230,7 +231,15 @@ def svds(a, k=6, ncv=None, tol=0, which="LM", maxiter=None, return_singular_vect
         raise ValueError("invalid k or which")
     if np.dtype(a.dtype) != np.dtype("float64"):
         pytest.skip("PartialSVD supports real FP64 only")
-    solver = PartialSVD(matrix(host(a)), k, ncv=ncv, tol=1e-14 if tol == 0 else tol)
+    start = None
+    if v0 is not None:
+        start_host = np.asarray(host(v0))
+        if start_host.shape != (min(a.shape),):
+            raise ValueError("v0 must have shape (min(a.shape),)")
+        start = wp.array(start_host, dtype=wp.float64)
+    solver = PartialSVD(
+        matrix(host(a)), k, ncv=ncv, tol=1e-14 if tol == 0 else tol, initial_vector=start
+    )
     execute(solver, 300 if maxiter is None else maxiter)
     s = cp.asarray(output(solver.singular_values))
     if not return_singular_vectors:

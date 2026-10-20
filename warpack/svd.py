@@ -8,6 +8,86 @@ from .sparse_utils import _Transpose
 
 
 @wp.kernel
+def svd_start_scale(
+    source: wp.array[wp.float64],
+    scale: wp.array[wp.float64],
+    invalid: wp.array[wp.int32],
+):
+    i = wp.tid()
+    if wp.isfinite(source[i]):
+        wp.atomic_max(scale, 0, wp.abs(source[i]))
+    else:
+        wp.atomic_max(invalid, 0, 1)
+
+
+@wp.kernel
+def lift_svd_start(
+    source: wp.array[wp.float64],
+    scale: wp.array[wp.float64],
+    invalid: wp.array[wp.int32],
+    offset: int,
+    lifted: wp.array[wp.float64],
+):
+    i = wp.tid()
+    value = wp.float64(0.0)
+    if scale[0] > wp.float64(0.0) and invalid[0] == 0:
+        if i >= offset and i < offset + source.shape[0]:
+            value = source[i - offset] / scale[0]
+    elif i == offset:
+        # Keep work arithmetic finite; the status/count guard rejects this
+        # fallback. A later valid start can reuse the same captured graph.
+        value = wp.float64(1.0)
+    lifted[i] = value
+
+
+@wp.kernel
+def check_svd_start(
+    scale: wp.array[wp.float64],
+    invalid: wp.array[wp.int32],
+    status: wp.array[wp.int32],
+    count: wp.array[wp.int32],
+):
+    if scale[0] == wp.float64(0.0) or invalid[0] != 0:
+        wp.atomic_max(status, 0, 1)
+        count[0] = 0
+
+
+class _SVDStart:
+    """Device-only lift of a start on the smaller side; no solver ownership."""
+
+    def __init__(self, matrix, source):
+        if source.dtype != wp.float64 or source.ndim != 1 or source.size != min(matrix.shape):
+            raise ValueError("initial_vector must have shape (min(matrix.shape),) and dtype FP64")
+        if source.device != matrix.device:
+            raise ValueError("initial_vector must be on the matrix device")
+        self.source, self.device = source, matrix.device
+        rows, cols = matrix.shape
+        self.offset = rows if rows >= cols else 0
+        self.values = wp.empty(rows + cols, dtype=wp.float64, device=self.device)
+        self.scale = wp.zeros(1, dtype=wp.float64, device=self.device)
+        self.invalid = wp.zeros(1, dtype=wp.int32, device=self.device)
+
+    def prepare(self):
+        self.scale.zero_()
+        self.invalid.zero_()
+        wp.launch(
+            svd_start_scale,
+            self.source.size,
+            [self.source, self.scale, self.invalid],
+            device=self.device,
+        )
+        wp.launch(
+            lift_svd_start,
+            self.values.size,
+            [self.source, self.scale, self.invalid, self.offset, self.values],
+            device=self.device,
+        )
+
+    def check(self, status, count):
+        wp.launch(check_svd_start, 1, [self.scale, self.invalid, status, count], device=self.device)
+
+
+@wp.kernel
 def augmented_mv(
     ar: wp.array[wp.int32],
     ac: wp.array[wp.int32],
@@ -159,9 +239,24 @@ class _LongRowProduct:
 
 
 class _SVDKrylovSchur(KrylovSchur):
+    def __init__(self, *args, start_state=None, **kwargs):
+        self.start_state = start_state
+        if start_state is not None:
+            kwargs["initial_vector"] = start_state.values
+        super().__init__(*args, **kwargs)
+
     def initialize(self, seed=42):
         self.op.refresh()
+        if self.start_state is not None:
+            self.start_state.prepare()
         super().initialize(seed)
+        if self.start_state is not None:
+            self.start_state.check(self.status, self.converged)
+
+    def finalize(self):
+        super().finalize()
+        if self.start_state is not None:
+            self.start_state.check(self.status, self.converged)
 
 
 class _Augmented:
@@ -229,17 +324,29 @@ class PartialSVD:
     both left and right residuals; zero singular subspaces are not unique.
     Matrix values can change in place between solves/replays. The cached
     transpose values refresh on device; topology changes require a new solver.
+    An optional FP64 initial_vector of length min(matrix.shape) starts on the
+    right for tall/square matrices and on the left for wide matrices. Its
+    current device values are lifted and normalized at every initialization;
+    the source is unchanged. Zero/nonfinite starts set status=1 and clear both
+    accepted-triplet counts. Changed valid starts recover on the same graph.
     """
 
-    def __init__(self, matrix, k, ncv=None, tol=1.0e-10):
+    def __init__(self, matrix, k, ncv=None, tol=1.0e-10, initial_vector=None):
         if not 1 <= k <= min(matrix.shape):
             raise ValueError("require 1 <= k <= min(matrix.shape)")
+        self.start_state = None if initial_vector is None else _SVDStart(matrix, initial_vector)
         self.op = _Augmented(matrix)
         self.device = matrix.device
         self.k = k
         self.core = _SVDKrylovSchur(
-            self.op, k, ncv=ncv or min(self.op.n, max(4 * k, 48)), which="LA", tol=tol
+            self.op,
+            k,
+            ncv=ncv or min(self.op.n, max(4 * k, 48)),
+            which="LA",
+            tol=tol,
+            start_state=self.start_state,
         )
+        self.status = self.core.status
         self.u = wp.empty((k, matrix.shape[0]), dtype=wp.float64, device=self.device)
         self.v = wp.empty((k, matrix.shape[1]), dtype=wp.float64, device=self.device)
         self.singular_values = wp.empty(k, dtype=wp.float64, device=self.device)
@@ -348,6 +455,8 @@ class PartialSVD:
                 ],
                 device=self.device,
             )
+            if self.start_state is not None:
+                self.start_state.check(self.status, count)
 
     def capture(self, max_iterations=100):
         self.graph = self.core.capture(max_iterations, finalizer=self.finalize)
