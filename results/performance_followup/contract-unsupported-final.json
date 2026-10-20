@@ -1,0 +1,53 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "scipy": "1.15.0",
+    "numpy": "2.2.6",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "c886c2610f929df52cf92bd3b985c73565594d0c",
+  "git_dirty": true,
+  "blas_threads": "4",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08
+  },
+  "protocol": "Sequential isolated workers; setup and capture separate; synchronized wall median; every sample validated in original equations. GPU output conversion is outside timed solves. Acceptance is numerical; device_only_graph is reported separately. Start spaces differ by algorithm. Failed timings are diagnostics only.",
+  "cases": [
+    {
+      "api_class": "H",
+      "requested_size": 80,
+      "problem": "damped_chain",
+      "n": 80,
+      "columns": 80,
+      "nnz": 198,
+      "mass_nnz": null,
+      "k": 4,
+      "ncv": 32,
+      "method": "cupy",
+      "matrix_sha256": "6134a1658d2400584b237f9f37934ec229cacf363255ecb93fede772ad154a98",
+      "notes": "Standard first-order linearization of uniformly damped coupled oscillators; right modes",
+      "target": [
+        -0.12,
+        6.376242128094506
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "outcome": "unsupported",
+      "reason": "No native CuPy generalized shift/buckling or general eigs path in this adapter; do not apply Euclidean eigsh to M^-1 K",
+      "accepted": false,
+      "numerical_contract_failures": [
+        "no trial evidence",
+        "physical acceptance",
+        "requested method unsupported"
+      ],
+      "numerical_contract_accepted": false
+    }
+  ],
+  "numerical_contract_accepted": false,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

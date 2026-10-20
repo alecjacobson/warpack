@@ -1,0 +1,130 @@
+{
+  "matrix_sha256": "4c033e97d9b3e4622973a4f229152447f36467438cc5e335b5d7d50e95fb7555",
+  "args": {
+    "case": "clustered",
+    "size": 1000,
+    "modes": 20,
+    "snapshots": 64,
+    "full_basis_products": false,
+    "ncv": 64,
+    "reference_ncv": 20,
+    "steps": 100,
+    "repeats": 1,
+    "compare": "scipy",
+    "out": "results/performance_followup/contract-normal-reference-error.json",
+    "diagnostic": false
+  },
+  "matrix_shape": [
+    1000,
+    64
+  ],
+  "formulation": "complete_coordinate_projection",
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "/home/horde/projects/warpack-benchmark-contracts/benchmarks/experimental/normal_pod.py": "7c6000815c5dffce65603fd27de9a5acb3c6e59ffc8f988b033d8afd2894b1d2",
+    "benchmarks/acceptance.py": "a0e9ce580b0074d6292fead15c88611b574ac5c925df564468b046609abeec27",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "/home/horde/projects/warpack-benchmark-contracts/benchmarks/experimental/full_normal_basis.py": "950de018a1d78bca53db3a0fcb7264e86415021638ce580ef074dbab2501406f",
+    "benchmarks/applications/pod_compare.py": "6af8f7cf590955d3b0e182fa38228675b958a9e729ac9fa91dfeed2cca542519",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a"
+  },
+  "protocol": "Sequential methods on identical input. Synchronized warm replays restore starts. Assembly/reference/validation excluded. Normal method has its own explicit ncv; reference methods use reference_ncv. Pure Warp; normal equations square conditioning. Physical triplets and requested spaces must pass unchanged 1e-8 gates and normal method strict 1e-11 counts. Full-basis products explicitly form the small normal matrix by projecting onto the entire coordinate basis; no Krylov expansion.",
+  "normal": {
+    "setup_seconds": 0.11387397348880768,
+    "capture_seconds": 0.19163064286112785,
+    "warmup_seconds": 0.004508886486291885,
+    "ncv": 64,
+    "samples_seconds": [
+      0.0039348118007183075
+    ],
+    "solve_seconds": 0.0039348118007183075,
+    "validation": [
+      {
+        "accepted": true,
+        "residual": 1.6706454533977214e-14,
+        "orthogonality": 1.7541523789077473e-14,
+        "spectrum_error": 8.7053287725189e-15,
+        "captured_energy": 0.9794694415261639,
+        "relative_reconstruction_error": 0.1432848857131709,
+        "optimal_relative_reconstruction_error": 0.14328488571321904,
+        "reconstruction_energy_error": 1.3795831214094513e-14,
+        "left_subspace_error": 5.8496851766052245e-15,
+        "right_subspace_error": 1.0955344015418391e-14,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.9398545270110645e-15,
+          1.7319479184152442e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      }
+    ],
+    "accepted": true,
+    "graph": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 15,
+        "KERNEL": 181,
+        "CONDITIONAL": 2,
+        "MEMCPY": 3
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 3
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "timing_uncontended": true,
+    "numerical_contract_failures": [],
+    "numerical_contract_accepted": true
+  },
+  "references": [
+    {
+      "api_class": "I",
+      "requested_size": 1000,
+      "problem": "snapshot_pod_clustered",
+      "n": 1000,
+      "columns": 64,
+      "nnz": 64000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 20,
+      "method": "scipy",
+      "matrix_sha256": "4c033e97d9b3e4622973a4f229152447f36467438cc5e335b5d7d50e95fb7555",
+      "notes": "Known singular spectrum, two exact zero singular values, independent left/right requested subspaces; top multiplicity three for clustered variant",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 20,
+      "implementation": "SciPy ARPACK explicit ncv=20",
+      "setup_seconds": 0.0001408122479915619,
+      "outcome": "error",
+      "reason": "`ncv` must be an integer satisfying `k < ncv < min(A.shape)`.",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-benchmark-contracts/benchmarks/applications/compare.py\", line 249, in run\n    warmup, output = timed(solve)\n  File \"/home/horde/projects/warpack-benchmark-contracts/benchmarks/applications/compare.py\", line 37, in timed\n    value = fn()\n  File \"/home/horde/projects/warpack-benchmark-contracts/benchmarks/applications/runner.py\", line 255, in solve\n    u, w, vt = sla.svds(p.a, k=p.k, which=\"LM\", tol=1e-11, random_state=2026, ncv=ncv)\n  File \"/home/horde/.local/lib/python3.10/site-packages/scipy/_lib/_util.py\", line 440, in wrapper\n    return fun(*args, **kwargs)\n  File \"/home/horde/.local/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/_svds.py\", line 433, in svds\n    args = _iv(A, k, ncv, tol, which, v0, maxiter, return_singular_vectors,\n  File \"/home/horde/.local/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/_svds.py\", line 52, in _iv\n    raise ValueError(message)\nValueError: `ncv` must be an integer satisfying `k < ncv < min(A.shape)`.\n",
+      "accepted": false,
+      "numerical_contract_failures": [
+        "physical acceptance",
+        "requested method error"
+      ],
+      "numerical_contract_accepted": false
+    }
+  ],
+  "competing_gpu_processes": [],
+  "numerical_contract_accepted": false,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

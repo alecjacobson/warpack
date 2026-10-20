@@ -13,6 +13,8 @@ import scipy.linalg as la
 import scipy.sparse as sp
 import warp as wp
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+
 from .compare import run
 from .problems import Problem
 
@@ -89,6 +91,7 @@ def main():
     parser.add_argument("--timeout", type=int, default=180)
     parser.add_argument("--out", default="results/pod_comparisons.json")
     parser.add_argument("--worker", action="store_true")
+    add_diagnostic_argument(parser)
     args = parser.parse_args()
     names, sizes, methods = (
         args.cases.split(","),
@@ -180,13 +183,11 @@ def main():
                 report["cases"].append(row)
                 destination.write_text(json.dumps(report, indent=2) + "\n")
                 print(name, size, method, row["outcome"], row.get("solve_seconds"), flush=True)
-    if any(
-        not r["accepted"]
-        or not r.get("timing_uncontended")
-        or not r.get("strict_counts_pass", True)
-        for r in report["cases"]
-    ):
-        raise SystemExit("POD numerical or contention gate failed; inspect retained rows")
+    assess_comparison(report, report["cases"], args.diagnostic)
+    destination.write_text(json.dumps(report, indent=2) + "\n")
+    if any(r.get("timing_uncontended") is False for r in report["cases"]):
+        raise SystemExit("POD timing eligibility failed; inspect retained rows")
+    require_accepted(report)
 
 
 if __name__ == "__main__":

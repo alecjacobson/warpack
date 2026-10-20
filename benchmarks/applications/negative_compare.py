@@ -14,6 +14,8 @@ from pathlib import Path
 import warp as wp
 import warp.optim.linear as linear
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+
 from .compare import compare_baseline, run
 from .negative_foundation import make_negative_foundation
 
@@ -50,6 +52,7 @@ def main():
     parser.add_argument("--out", required=True)
     parser.add_argument("--baseline")
     parser.add_argument("--worker", action="store_true")
+    add_diagnostic_argument(parser)
     args = parser.parse_args()
     selections, masses, methods = (
         args.selections.split(","),
@@ -249,6 +252,8 @@ def main():
                 destination.write_text(json.dumps(report, indent=2) + "\n")
                 print(name, row["outcome"], row.get("solve_seconds"), flush=True)
     regressions = []
+    assess_comparison(report, report["cases"], args.diagnostic)
+    destination.write_text(json.dumps(report, indent=2) + "\n")
     if args.baseline:
         baseline = json.loads(Path(args.baseline).read_text())
         for key in ("gpu", "warp", "versions", "blas_threads"):
@@ -292,8 +297,7 @@ def main():
             )
         ):
             raise SystemExit("Regression detected; evidence retained")
-    if any(row["outcome"] not in ("passed", "unsupported") for row in report["cases"]):
-        raise SystemExit("Rejected/failed profile; evidence retained")
+    require_accepted(report)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+
 from .compare import compare_baseline, run
 from .interior_fem import NAMES, make_interior_case
 
@@ -32,6 +34,7 @@ def main():
     parser.add_argument("--out", default="results/interior_comparisons.json")
     parser.add_argument("--baseline")
     parser.add_argument("--worker", action="store_true")
+    add_diagnostic_argument(parser)
     args = parser.parse_args()
     names, methods = args.cases.split(","), args.methods.split(",")
     if set(names) - set(NAMES) or set(methods) - set(METHODS):
@@ -127,6 +130,8 @@ def main():
             report["cases"].append(row)
             destination.write_text(json.dumps(report, indent=2) + "\n")
             print(name, method, row["outcome"], row.get("solve_seconds"), flush=True)
+    assess_comparison(report, report["cases"], args.diagnostic)
+    destination.write_text(json.dumps(report, indent=2) + "\n")
     if args.baseline:
         old = json.loads(Path(args.baseline).read_text())
         if (old["gpu"], old["warp"]) != (report["gpu"], report["warp"]):
@@ -173,8 +178,7 @@ def main():
             for c in checks
         ):
             raise SystemExit("Regression or no comparable accepted timings")
-    if any(r["outcome"] not in ("passed", "unsupported") for r in report["cases"]):
-        raise SystemExit("One or more numerical profiles rejected; evidence preserved")
+    require_accepted(report)
 
 
 if __name__ == "__main__":

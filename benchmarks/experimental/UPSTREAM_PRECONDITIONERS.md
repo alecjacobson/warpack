@@ -16,8 +16,7 @@ reconstruction/refitting.
 
 ```python
 P = linear.preconditioner(K_bsr, ptype="block_jacobi_sequential")
-solver = BlockLOBPCG(SparseOperator(K), k=20, width=24,
-                    mass=SparseOperator(M), preconditioner=P)
+solver = BlockLOBPCG(SparseOperator(K), k=20, width=24, mass=SparseOperator(M), preconditioner=P)
 ```
 
 `linear.FSAI(K_bsr, ...)` is also accepted when available. Upstream block-Jacobi

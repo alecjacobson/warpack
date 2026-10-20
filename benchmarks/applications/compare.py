@@ -17,6 +17,8 @@ import numpy as np
 import warp as wp
 import warp.optim.linear as linear
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+
 from .problems import make_problem
 from .references import Unsupported, cupy_setup, spectra_setup
 from .runner import (
@@ -456,6 +458,7 @@ def main():
     parser.add_argument("--regression-limit", type=float, default=1.25)
     parser.add_argument("--timeout", type=int, default=180)
     parser.add_argument("--worker", action="store_true")
+    add_diagnostic_argument(parser)
     args = parser.parse_args()
     dest = Path(args.out)
     dest.parent.mkdir(exist_ok=True, parents=True)
@@ -521,6 +524,7 @@ def main():
                     command += ["--cg-atol", str(args.cg_atol)]
                 if args.steps is not None:
                     command += ["--steps", str(args.steps)]
+                out.unlink(missing_ok=True)
                 try:
                     with log.open("w") as f:
                         subprocess.run(
@@ -541,6 +545,8 @@ def main():
                 report["cases"].append(row)
                 dest.write_text(json.dumps(report, indent=2) + "\n")
                 print(api_class, size, method, row["outcome"], row.get("solve_seconds"), flush=True)
+    assess_comparison(report, report["cases"], args.diagnostic)
+    dest.write_text(json.dumps(report, indent=2) + "\n")
     if args.baseline:
         baseline = json.loads(Path(args.baseline).read_text())
         if baseline["gpu"] != report["gpu"] or baseline["warp"] != report["warp"]:
@@ -561,6 +567,7 @@ def main():
             raise SystemExit(
                 "No comparable uncontended timings; performance regression is inconclusive"
             )
+    require_accepted(report)
 
 
 if __name__ == "__main__":

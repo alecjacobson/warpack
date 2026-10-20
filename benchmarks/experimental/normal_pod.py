@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
 from benchmarks.applications.compare import other_gpu_processes, run, timed
 from benchmarks.applications.pod_compare import snapshots
 from benchmarks.applications.problems import make_problem
@@ -35,6 +36,7 @@ def main():
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--compare", default="warp,cupy,scipy,spectra")
     p.add_argument("--out", required=True)
+    add_diagnostic_argument(p)
     args = p.parse_args()
     methods = args.compare.split(",") if args.compare else []
     if set(methods) - {"warp", "cupy", "scipy", "spectra"} or args.repeats < 1:
@@ -105,6 +107,7 @@ def main():
             str(path): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in (
                 Path(__file__),
+                Path("benchmarks/acceptance.py"),
                 Path("warpack/normal_svd.py"),
                 Path("warpack/sparse_utils.py"),
                 Path(__file__).with_name("full_normal_basis.py"),
@@ -147,10 +150,12 @@ def main():
         print(method, row["outcome"], row.get("solve_seconds"), flush=True)
     competing.update(other_gpu_processes())
     report["competing_gpu_processes"] = sorted(competing)
+    assess_comparison(report, [report["normal"], *report["references"]], args.diagnostic)
     destination.write_text(json.dumps(report, indent=2) + "\n")
     print("normal", report["normal"]["accepted"], report["normal"]["solve_seconds"], flush=True)
-    if not report["normal"]["accepted"] or competing:
-        raise SystemExit("Normal formulation accuracy or occupancy gate failed")
+    if competing:
+        raise SystemExit("Normal formulation occupancy gate failed")
+    require_accepted(report)
 
 
 if __name__ == "__main__":

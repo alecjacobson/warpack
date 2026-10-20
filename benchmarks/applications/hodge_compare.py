@@ -10,6 +10,8 @@ from pathlib import Path
 
 import warp as wp
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+
 from .compare import compare_baseline, run
 from .hodge import make_hodge_case
 
@@ -50,6 +52,7 @@ def main():
     parser.add_argument("--out", default="results/hodge_comparisons.json")
     parser.add_argument("--baseline")
     parser.add_argument("--worker", action="store_true")
+    add_diagnostic_argument(parser)
     args = parser.parse_args()
     names, methods = args.cases.split(","), args.methods.split(",")
     if set(names) - set(NAMES) or set(methods) - set(METHODS):
@@ -161,6 +164,8 @@ def main():
             report["cases"].append(row)
             destination.write_text(json.dumps(report, indent=2) + "\n")
             print(name, method, row["outcome"], row.get("solve_seconds"), flush=True)
+    assess_comparison(report, report["cases"], args.diagnostic)
+    destination.write_text(json.dumps(report, indent=2) + "\n")
     if args.baseline:
         old = json.loads(Path(args.baseline).read_text())
         if (old["gpu"], old["warp"]) != (report["gpu"], report["warp"]):
@@ -182,6 +187,7 @@ def main():
             raise SystemExit(1)
         if not any(c["comparable"] for c in checks):
             raise SystemExit("No comparable uncontended timings")
+    require_accepted(report)
 
 
 if __name__ == "__main__":

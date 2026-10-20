@@ -1,0 +1,243 @@
+{
+  "issue": 85,
+  "base_revision": "c886c26",
+  "production_source_unchanged": true,
+  "tests": {
+    "passed": 30,
+    "seconds": 0.81,
+    "command": "PYTHONPATH=$PWD OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q tests/test_benchmark_acceptance.py tests/test_block_benchmark_acceptance.py"
+  },
+  "cli": [
+    {
+      "name": "contract-normal-reference-error-final",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.normal_pod",
+        "--case",
+        "clustered",
+        "--size",
+        "1000",
+        "--modes",
+        "20",
+        "--snapshots",
+        "64",
+        "--ncv",
+        "64",
+        "--steps",
+        "100",
+        "--repeats",
+        "1",
+        "--compare",
+        "scipy",
+        "--reference-ncv",
+        "20",
+        "--out",
+        "results/performance_followup/contract-normal-reference-error-final.json"
+      ],
+      "expected_exit": 1,
+      "exit_code": 1,
+      "numerical_contract_accepted": false
+    },
+    {
+      "name": "contract-normal-diagnostic-final",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.normal_pod",
+        "--case",
+        "clustered",
+        "--size",
+        "1000",
+        "--modes",
+        "20",
+        "--snapshots",
+        "64",
+        "--ncv",
+        "64",
+        "--steps",
+        "100",
+        "--repeats",
+        "1",
+        "--compare",
+        "scipy",
+        "--reference-ncv",
+        "20",
+        "--diagnostic",
+        "--out",
+        "results/performance_followup/contract-normal-diagnostic-final.json"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "numerical_contract_accepted": false
+    },
+    {
+      "name": "contract-normal-accepted-final",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.normal_pod",
+        "--case",
+        "clustered",
+        "--size",
+        "1000",
+        "--modes",
+        "20",
+        "--snapshots",
+        "64",
+        "--ncv",
+        "64",
+        "--steps",
+        "100",
+        "--repeats",
+        "1",
+        "--compare",
+        "scipy",
+        "--reference-ncv",
+        "48",
+        "--out",
+        "results/performance_followup/contract-normal-accepted-final.json"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "numerical_contract_accepted": true
+    },
+    {
+      "name": "contract-unsupported-final",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.applications.compare",
+        "--classes",
+        "H",
+        "--sizes",
+        "80",
+        "--methods",
+        "cupy",
+        "--repeats",
+        "1",
+        "--out",
+        "results/performance_followup/contract-unsupported-final.json"
+      ],
+      "expected_exit": 1,
+      "exit_code": 1,
+      "numerical_contract_accepted": false
+    },
+    {
+      "name": "contract-unsupported-diagnostic-final",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.applications.compare",
+        "--classes",
+        "H",
+        "--sizes",
+        "80",
+        "--methods",
+        "cupy",
+        "--repeats",
+        "1",
+        "--diagnostic",
+        "--out",
+        "results/performance_followup/contract-unsupported-diagnostic-final.json"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "numerical_contract_accepted": false
+    }
+  ],
+  "audit": [
+    {
+      "module": "compare",
+      "diagnostic_help": true
+    },
+    {
+      "module": "fem_compare",
+      "diagnostic_help": true
+    },
+    {
+      "module": "hodge_compare",
+      "diagnostic_help": true
+    },
+    {
+      "module": "interior_compare",
+      "diagnostic_help": true
+    },
+    {
+      "module": "negative_compare",
+      "diagnostic_help": true
+    },
+    {
+      "module": "skinning_compare",
+      "diagnostic_help": true
+    },
+    {
+      "module": "pod_compare",
+      "diagnostic_help": true
+    },
+    {
+      "input": "fused-regular-lm.json",
+      "accepted": true,
+      "rows": [
+        {
+          "method": "warp-diagonal",
+          "accepted": true,
+          "failures": []
+        },
+        {
+          "method": "warp-scaled",
+          "accepted": true,
+          "failures": []
+        },
+        {
+          "method": "cupy-eigsh",
+          "accepted": true,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "input": "negative-lm-diagonal8.json",
+      "accepted": false,
+      "rows": [
+        {
+          "method": "warp-diagonal",
+          "accepted": false,
+          "failures": [
+            "physical acceptance",
+            "requested method failed",
+            "solver_full_count",
+            "strict_stopping_accepted",
+            "trial physical acceptance"
+          ]
+        },
+        {
+          "method": "warp-scaled",
+          "accepted": false,
+          "failures": [
+            "physical acceptance",
+            "requested method failed",
+            "solver_full_count",
+            "strict_stopping_accepted",
+            "trial physical acceptance"
+          ]
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3",
+    "tests/test_benchmark_acceptance.py": "b65e51a4bb86f1de3f97347d8bc33396986131a0a314d85fbc9d948b8036a5ea",
+    "benchmarks/experimental/normal_pod.py": "7c6000815c5dffce65603fd27de9a5acb3c6e59ffc8f988b033d8afd2894b1d2",
+    "benchmarks/applications/compare.py": "fc1f85b72037c5ee2d5b951d24ed498add0fc99f6129f7aba16b80d91837065c",
+    "benchmarks/applications/fem_compare.py": "079837e13eecf98a2d03bdec3515169c87db0ad9b0d86aca197eac81b0ac5497",
+    "benchmarks/applications/hodge_compare.py": "8d9db3dad65e9d46acb1112a003d8bce4d1ff32177089a2d254d9a17517e2a64",
+    "benchmarks/applications/interior_compare.py": "271586ff161ff088cafb52188316a1d07edd66ea3a6a379e3072676c7633fda9",
+    "benchmarks/applications/negative_compare.py": "fe2c52e8aeb87db75d0089872aac47ded29bce0f084199e09cdf1a0034e24ff1",
+    "benchmarks/applications/skinning_compare.py": "43a6880ad73ae16d3b5e8c81ded64388539c286c1d24bed92be32852f1def35a",
+    "benchmarks/applications/pod_compare.py": "6af8f7cf590955d3b0e182fa38228675b958a9e729ac9fa91dfeed2cca542519"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: passed",
+  "scope": "Benchmark process contracts only. Real one-sample CLI checks are not performance comparisons. Historical physical/strict/graph/timing evidence is retained, not relabeled; explicit diagnostic mode remains rejected in JSON."
+}

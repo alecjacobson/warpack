@@ -14,6 +14,7 @@ import numpy as np
 import scipy.sparse.linalg as sla
 import warp as wp
 
+from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
 from benchmarks.audit_profile import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import ConstrainedKrylovSchur, CuDSSInverse, SparseOperator, saddle_point_matrix
@@ -256,6 +257,7 @@ def main():
     parser.add_argument("--methods", default="scipy,spectra,cupy-cudss,warp-cudss,warp-cg")
     parser.add_argument("--out", default="results/skinning_comparisons.json")
     parser.add_argument("--baseline")
+    add_diagnostic_argument(parser)
     args = parser.parse_args()
     methods = args.methods.split(",")
     if set(methods) - {"scipy", "spectra", "cupy-cudss", "warp-cudss", "warp-cg"}:
@@ -334,6 +336,8 @@ def main():
         print(
             method, row["outcome"], row.get("setup_seconds"), row.get("solve_seconds"), flush=True
         )
+    assess_comparison(report, report["cases"], args.diagnostic)
+    destination.write_text(json.dumps(report, indent=2) + "\n")
     if args.baseline:
         prior = json.loads(Path(args.baseline).read_text())
         for key in ("gpu", "warp", "versions", "matrix_hash", "blas_threads"):
@@ -362,8 +366,7 @@ def main():
             c["accuracy_regression"] or c["performance_regression"] for c in checks
         ):
             raise SystemExit("Regression detected; evidence preserved")
-    if any(r["outcome"] not in ("passed", "unsupported") for r in report["cases"]):
-        raise SystemExit("Rejected numerical result; evidence preserved")
+    require_accepted(report)
 
 
 if __name__ == "__main__":
