@@ -25,7 +25,8 @@ The first full Warp run takes 453.08 s, the SVD-start full rerun 461.09 s, and
 native CuPy 191.90 s, including setup,
 capture, assertions and test overhead. These are **not eigensolver performance
 comparisons**. Spectra's unchanged native suite also passes all 31 executables;
-its numerical-fixture refresh is separate ongoing work.
+its [complete numerical-fixture refresh](SPECTRA_REFRESH.md) records 170 passes,
+14 failures and 176 unsupported cases, with no lost passes.
 
 ## Boundary contracts enabled
 
@@ -99,7 +100,7 @@ addition to numerical bounds and counts (#118). The first full 30-case
 `SymEigsShift` family rerun has 27 passes and the same three known failures;
 all 30 statuses are zero. Two compact SM profiles remain unconverged, and
 `SymEigsShift_17` still fails its internal count despite passing the external
-numerical bounds. This is a status-harness validation, not a completed Spectra
-inventory. The [before/after evidence](../../results/performance_followup/upstream-status-validation.json)
+numerical bounds. This first-family report is status-harness validation; the subsequent complete
+inventory is documented in [SPECTRA_REFRESH](SPECTRA_REFRESH.md). The [before/after evidence](../../results/performance_followup/upstream-status-validation.json)
 retains the pre-status report; missing status in historical reports stays
 unknown rather than being inferred as success.
