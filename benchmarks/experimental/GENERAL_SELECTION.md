@@ -75,3 +75,51 @@ partial-space replay regression are tracked in
 To reproduce the fixed audit, add `--fixed --budget 80` to the command above.
 Use `--ncv N` to select an explicit width instead of the multiplier. These
 options alter the reported experimental profile, not production defaults.
+
+## Per-cycle diagnosis
+
+A subsequent instrumented case-30 trace identifies the lost-output mechanism.
+All five tiled-Schur replays first pass the complete requested spectrum and
+residual check at cycle 23. Each then fails at later cycles (11–17 times per
+replay), although all finish cycle 80 successfully in this instrumented run.
+The complete desired set remains among the converged Ritz pairs at every such
+failed cycle. The orthonormal basis is intact (error below 1.5e-15), and the
+projected eigensolve remains accurate (backward error below 1.1e-15).
+
+At cycle 25, the inaccurate estimate `17.6858757 - 4.5601808j`, with normalized
+original residual 0.00822, outranks the already converged boundary eigenvalue
+`17.6717832 + 4.5666816j`, with residual 3.8e-13. The accurate vector is still
+in the projected basis; it has moved just outside the selected top ten.
+At later cycles, other unconverged estimates similarly displace converged
+requested pairs. The problem in these traces is output ranking during continued
+exploration, rather than loss of the underlying invariant directions.
+
+The matched serial-Schur control reproduces this behavior in both 50-cycle
+replays: first pass at 23, then nine failed cycles each, always with the complete
+converged set still present in the projection. This rules out the tiled Schur
+optimization as the necessary cause of this failure.
+
+[Tiled trace](../../results/general-selection-trace30-tiled.json),
+[serial trace](../../results/general-selection-trace30-serial.json), and compact
+raw projected spectra/residual arrays for
+[tiled](../../results/general-selection-trace30-tiled.npz) and
+[serial](../../results/general-selection-trace30-serial.npz). Per-cycle gates
+check spectrum, residuals and projected status; final output gates additionally
+check full vectors/subspaces and numerical independence. Instrumentation adds
+kernels and can change roundoff trajectories. These traces diagnose the
+mechanism, not the exact trajectory of an earlier uninstrumented failure, and
+provide no performance timings.
+
+```bash
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
+  PYTHONPATH="$PWD/build/warp-fsai:$PWD" \
+  python -m benchmarks.experimental.general_selection_trace \
+  --case benchmark_gen_30 --ncv 60 --budget 80 --repeats 5 \
+  --out build/general-selection-trace30-tiled.json
+# Serial control: --backend serial --budget 50 --repeats 2
+```
+
+Preserving a complete converged result while continuing exploration is being
+investigated separately. It must not hide missing requested modes, accept an
+inaccurate original equation, or reuse stale results after a changed-matrix
+replay. No such policy has yet been promoted to the public solver.
