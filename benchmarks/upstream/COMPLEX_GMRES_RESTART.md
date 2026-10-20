@@ -9,9 +9,9 @@ allocations or numerical decisions change. Nonpositive/noninteger widths are
 rejected, as is supplying this option to the cuDSS backend.
 
 ```python
-inverse = ComplexShiftInverse(shifted, backend="gmres",
-                             inner_tol=1e-14, inner_maxiter=1000,
-                             inner_restart=96)
+inverse = ComplexShiftInverse(
+    shifted, backend="gmres", inner_tol=1e-14, inner_maxiter=1000, inner_restart=96
+)
 ```
 
 This resolves a configuration gap found while testing consistent spatial mass
