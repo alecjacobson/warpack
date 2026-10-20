@@ -1,0 +1,277 @@
+{
+  "args": {
+    "side": 24,
+    "modes": 20,
+    "masses": "lumped,consistent",
+    "width": 24,
+    "steps": 300,
+    "tol": 1e-13,
+    "preconditioner": "upper-cg",
+    "fsai_width": 32,
+    "inner_cg": 8,
+    "inner_tol": 0.01,
+    "repeats": 3,
+    "references": false,
+    "reference_ncv": 96,
+    "reference_steps": 12,
+    "out": "results/performance_followup/largest-block-upper-cg8.json",
+    "diagnostic": false
+  },
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "cases": [
+    {
+      "method": "warp-largest-block",
+      "mass": "lumped",
+      "n": 27648,
+      "nnz": 186624,
+      "mass_nnz": 27648,
+      "k": 20,
+      "width": 24,
+      "projected_dimension": 72,
+      "preconditioner_upper_shift": 12312.102516030987,
+      "preconditioner_policy": "Upstream FSAI32 with optional intentionally truncated batched FP32 CG; bound derived from Q1 stencil inputs, not eigenpairs",
+      "matrix_sha256": "f901e83b3f6f9556c784d1af5241491d4cef914c6f7d6dd83314ce78e3cd642b",
+      "setup_seconds": 0.647894162684679,
+      "capture_seconds": 0.45051558688282967,
+      "warmup_seconds": 0.3616139702498913,
+      "samples_seconds": [
+        0.3447895161807537,
+        0.34688568487763405,
+        0.34699099883437157
+      ],
+      "solve_seconds": 0.34688568487763405,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.036591112100088e-14,
+          "max_absolute_residual": 3.205213872092827e-13,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.498607129698894e-16,
+          "requested_subspace_error": 5.870746260226023e-12,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 30,
+          "reported_max_residual": 6.036605381239867e-14,
+          "solver_full_count": true,
+          "standard_form_frobenius_residual": 1.4662063270016194e-09,
+          "native_stopping_passed": true,
+          "preconditioner_cg_stats": [
+            5424,
+            8,
+            225,
+            720
+          ]
+        },
+        {
+          "accepted": true,
+          "residual": 9.454301298213342e-14,
+          "max_absolute_residual": 5.740685704580528e-13,
+          "orthogonality": 6.661338147750939e-16,
+          "spectrum_error": 4.479019000098826e-16,
+          "requested_subspace_error": 8.828021718952624e-12,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 30,
+          "reported_max_residual": 9.454285968395428e-14,
+          "solver_full_count": true,
+          "standard_form_frobenius_residual": 2.2975005817341594e-09,
+          "native_stopping_passed": true,
+          "preconditioner_cg_stats": [
+            5424,
+            8,
+            230,
+            720
+          ]
+        },
+        {
+          "accepted": true,
+          "residual": 4.5799798256524487e-14,
+          "max_absolute_residual": 3.368416656712725e-13,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 5.933348096629818e-16,
+          "requested_subspace_error": 3.1827847423128e-12,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 30,
+          "reported_max_residual": 4.58000167984447e-14,
+          "solver_full_count": true,
+          "standard_form_frobenius_residual": 1.1139490289899513e-09,
+          "native_stopping_passed": true,
+          "preconditioner_cg_stats": [
+            5424,
+            8,
+            230,
+            720
+          ]
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 39,
+          "KERNEL": 820,
+          "CONDITIONAL": 8,
+          "MEMCPY": 18
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 18
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "timing_uncontended": true,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-largest-block",
+      "mass": "consistent",
+      "n": 27648,
+      "nnz": 686000,
+      "mass_nnz": 686000,
+      "k": 20,
+      "width": 24,
+      "projected_dimension": 72,
+      "preconditioner_upper_shift": 37308.31129836251,
+      "preconditioner_policy": "Upstream FSAI32 with optional intentionally truncated batched FP32 CG; bound derived from Q1 stencil inputs, not eigenpairs",
+      "matrix_sha256": "902e5bec859f25129ad535be60cf3adcc86762de5e6723620a946cb3de4e0f37",
+      "setup_seconds": 0.04918495938181877,
+      "capture_seconds": 0.05147799104452133,
+      "warmup_seconds": 0.4233189933001995,
+      "samples_seconds": [
+        0.43217965587973595,
+        0.42378127947449684,
+        0.4335952438414097
+      ],
+      "solve_seconds": 0.43217965587973595,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.966776694013426e-14,
+          "max_absolute_residual": 1.566524687746096e-13,
+          "orthogonality": 5.551115123125783e-16,
+          "spectrum_error": 7.948917921504877e-16,
+          "requested_subspace_error": 5.350841620514796e-13,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 32,
+          "reported_max_residual": 3.966745130281803e-14,
+          "solver_full_count": true,
+          "original_max_absolute_residual": 4.554677693623622e-12,
+          "native_stopping_passed": true,
+          "preconditioner_cg_stats": [
+            5808,
+            8,
+            248,
+            768
+          ]
+        },
+        {
+          "accepted": true,
+          "residual": 8.604109035429817e-14,
+          "max_absolute_residual": 2.9830304892897175e-13,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 6.088735247940669e-16,
+          "requested_subspace_error": 1.161408873242539e-12,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 31,
+          "reported_max_residual": 8.603527528766403e-14,
+          "solver_full_count": true,
+          "original_max_absolute_residual": 9.879291555867186e-12,
+          "native_stopping_passed": true,
+          "preconditioner_cg_stats": [
+            5616,
+            8,
+            231,
+            744
+          ]
+        },
+        {
+          "accepted": true,
+          "residual": 5.730716949262293e-14,
+          "max_absolute_residual": 2.284838984678572e-13,
+          "orthogonality": 7.771561172376096e-16,
+          "spectrum_error": 6.088735247940669e-16,
+          "requested_subspace_error": 8.674338038511354e-13,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 32,
+          "reported_max_residual": 5.731029205471854e-14,
+          "solver_full_count": true,
+          "original_max_absolute_residual": 6.580044875394111e-12,
+          "native_stopping_passed": true,
+          "preconditioner_cg_stats": [
+            5808,
+            8,
+            251,
+            768
+          ]
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 39,
+          "KERNEL": 820,
+          "CONDITIONAL": 8,
+          "MEMCPY": 18
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 18
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "timing_uncontended": true,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    }
+  ],
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "/home/horde/projects/warpack-largest-block/benchmarks/experimental/largest_block_compare.py": "b53e0bf75991865e5251d0e79615d2b9971d5bbbb772a2d611295113ff7d64b8",
+    "benchmarks/experimental/largest_block.py": "d214dfa63858707d5cf32f3d3e581e8ddad7655380fc9b008cf689ec3f7964d8",
+    "benchmarks/experimental/batched_cg.py": "3d920e0f60de90bf1ecad94a675631919058cd84aa131ce822b19e0f6d2ef9bd",
+    "benchmarks/experimental/block_kernels.py": "da82ded4fdfc07859d49efa4dcbb432dc41f2a76c878c4f2babfc8b4ec28b0cd",
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3",
+    "benchmarks/applications/negative_foundation.py": "551a150882fcaafaaf601779c023aad3fa0d63d223958b537e1f4fe6a471fc56"
+  },
+  "protocol": "Largest algebraic block solve on -K, signs restored on device. This fixture independently verifies that LA equals its LM target; no general LM claim. Seed42 block starts, native reference seed2026; full repeated requested spaces validated analytically. Warm synchronized replay excludes setup/capture/validation. Pure Warp; optional references use their declared backends. Both normalized outer counts and the fresh native absolute bound are required.",
+  "competing_gpu_processes": [],
+  "numerical_contract_accepted": true,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

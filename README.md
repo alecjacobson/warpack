@@ -108,6 +108,10 @@ documents the supported CuPy fixtures and remaining reference mismatch.
 Upstream FP64 BSR block-Jacobi and FSAI preconditioners can also be passed
 directly; see the [adapter validation](benchmarks/experimental/UPSTREAM_PRECONDITIONERS.md)
 for required upstream features and captured application checks.
+`block.capture(..., finalizer=callback)` also records device postprocessing once
+after the loop; preallocate its outputs and record Warp launches in the callback.
+The [finalization and largest-mode example](benchmarks/experimental/LARGEST_BLOCK.md)
+checks changed inputs and failure recovery on graph replay.
 
 
 ```python

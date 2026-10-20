@@ -609,7 +609,12 @@ class BlockLOBPCG:
             self.step()
         return self
 
-    def capture(self, max_iterations=100, adaptive=None):
+    def capture(self, max_iterations=100, adaptive=None, finalizer=None):
+        """Capture the solve and optional device postprocessing once per replay.
+
+        The finalizer records device operations during setup, after JIT warmup;
+        it does not execute as a Python callback during graph replay.
+        """
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")
@@ -622,6 +627,8 @@ class BlockLOBPCG:
         if adaptive and static_only:
             raise ValueError("This preconditioner requires adaptive=False for the outer graph")
         self.solve(1)
+        if finalizer is not None:
+            finalizer()
         wp.synchronize_device(self.device)
 
         def body():
@@ -648,5 +655,7 @@ class BlockLOBPCG:
                 for _ in range(max_iterations):
                     self.step()
                 self.iterations.fill_(max_iterations)
+            if finalizer is not None:
+                finalizer()
         self.graph = capture.graph
         return self.graph

@@ -1,0 +1,56 @@
+{
+  "issue": 87,
+  "base_revision": "e2faaaa",
+  "test_command": "python -m pytest -q tests/test_block_finalizer.py tests/test_largest_block_experimental.py tests/test_block_api.py tests/test_lobpcg_experimental.py",
+  "pinned": {
+    "warp": "1.18.0",
+    "passed": 58,
+    "seconds": 7.36
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "passed": 58,
+    "seconds": 7.81
+  },
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "benchmarks/experimental/largest_block.py": "31b07176ddd30f6c979a61547adc1193c5f68e85569b856ac53ff4b3c4b022c8",
+    "benchmarks/experimental/largest_block_compare.py": "6f0ef79feedbf603049115318269926c11fea7d8a583d1b650c2b79afa4bc7d7",
+    "tests/test_block_finalizer.py": "e5fa7d9e1af8ca2019d17d6d5dd0de1616fba588e48946320a2ae9e932e35148",
+    "tests/test_largest_block_experimental.py": "bb4ea12af6dc28aef414ed590e26a3db190dfb9fe01c21c79bc92e7c6e3a1b95"
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: 246 files passed",
+  "accepted_comparisons": [
+    "largest-block-upper-cg8.json",
+    "largest-consistent-krylov-control.json"
+  ],
+  "rejected_comparisons": {
+    "largest-block-initial.json": "Consistent mass exhausts 300 iterations; slower accepted lumped row retained.",
+    "largest-block-upper-cg8-references.json": "Native consistent-mass CuPy LOBPCG exhausts 200 iterations and misses physical/native bounds. Other rows pass; aggregate is rejected."
+  },
+  "matching_consistent_matrix_sha256": "902e5bec859f25129ad535be60cf3adcc86762de5e6723620a946cb3de4e0f37",
+  "scope": "Focused validation following prior full suite. Only production change is optional captured finalizer; numerical iterations unchanged. Largest-algebraic transform and fixture-specific preconditioner remain benchmark-only."
+}

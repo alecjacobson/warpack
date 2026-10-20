@@ -1,0 +1,237 @@
+{
+  "args": {
+    "side": 24,
+    "modes": 20,
+    "masses": "lumped,consistent",
+    "width": 24,
+    "steps": 300,
+    "tol": 1e-13,
+    "preconditioner": "mass-diagonal",
+    "repeats": 3,
+    "references": false,
+    "reference_ncv": 96,
+    "reference_steps": 12,
+    "out": "results/performance_followup/largest-block-initial.json",
+    "diagnostic": false
+  },
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "cases": [
+    {
+      "method": "warp-largest-block",
+      "mass": "lumped",
+      "n": 27648,
+      "nnz": 186624,
+      "mass_nnz": 27648,
+      "k": 20,
+      "width": 24,
+      "projected_dimension": 72,
+      "matrix_sha256": "f901e83b3f6f9556c784d1af5241491d4cef914c6f7d6dd83314ce78e3cd642b",
+      "setup_seconds": 0.15969527512788773,
+      "capture_seconds": 0.47126390412449837,
+      "warmup_seconds": 2.3096147552132607,
+      "samples_seconds": [
+        2.27261546254158,
+        2.244485553354025,
+        2.2841812297701836
+      ],
+      "solve_seconds": 2.27261546254158,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 8.864014420045972e-14,
+          "max_absolute_residual": 4.738431869100168e-13,
+          "orthogonality": 8.881784197001252e-16,
+          "spectrum_error": 4.479019000098826e-16,
+          "requested_subspace_error": 1.2935042170874876e-11,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 262,
+          "reported_max_residual": 8.863973123613663e-14,
+          "solver_full_count": true,
+          "standard_form_frobenius_residual": 2.4638300624710147e-09,
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 9.766609711130158e-14,
+          "max_absolute_residual": 4.811151477213116e-13,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.485516638964155e-16,
+          "requested_subspace_error": 1.7014024383962685e-11,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 259,
+          "reported_max_residual": 9.766640759057836e-14,
+          "solver_full_count": true,
+          "standard_form_frobenius_residual": 2.9758882215883515e-09,
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 9.957210253650992e-14,
+          "max_absolute_residual": 4.71955807768154e-13,
+          "orthogonality": 4.440892098500626e-16,
+          "spectrum_error": 4.474697688946435e-16,
+          "requested_subspace_error": 1.01533326242413e-11,
+          "physical_accepted": true,
+          "solver_status": 0,
+          "reported_converged": 20,
+          "outer_iterations": 264,
+          "reported_max_residual": 9.957215589209386e-14,
+          "solver_full_count": true,
+          "standard_form_frobenius_residual": 2.6417736187004902e-09,
+          "native_stopping_passed": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 35,
+          "KERNEL": 815,
+          "CONDITIONAL": 7,
+          "MEMCPY": 16
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 16
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "timing_uncontended": true,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-largest-block",
+      "mass": "consistent",
+      "n": 27648,
+      "nnz": 686000,
+      "mass_nnz": 686000,
+      "k": 20,
+      "width": 24,
+      "projected_dimension": 72,
+      "matrix_sha256": "902e5bec859f25129ad535be60cf3adcc86762de5e6723620a946cb3de4e0f37",
+      "setup_seconds": 0.012025147676467896,
+      "capture_seconds": 0.05030704662203789,
+      "warmup_seconds": 3.363242447376251,
+      "samples_seconds": [
+        3.358299657702446,
+        3.353971216827631,
+        3.3556154184043407
+      ],
+      "solve_seconds": 3.3556154184043407,
+      "validation": [
+        {
+          "accepted": false,
+          "residual": 0.0015127728289912469,
+          "max_absolute_residual": 0.005424186164802169,
+          "orthogonality": 3.574918139293004e-14,
+          "spectrum_error": 7.251643794769635e-05,
+          "requested_subspace_error": 0.1356087451108291,
+          "physical_accepted": false,
+          "solver_status": 0,
+          "reported_converged": 0,
+          "outer_iterations": 300,
+          "reported_max_residual": 0.0015127728289912542,
+          "solver_full_count": false,
+          "original_max_absolute_residual": 0.17372267628995067,
+          "native_stopping_passed": false
+        },
+        {
+          "accepted": false,
+          "residual": 0.0015128149992149815,
+          "max_absolute_residual": 0.005424162269637878,
+          "orthogonality": 3.552713678800501e-14,
+          "spectrum_error": 7.251627772263632e-05,
+          "requested_subspace_error": 0.13560854831944286,
+          "physical_accepted": false,
+          "solver_status": 0,
+          "reported_converged": 0,
+          "outer_iterations": 300,
+          "reported_max_residual": 0.0015128149992149858,
+          "solver_full_count": false,
+          "original_max_absolute_residual": 0.17372751891613994,
+          "native_stopping_passed": false
+        },
+        {
+          "accepted": false,
+          "residual": 0.001512828304874857,
+          "max_absolute_residual": 0.005424287269756967,
+          "orthogonality": 3.4638958368304884e-14,
+          "spectrum_error": 7.251622820525548e-05,
+          "requested_subspace_error": 0.13560838933870895,
+          "physical_accepted": false,
+          "solver_status": 0,
+          "reported_converged": 0,
+          "outer_iterations": 300,
+          "reported_max_residual": 0.001512828304874863,
+          "solver_full_count": false,
+          "original_max_absolute_residual": 0.17372904689481192,
+          "native_stopping_passed": false
+        }
+      ],
+      "accepted": false,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 35,
+          "KERNEL": 815,
+          "CONDITIONAL": 7,
+          "MEMCPY": 16
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 16
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "timing_uncontended": true,
+      "numerical_contract_failures": [
+        "native_stopping_passed",
+        "physical acceptance",
+        "solver_full_count",
+        "trial physical acceptance"
+      ],
+      "numerical_contract_accepted": false
+    }
+  ],
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "/home/horde/projects/warpack-largest-block/benchmarks/experimental/largest_block_compare.py": "972f771b81aa057fd947ec9b6f7dc5670e1929103dbdcfa8caa042ef923de0cd",
+    "benchmarks/experimental/largest_block.py": "d214dfa63858707d5cf32f3d3e581e8ddad7655380fc9b008cf689ec3f7964d8",
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3",
+    "benchmarks/applications/negative_foundation.py": "551a150882fcaafaaf601779c023aad3fa0d63d223958b537e1f4fe6a471fc56"
+  },
+  "protocol": "Largest algebraic block solve on -K, signs restored on device. This fixture independently verifies that LA equals its LM target; no general LM claim. Seed42 block starts, native reference seed2026; full repeated requested spaces validated analytically. Warm synchronized replay excludes setup/capture/validation. Pure Warp; optional references use their declared backends. Both normalized outer counts and the fresh native absolute bound are required.",
+  "competing_gpu_processes": [],
+  "numerical_contract_accepted": false,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}
