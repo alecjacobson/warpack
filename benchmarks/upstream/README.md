@@ -2,7 +2,8 @@
 
 This harness runs the eigensolver/SVD portion of CuPy's tests and exports Spectra's numerical solver fixtures. It also runs Spectra's own native suite and benchmarks. It does not claim that unrelated CuPy array operations or Spectra's private factorization classes have Warpack equivalents.
 
-See [recorded results and known failures](RESULTS.md) and the [native general requested-spectrum audit](GENERAL_SELECTION.md), which validates complete target sets beyond residuals. Production solver code was held fixed during that original run. The [public block follow-up](BLOCK_API.md) now enables applicable CuPy LOBPCG fixtures; its supported/unsupported cases and reference-spectrum mismatch are reported separately.
+See the [full CuPy refresh and current boundary contracts](CUPY_REFRESH.md),
+[historical results and known failures](RESULTS.md) and the [native general requested-spectrum audit](GENERAL_SELECTION.md), which validates complete target sets beyond residuals. Production solver code was held fixed during that original run. The [public block follow-up](BLOCK_API.md) now enables applicable CuPy LOBPCG fixtures; its supported/unsupported cases and reference-spectrum mismatch are reported separately.
 
 Pinned sources:
 

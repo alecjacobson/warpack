@@ -1,5 +1,9 @@
 # CuPy and Spectra conformance, 2026-10-13
 
+The [full CuPy refresh](CUPY_REFRESH.md) now passes all 31 ordinary failures
+from this original inventory, with no lost passes. Historical counts below
+remain unchanged.
+
 Subsequent fixes and focused reruns are recorded in the
 [Krylov multiplicity report](MULTIPLICITY.md) and
 [cuDSS residual-correction report](REFINEMENT.md), and

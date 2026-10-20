@@ -98,6 +98,13 @@ def eigsh(
     import cupy as cp
     import pytest
 
+    # Match validation at the CuPy boundary, not a new generalized eigsh API.
+    if kwargs.pop("M", None) is not None:
+        raise NotImplementedError("M is not supported by the CuPy eigsh adapter")
+    if kwargs.pop("Minv", None) is not None:
+        raise NotImplementedError("Minv is not supported by the CuPy eigsh adapter")
+    if kwargs.pop("mode", "normal") != "normal":
+        raise NotImplementedError("Only normal mode is supported by the CuPy eigsh adapter")
     if kwargs:
         pytest.skip("Warpack has no CuPy API for: " + ", ".join(kwargs))
     if len(a.shape) != 2 or a.shape[0] != a.shape[1]:
@@ -116,10 +123,10 @@ def eigsh(
         if v0h.shape != (n,):
             raise ValueError("v0 must have shape (n,)")
         start = wp.array(np.column_stack((v0h.real, v0h.imag)), dtype=wp.vec2d)
-    m = min(n, max(2 * k + 12, 32) if ncv is None else ncv)
-    iterations = 300 if maxiter is None else maxiter
-    if m <= k:
-        pytest.skip("Warpack requires ncv > k; CuPy clamps this parameter")
+    m = min(n, max(2 * k + 12, 32) if ncv is None else max(ncv, k + 2))
+    # CuPy performs an initial sweep even when its restart budget is zero.
+    # Warpack counts complete cycles, including that first sweep.
+    iterations = 300 if maxiter is None else max(1, maxiter)
     threshold = 1e-14 if tol == 0 else tol
     inverse = None
     evaluation = None
