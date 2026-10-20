@@ -120,7 +120,7 @@ records exact samples, sizes, sparsity, matrix hashes, versions and source state
 
 ## Reproduction
 
-Use the pinned environment in the root README and install benchmark extras.
+Use the [pinned environment](../../docs/installation.md#fast-block-solves) and install benchmark extras.
 The Spectra checkout must be at `db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95`.
 
 ```bash

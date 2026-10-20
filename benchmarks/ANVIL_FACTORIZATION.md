@@ -159,7 +159,7 @@ original SuperLU/Eigen setup costs as representative of all CPU pipelines.
 
 ## Reproduction
 
-Use the pinned Warp environment from the root README to assemble once:
+Use the [pinned Warp environment](../docs/installation.md#fast-block-solves) to assemble once:
 
 ```bash
 mkdir -p build/anvil-factor-audit
