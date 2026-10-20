@@ -1,0 +1,39 @@
+{
+  "issue": 15,
+  "source_base_revision": "78757c1",
+  "scope": "Settings-only Anvil block preconditioner sweep; no numerical code changed. Earlier profiles ran on34032ae, whose only subsequent change was the unrelated buckling benchmark metric fix.",
+  "input_sha256": {
+    "anvil for export-ftetwild.mesh": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+    "build/anvil_reference.npz": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898"
+  },
+  "profiles": {
+    "anvil-shift10000-control": {
+      "accepted": true,
+      "timing_eligible": true,
+      "rows": 6
+    },
+    "anvil-shift1000": {
+      "accepted": true,
+      "timing_eligible": true,
+      "rows": 6
+    },
+    "anvil-shift100": {
+      "accepted": true,
+      "timing_eligible": true,
+      "rows": 6
+    },
+    "anvil-shift10": {
+      "accepted": true,
+      "timing_eligible": true,
+      "rows": 6
+    },
+    "anvil-shift100-cg10": {
+      "accepted": true,
+      "timing_eligible": true,
+      "rows": 6
+    }
+  },
+  "accuracy_policy": "Existing original pencil/eigenvalue/mode-shape/orthogonality gates, full Warp counts/status, fresh full-block CuPy native absolute residual, and post-profile validation all mandatory. Truncated preconditioner CG is not an exact inverse contract.",
+  "tests": "No new tests or redundant suite run: unchanged solver code; all repeated benchmark and post-profile gates pass.",
+  "remaining_gap": "Best block median2.54485s versus preceding accepted cuDSS.46559s; issue15 remains open."
+}
