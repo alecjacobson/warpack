@@ -15,6 +15,7 @@ import warp.sparse as ws
 from benchmarks.applications.compare import other_gpu_processes, run, timed
 from benchmarks.applications.fem_cases import elastic_matrices, make_fem_case, reference
 from benchmarks.applications.runner import accuracy
+from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
 from benchmarks.upstream.adapters import matrix
 from warpack import SparseOperator
@@ -40,15 +41,17 @@ def fsai(host, width):
 def preconditioner(host, args):
     factor, device = fsai(host, args.fsai_width)
     if args.inner_cg:
-        from benchmarks.experimental.batched_cg import BatchedCGInverse
+        from warpack import BatchedCGPreconditioner
 
-        inverse = BatchedCGInverse(
+        inverse = BatchedCGPreconditioner(
             device,
             args.width,
             tol=args.inner_tol,
             maxiter=args.inner_cg,
             preconditioner=factor,
             working_dtype=wp.float32 if args.inner_fp32 else wp.float64,
+            fsai_layout=args.fsai_layout,
+            matrix_layout=args.matrix_layout,
         )
     else:
         inverse = UpstreamPreconditioner(factor)
@@ -56,13 +59,28 @@ def preconditioner(host, args):
 
 
 def with_active_preconditioner(solver, args):
-    if args.active_cg_bucket_size:
+    if args.active_cg_bucket_size and not args.public_api:
         from benchmarks.experimental.active_cg import DeviceBucketedCG
 
         solver.preconditioner = DeviceBucketedCG(
             solver.preconditioner, solver.errors, solver.tol, args.active_cg_bucket_size
         )
     return solver
+
+
+def audit_graph(graph, args, label):
+    path = Path("build/block-eigen") / f"{Path(args.out).stem}-{label}.dot"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    wp.capture_debug_dot_print(graph, str(path))
+    result = graph_summary(path)
+    path.unlink()
+    return result
+
+
+def device_only(audit):
+    return audit.get("node_types_including_conditional_body", {}).get("HOST", 0) == 0 and all(
+        "DtoD" in kind for kind in audit.get("memcpy_kinds", {})
+    )
 
 
 def inner_quality(solver):
@@ -92,8 +110,11 @@ def finalize_starts_acceptance(report):
             finalize_acceptance(dict(rows=row["cupy_trials"])) if "cupy_trials" in row else True
         )
         row["accepted"] = row["warp_accepted"] and row["cupy_accepted"]
+        row["graph_accepted"] = device_only(row.get("graph", {}))
+        row["accepted"] &= row["graph_accepted"]
     report["accepted"] = (
         report["source_quality"]["accepted"]
+        and device_only(report.get("source_graph", {}))
         and bool(report["rows"])
         and all(row["accepted"] for row in report["rows"])
         and all(
@@ -127,6 +148,11 @@ def main():
     p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--paired-rotation", action="store_true")
     p.add_argument("--reuse-x-image", action="store_true")
+    p.add_argument("--public-api", action="store_true")
+    p.add_argument("--active-search-bucket-size", type=int, default=0)
+    p.add_argument("--active-search-keep-history", action="store_true")
+    p.add_argument("--fsai-layout", choices=["rows", "columns"], default="rows")
+    p.add_argument("--matrix-layout", choices=["rows", "columns"], default="rows")
     p.add_argument(
         "--initial-perturbation",
         type=float,
@@ -148,7 +174,18 @@ def main():
     p.add_argument("--out", required=True)
     args = p.parse_args()
     solver_type = BlockLOBPCG
-    if args.reuse_x_image:
+    solver_options = {}
+    if args.public_api:
+        from warpack import BlockLOBPCG as PublicBlockLOBPCG
+
+        solver_type = PublicBlockLOBPCG
+        solver_options = dict(
+            reuse_operator_images=args.reuse_x_image,
+            search_bucket_size=args.active_search_bucket_size,
+            keep_history=args.active_search_keep_history,
+            preconditioner_bucket_size=args.active_cg_bucket_size,
+        )
+    elif args.reuse_x_image:
         from benchmarks.experimental.cached_x_image import CachedXBlockLOBPCG
 
         solver_type = CachedXBlockLOBPCG
@@ -162,14 +199,24 @@ def main():
         p.error("Require finite nonnegative initial-perturbation")
     if args.active_cg_bucket_size < 0 or (args.active_cg_bucket_size and not args.inner_cg):
         p.error("active-cg-bucket-size requires a positive size and inner-cg")
+    if args.active_search_bucket_size < 0:
+        p.error("active-search-bucket-size must be nonnegative")
+    if args.active_search_bucket_size and (not args.public_api or not args.reuse_x_image):
+        p.error("search buckets require --public-api and --reuse-x-image")
+    if args.active_search_keep_history and not args.active_search_bucket_size:
+        p.error("active-search-keep-history requires search buckets")
+    if "columns" in (args.fsai_layout, args.matrix_layout) and not args.inner_cg:
+        p.error("column layouts require inner-cg")
     before = other_gpu_processes()
     case = make_fem_case(args.case, args.side, args.modes)
     source = case.problem
     if args.cupy_width is not None and not source.k <= args.cupy_width <= args.width:
         p.error("Require k <= cupy-width <= width")
+    if not source.k <= args.width <= source.n // 3:
+        p.error(f"Require {source.k} <= width <= n/3, including complete boundary clusters")
     operator = SparseOperator
     if args.batched_products:
-        from benchmarks.experimental.block_kernels import BatchedSparseOperator
+        from warpack import BatchedSparseOperator
 
         operator = BatchedSparseOperator
     print("Prepared", args.case, "n=", source.n, flush=True)
@@ -194,11 +241,13 @@ def main():
                 symmetric_products=args.symmetric_products,
                 fused_updates=args.fused_updates,
                 paired_rotation=args.paired_rotation,
+                **solver_options,
             ),
             args,
         )
     )
     source_capture, source_graph = timed(lambda: bootstrap.capture(args.steps))
+    source_audit = audit_graph(source_graph, args, "source")
     source_seconds, _ = timed(lambda: wp.capture_launch(source_graph))
     source_quality = check(source, bootstrap)
     if args.inner_cg:
@@ -242,6 +291,7 @@ def main():
         source_solve_seconds=source_seconds,
         source_iterations=int(bootstrap.iterations.numpy()[0]),
         source_quality=source_quality,
+        source_graph=source_audit,
         changed_preconditioner_setup_seconds=setup,
         changed_operator_setup_seconds=operator_setup,
         setup_scope="Preconditioner setup includes upstream FSAI and optional batched CG state/copy. Optional active-bucket states are charged to solver setup. Solver/operator workspaces, capture, and source solve are separate. Host FEM assembly/reference and starting-block generation/upload are excluded. JIT is charged where encountered.",
@@ -285,11 +335,13 @@ def main():
                     symmetric_products=args.symmetric_products,
                     fused_updates=args.fused_updates,
                     paired_rotation=args.paired_rotation,
+                    **solver_options,
                 ),
                 args,
             )
         )
         capture_seconds, graph = timed(lambda: solver.capture(args.steps))
+        audit = audit_graph(graph, args, name)
         warmup_seconds, _ = timed(lambda: wp.capture_launch(graph))
         trials = []
         for _ in range(args.repeats):
@@ -313,24 +365,31 @@ def main():
             median_seconds=float(np.median([t["seconds"] for t in trials])),
             accepted=all(t["quality"]["accepted"] for t in trials),
             trials=trials,
+            graph=audit,
         )
         report["rows"].append(row)
         print(name, row, flush=True)
         if args.cupy and not perturbation:
-            from benchmarks.experimental.compare_block import cupy_trials
+            from benchmarks.experimental.compare_block import collect_reference, cupy_trials
 
-            cupy_rows, metadata = cupy_trials(
-                target.a,
-                target.b,
-                current_factor,
-                start.numpy().T,
-                None,
-                args,
-                source.k,
-                lambda w, v: accuracy(target, w, v),
-                cg=current_pre if args.inner_cg else None,
+            reference_report = dict(rows=[])
+            collect_reference(
+                reference_report,
+                lambda rows: cupy_trials(
+                    target.a,
+                    target.b,
+                    current_factor,
+                    start.numpy().T,
+                    None,
+                    args,
+                    source.k,
+                    lambda w, v: accuracy(target, w, v),
+                    cg=current_pre if args.inner_cg else None,
+                    completed_rows=rows,
+                )[1],
             )
-            row["cupy_trials"], row["cupy_adapter"] = cupy_rows, metadata
+            row["cupy_trials"] = reference_report["rows"]
+            row["cupy_adapter"] = reference_report.get("cupy_adapter")
     if args.baselines:
         report["production_baselines"] = [
             run(

@@ -76,3 +76,16 @@ def test_related_starts_rejects_native_or_production_failure():
     assert finalize_starts_acceptance(report)
     report["production_baselines"] = [dict(accepted=True, contract_accepted=False)]
     assert not finalize_starts_acceptance(report)
+
+
+def test_related_starts_rejects_host_work_in_source_or_target_graph():
+    from benchmarks.experimental.fem_starts import finalize_starts_acceptance
+
+    row = dict(trials=[dict(quality=dict(accepted=True))])
+    report = dict(source_quality=dict(accepted=True), rows=[row])
+    assert finalize_starts_acceptance(report)
+    row["graph"] = dict(memcpy_kinds={"HtoD (HOST to DEVICE)": 1})
+    assert not finalize_starts_acceptance(report)
+    row["graph"] = dict(memcpy_kinds={"DtoD (DEVICE to DEVICE)": 2})
+    report["source_graph"] = dict(node_types_including_conditional_body={"HOST": 1})
+    assert not finalize_starts_acceptance(report)
