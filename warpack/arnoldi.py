@@ -62,19 +62,6 @@ def scale_vector(q: wp.array[wp.vec2d], norm: wp.array[wp.float64]):
 
 
 @wp.kernel
-def breakdown_vector(
-    q: wp.array[wp.vec2d],
-    norm: wp.array[wp.float64],
-    reference: wp.array[wp.float64],
-    seed: int,
-):
-    i = wp.tid()
-    if norm[0] <= wp.float64(1.0e-26) * reference[0]:
-        state = wp.rand_init(seed, i)
-        q[i] = wp.vec2d(wp.float64(wp.randn(state)), wp.float64(wp.randn(state)))
-
-
-@wp.kernel
 def complex_gram(x: wp.array2d[wp.vec2d], y: wp.array2d[wp.vec2d], h: wp.array2d[wp.vec2d]):
     a, b, chunk = wp.tid()
     xx = wp.tile_load(x[a], shape=256, offset=chunk * 256)
@@ -158,6 +145,84 @@ def complex_outputs(
         wp.atomic_add(converged, 0, 1)
 
 
+@wp.kernel
+def select_restart_residual(
+    values: wp.array[wp.vec2d],
+    order: wp.array[wp.int32],
+    norms: wp.array2d[wp.float64],
+    index: wp.array[wp.int32],
+):
+    # Search selection is not a stopping test. In shift-invert, a small
+    # transformed residual can still leave the original equation unfinished.
+    best = wp.float64(0.0)
+    index[0] = -1
+    for j in range(norms.shape[0]):
+        score = wp.sqrt(norms[j, 0]) / wp.max(wp.float64(1.0), cabs(values[order[j]]))
+        if wp.isfinite(score) and score > best:
+            best = score
+            index[0] = j
+
+
+@wp.kernel
+def save_restart_residual(
+    x: wp.array2d[wp.vec2d],
+    ax: wp.array2d[wp.vec2d],
+    values: wp.array[wp.vec2d],
+    order: wp.array[wp.int32],
+    norms: wp.array2d[wp.float64],
+    index: wp.array[wp.int32],
+    out: wp.array[wp.vec2d],
+):
+    i = wp.tid()
+    j = index[0]
+    if j >= 0:
+        out[i] = (ax[j, i] - cmul(values[order[j]], x[j, i])) / wp.sqrt(norms[j, 0])
+
+
+@wp.kernel
+def restart_direction(
+    q: wp.array[wp.vec2d],
+    norm: wp.array[wp.float64],
+    reference: wp.array[wp.float64],
+    candidate: wp.array[wp.vec2d],
+    index: wp.array[wp.int32],
+    recoveries: wp.array[wp.int32],
+    used: wp.array[wp.int32],
+    use_candidate: int,
+    seed: int,
+):
+    i = wp.tid()
+    if i == 0:
+        used[0] = 0
+    if norm[0] <= wp.float64(1.0e-26) * reference[0] or (use_candidate == 2 and index[0] >= 0):
+        if use_candidate != 0 and index[0] >= 0:
+            q[i] = candidate[i]
+            if i == 0:
+                recoveries[0] += 1
+                used[0] = 1
+        else:
+            state = wp.rand_init(seed, i)
+            q[i] = wp.vec2d(wp.float64(wp.randn(state)), wp.float64(wp.randn(state)))
+
+
+@wp.kernel
+def complete_restart_direction(
+    q: wp.array[wp.vec2d],
+    norm: wp.array[wp.float64],
+    used: wp.array[wp.int32],
+    fallbacks: wp.array[wp.int32],
+    seed: int,
+):
+    i = wp.tid()
+    # The candidate was normalized before projection. If it is already in the
+    # growing basis, retain random completion rather than install a zero row.
+    if used[0] != 0 and (norm[0] <= wp.float64(1.0e-26) or not wp.isfinite(norm[0])):
+        state = wp.rand_init(seed, i)
+        q[i] = wp.vec2d(wp.float64(wp.randn(state)), wp.float64(wp.randn(state)))
+        if i == 0:
+            fallbacks[0] += 1
+
+
 class GeneralEigensolver:
     """Complex nonsymmetric eigenpairs with LM/SM/LR/SR/LI/SI selection.
 
@@ -165,6 +230,10 @@ class GeneralEigensolver:
     convergence. No host-side eigensolve, factorization, or convergence checks.
     Inspect device `status` (0 success, 2 projected QR failure) and `converged`.
     Right eigenvectors of a general matrix need not be orthogonal.
+    Restarts expand from the largest remaining requested Ritz residual, using
+    cached operator images. Device ``residual_restarts`` and ``residual_fallbacks``
+    count candidate uses and random completion of projected-out candidates.
+    Fresh original-operator products still determine convergence.
     Solve and capture budgets must be positive integers; zero cycles cannot
     produce initialized Ritz vectors and are rejected before warmup.
     """
@@ -210,6 +279,11 @@ class GeneralEigensolver:
         self.eigenvalues = zero(k)
         self.residuals = zero(k, wp.float64)
         self.norms = zero((k, 1), wp.float64)
+        self.restart_residual = zero(self.n)
+        self.restart_index = wp.full(1, -1, dtype=wp.int32, device=self.device)
+        self.residual_restarts = zero(1, wp.int32)
+        self.recovery_used = zero(1, wp.int32)
+        self.residual_fallbacks = zero(1, wp.int32)
 
     def length(self, j, target):
         target.zero_()
@@ -247,15 +321,36 @@ class GeneralEigensolver:
         self.length(j, self.reference)
         self.orthogonalize(j)
         wp.launch(
-            breakdown_vector,
+            restart_direction,
             self.n,
-            [self.qrows[j], self.norm, self.reference, 701 + j],
+            [
+                self.qrows[j],
+                self.norm,
+                self.reference,
+                self.restart_residual,
+                self.restart_index,
+                self.residual_restarts,
+                self.recovery_used,
+                2 if j == self.keep else int(j > self.keep),
+                701 + j,
+            ],
             device=self.device,
         )
         self.orthogonalize(j)
+        if j >= self.keep:
+            wp.launch(
+                complete_restart_direction,
+                self.n,
+                [self.qrows[j], self.norm, self.recovery_used, self.residual_fallbacks, 701 + j],
+                device=self.device,
+            )
+            self.orthogonalize(j)
         wp.launch(scale_vector, self.n, [self.qrows[j], self.norm], device=self.device)
 
     def initialize(self, seed=42):
+        self.restart_index.fill_(-1)
+        self.residual_restarts.zero_()
+        self.residual_fallbacks.zero_()
         self.status.zero_()
         wp.launch(random_vector, self.n, [self.qrows[0], seed], device=self.device)
         self.length(0, self.norm)
@@ -310,6 +405,46 @@ class GeneralEigensolver:
         for j in range(self.keep):
             self.orthogonalize(j)
             wp.launch(scale_vector, self.n, [self.qrows[j], self.norm], device=self.device)
+
+        self.prepare_restart()
+
+    def prepare_restart(self):
+        # z and projected still describe the pre-restart basis. Their rotation
+        # supplies a search direction without another operator/inverse call.
+        wp.launch(
+            rotate_complex,
+            self.ax.shape,
+            [self.z, self.projected, self.order, self.ax],
+            device=self.device,
+        )
+        self.norms.zero_()
+        wp.launch_tiled(
+            complex_residual,
+            dim=(self.k, (self.n + 255) // 256),
+            inputs=[self.eigenvectors, self.ax, self.ritz, self.order, self.norms],
+            block_dim=128,
+            device=self.device,
+        )
+        wp.launch(
+            select_restart_residual,
+            1,
+            [self.ritz, self.order, self.norms, self.restart_index],
+            device=self.device,
+        )
+        wp.launch(
+            save_restart_residual,
+            self.n,
+            [
+                self.eigenvectors,
+                self.ax,
+                self.ritz,
+                self.order,
+                self.norms,
+                self.restart_index,
+                self.restart_residual,
+            ],
+            device=self.device,
+        )
 
     def finalize(self):
         self.op.apply_complex(self.eigenvectors, self.ax)

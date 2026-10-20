@@ -7,7 +7,9 @@ Rayleigh/product diagnostics and dense reference work stay outside the solver.
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -17,6 +19,8 @@ import scipy.linalg as la
 import warp as wp
 from scipy.optimize import linear_sum_assignment
 
+from benchmarks.audit_profile import graph_summary
+from benchmarks.runtime import warp_runtime_hashes
 from benchmarks.upstream.adapters import complex_matrix, output
 from benchmarks.upstream.run_spectra import FIX, read
 from warpack import GeneralEigensolver, ShiftInvertEigensolver
@@ -29,20 +33,14 @@ def main():
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--iterations", type=int)
     p.add_argument("--tol", type=float, default=1e-12)
-    p.add_argument("--prototype", action="store_true")
     p.add_argument("--trace", action="store_true")
     p.add_argument("--profile", action="store_true")
+    p.add_argument("--warmup", action="store_true")
+    p.add_argument("--diagnostic", action="store_true")
     args = p.parse_args()
     if args.repeats < 1 or (args.iterations is not None and args.iterations < 1):
         p.error("require positive repeats and iterations")
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    solver_type = GeneralEigensolver
-    if args.prototype:
-        import warpack.shift as shift_module
-        from benchmarks.experimental.general_restart import ResidualRestartGeneral
-
-        solver_type = ResidualRestartGeneral
-        shift_module.GeneralEigensolver = ResidualRestartGeneral
     c = next(
         json.loads(line)
         for path in FIX.glob("*.jsonl")
@@ -58,12 +56,9 @@ def main():
             complex_matrix(a), c["k"], c["sigma_real"], ncv=c["ncv"], tol=args.tol
         )
         if shifted
-        else solver_type(complex_matrix(a), c["k"], ncv=c["ncv"], which="SR", tol=args.tol)
+        else GeneralEigensolver(complex_matrix(a), c["k"], ncv=c["ncv"], which="SR", tol=args.tol)
     )
     core = getattr(s, "core", s)
-    if args.prototype:
-        shift_module.GeneralEigensolver = GeneralEigensolver
-        assert isinstance(core, solver_type), "prototype adapter was not installed"
     budget = args.iterations or (30 if shifted else 300)
     trace_buffers = None
     if args.trace:
@@ -73,13 +68,7 @@ def main():
     else:
         g = s.capture(budget)
     report = dict(
-        prototype=args.prototype,
         actual_core_class=type(core).__module__ + "." + type(core).__qualname__,
-        prototype_sha256=hashlib.sha256(
-            Path("benchmarks/experimental/general_restart.py").read_bytes()
-        ).hexdigest()
-        if args.prototype
-        else None,
         case=c,
         tol=args.tol,
         budget=args.iterations or (30 if shifted else 300),
@@ -89,10 +78,26 @@ def main():
         arnoldi_sha256=hashlib.sha256(Path("warpack/arnoldi.py").read_bytes()).hexdigest(),
         gpu=wp.get_device().name,
         warp=wp.__version__,
-        timing_note="Includes first replay; accuracy diagnostic, not matched accepted solve timing",
+        runtime_hashes=warp_runtime_hashes("build/application_spectra.so"),
+        versions={
+            name: importlib.metadata.version(name)
+            for name in ("numpy", "scipy", "nvidia-cudss-cu12")
+        },
+        blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
+        warmup=args.warmup,
+        timing_note="Synchronized replay after one warmup; setup, capture and validation excluded"
+        if args.warmup
+        else "Includes first replay; accuracy diagnostic, not matched accepted solve timing",
         trace_enabled=args.trace,
         replays=[],
     )
+    dot = Path(args.out).with_suffix(".dot")
+    wp.capture_debug_dot_print(g, str(dot))
+    report["graph"] = graph_summary(dot)
+    dot.unlink()
+    if args.warmup:
+        wp.capture_launch(g)
+        wp.synchronize()
     for i in range(args.repeats):
         if trace_buffers is not None:
             trace_buffers[0].fill_(float("nan"))
@@ -125,12 +130,17 @@ def main():
             device_product_errors=np.linalg.norm(ax - av, axis=0).tolist(),
         )
         row["residual_recoveries"] = (
-            int(getattr(s, "core", s).recoveries.numpy()[0])
-            if hasattr(getattr(s, "core", s), "recoveries")
+            int(getattr(s, "core", s).residual_restarts.numpy()[0])
+            if hasattr(getattr(s, "core", s), "residual_restarts")
             else 0
         )
+        if hasattr(core, "residual_fallbacks"):
+            row["residual_fallbacks"] = int(core.residual_fallbacks.numpy()[0])
+        row["core_count"] = int(core.converged.numpy()[0])
+        row["core_residuals"] = core.residuals.numpy().tolist()
         row["accepted"] = bool(
             row["count"] == c["k"]
+            and row["core_count"] == c["k"]
             and row["status"] == 0
             and row["max_absolute_residual"] <= (1e-8 if shifted else 1e-9)
             and row["max_requested_spectrum_error"] <= 1e-8
@@ -163,9 +173,14 @@ def main():
             grouped[result.name] = grouped.get(result.name, 0.0) + result.elapsed
         report["instrumented_kernel_ms"] = grouped
         Path(args.out).write_text(json.dumps(report, indent=2) + "\n")
+    report["accepted"] = all(row["accepted"] for row in report["replays"])
+    report["solve_seconds"] = float(np.median([row["seconds"] for row in report["replays"]]))
+    Path(args.out).write_text(json.dumps(report, indent=2) + "\n")
     if shifted:
         s.core.graph = s.graph = g = None
         s.close()
+    if not report["accepted"] and not args.diagnostic:
+        raise SystemExit("Requested spectrum, residual, norm or full-count gate failed")
 
 
 if __name__ == "__main__":

@@ -57,7 +57,10 @@ The retained-count controls use `min(k+4,max(k,ncv//2))` and
 the original count, rotates cached operator products to compute relative Ritz
 residuals, and swaps the worst requested vector to the last retained row before
 orthogonalization. Their JSON reports identify them as rejected experiments.
-The shipped Arnoldi implementation remains unchanged from `bc2db07`.
+At this historical checkpoint the shipped Arnoldi implementation remained
+unchanged from `bc2db07`. The later [general restart fix](../experimental/GENERAL_RESTART.md)
+uses the actual requested residual as a new direction, rather than swapping
+Ritz-vector order, and validates the two larger strict-count cases in #35.
 
 ## Coverage and API implications
 

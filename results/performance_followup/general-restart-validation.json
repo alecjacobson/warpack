@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "129b82d",
+  "prototype_checkpoint": "afaba1b",
+  "issue": 35,
+  "change": "Public residual-directed general restart from cached operator products; unchanged retained count, tolerances and convergence tests. No added operator/inverse applications.",
+  "pinned": {
+    "warp": "1.18.0+cu12",
+    "full_passed": 1143,
+    "full_seconds": 481.94,
+    "focused_passed": 89,
+    "focused_seconds": 30.21,
+    "additional_selector_passed": 6,
+    "additional_selector_seconds": 2.56
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "focused_passed": 95,
+    "focused_seconds": 32.58
+  },
+  "full_command": "PYTHONPATH=/home/horde/projects/warpack/build/warp-fsai:$PWD OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+  "upstream_cases": [
+    {
+      "result": "results/general-counts-upstream-direct.json",
+      "outcome": "passed",
+      "reported_converged": 20,
+      "replays": 2,
+      "internal_tolerance": 1e-12,
+      "iteration_budget": 300,
+      "note": "Generic upstream assertion does not check requested spectrum; separate repeated public probe does."
+    },
+    {
+      "result": "results/general-counts-upstream-shift.json",
+      "outcome": "passed",
+      "reported_converged": 20,
+      "replays": 2,
+      "internal_tolerance": 1e-12,
+      "iteration_budget": 30,
+      "note": "Generic upstream assertion does not check requested spectrum; separate repeated public probe does."
+    }
+  ],
+  "repeated_public_results": [
+    "results/general-counts-direct-public.json",
+    "results/general-counts-shift-public.json"
+  ],
+  "matched_performance": "results/general-counts-performance-regression.json",
+  "wheel": "results/performance_followup/general-restart-wheel.json",
+  "checks": [
+    "ruff check warpack benchmarks tests: passed",
+    "ruff format --check warpack benchmarks tests: 290 files formatted",
+    "git diff --check: passed"
+  ],
+  "sha256": {
+    "warpack/arnoldi.py": "e8cae9086c59b4d50aac45e17ecc396739e94ce8bdb61f7680fccf5df9bf3b25",
+    "tests/test_general_restart.py": "ed45475a83a94182f7a8c7827f4b2be742e95e0464d16ae3dbea99d8985f4260",
+    "tests/test_general_trace.py": "892714fc96b31b25d8298ecfeda0c8d157411054acfcb44733059426c4177a97",
+    "benchmarks/experimental/general_count_probe.py": "c09f8f8ae5d94e1914635d358a22c32e4f0b79a2e4425e89f1ffbe4c44d36a47"
+  }
+}
