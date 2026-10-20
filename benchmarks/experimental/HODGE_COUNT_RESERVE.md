@@ -19,7 +19,9 @@ It does not change the solver, CG profiles, tolerances, strict count checks,
 physical checks or published performance tables. This is an explicit larger
 test budget, not a claim that the three-cycle profile is reliable or fast.
 36 replays across 12 new setups pass at six cycles, and all 26 focused Hodge
-tests pass. Broader suite validation remains required before closing #103.
+tests pass. The subsequent full pinned suite passes 1,167 tests (462.34 s), including this
+profile. The failed three-cycle result remains retained. This closes the test
+budget issue without claiming a diagnosis of its unreproduced numerical details.
 [Six-cycle evidence](../../results/hodge-count-reserve.json).
 
 ```bash

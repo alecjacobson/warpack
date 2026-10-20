@@ -72,13 +72,13 @@ checks. Those timings are not certified matched-accuracy comparisons.
 The exact n100 `benchmark_gen_24` also misses the requested negative real mode
 with the serial projection and the old restart (129b82d), so this is not caused
 by tiled Schur. Its basis orthogonality error is about 1e-15 and projected
-backward error below 1e-15. Three variants stop after46 cycles with ten genuine,
+backward error below 1e-15. Three variants stop after 46 cycles with ten genuine,
 independent eigenvectors, but return the 11th/12th-magnitude eigenvalue instead
-of the 10th. Fixed80 cycles still miss it; fixed300 recovers it. These controls
+of the 10th. Fixed 80 cycles still miss it; fixed 300 recovers it. These controls
 identify premature target selection, not a defective projected eigensolve.
 [Serial control](../../results/general-selection24-serial.json),
 [old restart](../../results/general-selection24-prior.json),
-[fixed300 control](../../results/general-selection24-fixed300.json).
+[fixed 300 control](../../results/general-selection24-fixed 300.json).
 The remaining selection work is tracked in #104. All three formerly timed-out Spectra workers also finish and pass their
 original assertions and strict counts: `GenEigs_12`, `GenEigs_33`, and
 `ComplexEigs_33`. Both SM cases additionally check the requested spectrum and
@@ -92,3 +92,14 @@ The implementation's experimental checkpoint is commit `2cdd51d`.
 python -m pytest -q tests/test_tiled_schur.py
 python -m benchmarks.experimental.compare_schur --out build/schur-components.json
 ```
+
+## Final local validation
+
+After the separate [Hodge test-budget correction](HODGE_COUNT_RESERVE.md), the
+full pinned suite passes **1,167 tests** (462.34 s). The general/projected
+subset passes 119 on stock Warp 1.15 (30.26 s). Lint, formatting and a clean-source
+wheel check pass; all 24 installed core modules match source, including tiled
+Schur, while benchmark/example/test modules remain outside the wheel. This
+local result does not reclassify the nine stronger upstream selection failures.
+[Validation](../../results/performance_followup/tiled-schur-validation.json),
+[wheel](../../results/performance_followup/tiled-schur-wheel.json).
