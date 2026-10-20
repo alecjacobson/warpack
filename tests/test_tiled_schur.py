@@ -9,8 +9,8 @@ import warp as wp
 from scipy.optimize import linear_sum_assignment
 
 from benchmarks.audit_profile import graph_summary
-from benchmarks.experimental.tiled_schur import TiledSchur
 from benchmarks.upstream.adapters import output
+from warpack.schur_tiled import TiledSchur
 
 
 def workspace(a, budget=None):
@@ -157,3 +157,19 @@ def test_degenerate_projections(kind):
     # not an unjustified forward-eigenvalue or eigenbasis-orthogonality bound.
     assert np.max(np.linalg.norm(a @ v - v * w, axis=0)) / max(1, np.linalg.norm(a)) < 1e-12
     np.testing.assert_allclose(np.linalg.norm(v, axis=0), 1, atol=1e-12)
+
+
+def test_fixed_general_capture_without_conditional_support(monkeypatch, tmp_path):
+    from benchmarks.upstream.adapters import complex_matrix
+    from warpack import GeneralEigensolver
+
+    monkeypatch.setattr(wp, "is_conditional_graph_supported", lambda: False)
+    values = np.arange(1.0, 25)
+    solver = GeneralEigensolver(complex_matrix(np.diag(values)), 4, ncv=24, tol=1e-10)
+    graph = solver.capture(2, adaptive=False)
+    wp.capture_launch(graph)
+    assert solver.converged.numpy()[0] == 4
+    np.testing.assert_allclose(np.sort(output(solver.eigenvalues).real), values[-4:], atol=1e-11)
+    dot = tmp_path / "fixed.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    assert graph_summary(dot)["node_types_including_conditional_body"].get("CONDITIONAL", 0) == 0

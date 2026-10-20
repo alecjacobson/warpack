@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "9b23005",
+  "prototype_checkpoint": "2cdd51d",
+  "issues": [
+    14,
+    103,
+    104
+  ],
+  "standalone": {
+    "pinned_passed": 20,
+    "pinned_seconds": 2.72,
+    "stock_passed": 20,
+    "stock_seconds": 22.44
+  },
+  "integrated_focused": {
+    "pinned_passed": 115,
+    "pinned_seconds": 22.54,
+    "stock_passed": 119,
+    "stock_seconds": 30.26
+  },
+  "reference_checker_tests": {
+    "passed": 2,
+    "seconds": 0.28
+  },
+  "full_initial": {
+    "passed": 1163,
+    "failed": 1,
+    "seconds": 470.9,
+    "failure": "real Hodge strict count at three cycles; #103, mitigated separately in3aad1fa"
+  },
+  "full_after_hodge_reserve": "running",
+  "original_test_timeouts": {
+    "passed": [
+      "GenEigs_12",
+      "GenEigs_33",
+      "ComplexEigs_33"
+    ],
+    "requested_spectrum_checked": [
+      "GenEigs_33",
+      "ComplexEigs_33"
+    ],
+    "timing_scope": "bounded accuracy-only"
+  },
+  "upstream_general_benchmarks": {
+    "completed": 20,
+    "passed": 11,
+    "failed": 9,
+    "worker_timeouts": 0,
+    "failure_issue": 104,
+    "note": "No failed timing is an accepted speed comparison. Exact small wrong-spectrum control also fails old restart and serial Schur."
+  },
+  "accepted_matched_timings": "results/schur-general-comparison.json",
+  "checks": [
+    "ruff check passed",
+    "ruff format --check:299 files formatted",
+    "git diff --check passed"
+  ]
+}

@@ -19,6 +19,7 @@ from .hermitian import (
 )
 from .kernels import loop_update
 from .schur import cabs, schur
+from .schur_tiled import TiledSchur
 
 
 @wp.kernel
@@ -229,6 +230,8 @@ class GeneralEigensolver:
     SM interior targets generally need a shift-inverse operator for reliable
     convergence. No host-side eigensolve, factorization, or convergence checks.
     Inspect device `status` (0 success, 2 projected QR failure) and `converged`.
+    CUDA projections of size 16–64 use a cooperative QR loop when conditional
+    graphs are supported; other sizes/devices retain the serial reference.
     Right eigenvectors of a general matrix need not be orthogonal.
     Restarts expand from the largest remaining requested Ritz residual, using
     cached operator images. Device ``residual_restarts`` and ``residual_fallbacks``
@@ -284,6 +287,18 @@ class GeneralEigensolver:
         self.residual_restarts = zero(1, wp.int32)
         self.recovery_used = zero(1, wp.int32)
         self.residual_fallbacks = zero(1, wp.int32)
+        self.projected_solver = None
+        if self.device.is_cuda and 16 <= self.m <= 64 and wp.is_conditional_graph_supported():
+            self.projected_solver = TiledSchur(
+                self.h,
+                self.schur_vectors,
+                self.projected,
+                self.ritz,
+                self.u,
+                self.cs,
+                self.ss,
+                self.status,
+            )
 
     def length(self, j, target):
         target.zero_()
@@ -372,22 +387,7 @@ class GeneralEigensolver:
             block_dim=128,
             device=self.device,
         )
-        wp.launch(
-            schur,
-            1,
-            [
-                self.h,
-                self.schur_vectors,
-                self.projected,
-                self.ritz,
-                self.u,
-                self.cs,
-                self.ss,
-                self.status,
-                self.m * 100,
-            ],
-            device=self.device,
-        )
+        self.diagonalize()
         wp.launch(sort_complex, 1, [self.ritz, self.order, self.which], device=self.device)
         wp.launch(
             rotate_complex,
@@ -407,6 +407,27 @@ class GeneralEigensolver:
             wp.launch(scale_vector, self.n, [self.qrows[j], self.norm], device=self.device)
 
         self.prepare_restart()
+
+    def diagonalize(self):
+        if self.projected_solver is not None:
+            self.projected_solver.run()
+            return
+        wp.launch(
+            schur,
+            1,
+            [
+                self.h,
+                self.schur_vectors,
+                self.projected,
+                self.ritz,
+                self.u,
+                self.cs,
+                self.ss,
+                self.status,
+                self.m * 100,
+            ],
+            device=self.device,
+        )
 
     def prepare_restart(self):
         # z and projected still describe the pre-restart basis. Their rotation

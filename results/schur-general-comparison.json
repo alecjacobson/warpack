@@ -1,0 +1,50 @@
+{
+  "comparisons": [
+    {
+      "case": "direct",
+      "matched_fields": [
+        "case",
+        "tol",
+        "budget",
+        "matrix_sha256",
+        "warp",
+        "gpu",
+        "runtime_hashes",
+        "versions",
+        "blas_threads",
+        "warmup"
+      ],
+      "configuration_matches": true,
+      "before": "results/general-counts-direct-public.json",
+      "after": "results/schur-general-direct.json",
+      "before_seconds": 17.496526423841715,
+      "after_seconds": 3.2160705104470253,
+      "speedup": 5.440342917546837,
+      "accepted": true
+    },
+    {
+      "case": "shift",
+      "matched_fields": [
+        "case",
+        "tol",
+        "budget",
+        "matrix_sha256",
+        "warp",
+        "gpu",
+        "runtime_hashes",
+        "versions",
+        "blas_threads",
+        "warmup"
+      ],
+      "configuration_matches": true,
+      "before": "results/general-counts-shift-public.json",
+      "after": "results/schur-general-shift.json",
+      "before_seconds": 6.688798826187849,
+      "after_seconds": 1.2876956947147846,
+      "speedup": 5.1943940277515415,
+      "accepted": true
+    }
+  ],
+  "accepted": true,
+  "note": "Algorithm/source hashes intentionally differ; unchanged outer policy, matrices, budgets and acceptance. All trials pass physical/core counts, original residual, spectrum and vector norms."
+}

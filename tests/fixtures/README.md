@@ -93,3 +93,10 @@ are `f3cc97999ca0577b8f4c35210ea8049d52830509eb03da61ca098626dd462c33`
 and `8876fd837d5edea223c9fac804df091d6235f1362bf17c0c306e6db5eec01d1e`.
 The tests check independent eigenvalues, backward residuals, normalization and
 nested device-conditional replay; these matrices are not an outer-solver test.
+
+`spectra_general_lm_selection.npz` preserves the exact real n100 matrix and
+Spectra start from `benchmark_gen_24` (k10/ncv20, LM), using the pinned original
+benchmark generator and seed123. It exposes missed requested modes with full
+residual counts in #104. The matrix SHA256 is `e16ce25c5a35c82b1b18d85f4bc80098bdc342909efe5cfe1676a593c2f518d3`;
+the start SHA256 is `fb1928240eecd2b15737f4ee070ef3110cc6aaffac3452bbe8e140979b15ce59`.
+This generated numerical data is separate from the projected-Schur fixtures.

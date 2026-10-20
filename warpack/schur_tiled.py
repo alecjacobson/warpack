@@ -1,4 +1,4 @@
-"""Cooperative projected complex QR prototype; no vendor dense eigensolver.
+"""Cooperative projected complex QR; no vendor dense eigensolver.
 
 Householder similarity, shifts, deflation and back substitution follow the
 serial reference. Kernel boundaries order reflector sides; each cooperative
@@ -10,8 +10,8 @@ from functools import lru_cache
 
 import warp as wp
 
-from warpack.hermitian import cdot, cmul, norm2
-from warpack.schur import cabs, cdiv, conj, csqrt
+from .hermitian import cdot, cmul, norm2
+from .schur import cabs, cdiv, conj, csqrt
 
 
 @wp.func
@@ -352,7 +352,7 @@ class TiledSchur:
         if h.shape != (self.n, self.n) or h.dtype != wp.vec2d or not self.device.is_cuda:
             raise ValueError("require a square complex128 CUDA projection")
         if not 1 <= self.n <= 64:
-            raise ValueError("prototype supports projection sizes 1 through 64")
+            raise ValueError("tiled Schur supports projection sizes 1 through 64")
         for buffer, shape, dtype in (
             (q, h.shape, wp.vec2d),
             (vectors, h.shape, wp.vec2d),

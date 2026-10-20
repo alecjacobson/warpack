@@ -1,6 +1,7 @@
 """Warp/CuPy on every original Spectra benchmark dataset (10 warm trials)."""
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import time
@@ -10,10 +11,12 @@ import numpy as np
 import warp as wp
 from cupyx.scipy import sparse as cs
 
+from benchmarks.runtime import warp_runtime_hashes
 from warpack import GeneralEigensolver, KrylovSchur, SparseOperator
 from warpack.arnoldi import scale_vector
 
 from .adapters import complex_matrix, execute, matrix, output
+from .general_reference import GeneralReference
 from .run_spectra import ROOT, read
 
 
@@ -55,7 +58,19 @@ def main():
         spectra_revision="db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
         cupy_revision="2316a02d70c7e39d6a7c035529df8358d794256e",
         cupy_runtime=cp.__version__,
-        protocol="Original Spectra generators and starts, all 40 datasets. GPU setup/JIT/capture and validation excluded from 10 warm synchronized solves. CuPy uses pinned _eigen.py over installed runtime. General Warp initialization adapted only to accept original v0. All backends request tol=1e-10; convergence criteria differ by implementation.",
+        warp=wp.__version__,
+        gpu=wp.get_device().name,
+        runtime_hashes=warp_runtime_hashes("build/application_spectra.so"),
+        source_sha256={
+            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+            for path in (
+                "warpack/arnoldi.py",
+                "warpack/schur.py",
+                "warpack/schur_tiled.py",
+                "benchmarks/upstream/run_benchmarks.py",
+            )
+        },
+        protocol="Original Spectra generators and starts, all 40 datasets. GPU setup/JIT/capture and validation excluded from 10 warm synchronized solves. CuPy uses pinned _eigen.py over installed runtime. General Warp initialization adapted only to accept original v0. All backends request tol=1e-10; convergence criteria differ by implementation. General Warp trials additionally check every timed replay against independent requested spectra/subspaces and vector norms, allowing either conjugate member at the cutoff while requiring all larger modes.",
         cases=[],
     )
     for c in cases:
@@ -64,6 +79,7 @@ def main():
         n = len(a)
         k = c["k"]
         m = c["ncv"]
+        reference = GeneralReference(a, k) if c["family"] == "benchmark_gen" else None
         results = []
         for backend in ("warp", "cupy"):
             if backend == "cupy" and c["family"] == "benchmark_gen":
@@ -94,7 +110,23 @@ def main():
                         )
                     wp.synchronize()
                     setup = time.perf_counter() - start
-                    timings = execute(solver, 300, repeats=10)
+
+                    def validate():
+                        trial = reference.check(
+                            output(solver.eigenvalues), output(solver.eigenvectors).T
+                        )
+                        trial["converged"] = int(solver.converged.numpy()[0])
+                        trial["status"] = int(solver.status.numpy()[0])
+                        trial["iterations"] = int(solver.iterations.numpy()[0])
+                        trial["accepted"] &= trial["converged"] == k and trial["status"] == 0
+                        return trial
+
+                    timings = execute(
+                        solver,
+                        300,
+                        repeats=10,
+                        validate=validate if reference is not None else None,
+                    )
                     w = output(solver.eigenvalues)
                     v = output(solver.eigenvectors).T
                     converged = int(solver.converged.numpy()[0])
@@ -128,6 +160,7 @@ def main():
                         and residual < 1e-8
                         and converged == k
                         and status == 0
+                        and all(t["accepted"] for t in timings.get("trials", []))
                         else "failed",
                         setup_seconds=setup,
                         **timings,
@@ -147,7 +180,17 @@ def main():
                         traceback=traceback.format_exc(),
                     )
                 )
-        report["cases"].append(dict(**c, n=n, results=results))
+        report["cases"].append(
+            dict(
+                **c,
+                n=n,
+                results=results,
+                matrix_sha256=hashlib.sha256(a.tobytes()).hexdigest(),
+                start_sha256=hashlib.sha256(v0.tobytes()).hexdigest(),
+                requested_spectrum_checked=reference is not None,
+                all_timed_replays_validated=reference is not None,
+            )
+        )
         (ROOT / args.out).write_text(json.dumps(report, indent=2) + "\n")
         print(
             c["id"],

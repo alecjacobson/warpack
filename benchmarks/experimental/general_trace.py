@@ -2,8 +2,6 @@
 
 import warp as wp
 
-import warpack.arnoldi as arnoldi
-
 
 @wp.kernel
 def record_trace(
@@ -23,12 +21,12 @@ def capture_trace(solver, budget):
     The hooks run only during warmup/capture, never as replay callbacks. A
     fixed outer graph only finalizes its core once, so its trace has one row;
     the projected snapshots still record the last iteration. This diagnostic
-    temporarily intercepts launches and must run in its own benchmark process.
+    temporarily wraps the core projection/finalizer methods during setup.
     """
     core = getattr(solver, "core", solver)
     trace = wp.full((budget, core.k), float("nan"), dtype=wp.float64, device=core.device)
     h, q = wp.empty_like(core.h), wp.empty_like(core.q)
-    original_finalize, original_launch = core.finalize, wp.launch
+    original_finalize, original_diagonalize = core.finalize, core.diagonalize
 
     def finalize():
         original_finalize()
@@ -36,15 +34,14 @@ def capture_trace(solver, budget):
             record_trace, core.k, [core.residuals, core.iterations, trace], device=core.device
         )
 
-    def launch(kernel, *args, **kwargs):
-        if kernel is arnoldi.schur:
-            wp.copy(h, core.h)
-            wp.copy(q, core.q)
-        return original_launch(kernel, *args, **kwargs)
+    def diagonalize():
+        wp.copy(h, core.h)
+        wp.copy(q, core.q)
+        return original_diagonalize()
 
     try:
-        core.finalize, wp.launch = finalize, launch
+        core.finalize, core.diagonalize = finalize, diagonalize
         graph = solver.capture(budget)
     finally:
-        core.finalize, wp.launch = original_finalize, original_launch
+        core.finalize, core.diagonalize = original_finalize, original_diagonalize
     return graph, (trace, h, q)

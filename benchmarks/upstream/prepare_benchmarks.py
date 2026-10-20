@@ -1,15 +1,17 @@
 """Instrument Spectra's original 40 datasets x 10 trials; keep native ARPACK too."""
 
+import argparse
 import json
 import os
 import subprocess
+from pathlib import Path
 
 from .prepare_spectra import HEADER, ROOT, UP
 
 OUT = ROOT / "build/spectra-benchmark-fixtures"
 
 
-def record_native(log):
+def record_native(log, path=None):
     rows = []
     family = None
     for line in log.splitlines():
@@ -29,7 +31,7 @@ def record_native(log):
                 )
             )
     assert len(rows) == 400, f"Expected 400 native trials, got {len(rows)}"
-    path = ROOT / "results/upstream_provenance.json"
+    path = ROOT / "results/upstream_provenance.json" if path is None else Path(path)
     report = json.loads(path.read_text()) if path.exists() else {}
     report["native_spectra_benchmark"] = dict(
         protocol="Unchanged upstream main: 10 datasets x 10 repetitions x 2 sizes x 2 eigenproblem families; exported same matrices and v0 for Warp/CuPy",
@@ -40,6 +42,9 @@ def record_native(log):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--native-out", type=Path, help="Separate native timing/provenance output")
+    args = parser.parse_args()
     OUT.mkdir(exist_ok=True)
     header = HEADER.replace('#include "catch.hpp"', "").replace(
         "Catch::getResultCapture().getCurrentTestName()", 'std::string("upstream benchmark")'
@@ -104,7 +109,9 @@ def main():
             ),
             check=True,
         )
-    record_native((ROOT / "build/upstream_spectra_benchmark_native.log").read_text())
+    record_native(
+        (ROOT / "build/upstream_spectra_benchmark_native.log").read_text(), args.native_out
+    )
     print(
         "Exported and benchmarked",
         sum(len(p.read_text().splitlines()) for p in OUT.glob("*.jsonl")),

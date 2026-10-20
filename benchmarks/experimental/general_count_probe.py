@@ -1,7 +1,8 @@
 """Accuracy diagnostics for the two tight-count Spectra fixtures in #35.
 
 Requires prepare_spectra's original ComplexEigs/GenEigsRealShift fixtures.
-Includes the first graph replay; this is not an accepted timing comparison.
+Use --warmup for synchronized accepted replay timings; otherwise the first
+replay is included and the result is an accuracy diagnostic.
 Rayleigh/product diagnostics and dense reference work stay outside the solver.
 """
 
@@ -75,6 +76,8 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         matrix_sha256=hashlib.sha256(a.tobytes()).hexdigest(),
         projected_sha256=hashlib.sha256(Path("warpack/schur.py").read_bytes()).hexdigest(),
+        projected_backend="tiled" if core.projected_solver is not None else "serial",
+        tiled_sha256=hashlib.sha256(Path("warpack/schur_tiled.py").read_bytes()).hexdigest(),
         arnoldi_sha256=hashlib.sha256(Path("warpack/arnoldi.py").read_bytes()).hexdigest(),
         gpu=wp.get_device().name,
         warp=wp.__version__,

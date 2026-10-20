@@ -11,9 +11,10 @@ from warpack import GeneralEigensolver
 def test_trace_restores_hooks_and_copies_pre_schur_projection():
     a = np.diag(np.arange(1.0, 41)) + np.diag(np.full(39, 0.1 + 0.2j), 1)
     solver = GeneralEigensolver(complex_matrix(a), 3, ncv=16, tol=1e-9)
-    launch, finalize = wp.launch, solver.finalize
+    launch, finalize, diagonalize = wp.launch, solver.finalize, solver.diagonalize
     graph, (trace, h, q) = capture_trace(solver, 40)
     assert wp.launch is launch
+    assert solver.diagonalize == diagonalize
     assert solver.finalize == finalize
     trace.fill_(float("nan"))
     wp.capture_launch(graph)

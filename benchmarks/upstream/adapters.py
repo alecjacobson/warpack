@@ -60,21 +60,27 @@ def output(a):
     return x[..., 0] + 1j * x[..., 1] if a.dtype == wp.vec2d else x
 
 
-def execute(solver, iterations=300, repeats=1, **capture_options):
+def execute(solver, iterations=300, repeats=1, validate=None, **capture_options):
     start = time.perf_counter()
     graph = solver.capture(iterations, **capture_options)
     wp.capture_launch(graph)
     wp.synchronize()
     warmup = time.perf_counter() - start
     samples = []
+    validations = []
     for _ in range(repeats):
         start = time.perf_counter()
         wp.capture_launch(graph)
         wp.synchronize()
         samples.append(time.perf_counter() - start)
-    return dict(
+        if validate is not None:
+            validations.append(validate())
+    result = dict(
         solve_seconds=float(np.median(samples)), samples=samples, capture_warmup_seconds=warmup
     )
+    if validate is not None:
+        result["trials"] = validations
+    return result
 
 
 def eigsh(

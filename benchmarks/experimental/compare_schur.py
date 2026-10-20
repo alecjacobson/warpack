@@ -17,10 +17,10 @@ import scipy.linalg as la
 import warp as wp
 from scipy.optimize import linear_sum_assignment
 
-from benchmarks.experimental.tiled_schur import TiledSchur
 from benchmarks.runtime import warp_runtime_hashes
 from benchmarks.upstream.adapters import output
 from warpack.schur import schur
+from warpack.schur_tiled import TiledSchur
 
 
 def compare(a, repeats, batches):
@@ -102,7 +102,7 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         sha256={
             name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
-            for name in ("warpack/schur.py", "benchmarks/experimental/tiled_schur.py")
+            for name in ("warpack/schur.py", "warpack/schur_tiled.py")
         },
         runtime_hashes=warp_runtime_hashes("build/application_spectra.so"),
         warp=wp.__version__,
