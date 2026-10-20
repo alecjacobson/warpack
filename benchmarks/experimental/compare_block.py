@@ -127,6 +127,7 @@ def main():
     p.add_argument("--shift", type=float, default=0.01)
     p.add_argument("--fsai-width", type=int, default=64)
     p.add_argument("--fsai-layout", choices=["rows", "columns"], default="rows")
+    p.add_argument("--matrix-layout", choices=["rows", "columns"], default="rows")
     p.add_argument("--preconditioner", choices=["fsai", "bj"], default="fsai")
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--tol", type=float, default=1e-8)
@@ -182,6 +183,8 @@ def main():
         p.error("active-cg-bucket-size requires a positive size and batched-cg")
     if args.fsai_layout == "columns" and (not args.batched_cg or args.preconditioner != "fsai"):
         p.error("column FSAI layout requires batched CG with FSAI")
+    if args.matrix_layout == "columns" and not args.batched_cg:
+        p.error("column matrix layout requires batched CG")
     before = other_gpu_processes()
     a, mass, shifted, constraints, sa, sb, k, check = prepare(args)
     if args.cupy_width is not None and not k <= args.cupy_width <= args.width:
@@ -239,6 +242,7 @@ def main():
                 preconditioner=pre,
                 working_dtype=wp.float32 if args.inner_fp32 else wp.float64,
                 fsai_layout=args.fsai_layout,
+                matrix_layout=args.matrix_layout,
             )
         elif args.inner_cg:
             preconditioner = CGInverse(
@@ -321,6 +325,7 @@ def main():
                 "benchmarks/experimental/compare_block.py",
                 "benchmarks/experimental/batched_cg.py",
                 "benchmarks/experimental/coalesced_fsai.py",
+                "benchmarks/experimental/coalesced_operator.py",
                 "benchmarks/experimental/active_cg.py",
                 "benchmarks/experimental/cached_x_image.py",
                 "benchmarks/experimental/active_search.py",

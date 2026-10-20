@@ -1,5 +1,8 @@
 # Adjacent right-hand sides for FSAI application
 
+The subsequent [matrix-application report](COALESCED_OPERATOR.md) improves this
+configuration to 1.83–1.84s. This report retains the factor-only comparison.
+
 Changing the memory layout used to apply upstream Warp's FSAI factors reduces
 Anvil's experimental block solve from **2.2915 to 1.8976 seconds**, about **17%**.
 CuPy using the same captured upstream Warp CG preconditioner improves from

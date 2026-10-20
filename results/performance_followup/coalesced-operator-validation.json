@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-20",
+  "base_main": "f7e33ea",
+  "environment": "L40, driver 570.158.01; pinned Warp 1.18.0+cu12 overlay 04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+  "tests": [
+    {
+      "command": "python -m pytest tests/test_coalesced_operator.py tests/test_batched_cg_experimental.py tests/test_active_cg_experimental.py tests/test_active_search_experimental.py -q",
+      "environment": "pinned",
+      "passed": 128,
+      "seconds": 7.07
+    },
+    {
+      "command": "python -m pytest tests/test_coalesced_operator.py -q",
+      "environment": "stock Warp 1.15",
+      "passed": 32,
+      "seconds": 4.21
+    }
+  ],
+  "scope": "Experimental CG matrix application only. Upstream CG and FSAI unchanged. No installed core changes; earlier full-suite record is separate.",
+  "source_sha256": {
+    "benchmarks/experimental/coalesced_operator.py": "e2532d12cee8335df333db6963b41646c49f7da79bea4f555576523eb015884e",
+    "benchmarks/experimental/compare_operator_layout.py": "a422e91124170fb9ac9786e9057ab4199328d35f02c07932ba57b6de22cf5957",
+    "benchmarks/experimental/batched_cg.py": "6a33d6622312a7df9a7d3728e64a019458af5c50d939a67a2bc2d22537f8dbad",
+    "benchmarks/experimental/compare_block.py": "0c9c1a7aba10c04ed05f804eeb93ab6edeeee388277b955a1b0cf1ea966b4cf4",
+    "tests/test_coalesced_operator.py": "27618276e5a18705d1e4f54376cef238da8470b2d6a7ec129093b6c22afb8914",
+    "tests/test_batched_cg_experimental.py": "315d8b05b8f8fa5166c8f2c2754e53dde2b28bace6ef16ae0973c514c88a78a1",
+    "tests/test_active_cg_experimental.py": "9fd3599866827ca66cf801d3d49c8cb26b99d920e1b0099b7e4de70ec6008b31"
+  }
+}

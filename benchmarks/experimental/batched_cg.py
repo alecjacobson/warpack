@@ -89,12 +89,23 @@ def bsr_product(dtype):
 class RepeatedOperator:
     """Same sparse operator on independent contiguous vector blocks."""
 
-    def __init__(self, matrix, width, offsets):
+    def __init__(self, matrix, width, offsets, layout="rows"):
+        if layout not in ("rows", "columns"):
+            raise ValueError("matrix layout must be rows or columns")
+        self.coalesced = None
+        if layout == "columns":
+            from .coalesced_operator import CoalescedSparseApplication
+
+            self.coalesced = CoalescedSparseApplication(matrix, width)
         self.matrix, self.width, self.n = matrix, width, matrix.shape[0]
         self.operator = BatchedSparseOperator(matrix) if matrix.scalar_type == wp.float64 else None
-        self.tmp = wp.empty(width * self.n, dtype=matrix.scalar_type, device=matrix.device)
+        self.tmp = (
+            wp.empty(width * self.n, dtype=matrix.scalar_type, device=matrix.device)
+            if self.coalesced is None
+            else None
+        )
         self.linear = linear.LinearOperator(
-            (self.tmp.size, self.tmp.size),
+            (width * self.n, width * self.n),
             matrix.scalar_type,
             matrix.device,
             self.matvec,
@@ -103,6 +114,8 @@ class RepeatedOperator:
         )
 
     def matvec(self, x, y, z, alpha, beta):
+        if self.coalesced is not None:
+            return self.coalesced.matvec(x, y, z, alpha, beta)
         output = z if alpha == 1 and beta == 0 and z.ptr != x.ptr else self.tmp
         rows, out = x.reshape((self.width, self.n)), output.reshape((self.width, self.n))
         if self.matrix.block_shape == (1, 1):
@@ -193,6 +206,7 @@ class BatchedCGInverse:
         working_dtype=wp.float64,
         _working_matrix=None,
         fsai_layout="rows",
+        matrix_layout="rows",
     ):
         if not hasattr(linear.LinearOperator, "batch_offsets"):
             raise RuntimeError("Requires upstream Warp batched LinearOperator/CG support")
@@ -216,6 +230,9 @@ class BatchedCGInverse:
             preconditioner is None or not hasattr(preconditioner, "G")
         ):
             raise ValueError("column layout requires upstream FSAI factors")
+        if matrix_layout not in ("rows", "columns"):
+            raise ValueError("matrix layout must be rows or columns")
+        self.matrix_layout = matrix_layout
         self.fsai_layout = fsai_layout
         self.working_dtype = working_dtype
         self.source_matrix = matrix
@@ -240,7 +257,7 @@ class BatchedCGInverse:
             or working_matrix.row_counts is not None
         ):
             raise ValueError("incompatible shared working matrix")
-        self.operator = RepeatedOperator(working_matrix, width, self.offsets)
+        self.operator = RepeatedOperator(working_matrix, width, self.offsets, matrix_layout)
         self.preconditioner = (
             RepeatedPreconditioner(
                 preconditioner, width, self.n, self.offsets, self.device, working_dtype, fsai_layout
@@ -277,6 +294,7 @@ class BatchedCGInverse:
             working_dtype=self.working_dtype,
             _working_matrix=self.operator.matrix,
             fsai_layout=self.fsai_layout,
+            matrix_layout=self.matrix_layout,
         )
 
     def reset_stats(self):

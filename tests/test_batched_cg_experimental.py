@@ -113,6 +113,7 @@ def test_fp32_inner_solve_keeps_scaled_rhs_independent(layout, block, in_place):
         maxiter=100,
         working_dtype=wp.float32,
         fsai_layout=layout,
+        matrix_layout=layout,
     )
     source = wp.zeros((7, len(a)), dtype=wp.float64)
     out = source if in_place else wp.empty_like(source)
@@ -159,6 +160,7 @@ def test_fp32_preconditioning_preserves_fp64_eigen_accuracy(layout, coupled_mass
         maxiter=3,
         working_dtype=wp.float32,
         fsai_layout=layout,
+        matrix_layout=layout,
     )
     solver = BlockLOBPCG(
         SparseOperator(matrix(a)),
@@ -285,6 +287,7 @@ def test_batched_cg_changed_source_values_replay(layout, block, dtype, tolerance
         preconditioner=pre,
         working_dtype=dtype,
         fsai_layout=layout,
+        matrix_layout=layout,
     )
     rhs = wp.zeros((3, len(a)), dtype=wp.float64)
     inverse.apply(rhs, rhs)
