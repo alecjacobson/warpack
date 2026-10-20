@@ -64,6 +64,15 @@ Run GPU jobs sequentially. The upstream Spectra benchmark has 40 dense datasets 
 
 These commands overwrite recorded reports. Omit `--fresh` to resume an interrupted bounded run; without it, already completed cases are retained.
 
+The bounded numerical runner also accepts `--fixtures PATH --accuracy-only`
+for a separate export and untimed validation. An absent/empty fixture directory
+or a selection matching no cases is an error; it cannot be treated as a
+completed suite. A valid inventory with all cases already recorded still
+resumes successfully without rerunning them. To limit temporary disk use,
+export and validate one family at a time, retaining reports and generator
+provenance before removing regenerable matrix exports. These options do not
+apply to the performance benchmark runner.
+
 No eigensolver benchmark was found in the pinned CuPy performance repository; its suites cover array operations, reductions, kernels, and convolution. CuPy is measured on the shared Spectra datasets instead. CuPy has no general sparse `eigs` entry point, so those benchmark rows are marked unsupported.
 
 Each bounded worker's wall limit includes import, setup, capture, validation, and replays. Spectra cases that exceeded the initial 30-second limit receive a 120-second retry; benchmark workers allow 180 seconds for ten timed solves plus preparation. A timeout is reported separately from numerical failure and is not an accepted timing or a lower bound on a single solve. Completed rows are retained on resume, and retry records preserve earlier timeout metadata. The first Spectra pass ran in one process; its completed rows are retained, while the remaining cases use isolated workers.

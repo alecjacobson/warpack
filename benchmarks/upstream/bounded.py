@@ -22,6 +22,10 @@ def main():
     parser.add_argument("--case", help="Restrict to this exported case ID")
     parser.add_argument("--families", help="Comma-separated families for a focused regression run")
     parser.add_argument(
+        "--fixtures", type=Path, help="Explicit Spectra numerical-fixture directory"
+    )
+    parser.add_argument("--accuracy-only", action="store_true", help="Skip Spectra solve timing")
+    parser.add_argument(
         "--out", type=Path, help="Separate output report; preserves published results"
     )
     parser.add_argument("--fresh", action="store_true", help="Replace the recorded suite results")
@@ -29,7 +33,11 @@ def main():
     if args.fresh and args.retry_timeouts:
         parser.error("--fresh and --retry-timeouts are mutually exclusive")
     benchmark = args.suite == "benchmarks"
+    if benchmark and (args.fixtures is not None or args.accuracy_only):
+        parser.error("--fixtures and --accuracy-only apply to the Spectra numerical suite")
     folder = ROOT / ("build/spectra-benchmark-fixtures" if benchmark else "build/spectra-fixtures")
+    if args.fixtures is not None:
+        folder = args.fixtures.resolve()
     target = ROOT / (
         "results/upstream_benchmarks.json" if benchmark else "results/upstream_spectra_warp.json"
     )
@@ -60,10 +68,14 @@ def main():
         cases = [c for c in cases if c["id"] == args.case]
         if not cases:
             parser.error("No matching case: " + args.case)
+    if not cases:
+        parser.error(f"No matching exported fixtures in {folder}; prepare the fixtures first")
     report = (
         json.loads(target.read_text()) if target.exists() and not args.fresh else dict(cases=[])
     )
     report["per_case_wall_limit_seconds"] = args.timeout
+    report["fixture_directory"] = str(folder)
+    report["accuracy_only"] = args.accuracy_only
     report["timeout_scope"] = (
         "Whole worker including import/setup/capture/validation and all replays; subprocess terminated to release CUDA context. Completed earlier cases retained."
     )
@@ -75,7 +87,7 @@ def main():
         and c["family"] != args.retry_family
     }
     logs = ROOT / "build/upstream-workers"
-    logs.mkdir(exist_ok=True)
+    logs.mkdir(parents=True, exist_ok=True)
     pending = [c for c in cases if c["id"] not in finished]
     for attempt, c in enumerate(pending, 1):
         with (folder / (c["id"] + ".a")).open("rb") as matrix_file:
@@ -91,8 +103,13 @@ def main():
         start = time.perf_counter()
         with log.open("w") as f:
             try:
+                command = [sys.executable, "-m", module, "--case", c["id"], "--out", str(output)]
+                if not benchmark:
+                    command.extend(["--fixtures", str(folder)])
+                    if args.accuracy_only:
+                        command.append("--accuracy-only")
                 p = subprocess.run(
-                    [sys.executable, "-m", module, "--case", c["id"], "--out", str(output)],
+                    command,
                     stdout=f,
                     stderr=subprocess.STDOUT,
                     env=os.environ,
