@@ -85,6 +85,28 @@ def test_pencil_quotient_keeps_zero_and_repeated_modes():
         inverse.close()
 
 
+def test_singular_pencil_cannot_report_infinite_modes_as_finite_convergence():
+    n, k = 12, 4
+    a = np.diag(np.arange(1.0, n + 1))
+    b = np.diag(np.r_[np.ones(3), np.zeros(n - 3)])
+    sigma = -0.5 + 0.2j
+    inverse = ComplexShiftInverse(complex_matrix(a - sigma * b), backend="gmres", inner_restart=24)
+    solver = GeneralizedShiftInvertEigensolver(
+        complex_matrix(a), complex_matrix(b), inverse, k, sigma=sigma, ncv=n, tol=1e-10
+    )
+    try:
+        graph = solver.capture(3)
+        wp.capture_launch(graph)
+        # The regular pencil has only three finite eigenvalues. A fourth
+        # zero transformed value cannot satisfy a finite original equation.
+        assert solver.converged.numpy()[0] < k
+        assert not np.all(solver.residuals.numpy() <= solver.tol)
+    finally:
+        solver.close()
+        graph = None
+        inverse.close()
+
+
 @pytest.mark.parametrize("polish", [1, 2])
 @pytest.mark.parametrize("rayleigh", [False, True])
 def test_declared_pencil_polish_preserves_physical_modes(polish, rayleigh):
