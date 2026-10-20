@@ -121,3 +121,7 @@ The corrected control passes every measured sample. Median solves are scipy: 18.
 iterations; shorter explicit budgets require separate acceptance checks.
 [Corrected control](../../results/damped-medium-physical-gates.json),
 [occupancy](../../results/damped-medium-physical-gates.occupancy.json).
+
+The [replication and additional large variants](../experimental/DAMPED_RECOVERY.md#replication-and-further-large-variants)
+pass another 27 supported-backend samples on nonproportional, gyroscopic and
+coupled-mass systems with the same settings. Warp medians are 0.199–0.219 s.

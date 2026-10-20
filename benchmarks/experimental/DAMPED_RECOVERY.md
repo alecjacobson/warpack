@@ -75,3 +75,31 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
   --reference-refinement 1 --reference-tol 1e-12 --tol 2e-8 \
   --out build/damped-balanced8.json
 ```
+
+
+## Replication and further large variants
+
+The final native ABI guard is included in a fresh nonproportional replication
+and two additional 65,536-unknown variants. Every supported-backend sample
+passes again (27 samples total); all three occupancy monitors are eligible.
+The repeated nonproportional Warp median is 0.218532 s, consistent with the first
+0.218344s. The gyroscopic and coupled-mass variants use the exact same profile,
+without retuning tolerances, basis width or iteration budget.
+
+| Case | ARPACK solve(s) | Spectra solve(s) | Warp+cuDSS solve(s) |
+|---|---:|---:|---:|
+| nonproportional | 1.155124 | 2.221034 | 0.218532 |
+| gyroscopic | 1.190982 | 2.076426 | 0.218731 |
+| coupled-mass | 1.878366 | 3.356669 | 0.199320 |
+
+[nonproportional raw trials](../../results/damped-large-balanced8-repeat.json), [occupancy](../../results/damped-large-balanced8-repeat.occupancy.json).
+[gyroscopic raw trials](../../results/damped-large-gyroscopic.json), [occupancy](../../results/damped-large-gyroscopic.occupancy.json).
+[coupled-mass raw trials](../../results/damped-large-coupled-mass.json), [occupancy](../../results/damped-large-coupled-mass.occupancy.json).
+
+The coupled-mass fixture still has lumped spatial mass with non-diagonal 2x2
+polarization blocks. These tests do not add a general nonsymmetric pencil or
+left-mode API. The historical tol 1e-10 failure remains correctly reported as
+nonconvergence; the validated practical profile is explicit above. Earlier
+records' `versions.warp-lang` describes the installed distribution; the
+`warp_runtime` field in newer records identifies the imported pinned overlay.
+The runtime source hashes identify the actual code in both cases.
