@@ -1,0 +1,11 @@
+{
+  "issue": 110,
+  "runtime": "Warp 1.15.0",
+  "command": "PYTHONPATH=$PWD OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest build/test_fused_schur.py -q",
+  "passed": 4,
+  "failed": 17,
+  "seconds": 5.41,
+  "source_sha256": "12f2d484b63cc6ca322abdb5b5a85ba6edb83b1ab181047d7738159c52fe1cd8",
+  "failure": "2D shared vec2d tile indexing resolves to vector-component overloads; NVRTC error6. Public tiled path unaffected.",
+  "correction": "Flattened alias for scalar indexing, retaining 2D tile views for row/column updates; precompute tile size as wp.constant for Warp1.15."
+}

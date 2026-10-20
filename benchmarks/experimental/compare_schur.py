@@ -23,22 +23,26 @@ from warpack.schur import schur
 from warpack.schur_tiled import TiledSchur
 
 
-def compare(a, repeats, batches):
+def compare(a, repeats, batches, methods=("serial", "tiled")):
     n = len(a)
     source = wp.array(np.stack([a.real, a.imag], axis=-1), dtype=wp.vec2d)
     h, q, v = (wp.empty_like(source) for _ in range(3))
     values, u, ss = (wp.empty(n, dtype=wp.vec2d) for _ in range(3))
     cs, status = wp.empty(n, dtype=wp.float64), wp.zeros(1, dtype=wp.int32)
-    tiled = TiledSchur(h, q, v, values, u, cs, ss, status)
+    engines = {"tiled": TiledSchur(h, q, v, values, u, cs, ss, status)}
+    if "fused" in methods:
+        from benchmarks.experimental.schur_fused import FusedSchur
+
+        engines["fused"] = FusedSchur(h, q, v, values, u, cs, ss, status)
     reference = la.eigvals(a)
     norm = max(np.linalg.norm(a), np.finfo(float).tiny)
     result = dict(n=n, matrix_sha256=hashlib.sha256(a.tobytes()).hexdigest(), methods={})
-    for name in ("serial", "tiled"):
+    for name in methods:
 
         def run():
             wp.copy(h, source)
-            if name == "tiled":
-                tiled.run()
+            if name in engines:
+                engines[name].run()
             else:
                 wp.launch(schur, 1, [h, q, v, values, u, cs, ss, status, n * 100])
 
@@ -81,9 +85,16 @@ def compare(a, repeats, batches):
             accepted=all(t["accepted"] for t in trials),
         )
     result["accepted"] = all(m["accepted"] for m in result["methods"].values())
-    result["tiled_over_serial"] = (
-        result["methods"]["tiled"]["median_seconds"] / result["methods"]["serial"]["median_seconds"]
-    )
+    if "serial" in methods and "tiled" in methods:
+        result["tiled_over_serial"] = (
+            result["methods"]["tiled"]["median_seconds"]
+            / result["methods"]["serial"]["median_seconds"]
+        )
+    if "tiled" in methods and "fused" in methods:
+        result["fused_over_tiled"] = (
+            result["methods"]["fused"]["median_seconds"]
+            / result["methods"]["tiled"]["median_seconds"]
+        )
     return result
 
 
@@ -92,6 +103,9 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--batches", type=int, default=3)
+    p.add_argument(
+        "--methods", nargs="+", choices=("serial", "tiled", "fused"), default=["serial", "tiled"]
+    )
     p.add_argument("--sizes", type=int, nargs="*", default=[6, 16, 32, 50, 64])
     args = p.parse_args()
     if args.repeats < 1 or args.batches < 1 or any(not 1 <= n <= 64 for n in args.sizes):
@@ -102,11 +116,17 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         sha256={
             name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
-            for name in ("warpack/schur.py", "warpack/schur_tiled.py")
+            for name in (
+                "warpack/schur.py",
+                "warpack/schur_tiled.py",
+                "benchmarks/experimental/schur_fused.py",
+                "benchmarks/experimental/compare_schur.py",
+            )
         },
         runtime_hashes=warp_runtime_hashes("build/application_spectra.so"),
         warp=wp.__version__,
         gpu=wp.get_device().name,
+        methods=args.methods,
         repeats=args.repeats,
         batches=args.batches,
         timing_note="One warmup; synchronized replay batches; input reset per replay; setup/capture/reference excluded",
@@ -119,7 +139,7 @@ def main():
         {f"random{n}": rng.normal(size=(n, n)) + 1j * rng.normal(size=(n, n)) for n in args.sizes}
     )
     for case, matrix in matrices.items():
-        report["cases"][case] = compare(matrix, args.repeats, args.batches)
+        report["cases"][case] = compare(matrix, args.repeats, args.batches, args.methods)
         args.out.write_text(json.dumps(report, indent=2) + "\n")
         print(case, report["cases"][case], flush=True)
     report["accepted"] = all(c["accepted"] for c in report["cases"].values())

@@ -13,7 +13,16 @@ from benchmarks.upstream.adapters import output
 from warpack.schur_tiled import TiledSchur
 
 
-def workspace(a, budget=None):
+@pytest.fixture(params=["tiled", "fused"])
+def solver_type(request):
+    if request.param == "fused":
+        from benchmarks.experimental.schur_fused import FusedSchur
+
+        return FusedSchur
+    return TiledSchur
+
+
+def workspace(a, solver_type, budget=None):
     data = np.stack([a.real, a.imag], axis=-1)
     source = wp.array(data, dtype=wp.vec2d)
     h, q, v = wp.empty_like(source), wp.empty_like(source), wp.empty_like(source)
@@ -21,18 +30,18 @@ def workspace(a, budget=None):
     values, u, ss = (wp.empty(n, dtype=wp.vec2d) for _ in range(3))
     cs = wp.empty(n, dtype=wp.float64)
     status = wp.zeros(1, dtype=wp.int32)
-    solver = TiledSchur(h, q, v, values, u, cs, ss, status, maxiter=budget)
+    solver = solver_type(h, q, v, values, u, cs, ss, status, maxiter=budget)
     return source, solver
 
 
 @pytest.mark.parametrize("n", [1, 4, 17, 32, 50, 64])
 @pytest.mark.parametrize("complex_input", [False, True])
-def test_changed_projection(n, complex_input, tmp_path):
+def test_changed_projection(n, complex_input, tmp_path, solver_type):
     rng = np.random.default_rng(81)
     a = rng.normal(size=(n, n)).astype(complex)
     if complex_input:
         a += 1j * rng.normal(size=(n, n))
-    source, solver = workspace(a)
+    source, solver = workspace(a, solver_type)
     wp.copy(solver.h, source)
     solver.run()
     wp.synchronize()
@@ -62,18 +71,18 @@ def test_changed_projection(n, complex_input, tmp_path):
     assert all("DtoD" in kind for kind in audit["memcpy_kinds"])
 
 
-def test_qr_iteration_budget_reports_failure():
+def test_qr_iteration_budget_reports_failure(solver_type):
     a = np.random.default_rng(91).normal(size=(32, 32)).astype(complex)
-    source, solver = workspace(a, budget=1)
+    source, solver = workspace(a, solver_type, budget=1)
     wp.copy(solver.h, source)
     solver.run()
     assert solver.status.numpy()[0] == 2
     assert solver.state.numpy()[1] == 1
 
 
-def test_nonfinite_projection_then_same_graph_recovers():
+def test_nonfinite_projection_then_same_graph_recovers(solver_type):
     a = np.random.default_rng(92).normal(size=(17, 17)).astype(complex)
-    source, solver = workspace(a)
+    source, solver = workspace(a, solver_type)
     wp.copy(solver.h, source)
     solver.run()
     wp.synchronize()
@@ -96,10 +105,10 @@ def decrease(running: wp.array[wp.int32]):
 
 
 @pytest.mark.parametrize("case", ["direct", "shift"])
-def test_actual_projection_in_nested_capture(case, tmp_path):
+def test_actual_projection_in_nested_capture(case, tmp_path, solver_type):
     with np.load(Path(__file__).parent / "fixtures/general_projections.npz") as data:
         a = data[case]
-    source, solver = workspace(a)
+    source, solver = workspace(a, solver_type)
     running = wp.zeros(1, dtype=wp.int32)
 
     def body():
@@ -128,13 +137,14 @@ def test_actual_projection_in_nested_capture(case, tmp_path):
     dot = tmp_path / "nested.dot"
     wp.capture_debug_dot_print(capture.graph, str(dot))
     audit = graph_summary(dot)
-    assert audit["node_types_including_conditional_body"].get("CONDITIONAL", 0) == 2
+    expected = 2 if solver_type is TiledSchur else 1
+    assert audit["node_types_including_conditional_body"].get("CONDITIONAL", 0) == expected
     assert audit["node_types_including_conditional_body"].get("HOST", 0) == 0
     assert all("DtoD" in kind for kind in audit["memcpy_kinds"])
 
 
 @pytest.mark.parametrize("kind", ["identity", "zero", "repeated", "nonnormal"])
-def test_degenerate_projections(kind):
+def test_degenerate_projections(kind, solver_type):
     n = 32
     if kind == "zero":
         a = np.zeros((n, n), dtype=complex)
@@ -148,7 +158,7 @@ def test_degenerate_projections(kind):
         rng = np.random.default_rng(321)
         q = np.linalg.qr(rng.normal(size=(n, n)) + 1j * rng.normal(size=(n, n)))[0]
         a = q @ a @ q.conj().T
-    source, solver = workspace(a)
+    source, solver = workspace(a, solver_type)
     wp.copy(solver.h, source)
     solver.run()
     assert solver.status.numpy()[0] == 0
