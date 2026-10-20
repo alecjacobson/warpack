@@ -1,0 +1,978 @@
+{
+  "source_commit": "e7f901a02d8ecaf6e2f4a5e92bdb2526544ef2ab",
+  "production_or_benchmark_code_changed": false,
+  "gpu": "NVIDIA L40",
+  "driver": "570.158.01",
+  "cpu_blas_omp_threads": 4,
+  "protocol": "Seven sequential processes, each with three synchronized warm solves per backend and validation after every solve. Both backends share the same Warp factors/upstream CG settings within each process. No new CPU sparse reference factorization; cached Anvil eigenvectors reused. Unlocked clocks. Every rejected profile retained.",
+  "profiles": [
+    {
+      "profile": "control",
+      "accepted": true,
+      "timing_eligible": true,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 24,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 32,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 25,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-control.json"
+      },
+      "total_setup_seconds": 1.2914302200078964,
+      "capture_seconds": 1.1515361107885838,
+      "device_free_memory_decrease_bytes": 4454350848,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 183,
+          "MEMCPY": 110,
+          "KERNEL": 2461,
+          "CONDITIONAL": 30
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 110
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 1.7784115225076675,
+          "iterations": [
+            16,
+            16,
+            16
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            7800,
+            7800,
+            7800
+          ],
+          "worst_original_residual": 1.913072178761976e-08,
+          "worst_returned_pair_residual": 9.5653608938372e-09,
+          "worst_relative_eigenvalue_error": 5.1736392947532295e-14,
+          "minimum_mac": 0.9999999999999993,
+          "worst_orthogonality": 1.9984014443252818e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": true,
+          "median_seconds": 2.167554784566164,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            9200,
+            8950,
+            8950
+          ],
+          "worst_original_residual": 1.9833826559511377e-08,
+          "worst_returned_pair_residual": 9.91691348602001e-09,
+          "worst_relative_eigenvalue_error": 4.106937012693379e-12,
+          "minimum_mac": 0.9999999999999989,
+          "worst_orthogonality": 1.27675647831893e-14,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    },
+    {
+      "profile": "width28",
+      "accepted": true,
+      "timing_eligible": true,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 28,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 32,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 25,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-width28.json"
+      },
+      "total_setup_seconds": 1.7772235944867134,
+      "capture_seconds": 1.4336407333612442,
+      "device_free_memory_decrease_bytes": 5129633792,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 212,
+          "MEMCPY": 132,
+          "KERNEL": 3476,
+          "CONDITIONAL": 38
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 132
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 2.194270472973585,
+          "iterations": [
+            14,
+            14,
+            14
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            8500,
+            8500,
+            8500
+          ],
+          "worst_original_residual": 9.748873717511716e-09,
+          "worst_returned_pair_residual": 4.874436858748188e-09,
+          "worst_relative_eigenvalue_error": 7.938094626069869e-14,
+          "minimum_mac": 0.9999999999999991,
+          "worst_orthogonality": 1.9984014443252818e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": true,
+          "median_seconds": 2.192300785332918,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            8800,
+            8725,
+            8800
+          ],
+          "worst_original_residual": 1.9239587190094075e-08,
+          "worst_returned_pair_residual": 9.619793599345179e-09,
+          "worst_relative_eigenvalue_error": 6.969091970177033e-12,
+          "minimum_mac": 0.9999999999999993,
+          "worst_orthogonality": 1.709743457922741e-14,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    },
+    {
+      "profile": "width32",
+      "accepted": true,
+      "timing_eligible": true,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 32,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 32,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 25,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-width32.json"
+      },
+      "total_setup_seconds": 1.83182904869318,
+      "capture_seconds": 1.6870893016457558,
+      "device_free_memory_decrease_bytes": 5842665472,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 241,
+          "MEMCPY": 154,
+          "KERNEL": 4615,
+          "CONDITIONAL": 46
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 154
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 2.1440088860690594,
+          "iterations": [
+            12,
+            12,
+            12
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            8700,
+            8700,
+            8700
+          ],
+          "worst_original_residual": 5.66556705950737e-09,
+          "worst_returned_pair_residual": 2.8327835296472253e-09,
+          "worst_relative_eigenvalue_error": 5.750955267558311e-14,
+          "minimum_mac": 0.9999999999999989,
+          "worst_orthogonality": 2.1094237467877974e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": true,
+          "median_seconds": 2.1782086789608,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            8875,
+            8875,
+            8875
+          ],
+          "worst_original_residual": 1.6425355994391763e-08,
+          "worst_returned_pair_residual": 8.212678406279127e-09,
+          "worst_relative_eigenvalue_error": 5.162981153716828e-12,
+          "minimum_mac": 0.9999999999999993,
+          "worst_orthogonality": 1.4988010832439613e-14,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    },
+    {
+      "profile": "fsai16-cg25",
+      "accepted": false,
+      "timing_eligible": false,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 24,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 16,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 25,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-fsai16-cg25.json"
+      },
+      "total_setup_seconds": 0.29791589826345444,
+      "capture_seconds": 1.0901744402945042,
+      "device_free_memory_decrease_bytes": 2984247296,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 183,
+          "MEMCPY": 110,
+          "KERNEL": 2461,
+          "CONDITIONAL": 30
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 110
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 1.9635655283927917,
+          "iterations": [
+            19,
+            19,
+            19
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            9400,
+            9400,
+            9400
+          ],
+          "worst_original_residual": 1.1889178940559857e-08,
+          "worst_returned_pair_residual": 5.94458947026321e-09,
+          "worst_relative_eigenvalue_error": 6.106226635438361e-14,
+          "minimum_mac": 0.9999999999999991,
+          "worst_orthogonality": 1.5543122344752192e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": false,
+          "median_seconds": 2.4381381906569004,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            10775,
+            10475,
+            10725
+          ],
+          "worst_original_residual": 2.5213177055727107e-08,
+          "worst_returned_pair_residual": 1.2606588722229875e-08,
+          "worst_relative_eigenvalue_error": 4.452882507166578e-12,
+          "minimum_mac": 0.9999999999999989,
+          "worst_orthogonality": 1.4432899320127035e-14,
+          "each_physical_acceptance": [
+            true,
+            true,
+            false
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    },
+    {
+      "profile": "fsai16-cg35",
+      "accepted": false,
+      "timing_eligible": false,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 24,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 16,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 35,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-fsai16-cg35.json"
+      },
+      "total_setup_seconds": 0.3204668276011944,
+      "capture_seconds": 1.1453488878905773,
+      "device_free_memory_decrease_bytes": 2984247296,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 183,
+          "MEMCPY": 110,
+          "KERNEL": 2461,
+          "CONDITIONAL": 30
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 110
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 1.9216421656310558,
+          "iterations": [
+            16,
+            16,
+            16
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            10640,
+            10640,
+            10640
+          ],
+          "worst_original_residual": 1.1302744333956743e-08,
+          "worst_returned_pair_residual": 5.651372167080106e-09,
+          "worst_relative_eigenvalue_error": 1.035838081975271e-13,
+          "minimum_mac": 0.9999999999999989,
+          "worst_orthogonality": 1.9984014443252818e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": false,
+          "median_seconds": 2.260309461504221,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            11515,
+            11515,
+            11515
+          ],
+          "worst_original_residual": 2.4171497767360656e-08,
+          "worst_returned_pair_residual": 1.2085748974921167e-08,
+          "worst_relative_eigenvalue_error": 5.978995076816318e-12,
+          "minimum_mac": 0.9999999999999989,
+          "worst_orthogonality": 1.2878587085651816e-14,
+          "each_physical_acceptance": [
+            false,
+            false,
+            false
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    },
+    {
+      "profile": "cg20",
+      "accepted": true,
+      "timing_eligible": true,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 24,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 32,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 20,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-cg20.json"
+      },
+      "total_setup_seconds": 1.2323788776993752,
+      "capture_seconds": 1.0897783525288105,
+      "device_free_memory_decrease_bytes": 4454350848,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 183,
+          "MEMCPY": 110,
+          "KERNEL": 2461,
+          "CONDITIONAL": 30
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 110
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 1.96588721498847,
+          "iterations": [
+            19,
+            19,
+            19
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            7520,
+            7520,
+            7520
+          ],
+          "worst_original_residual": 1.0786619147170494e-08,
+          "worst_returned_pair_residual": 5.393309573443917e-09,
+          "worst_relative_eigenvalue_error": 5.861977570020827e-14,
+          "minimum_mac": 0.9999999999999991,
+          "worst_orthogonality": 1.3322676295501878e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": true,
+          "median_seconds": 2.2641498148441315,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            8320,
+            8240,
+            8240
+          ],
+          "worst_original_residual": 1.8547613525843302e-08,
+          "worst_returned_pair_residual": 9.273806824789755e-09,
+          "worst_relative_eigenvalue_error": 9.072631534934317e-12,
+          "minimum_mac": 0.9999999999999991,
+          "worst_orthogonality": 1.2989609388114332e-14,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    },
+    {
+      "profile": "cg30",
+      "accepted": false,
+      "timing_eligible": false,
+      "args": {
+        "case": "anvil",
+        "side": 6,
+        "modes": 6,
+        "width": 24,
+        "steps": 200,
+        "shift": 100.0,
+        "fsai_width": 32,
+        "fsai_layout": "columns",
+        "matrix_layout": "columns",
+        "preconditioner": "fsai",
+        "repeats": 3,
+        "tol": 1e-08,
+        "cupy": true,
+        "cupy_width": 20,
+        "cupy_tol": null,
+        "cupy_padding": false,
+        "profile": false,
+        "keep_graph": false,
+        "gram_chunk": 4096,
+        "symmetric_products": true,
+        "fused_updates": true,
+        "paired_rotation": true,
+        "reuse_x_image": true,
+        "active_search_bucket_size": 4,
+        "active_search_keep_history": true,
+        "native_products": false,
+        "batched_products": true,
+        "inner_cg": 30,
+        "batched_cg": true,
+        "active_cg_bucket_size": 4,
+        "fixed_outer": false,
+        "inner_fp32": true,
+        "inner_tol": 0.01,
+        "out": "/home/horde/projects/warpack-anvil-tuning/build/anvil-tuning-cg30.json"
+      },
+      "total_setup_seconds": 1.2411483488976955,
+      "capture_seconds": 1.162620771676302,
+      "device_free_memory_decrease_bytes": 4454350848,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 183,
+          "MEMCPY": 110,
+          "KERNEL": 2461,
+          "CONDITIONAL": 30
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 110
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "methods": {
+        "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search": {
+          "accepted": true,
+          "median_seconds": 2.047536537051201,
+          "iterations": [
+            17,
+            17,
+            17
+          ],
+          "counts": [
+            20,
+            20,
+            20
+          ],
+          "statuses": [
+            0,
+            0,
+            0
+          ],
+          "scheduled_cg_vector_iterations": [
+            9240,
+            9240,
+            9240
+          ],
+          "worst_original_residual": 6.663321757095928e-09,
+          "worst_returned_pair_residual": 3.3316608785174374e-09,
+          "worst_relative_eigenvalue_error": 7.37188088351104e-14,
+          "minimum_mac": 0.9999999999999989,
+          "worst_orthogonality": 1.6653345369377348e-15,
+          "each_physical_acceptance": [
+            true,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        },
+        "CuPy LOBPCG + same captured upstream Warp batched CG": {
+          "accepted": false,
+          "median_seconds": 2.426419258117676,
+          "iterations": [
+            null,
+            null,
+            null
+          ],
+          "counts": [
+            null,
+            null,
+            null
+          ],
+          "statuses": [
+            null,
+            null,
+            null
+          ],
+          "scheduled_cg_vector_iterations": [
+            9840,
+            9900,
+            9870
+          ],
+          "worst_original_residual": 2.1243071864287392e-08,
+          "worst_returned_pair_residual": 1.0621535987338596e-08,
+          "worst_relative_eigenvalue_error": 7.786216116301148e-12,
+          "minimum_mac": 0.9999999999999993,
+          "worst_orthogonality": 1.4432899320127035e-14,
+          "each_physical_acceptance": [
+            false,
+            true,
+            true
+          ],
+          "each_native_stopping_acceptance": [
+            true,
+            true,
+            true
+          ]
+        }
+      }
+    }
+  ],
+  "files_sha256": {
+    "anvil-tuning-control.json": "7017fc9ce483f722a62d24ac9c1386bafd4e734501e069613f2ee2c950a9f4ac",
+    "anvil-tuning-control.occupancy.json": "f12f37115bb2142892c57b7fb2eb03951a73da31d489bb4c170b86a79c846473",
+    "anvil-tuning-width28.json": "db63597509e80f4e0cb55fde296456a68094d897e438a8412cd6da148dbe4817",
+    "anvil-tuning-width28.occupancy.json": "11e43e6509afc313d0fd946e1773b17fb9b3e7a29281ebe71d615d138215ed87",
+    "anvil-tuning-width32.json": "e8af2228c3a40414a6f0d57fd02164f5e446f3cd40091ccb2cb81b39a9cc04c4",
+    "anvil-tuning-width32.occupancy.json": "aad80617e29259a47b7ac3c1626bdef82ba08eb69b93fda722cde9df14adfd1b",
+    "anvil-tuning-fsai16-cg25.json": "7243c5e7d51342b237455fbb5161894eb86cfd66151a785c7d0d1c9121c8e319",
+    "anvil-tuning-fsai16-cg25.occupancy.json": "40e3f4ba044f9566b41e2dfa0a03fa1df627204bc047700dd96136f63505097d",
+    "anvil-tuning-fsai16-cg35.json": "6b683665e79e62591767965a39bc8c8da25f6baa306587b9fb4a7dde7856f208",
+    "anvil-tuning-fsai16-cg35.occupancy.json": "3ac961b48b9ef0caef5c317626172a3beb413e4ee0e093ab4b30e4ee0734055b",
+    "anvil-tuning-cg20.json": "de8850b477d40b703ee00e7ddbc035388133c4687f9eb08c95d38c1839ea5bc8",
+    "anvil-tuning-cg20.occupancy.json": "56a662de0991bc0ef645fbb0ae0e0fb322647e3f0ced9a5c57b396410cdccdb1",
+    "anvil-tuning-cg30.json": "232b32316c486be37eb4f0b7d141a66e2988c4989270b33353eaa9194b931373",
+    "anvil-tuning-cg30.occupancy.json": "e6a77561f62612c7f072965f2f0d2682eac6923de868c83b4bbc2f8eab44e175"
+  }
+}

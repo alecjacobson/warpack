@@ -68,6 +68,10 @@ capture 1.1266s. The device free-memory decrease through setup/capture is 4.454G
 (not peak memory), about 67MB more than the FSAI-only adapter. Replay has 30
 conditional nodes and 110 DtoD copies, with no HOST/HtoD/DtoH nodes.
 
+The subsequent [settings sweep](ANVIL_SETTINGS.md) retains width 24, FSAI32
+and CG25: six tested alternatives do not improve the accepted comparison. Its
+fresh unchanged-code control is 1.7784 s Warp / 2.1676 s CuPy.
+
 ## Validation and reproduction
 
 **128 tests pass in 7.07s** on the pinned Warp environment. These include

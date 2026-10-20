@@ -238,6 +238,12 @@ FSAI comes from the unmodified [Warp PR #16](https://github.com/alecjacobson/war
 
 Sources: [current ARPACK + PARDISO](results/anvil_pardiso_noir_confirmed.json), [current Spectra + PARDISO](results/anvil_pardiso_spectra_confirmed.json), [original CPU and retained CuPy comparison](results/anvil_benchmarks.json), [latest Warp + cuDSS recheck](results/anvil_cudss_recheck.json), and [best CG settings and per-replay accuracy](results/anvil_cg_optimized.json). Earlier configurations and unsuccessful trials are in the [historical experiments](historical/README.md).
 
+The [latest Anvil settings sweep](benchmarks/experimental/ANVIL_SETTINGS.md)
+reproduces the same width-24/FSAI32/CG25 profile at **1.7784 s Warp / 2.1676 s
+CuPy**. All 20 modes pass; none of six alternative settings improves the accepted
+comparison. This is a fresh control of unchanged code, not a new algorithmic
+speedup. Rejected comparisons and their stopping-criterion differences are retained.
+
 ## Validation and benchmarking
 
 The [complex connection comparison](benchmarks/applications/CONNECTION.md) adds
