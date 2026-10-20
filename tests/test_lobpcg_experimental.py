@@ -212,3 +212,46 @@ def test_changed_pencil_constraints_and_start_reuse_one_graph(optimized):
         assert abs(constraints.numpy() @ mass @ x).max() < 1e-10
         # Reuse the computed oversampled block as the next problem's start.
         wp.copy(starts, s.x)
+
+
+@pytest.mark.parametrize("coupled_mass", [False, True])
+def test_wide_block_captured_repeated_modes(coupled_mass, tmp_path):
+    # Width 24 exercises the 72-column projected solve, including rank loss
+    # after converging repeated modes. Continue a fixed budget after convergence.
+    n, k = 100, 4
+    rng = np.random.default_rng(836)
+    q = la.qr(rng.normal(size=(n, n)))[0]
+    values = np.arange(1.0, n + 1)
+    values[:4] = [1, 1, 2, 2]
+    coordinates = np.eye(n)
+    if coupled_mass:
+        coordinates += np.tril(rng.normal(scale=0.02, size=(n, n)), -1)
+    mass = coordinates.T @ coordinates
+    a = coordinates.T @ ((q * values) @ q.T) @ coordinates
+    requested = la.solve(coordinates, q[:, :k])
+    solver = BlockLOBPCG(
+        operator(a),
+        k,
+        width=24,
+        mass=operator(mass) if coupled_mass else None,
+        preconditioner=operator(la.inv(a)),
+        tol=1e-10,
+    )
+    graph = solver.capture(30, adaptive=False)
+    for _ in range(2):
+        wp.capture_launch(graph)
+        w, x = solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
+        assert solver.status.numpy()[0] == 0
+        assert solver.converged.numpy()[0] == k
+        np.testing.assert_allclose(np.sort(w), values[:k], rtol=0, atol=1e-10)
+        np.testing.assert_allclose(x.T @ mass @ x, np.eye(k), rtol=0, atol=1e-10)
+        av, mv = a @ x, mass @ x
+        residual = la.norm(av - mv * w, axis=0) / np.maximum(
+            1, la.norm(av, axis=0) + abs(w) * la.norm(mv, axis=0)
+        )
+        assert residual.max() < 1e-10
+        remainder = x - requested @ (requested.T @ mv)
+        assert np.sqrt(np.sum(remainder * (mass @ remainder))) < 1e-8
+    dot = tmp_path / "wide-block.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    assert not any(word in dot.read_text() for word in ("HOST", "HtoD", "DtoH"))

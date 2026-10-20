@@ -12,11 +12,14 @@ from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.audit_profile import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import SparseOperator, SymmetricEigensolver
+from warpack import kernels as K
+from warpack.projected import GlobalJacobi, jacobi_kernel
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--sizes", default="48,64,72,96,128")
+    p.add_argument("--backend", choices=["default", "shared", "global"], default="default")
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--batch", type=int, default=10)
     p.add_argument("--out", required=True)
@@ -31,6 +34,48 @@ def main():
         expected[-2:] = 0
         a = (q * expected) @ q.T
         solver = SymmetricEigensolver(SparseOperator(matrix(a)), 20, ncv=n, which="LA", tol=1e-11)
+        if args.backend != "default":
+            if n % 2:
+                p.error("explicit projected backends require even sizes")
+            if args.backend == "shared":
+                if n > 64 and not (n == 72 and solver.device.max_shared_memory_per_block >= 98304):
+                    p.error("shared benchmark supports <=64, or 72 with sufficient shared memory")
+
+                def diagonalize():
+                    wp.launch_tiled(
+                        jacobi_kernel(n),
+                        dim=1,
+                        inputs=[solver.g, solver.v],
+                        block_dim=256,
+                        device=solver.device,
+                    )
+                    wp.launch(
+                        K.sort_diagonal,
+                        n,
+                        [solver.g, solver.ritz, solver.order, solver.which],
+                        device=solver.device,
+                    )
+            else:
+                solver._global_jacobi = GlobalJacobi(
+                    solver.g,
+                    solver.v,
+                    solver.cs,
+                    solver.ss,
+                    solver.partners,
+                    solver.jtmp,
+                    solver.vtmp,
+                )
+
+                def diagonalize():
+                    solver._global_jacobi.apply()
+                    wp.launch(
+                        K.sort_diagonal,
+                        n,
+                        [solver.g, solver.ritz, solver.order, solver.which],
+                        device=solver.device,
+                    )
+
+            solver.diagonalize = diagonalize
         original = wp.array(a, dtype=wp.float64, device=solver.device)
         wp.copy(solver.g, original)
         solver.diagonalize()
@@ -56,7 +101,7 @@ def main():
                 spectrum_error=error,
                 sweeps=(
                     int(solver._global_jacobi.sweeps.numpy()[0])
-                    if solver._global_jacobi is not None
+                    if solver._global_jacobi is not None and args.backend != "shared"
                     else None
                 ),
             )
@@ -69,6 +114,7 @@ def main():
         rows.append(
             dict(
                 n=n,
+                backend=args.backend,
                 samples=samples,
                 seconds=float(np.median(samples)),
                 checks=checks,

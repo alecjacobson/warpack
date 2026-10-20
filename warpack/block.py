@@ -219,27 +219,7 @@ class UpstreamPreconditioner:
 
 
 class ProjectedSolver(SymmetricEigensolver):
-    def _diagonalize_projected(self):
-        # The 72x72 two-tile kernel fits devices with enough block shared memory.
-        # Other projected dimensions use the common symmetric dispatch.
-        if self.m == 72 and self.device.max_shared_memory_per_block >= 98304:
-            from warpack.projected import jacobi_kernel
-
-            wp.launch_tiled(
-                jacobi_kernel(self.m),
-                dim=1,
-                inputs=[self.g, self.v],
-                block_dim=256,
-                device=self.device,
-            )
-            wp.launch(
-                K.sort_diagonal,
-                self.m,
-                [self.g, self.ritz, self.order, self.which],
-                device=self.device,
-            )
-        else:
-            super()._diagonalize_projected()
+    """Block projection using the common global/shared Jacobi dispatch."""
 
 
 class BlockLOBPCG:
