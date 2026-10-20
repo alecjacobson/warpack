@@ -93,3 +93,13 @@ Reproduce full runs with the commands in [README](README.md), setting
 baseline. The focused follow-up selects the 36 starting-vector node IDs and
 four unsupported-keyword node IDs recorded in its raw report. GPU jobs run
 sequentially. No installed CuPy source is patched.
+
+The Spectra refresh now records and requires zero device solver status in
+addition to numerical bounds and counts (#118). The first full 30-case
+`SymEigsShift` family rerun has 27 passes and the same three known failures;
+all 30 statuses are zero. Two compact SM profiles remain unconverged, and
+`SymEigsShift_17` still fails its internal count despite passing the external
+numerical bounds. This is a status-harness validation, not a completed Spectra
+inventory. The [before/after evidence](../../results/performance_followup/upstream-status-validation.json)
+retains the pre-status report; missing status in historical reports stays
+unknown rather than being inferred as success.
