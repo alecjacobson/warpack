@@ -3,7 +3,6 @@
 import argparse
 import hashlib
 import importlib.metadata
-import inspect
 import json
 import os
 import subprocess
@@ -13,10 +12,10 @@ from pathlib import Path
 
 import numpy as np
 import warp as wp
-import warp.optim.linear as linear
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
 from benchmarks.audit_profile import graph_summary
+from benchmarks.runtime import complete_warp_fingerprint, warp_runtime_hashes
 from benchmarks.upstream.adapters import output
 
 from . import connection_backends as backends
@@ -191,6 +190,9 @@ def assess_baseline(report, baseline):
     same_runtime &= all(
         item.get("numerical_contract_accepted", False) for item in (report, baseline)
     )
+    same_runtime &= all(
+        complete_warp_fingerprint(item.get("runtime_hashes")) for item in (report, baseline)
+    )
     old = {row["method"]: row for row in baseline["cases"]}
     keys = (
         "matrix_sha256",
@@ -283,15 +285,7 @@ def main():
             + [Path("benchmarks/experimental/corrected_cg.py"), Path("warpack/generalized.py")]
             if path.suffix in (".py", ".cpp")
         },
-        runtime_hashes={
-            name: hashlib.sha256(Path(path).read_bytes()).hexdigest()
-            if Path(path).exists()
-            else None
-            for name, path in {
-                "warp_linear": inspect.getfile(linear),
-                "spectra_binary": "build/connection_spectra.so",
-            }.items()
-        },
+        runtime_hashes=warp_runtime_hashes("build/connection_spectra.so"),
         blas_threads=os.environ.get("OPENBLAS_NUM_THREADS"),
         fixture="Periodic flat P1 U(1) connection, independent Fourier and triangle references",
         acceptance=dict(residual=1e-8, orthogonality=1e-8, spectrum=1e-8, subspace=1e-8),

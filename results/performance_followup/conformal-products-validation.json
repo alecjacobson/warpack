@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "112b019",
+  "production_core_changed": false,
+  "new_tests": 17,
+  "pinned": {
+    "warp": "1.18.0",
+    "warp_commit": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "passed": 69,
+    "seconds": 29.48
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "passed": 69,
+    "seconds": 30.26
+  },
+  "command": "pytest -q tests/test_boundary_projector.py tests/test_conformal_fixture.py tests/test_conformal_solver.py tests/test_conformal_reference.py tests/test_conformal_baseline.py tests/test_connection_baseline.py tests/test_runtime_fingerprint.py",
+  "checks": [
+    "ruff check warpack benchmarks tests",
+    "ruff format --check warpack benchmarks tests",
+    "git diff --check"
+  ],
+  "baseline": "results/conformal-products.json",
+  "regression": "results/conformal-products-regression.json",
+  "default_explicit_graphs_unchanged_from_112b019": true,
+  "sha256": {
+    "benchmarks/runtime.py": "0b9d02c5b8b891f9c9c4d924249cdcba0dcc2d7b2febe0d3f605975d1c39ed63",
+    "benchmarks/experimental/boundary_projector.py": "91ed8640ad77a5341af7403da3909e666aa436adc6ae40e47bfc04a306516c20",
+    "benchmarks/applications/conformal_warp.py": "78c2fe851f525d7ab6da40f8f341555f0d799a0246f878eb5df91156d6b0219b",
+    "benchmarks/applications/conformal_compare.py": "d2410f3aa635eb8d42fdfb37ad160cc323dbe13b7db7a0960f29ce761b97d692",
+    "benchmarks/applications/connection_compare.py": "01f4de15e3f483f98d5a742eefa35a95e6bae9178c0e913fb822e4db0324196f",
+    "tests/test_boundary_projector.py": "dc4a0f57b5e075d698ecd8898b5c2b0506be3506778addfd43231d55be20c6d0",
+    "tests/test_runtime_fingerprint.py": "2a70354f8e8894b02232a0596cbae02498667976d70cb86bf420a88f7ee7512b",
+    "tests/test_connection_baseline.py": "e5fdc87c4ada5cfda768cceeaacf6d91e7c4117a9234cf4481f802acb11428aa"
+  }
+}

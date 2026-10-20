@@ -90,6 +90,12 @@ native LOBPCG with `B=A`, largest modes and a supplied cuDSS preconditioner;
 comparison scales the left matrix by `-sigma`, maps reciprocals into `(0,1]`,
 and reverses that scaling in its output. It does not modify CuPy source.
 
+The [implicit boundary-product follow-up](../experimental/BOUNDARY_PROJECTOR.md)
+keeps these accuracy gates and factors, reducing large CG replay from 12.69 to
+6.80 seconds and cuDSS from 0.419 to 0.384 seconds. The explicit controls below
+remain the original coverage baseline; the follow-up has matched controls and
+stronger implementation fingerprints.
+
 ## Large curved-patch comparison
 
 NVIDIA L40, pinned Warp 1.18.0/FSAI commit
@@ -165,8 +171,10 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m benchmarks.monitor_gpu \
   --out build/conformal.json
 ```
 
-Add `--baseline results/conformal-32766.json` for the strict same-runtime/config
-1.25 timing gate. Methods run in isolated sequential workers with a bounded
+For the current strict same-runtime/config 1.25 timing gate, use the fresh
+[implicit-product baseline](../experimental/BOUNDARY_PROJECTOR.md). The original
+coverage records predate the stronger implementation fingerprints and are no
+longer automatically comparable. Methods run in isolated sequential workers with a bounded
 240-second timeout; rejected rows are retained before a nonzero exit. Use
 `--diagnostic` explicitly when collecting known failed native CuPy controls.
 For the small scaled comparison, use `--side 24 --modes 6 --ncv 32 --steps 4

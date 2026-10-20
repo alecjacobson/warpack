@@ -50,14 +50,23 @@ class ConformalEigensolver:
     All replay arithmetic, including lifting and boundary centering, is Warp.
     """
 
-    def __init__(self, case, ncv=32, backend="cudss", tol=1e-10, cg_tol=1e-11):
+    def __init__(self, case, ncv=32, backend="cudss", tol=1e-10, cg_tol=1e-11, implicit=False):
         self.case, self.k, self.tol = case, case.k, tol
         stiffness, mass = case.reduced
         shifted = matrix(stiffness - case.shift * mass)
+        implicit_mass = implicit_shifted = None
+        if implicit:
+            from benchmarks.experimental.boundary_projector import (
+                CenteredBoundary,
+                ShiftedConformal,
+            )
+
+            implicit_mass = CenteredBoundary(case, ncv)
+            implicit_shifted = ShiftedConformal(case, ncv)
         if backend == "cudss":
             inverse = CuDSSInverse(shifted, 1, refinement_steps=1)
         elif backend in ("cg", "cg-fsai"):
-            preconditioner = "diag"
+            preconditioner = linear.preconditioner(shifted, ptype="diag") if implicit else "diag"
             if backend == "cg-fsai":
                 preconditioner = linear.FSAI(
                     shifted,
@@ -67,7 +76,7 @@ class ConformalEigensolver:
                     factor_dtype=wp.float32,
                 )
             inverse = CGInverse(
-                shifted,
+                implicit_shifted.linear if implicit else shifted,
                 tol=cg_tol,
                 atol=0.0,
                 maxiter=10000,
@@ -83,8 +92,8 @@ class ConformalEigensolver:
             np.random.default_rng(2026).normal(size=case.n), dtype=wp.float64, device=self.device
         )
         self.core = GeneralizedKrylovSchur(
-            SparseOperator(matrix(mass)),
-            SparseOperator(shifted),
+            implicit_mass if implicit else SparseOperator(matrix(mass)),
+            implicit_shifted if implicit else SparseOperator(shifted),
             inverse,
             case.k,
             ncv=ncv,

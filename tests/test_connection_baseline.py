@@ -13,7 +13,14 @@ def report():
         warp="pinned",
         versions={"cupy": "14"},
         blas_threads="4",
-        runtime_hashes={"warp_linear": "abc", "spectra_binary": "def"},
+        runtime_hashes={
+            "warp_linear": "abc",
+            "spectra_binary": "def",
+            "warp_cg_implementation": "cg",
+            "warp_preconditioner_implementation": "pre",
+            "warp_fsai_implementation": "fsai",
+            "warp_sparse_implementation": "sparse",
+        },
         numerical_contract_accepted=True,
         cases=[
             dict(
@@ -72,3 +79,11 @@ def test_failed_aggregate_and_changed_runtime_rejected():
         current[field] = value
         assess_baseline(current, previous)
         assert not current["baseline_comparable"]
+
+
+def test_legacy_forwarder_fingerprint_is_not_comparable_even_when_equal():
+    previous = report()
+    previous["runtime_hashes"] = {"warp_linear": "public-module", "spectra_binary": "binary"}
+    current = deepcopy(previous)
+    assess_baseline(current, previous)
+    assert not current["baseline_comparable"]

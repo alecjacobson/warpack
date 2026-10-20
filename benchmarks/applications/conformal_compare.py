@@ -3,7 +3,6 @@
 import argparse
 import hashlib
 import importlib.metadata
-import inspect
 import json
 import os
 import subprocess
@@ -13,10 +12,10 @@ from pathlib import Path
 
 import numpy as np
 import warp as wp
-import warp.optim.linear as linear
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
 from benchmarks.audit_profile import graph_summary
+from benchmarks.runtime import warp_runtime_hashes
 
 from . import conformal_backends as backends
 from .compare import other_gpu_processes, timed
@@ -33,6 +32,8 @@ METHODS = (
     "warp-cudss",
     "warp-cg",
     "warp-cg-fsai",
+    "warp-cudss-implicit",
+    "warp-cg-fsai-implicit",
 )
 
 
@@ -71,6 +72,7 @@ def run(args):
         cupy_tol=args.cupy_tol,
         cupy_maxiter=300,
         reciprocal_scale=-case.shift if args.method == "cupy-scaled" else 1.0,
+        implicit_boundary=args.method.endswith("-implicit"),
         reference_seconds=reference_seconds,
         reference_values=reference[0].tolist(),
         reference="static boundary condensation + dense centered boundary eigensolve",
@@ -87,7 +89,11 @@ def run(args):
         if args.method.startswith("warp"):
             row["setup_seconds"], solver = timed(
                 lambda: ConformalEigensolver(
-                    case, args.ncv, args.method.removeprefix("warp-"), cg_tol=args.cg_tol
+                    case,
+                    args.ncv,
+                    args.method.removeprefix("warp-").removesuffix("-implicit"),
+                    cg_tol=args.cg_tol,
+                    implicit=args.method.endswith("-implicit"),
                 )
             )
             close = solver.close
@@ -238,17 +244,12 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         implementation_sha256={
             p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in Path(__file__).parent.glob("conformal*.py")
+            for p in [
+                *Path(__file__).parent.glob("conformal*.py"),
+                Path("benchmarks/experimental/boundary_projector.py"),
+            ]
         },
-        runtime_hashes={
-            name: hashlib.sha256(Path(path).read_bytes()).hexdigest()
-            if Path(path).exists()
-            else None
-            for name, path in {
-                "warp_linear": inspect.getfile(linear),
-                "spectra_binary": "build/application_spectra.so",
-            }.items()
-        },
+        runtime_hashes=warp_runtime_hashes("build/application_spectra.so"),
         fixture="P1 conformal energy, centered boundary mass, translation quotient; no regularization",
         cases=[],
     )

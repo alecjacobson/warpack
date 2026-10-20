@@ -160,3 +160,9 @@ All 39 new tests (25 host, 14 GPU) pass on pinned Warp 1.18 in 30.47 s and stock
 Warp 1.15 in 31.17 s. [Validation record](../../results/connection-validation.json).
 No installed-core files changed; the earlier full 941-test result is retained
 as that earlier run, not relabeled as a fresh full-suite run.
+
+The current shared baseline helper fingerprints the actual Warp CG/FSAI/sparse
+implementation files as well as the public forwarding module. Earlier records
+above predate these fields and remain historical evidence; create a fresh
+accepted report before using it as an automatic baseline. The repair and a
+validated fresh baseline are documented in the [boundary-product follow-up](../experimental/BOUNDARY_PROJECTOR.md).
