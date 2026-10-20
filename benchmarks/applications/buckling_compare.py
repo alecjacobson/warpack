@@ -174,6 +174,39 @@ def _gpu_run(p, method, args, destination, label, sign, competing, row):
         cleanup()
 
 
+def assess_baseline(report, baseline):
+    """Compare matching signed rows with unchanged input/budget/runtime contracts."""
+    ignored = {"methods", "signs", "out", "baseline", "repeats", "diagnostic"}
+    same = {k: v for k, v in report["args"].items() if k not in ignored} == {
+        k: v for k, v in baseline["args"].items() if k not in ignored
+    }
+    same &= all(
+        report.get(key) == baseline.get(key)
+        for key in ("gpu", "versions", "blas_threads", "upstream_source_sha256")
+    )
+    same &= all(
+        data.get("numerical_contract_accepted", False) and data.get("timing_eligible", False)
+        for data in (report, baseline)
+    )
+    old = {(row["sign"], row["method"]): row for row in baseline["cases"]}
+    for row in report["cases"]:
+        previous = old.get((row["sign"], row["method"]), {})
+        comparable = same and row.get("accepted", False) and previous.get("accepted", False)
+        comparable &= all(
+            row.get(key) == previous.get(key) for key in ("matrix_sha256", "n", "k", "sigma")
+        )
+        row["baseline_comparable"] = bool(comparable)
+        if comparable:
+            row["time_ratio"] = row["solve_seconds"] / previous["solve_seconds"]
+            row["performance_regression"] = row["time_ratio"] > 1.25
+    report["baseline_comparable"] = bool(report["cases"]) and all(
+        row["baseline_comparable"] for row in report["cases"]
+    )
+    report["performance_regression"] = any(
+        row.get("performance_regression", False) for row in report["cases"]
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--side", type=int, default=6)
@@ -190,6 +223,7 @@ def main():
     parser.add_argument("--cupy-tol", type=float, default=1e-10)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--baseline")
     add_diagnostic_argument(parser)
     args = parser.parse_args()
     methods, signs = args.methods.split(","), args.signs.split(",")
@@ -274,10 +308,14 @@ def main():
     report["competing_gpu_processes"] = sorted(competing)
     report["timing_eligible"] = not competing
     assess_comparison(report, report["cases"], args.diagnostic)
+    if args.baseline:
+        assess_baseline(report, json.loads(Path(args.baseline).read_text()))
     destination.write_text(json.dumps(report, indent=2) + "\n")
     if competing:
         raise SystemExit("GPU contention; not timing evidence")
     require_accepted(report)
+    if args.baseline and (not report["baseline_comparable"] or report["performance_regression"]):
+        raise SystemExit("Buckling baseline is not comparable or exceeds the 1.25 regression gate")
 
 
 if __name__ == "__main__":

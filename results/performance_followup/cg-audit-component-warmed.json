@@ -1,0 +1,475 @@
+{
+  "args": {
+    "side": 32,
+    "width": 4,
+    "repeats": 5,
+    "warmup_replays": 100,
+    "tol": 1e-11,
+    "out": "results/performance_followup/cg-audit-component-warmed.json"
+  },
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "n": 32768,
+  "nnz": 223232,
+  "matrix_sha256": "58bf4a8996473a639bd69d66b7261122715104dc596788916a41ed3810dcc3cc",
+  "rhs_sha256": "d9677e89e707f330648903c49a44b4648e3fb94c09c2d2506d5b89a204c4a55e",
+  "source_sha256": {
+    "/home/horde/projects/warpack-cg-residual-audit/benchmarks/experimental/cg_residual_audit.py": "b9cf49dddbdb5e81c8e0a49ccb6ebbb84acb7956548e43118cff00639683ffdc",
+    "warpack/generalized.py": "a24cef76d407b9383dc3d600e8549cd64283b20f26e5bd1676ed47a6931a3870",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720"
+  },
+  "protocol": "Dirichlet 3D Poisson, manufactured random solution seed918, last RHS zero. Solution only forms/validates RHS, never initializes CG. Upstream diagonal preconditioner, relative tolerance, zero requested absolute tolerance, zero CG start every replay. Fresh host residual and known solution checked for all rows; optional device fresh counters separately mandatory. Warm replay includes resets and necessary in-place copying; setup/capture separate. Component cost, not whole eigensolver timing.",
+  "rows": [
+    {
+      "inplace": false,
+      "verify_residuals": false,
+      "setup_seconds": 0.006777580827474594,
+      "setup_scope": "CG/preconditioner/output workspace setup; shared matrix/RHS construction and upload excluded",
+      "jit_warmup_seconds": 0.04664300009608269,
+      "capture_seconds": 0.005654092878103256,
+      "warmup_seconds": 1.0434398725628853,
+      "samples_seconds": [
+        0.01046060025691986,
+        0.010452356189489365,
+        0.010450176894664764,
+        0.010464094579219818,
+        0.01045161858201027
+      ],
+      "median_seconds": 0.010452356189489365,
+      "checks": [
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 13,
+          "KERNEL": 84,
+          "MEMCPY": 12,
+          "CONDITIONAL": 4
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 12
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      }
+    },
+    {
+      "inplace": false,
+      "verify_residuals": true,
+      "setup_seconds": 0.0011179782450199127,
+      "setup_scope": "CG/preconditioner/output workspace setup; shared matrix/RHS construction and upload excluded",
+      "jit_warmup_seconds": 0.020705554634332657,
+      "capture_seconds": 0.0070943571627140045,
+      "warmup_seconds": 1.1189003996551037,
+      "samples_seconds": [
+        0.0112096406519413,
+        0.011204749345779419,
+        0.011216375976800919,
+        0.01120566576719284,
+        0.01120542362332344
+      ],
+      "median_seconds": 0.01120566576719284,
+      "checks": [
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.14770669268388e-08,
+            9.895039976311635e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838802e-08,
+            9.895039976311635e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838804e-08,
+            9.895039976311638e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838802e-08,
+            9.895039976311637e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838802e-08,
+            9.895039976311637e-12
+          ]
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 19,
+          "MEMCPY": 16,
+          "KERNEL": 100,
+          "CONDITIONAL": 4
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 16
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      }
+    },
+    {
+      "inplace": true,
+      "verify_residuals": false,
+      "setup_seconds": 0.0007516108453273773,
+      "setup_scope": "CG/preconditioner/output workspace setup; shared matrix/RHS construction and upload excluded",
+      "jit_warmup_seconds": 0.017701968550682068,
+      "capture_seconds": 0.006378043442964554,
+      "warmup_seconds": 1.047241147607565,
+      "samples_seconds": [
+        0.010519377887248993,
+        0.01048341765999794,
+        0.010486233979463577,
+        0.010482702404260635,
+        0.010483045130968094
+      ],
+      "median_seconds": 0.01048341765999794,
+      "checks": [
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 13,
+          "MEMCPY": 17,
+          "KERNEL": 84,
+          "CONDITIONAL": 4
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 17
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      }
+    },
+    {
+      "inplace": true,
+      "verify_residuals": true,
+      "setup_seconds": 0.0012401863932609558,
+      "setup_scope": "CG/preconditioner/output workspace setup; shared matrix/RHS construction and upload excluded",
+      "jit_warmup_seconds": 0.01839117333292961,
+      "capture_seconds": 0.006665047258138657,
+      "warmup_seconds": 1.0454664751887321,
+      "samples_seconds": [
+        0.010525591671466827,
+        0.01046786829829216,
+        0.010466407984495163,
+        0.010469384491443634,
+        0.01046527549624443
+      ],
+      "median_seconds": 0.01046786829829216,
+      "checks": [
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838802e-08,
+            9.895039976311635e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838804e-08,
+            9.895039976311635e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838802e-08,
+            9.895039976311635e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838805e-08,
+            9.895039976311637e-12
+          ]
+        },
+        {
+          "relative_residual": 9.895039352872671e-12,
+          "solution_error": 1.006347347843456e-10,
+          "recursive_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "accepted": true,
+          "fresh_stats": [
+            423,
+            142,
+            0,
+            4
+          ],
+          "residual_maxima": [
+            1.1477066926838804e-08,
+            9.895039976311638e-12
+          ]
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 19,
+          "MEMCPY": 17,
+          "KERNEL": 100,
+          "CONDITIONAL": 4
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 17
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      }
+    }
+  ],
+  "accepted": true,
+  "competing_gpu_processes": [],
+  "timing_eligible": true
+}

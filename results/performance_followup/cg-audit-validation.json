@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "1729e56",
+  "issues": [
+    89,
+    91,
+    26
+  ],
+  "full_suite": {
+    "passed": 929,
+    "seconds": 419.17,
+    "environment": "Pinned Warp 1.18.0+cu12 overlay04427b997fe7ff07bc6ed1dde5ca9813496c6b55; L40; driver570.158.01; Python3.10; four BLAS/OpenMP threads",
+    "command": "PYTHONPATH=/home/horde/projects/warpack/build/warp-fsai:$PWD OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "compatibility": {
+    "stock_targeted": {
+      "passed": 50,
+      "seconds": 434.1,
+      "scope": "Initial ten CG audit tests plus absolute-tolerance and real GMRES tests"
+    },
+    "final_focused": {
+      "passed": 22,
+      "pinned_seconds": 1.31,
+      "stock_seconds": 1.79,
+      "scope": "Final fourteen CG audit tests and eight signed buckling saved-baseline tests"
+    }
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: 257 files formatted",
+  "wheel": "cg-audit-wheel.json: 23 core modules and isolated CGInverse verify_residuals API import",
+  "source_sha256": {
+    "warpack/generalized.py": "a24cef76d407b9383dc3d600e8549cd64283b20f26e5bd1676ed47a6931a3870",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "tests/test_cg_residual_audit.py": "f5e2d3b86eba0c2979d8e03b623291c233229da9faea5b2cc5fc748e5c4bed42",
+    "tests/test_buckling_baseline.py": "4444140dd8ce4c15e64c410c4c34e118050e4eacf5550958cd2c45eca91f4e54",
+    "benchmarks/applications/buckling_compare.py": "683da716a4c013715f0d6e8bc4d2620cf95d749a51aa913dcc6461f700ca883b",
+    "benchmarks/experimental/cg_residual_audit.py": "b9cf49dddbdb5e81c8e0a49ccb6ebbb84acb7956548e43118cff00639683ffdc"
+  },
+  "alias_before": "cg-alias-before.json: original exact in-place application returned zero instead of one with no failure reported",
+  "component": [
+    "cg-audit-component.json",
+    "cg-audit-component-warmed.json"
+  ],
+  "default_regression": "buckling-cg-default-regression.json: signed 41616-unknown/k20 cuDSS and CG rows all pass; ratios .9972\u20131.0027; all four graph audit dictionaries equal baseline",
+  "limitations": [
+    "Audit is optional and adds a matvec/reductions; no refinement or stopping change.",
+    "Recursive stats remain recursive; fresh_stats separately reports recomputed linear residual failures.",
+    "The default buckling performance control leaves fresh auditing disabled.",
+    "Captured cuDSS vendor metadata copies and native CuPy failures remain separately tracked."
+  ]
+}

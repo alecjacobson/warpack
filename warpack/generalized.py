@@ -43,6 +43,16 @@ class CGInverse:
     Inner stopping uses device convergence checks. Always verify the original
     eigenproblem residual: a converged recursive CG residual can be optimistic.
 
+    ``verify_residuals=True`` additionally recomputes each original linear
+    residual on device. ``fresh_stats`` uses the same four counters as ``stats``
+    but checks that fresh residual against upstream's effective tolerance;
+    ``residual_maxima`` holds maximum fresh absolute/relative residual norms.
+    The upstream solve and recursive ``stats`` are unchanged. Both additional
+    arrays are ``None`` when this optional audit is disabled.
+
+    Exact in-place application is supported. Nonidentical input/output views
+    with overlapping address ranges are rejected.
+
     ``atol=None`` preserves upstream Warp's default: ``tol`` is both the
     relative and absolute residual tolerance. Pass ``atol=0.0`` for relative
     stopping on small right-hand sides, such as eigenvector residuals used
@@ -64,6 +74,7 @@ class CGInverse:
         preconditioner=None,
         atol=None,
         adaptive_capture=False,
+        verify_residuals=False,
     ):
         if atol is not None and (not math.isfinite(atol) or atol < 0):
             raise ValueError("atol must be finite and nonnegative, or None")
@@ -94,20 +105,100 @@ class CGInverse:
         if adaptive_capture and not _cg_preallocates_loop_control(self.state):
             raise ValueError("adaptive_capture requires upstream CG with preallocated loop control")
         self.requires_static_outer_capture = not adaptive_capture
+        self.verify_residuals = bool(verify_residuals)
+        self.fresh_stats = None
+        self.residual_maxima = None
+        if self.verify_residuals:
+            # Shared with GMRES; imported at setup to avoid the module cycle
+            # through accumulate_cg_statistics. No Python callback on replay.
+            from .iterative import residual_maxima, residual_norms
+
+            self._residual_norms_kernel = residual_norms
+            self._residual_maxima_kernel = residual_maxima
+            self._audit_operator = linear.aslinearoperator(matrix)
+            self._audit_ax = wp.empty((1, self.n), dtype=wp.float64, device=self.device)
+            self._audit_norms = wp.zeros(2, dtype=wp.float64, device=self.device)
+            self.fresh_stats = wp.zeros(4, dtype=wp.int32, device=self.device)
+            self.residual_maxima = wp.zeros(2, dtype=wp.float64, device=self.device)
 
     def reset_stats(self):
         self.stats.zero_()
+        if self.verify_residuals:
+            self.fresh_stats.zero_()
+            self.residual_maxima.zero_()
 
     def apply(self, x, y):
+        if (
+            x.ndim != 2
+            or x.shape != y.shape
+            or x.shape[1] != self.n
+            or x.dtype != wp.float64
+            or y.dtype != wp.float64
+            or x.device != self.device
+            or y.device != self.device
+        ):
+            raise ValueError("expected matching FP64 (width,n) device rows")
+        if x.shape[0] == 0:
+            return
+        alias = x.ptr == y.ptr and x.strides == y.strides
+
+        def span(array):
+            # Address metadata only, including strided views. Never read a
+            # device scalar to decide the capture/replay path.
+            offsets = [(n - 1) * stride for n, stride in zip(array.shape, array.strides)]
+            return (
+                array.ptr + sum(min(0, offset) for offset in offsets),
+                array.ptr + sum(max(0, offset) for offset in offsets) + 8,
+            )
+
+        if not alias:
+            xlo, xhi = span(x)
+            ylo, yhi = span(y)
+            if max(xlo, ylo) < min(xhi, yhi):
+                raise ValueError("partially overlapping CG input/output views are unsupported")
+        snapshot = self.b
+        if alias or self.verify_residuals:
+            # Also allow callers to use this inverse's exposed b/x workspaces.
+            # The snapshot must not be the output that is about to be cleared.
+            ylo, yhi = span(y)
+            blo, bhi = span(self.b)
+            if max(ylo, blo) < min(yhi, bhi):
+                snapshot = self.x
         for j in range(x.shape[0]):
+            rhs = x[j]
+            if alias or self.verify_residuals:
+                wp.copy(snapshot, rhs)
+                rhs = snapshot
             y[j].zero_()
-            iterations, residual_sq, tolerance_sq = self.state(b=x[j], x=y[j])
+            iterations, residual_sq, tolerance_sq = self.state(b=rhs, x=y[j])
             wp.launch(
                 accumulate_cg_statistics,
                 1,
                 [iterations, residual_sq, tolerance_sq, self.stats],
                 device=self.device,
             )
+            if self.verify_residuals:
+                self._audit_operator.matvec(y[j], self._audit_ax[0], self._audit_ax[0], 1.0, 0.0)
+                self._audit_norms.zero_()
+                wp.launch_tiled(
+                    self._residual_norms_kernel,
+                    dim=(self.n + 255) // 256,
+                    inputs=[self._audit_ax[0], rhs, self._audit_norms],
+                    block_dim=64,
+                    device=self.device,
+                )
+                wp.launch(
+                    accumulate_cg_statistics,
+                    1,
+                    [iterations, self._audit_norms, tolerance_sq, self.fresh_stats],
+                    device=self.device,
+                )
+                wp.launch(
+                    self._residual_maxima_kernel,
+                    1,
+                    [self._audit_norms, self.residual_maxima],
+                    device=self.device,
+                )
 
 
 @wp.kernel

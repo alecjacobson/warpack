@@ -1,0 +1,451 @@
+{
+  "args": {
+    "side": 16,
+    "modes": 20,
+    "signs": "positive,negative",
+    "shift": 0.1,
+    "methods": "warp-cudss,warp-cg",
+    "ncv": 64,
+    "steps": 8,
+    "outer_tol": 1e-09,
+    "inner_tol": 1e-14,
+    "fsai_width": 32,
+    "cupy_steps": 400,
+    "cupy_tol": 1e-10,
+    "repeats": 3,
+    "out": "results/performance_followup/buckling-cg-default-regression.json",
+    "baseline": "results/performance_followup/buckling-tet-41616.json",
+    "diagnostic": false
+  },
+  "gpu": "NVIDIA L40",
+  "git_head": "1729e567a02c97350264c83918f779ce07bf5207",
+  "blas_threads": "4",
+  "spectra_binary_sha256": "03eef93f96b2b7310a5288caabbdf80fdf587be6e6ef33a56d041decaae05184",
+  "upstream_source_sha256": {
+    "/home/horde/projects/warpack/build/warp-fsai/warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+  },
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "a24cef76d407b9383dc3d600e8549cd64283b20f26e5bd1676ed47a6931a3870",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "/home/horde/projects/warpack-cg-residual-audit/benchmarks/applications/buckling_compare.py": "683da716a4c013715f0d6e8bc4d2620cf95d749a51aa913dcc6461f700ca883b",
+    "benchmarks/applications/prestress_buckling.py": "2832bddf66b4014caa5277d5e83464168df638e1dcf4cecf1283326e2f6a4984",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/runner.py": "45a4ba1321eca6cc7ca70c55db0b570a5e886704c83231b83b9a6c79b47f847b",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3"
+  },
+  "cases": [
+    {
+      "method": "warp-cudss",
+      "accepted": true,
+      "samples_seconds": [
+        0.8119225092232227,
+        0.8118436634540558,
+        0.8112649284303188
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.1762495627807041e-12,
+          "max_absolute_residual": 2.824085095550627e-14,
+          "orthogonality": 1.305622276959184e-13,
+          "spectrum_error": 7.718825578706401e-14,
+          "requested_subspace_error": 8.634604881737425e-12,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.1632306746439527e-12,
+          "max_absolute_residual": 2.8758896306047e-14,
+          "orthogonality": 8.149037000748649e-14,
+          "spectrum_error": 7.127957407862617e-14,
+          "requested_subspace_error": 1.0981545247409746e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.1398427550757055e-12,
+          "max_absolute_residual": 2.7829301363357928e-14,
+          "orthogonality": 1.5210055437364645e-13,
+          "spectrum_error": 7.127957407862617e-14,
+          "requested_subspace_error": 1.134593557481261e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        }
+      ],
+      "setup_seconds": 0.45705658942461014,
+      "capture_seconds": 1.0832195319235325,
+      "warmup_seconds": 0.923625759780407,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 4237,
+          "KERNEL": 18514,
+          "MEMCPY": 3535,
+          "CONDITIONAL": 351
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2131,
+          "HtoD (HOST PAGEABLE to DEVICE)": 1404
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "solve_seconds": 0.8118436634540558,
+      "sign": "positive",
+      "n": 41616,
+      "k": 20,
+      "nnz": 1437250,
+      "geometric_nnz": 579114,
+      "matrix_sha256": "8af263799a90a64510306c2d3d23ae25a316e3d711fdbe84522efd78f0be4a6b",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 3.9478511771268273e-13,
+      "reference_orthogonality": 1.341149413747189e-13,
+      "transformed_selection_margin": 0.00019872457046643532,
+      "shifted_spd": true,
+      "sigma": 0.1,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true,
+      "baseline_comparable": true,
+      "time_ratio": 1.001262689958736,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cg",
+      "accepted": true,
+      "samples_seconds": [
+        5.465206019580364,
+        5.465693697333336,
+        5.465846735984087
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.408900521789438e-12,
+          "max_absolute_residual": 6.51666322629401e-14,
+          "orthogonality": 9.259260025373806e-14,
+          "spectrum_error": 8.992806499463768e-14,
+          "requested_subspace_error": 1.4888654586308182e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            100453,
+            292,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.4088942744964111e-12,
+          "max_absolute_residual": 6.51666322629401e-14,
+          "orthogonality": 9.259260025373806e-14,
+          "spectrum_error": 8.992806499463768e-14,
+          "requested_subspace_error": 1.4888654586308182e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            100453,
+            292,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.4088926698452154e-12,
+          "max_absolute_residual": 6.516663734513779e-14,
+          "orthogonality": 9.259260025373806e-14,
+          "spectrum_error": 9.009459844833145e-14,
+          "requested_subspace_error": 1.4888654586308182e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            100453,
+            292,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "setup_seconds": 0.23175914958119392,
+      "capture_seconds": 2.4826243333518505,
+      "warmup_seconds": 5.541892740875483,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1078,
+          "KERNEL": 18514,
+          "MEMCPY": 1429,
+          "CONDITIONAL": 702
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1429
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "solve_seconds": 5.465693697333336,
+      "sign": "positive",
+      "n": 41616,
+      "k": 20,
+      "nnz": 1437250,
+      "geometric_nnz": 579114,
+      "matrix_sha256": "8af263799a90a64510306c2d3d23ae25a316e3d711fdbe84522efd78f0be4a6b",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 3.9478511771268273e-13,
+      "reference_orthogonality": 1.341149413747189e-13,
+      "transformed_selection_margin": 0.00019872457046643532,
+      "shifted_spd": true,
+      "sigma": 0.1,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true,
+      "baseline_comparable": true,
+      "time_ratio": 0.9999757200957899,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cudss",
+      "accepted": true,
+      "samples_seconds": [
+        0.8071816638112068,
+        0.8069255352020264,
+        0.806953888386488
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.7905869657617127e-12,
+          "max_absolute_residual": 8.667784372196063e-14,
+          "orthogonality": 6.972200594645983e-14,
+          "spectrum_error": 1.4991443335089596e-14,
+          "requested_subspace_error": 2.300451695389685e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.8050863096623509e-12,
+          "max_absolute_residual": 6.81535990837423e-14,
+          "orthogonality": 5.5289106626332796e-14,
+          "spectrum_error": 1.7114878554525297e-14,
+          "requested_subspace_error": 2.1070211314038881e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.3359309042977225e-12,
+          "max_absolute_residual": 7.879504340668753e-14,
+          "orthogonality": 5.395683899678261e-14,
+          "spectrum_error": 1.523130642845103e-14,
+          "requested_subspace_error": 1.3246723821361048e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        }
+      ],
+      "setup_seconds": 0.24194663763046265,
+      "capture_seconds": 0.9597340561449528,
+      "warmup_seconds": 0.9037317335605621,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 4237,
+          "KERNEL": 18514,
+          "MEMCPY": 3535,
+          "CONDITIONAL": 351
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2131,
+          "HtoD (HOST PAGEABLE to DEVICE)": 1404
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "solve_seconds": 0.806953888386488,
+      "sign": "negative",
+      "n": 41616,
+      "k": 20,
+      "nnz": 1437250,
+      "geometric_nnz": 579114,
+      "matrix_sha256": "8af263799a90a64510306c2d3d23ae25a316e3d711fdbe84522efd78f0be4a6b",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 1.343912163933071e-13,
+      "reference_orthogonality": 1.802724636235098e-14,
+      "transformed_selection_margin": 6.954869942799036e-05,
+      "shifted_spd": true,
+      "sigma": -0.1,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true,
+      "baseline_comparable": true,
+      "time_ratio": 1.0026527767823434,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cg",
+      "accepted": true,
+      "samples_seconds": [
+        5.288396198302507,
+        5.288650404661894,
+        5.28839249163866
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 7.094429736905796e-12,
+          "max_absolute_residual": 2.6137468925324647e-13,
+          "orthogonality": 5.995204332975845e-14,
+          "spectrum_error": 1.523130642845103e-14,
+          "requested_subspace_error": 2.2740413957765246e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            97620,
+            281,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 7.09442950156189e-12,
+          "max_absolute_residual": 2.613738218915085e-13,
+          "orthogonality": 5.995204332975845e-14,
+          "spectrum_error": 1.559110106849318e-14,
+          "requested_subspace_error": 2.2740413957765246e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            97620,
+            281,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 7.094429499132173e-12,
+          "max_absolute_residual": 2.61374038731943e-13,
+          "orthogonality": 5.995204332975845e-14,
+          "spectrum_error": 1.4631648695047446e-14,
+          "requested_subspace_error": 2.2740413957765246e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            97620,
+            281,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "setup_seconds": 0.18835507333278656,
+      "capture_seconds": 2.4432490952312946,
+      "warmup_seconds": 5.353044334799051,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1078,
+          "KERNEL": 18514,
+          "MEMCPY": 1429,
+          "CONDITIONAL": 702
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1429
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "solve_seconds": 5.288396198302507,
+      "sign": "negative",
+      "n": 41616,
+      "k": 20,
+      "nnz": 1437250,
+      "geometric_nnz": 579114,
+      "matrix_sha256": "8af263799a90a64510306c2d3d23ae25a316e3d711fdbe84522efd78f0be4a6b",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 1.343912163933071e-13,
+      "reference_orthogonality": 1.802724636235098e-14,
+      "transformed_selection_margin": 6.954869942799036e-05,
+      "shifted_spd": true,
+      "sigma": -0.1,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true,
+      "baseline_comparable": true,
+      "time_ratio": 0.9972223582458947,
+      "performance_regression": false
+    }
+  ],
+  "protocol": "Clamped P1 tetrahedral K SPD / G indefinite prescribed initial-stress pencil. Signed transformed buckling ordering, original equations, complete requested K-space and K-orthogonality. Independent reciprocal reference seed913; native seed2026, Warp seed42; no reference starts. Warm solve timings exclude fixture/reference/setup/capture. Warp physical and reciprocal-core counts plus upstream recursive CG convergence are mandatory; fresh inner CG diagnostics are tracked separately in issue89. Native CuPy has no buckling API: explicit reciprocal LOBPCG with SPD K metric and supplied cuDSS K inverse is labeled separately. Its fresh absolute reciprocal residual is mandatory.",
+  "competing_gpu_processes": [],
+  "timing_eligible": true,
+  "numerical_contract_accepted": true,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate.",
+  "baseline_comparable": true,
+  "performance_regression": false
+}

@@ -39,8 +39,9 @@ signed load factor. For an indefinite shifted matrix, use an appropriate
 indefinite inverse instead. Pure-Warp comparisons use unmodified upstream
 FSAI32 (FP32 factors) and FP64 CG with relative tolerance 1e-14, zero requested
 absolute tolerance and a 10,000-step limit. `CGInverse.stats` reports upstream
-recursive convergence; [#89](https://github.com/alecjacobson/warpack/issues/89)
-tracks optional fresh linear-residual diagnostics separately.
+recursive convergence. Optional `verify_residuals=True` adds fresh linear-residual
+diagnostics; see the [CG audit report](../experimental/CG_RESIDUAL_AUDIT.md).
+The timings here leave that optional audit disabled.
 
 Buckling ranks `abs(lambda/(lambda-sigma))`. Dense regressions explicitly
 prove that the requested set differs from ordinary nearest-physical-shift
@@ -130,6 +131,9 @@ reciprocal-core counts at inner tolerance 1e-13. Tightening only the inner
 solve to 1e-14 resolves those counts; outer tolerances are unchanged.
 [Full retained screen](../../results/performance_followup/buckling-inner-tolerance-screen.json).
 
+The native residual-orthogonalization exception is also reported upstream as
+[CuPy #10404](https://github.com/cupy/cupy/issues/10404).
+
 ## Validation and reproduction
 
 Tests cover independently evaluated element energies, translations, symmetric
@@ -150,3 +154,10 @@ PYTHONPATH="$PWD" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
   python -m benchmarks.upstream.cupy_buckling_probe --side 10 --modes 20 \
   --methods dense --repeats 3 --out build/buckling-cupy.json
 ```
+
+Add `--baseline results/performance_followup/buckling-tet-41616.json` to compare
+against the saved accepted large profile. The checker matches `(sign, method)`,
+input hashes, numerical settings and runtime; mismatches and solve-time ratios
+above 1.25 fail the command. Requested subsets of methods/signs are supported.
+The [post-CG-change regression](../../results/performance_followup/buckling-cg-default-regression.json)
+passes all four GPU rows with ratios 0.9972–1.0027 and unchanged graph audits.
