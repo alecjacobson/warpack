@@ -1,0 +1,261 @@
+{
+  "case": {
+    "id": "benchmark_gen_20",
+    "family": "benchmark_gen",
+    "name": "upstream benchmark",
+    "k": 10,
+    "ncv": 20,
+    "selection": 0,
+    "sigma_real": 0,
+    "sigma_imag": 0,
+    "upstream_allows_nonconvergence": false
+  },
+  "n": 100,
+  "nnz": 10000,
+  "k": 10,
+  "ncv": 40,
+  "budget": 80,
+  "tol": 1e-10,
+  "repeats": 5,
+  "protocol": "Matched fixed-budget solves on the same matrix/v0. Separate workspace and capture setup; warm synchronized reset replays alternate backend order. Original-equation, target spectrum/subspace, independence and count gates run outside every timed sample. Failed samples reject the comparison. Run through benchmarks.monitor_gpu for occupancy evidence. Clocks unlocked.",
+  "common_input_setup_seconds": 0.13197636231780052,
+  "warp": "1.18.0",
+  "gpu": "NVIDIA L40",
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "warp_cg_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_preconditioner_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_fsai_implementation": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp_sparse_implementation": "ec75cde6ace8704d7043700353b6132ff8450dd83840fd1558a89a0d012dc274",
+    "spectra_binary": null
+  },
+  "matrix_sha256": "91174ae7d178d3d8c9fcc3308b3e0a0d33b158ec2a14a8303992342064e63c08",
+  "start_sha256": "d5b756f65e079fbfcca8f15921b25a6141cdfd08c7975ac1884307e3b9e203c1",
+  "source_sha256": {
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "benchmarks/upstream/run_benchmarks.py": "fe4972ea7a43fb296312e541e51ee1c8f3b9326bd9a99909a628c344f99f6461",
+    "benchmarks/upstream/general_reference.py": "9c40ac32d5c81879e8cddb3ee655539a08474d2ae3844818495e3859f18b3354",
+    "benchmarks/experimental/general_checkpoint.py": "14224ff7c51cc01d522687e01b3de4ffccfb2621b4cbd745f17ac9a62bbf21a7",
+    "benchmarks/experimental/compare_general_checkpoint.py": "38c609beecfb0a0ca6bd984929185ed336c536acf76066adb9674c7028a9946c"
+  },
+  "variants": {
+    "baseline": {
+      "public_preserve_converged": false,
+      "solver_class": "benchmarks.upstream.run_benchmarks.StartedGeneral",
+      "workspace_setup_seconds": 0.02931736782193184,
+      "capture_seconds": 2.0825015269219875,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "KERNEL": 73016,
+          "MEMSET": 24258,
+          "MEMCPY": 2174
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2174
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "trials": [
+        {
+          "seconds": 1.1170765422284603,
+          "quality": {
+            "minimum_vector_singular_value": 0.46499359711380467,
+            "vector_rank_threshold": 3.0838007327296317e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 4.0226438312062325e-15,
+            "max_normalized_residual": 3.2560534572780424e-15,
+            "spectrum_error": 2.2748467065386707e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 1.1102230246251565e-16,
+            "subspace_error": 9.979558811474922e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.1170400269329548,
+          "quality": {
+            "minimum_vector_singular_value": 0.46499359711380467,
+            "vector_rank_threshold": 3.0838007327296317e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 4.0226438312062325e-15,
+            "max_normalized_residual": 3.2560534572780424e-15,
+            "spectrum_error": 2.2748467065386707e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 1.1102230246251565e-16,
+            "subspace_error": 9.979558811474922e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.1170308105647564,
+          "quality": {
+            "minimum_vector_singular_value": 0.46499359711380467,
+            "vector_rank_threshold": 3.0838007327296317e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 4.0226438312062325e-15,
+            "max_normalized_residual": 3.2560534572780424e-15,
+            "spectrum_error": 2.2748467065386707e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 1.1102230246251565e-16,
+            "subspace_error": 9.979558811474922e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.1170401759445667,
+          "quality": {
+            "minimum_vector_singular_value": 0.46499359711380467,
+            "vector_rank_threshold": 3.0838007327296317e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 4.0226438312062325e-15,
+            "max_normalized_residual": 3.2560534572780424e-15,
+            "spectrum_error": 2.2748467065386707e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 1.1102230246251565e-16,
+            "subspace_error": 9.979558811474922e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.117023266851902,
+          "quality": {
+            "minimum_vector_singular_value": 0.46499359711380467,
+            "vector_rank_threshold": 3.0838007327296317e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 4.0226438312062325e-15,
+            "max_normalized_residual": 3.2560534572780424e-15,
+            "spectrum_error": 2.2748467065386707e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 1.1102230246251565e-16,
+            "subspace_error": 9.979558811474922e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        }
+      ],
+      "accepted": true,
+      "median_seconds": 1.1170400269329548
+    },
+    "checkpoint": {
+      "public_preserve_converged": true,
+      "solver_class": "benchmarks.upstream.run_benchmarks.StartedGeneral",
+      "workspace_setup_seconds": 0.0022293031215667725,
+      "capture_seconds": 2.027744796127081,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 24264,
+          "KERNEL": 73177,
+          "MEMCPY": 2174
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2174
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "trials": [
+        {
+          "seconds": 1.1172039173543453,
+          "quality": {
+            "minimum_vector_singular_value": 0.4649935971138066,
+            "vector_rank_threshold": 3.0838007327296285e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 3.763721552792793e-15,
+            "max_normalized_residual": 3.042450593147448e-15,
+            "spectrum_error": 2.680125291866609e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 2.220446049250313e-16,
+            "subspace_error": 9.546733445549427e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.117230948060751,
+          "quality": {
+            "minimum_vector_singular_value": 0.4649935971138066,
+            "vector_rank_threshold": 3.0838007327296285e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 3.763721552792793e-15,
+            "max_normalized_residual": 3.042450593147448e-15,
+            "spectrum_error": 2.680125291866609e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 2.220446049250313e-16,
+            "subspace_error": 9.546733445549427e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.117303092032671,
+          "quality": {
+            "minimum_vector_singular_value": 0.4649935971138066,
+            "vector_rank_threshold": 3.0838007327296285e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 3.763721552792793e-15,
+            "max_normalized_residual": 3.042450593147448e-15,
+            "spectrum_error": 2.680125291866609e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 2.220446049250313e-16,
+            "subspace_error": 9.546733445549427e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.1171977631747723,
+          "quality": {
+            "minimum_vector_singular_value": 0.4649935971138066,
+            "vector_rank_threshold": 3.0838007327296285e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 3.763721552792793e-15,
+            "max_normalized_residual": 3.042450593147448e-15,
+            "spectrum_error": 2.680125291866609e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 2.220446049250313e-16,
+            "subspace_error": 9.546733445549427e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        },
+        {
+          "seconds": 1.1172721982002258,
+          "quality": {
+            "minimum_vector_singular_value": 0.4649935971138066,
+            "vector_rank_threshold": 3.0838007327296285e-14,
+            "independent_vectors": true,
+            "max_absolute_residual": 3.763721552792793e-15,
+            "max_normalized_residual": 3.042450593147448e-15,
+            "spectrum_error": 2.680125291866609e-14,
+            "required_spectrum_covered": true,
+            "vector_norm_error": 2.220446049250313e-16,
+            "subspace_error": 9.546733445549427e-15,
+            "accepted": true,
+            "converged": 10,
+            "status": 0
+          }
+        }
+      ],
+      "accepted": true,
+      "median_seconds": 1.117230948060751
+    }
+  },
+  "accepted": true,
+  "checkpoint_to_baseline_ratio": 1.0001709169977735
+}

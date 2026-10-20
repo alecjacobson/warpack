@@ -1,5 +1,10 @@
 # General spectrum-selection diagnostics
 
+The subsequent [public checkpoint report](../upstream/GENERAL_CHECKPOINT.md)
+promotes fixed-budget preservation with original-equation checks for shifted
+candidates. This document retains the preceding diagnostics and experimental
+policies; statements about unpromoted checkpoints describe those earlier stages.
+
 The public general solver's original Spectra benchmark profile passes 11/20
 requested-set checks. Doubling the explicitly requested `ncv` improves this to
 19/20 across three reset graph replays per case. This is an accuracy profile,

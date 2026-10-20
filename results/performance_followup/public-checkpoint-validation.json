@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-20",
+  "tested_code_revision": "641b290",
+  "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+  "warp": "1.18.0",
+  "warp_module": "/home/horde/projects/warpack/build/warp-fsai/warp/__init__.py",
+  "warp_overlay_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+  "gpu": "NVIDIA L40",
+  "driver": "570.158.01",
+  "blas_threads": 4,
+  "full_suite": {
+    "command": "python -m pytest -q",
+    "passed": 1332,
+    "seconds": 494.94
+  },
+  "stock_compatibility": {
+    "warp": "1.15.0",
+    "scope": "test_general*.py plus shift, complex shift refresh, tiled Schur and damped solver tests",
+    "passed": 172,
+    "seconds": 58.3
+  },
+  "checks": {
+    "lint": "python -m ruff check .: passed",
+    "python_formatting": "python -m ruff format --check --extend-exclude '*.md' .: 262 files already formatted",
+    "whitespace": "git diff --check: passed",
+    "format_scope": "Existing README/historical Markdown code-fence formatting is excluded; no numerical-source formatting failures."
+  },
+  "numerical": {
+    "wide_fixed80": "20/20 cases, 60/60 replays accepted; exact initial source retained in f8212ae; subsequent owner/counter fixes do not change numerical kernels",
+    "compact_adaptive": "same 11/20 cases accepted, same nine requested-spectrum failures; #104 remains open",
+    "shifted_timing": "control and preservation each 3/3 accepted, occupancy eligible",
+    "direct_timing": "control and preservation each 5/5 accepted, alternating order, occupancy eligible"
+  },
+  "pipeline": [
+    {
+      "name": "shift-control",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.monitor_gpu",
+        "--out",
+        "build/checkpoint-shift-control.occupancy.json",
+        "--log",
+        "build/checkpoint-shift-control.log",
+        "--",
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.general_count_probe",
+        "--case",
+        "GenEigsRealShift_12",
+        "--iterations",
+        "30",
+        "--repeats",
+        "3",
+        "--warmup",
+        "--no-preserve",
+        "--out",
+        "build/checkpoint-shift-control.json"
+      ],
+      "exit_code": 0,
+      "seconds": 10.109800815582275
+    },
+    {
+      "name": "shift-preserved",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.monitor_gpu",
+        "--out",
+        "build/checkpoint-shift-preserved.occupancy.json",
+        "--log",
+        "build/checkpoint-shift-preserved.log",
+        "--",
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.general_count_probe",
+        "--case",
+        "GenEigsRealShift_12",
+        "--iterations",
+        "30",
+        "--repeats",
+        "3",
+        "--warmup",
+        "--out",
+        "build/checkpoint-shift-preserved.json"
+      ],
+      "exit_code": 0,
+      "seconds": 9.707960844039917
+    },
+    {
+      "name": "direct-overhead",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.monitor_gpu",
+        "--out",
+        "build/checkpoint-direct-overhead.occupancy.json",
+        "--log",
+        "build/checkpoint-direct-overhead.log",
+        "--",
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.compare_general_checkpoint",
+        "--case",
+        "benchmark_gen_20",
+        "--ncv",
+        "40",
+        "--budget",
+        "80",
+        "--repeats",
+        "5",
+        "--public",
+        "--out",
+        "build/checkpoint-direct-overhead.json"
+      ],
+      "exit_code": 0,
+      "seconds": 22.370463848114014
+    },
+    {
+      "name": "compact-inventory",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "benchmarks.experimental.general_selection_profiles",
+        "--ncv-multiplier",
+        "1",
+        "--budget",
+        "300",
+        "--repeats",
+        "3",
+        "--out",
+        "build/checkpoint-compact-inventory.json"
+      ],
+      "exit_code": 0,
+      "seconds": 92.85730147361755
+    },
+    {
+      "name": "full-suite",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "exit_code": 0,
+      "seconds": 495.98790979385376
+    },
+    {
+      "name": "stock-focused",
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "pytest",
+        "tests/test_general_benchmark_start.py",
+        "tests/test_general_budgets.py",
+        "tests/test_general_checkpoint.py",
+        "tests/test_general_checkpoint_experiment.py",
+        "tests/test_general_reference.py",
+        "tests/test_general_restart.py",
+        "tests/test_general_sm.py",
+        "tests/test_general_starts.py",
+        "tests/test_general_trace.py",
+        "tests/test_generalized_transforms_krylov.py",
+        "tests/test_shift.py",
+        "tests/test_complex_shift_refresh.py",
+        "tests/test_tiled_schur.py",
+        "tests/test_damped_solver.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "seconds": 59.16562819480896
+    }
+  ],
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "84db517eb8cc6ac7ddf9e82f3faa49f2896ae546a4d6a53e824f564c915cd421",
+    "warpack/solver.py": "1b2bfb4887cf18d6c0ed94af2980119d1d441ce345dd3772e6bb8f8d85eaaa92",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  }
+}
