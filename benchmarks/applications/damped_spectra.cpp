@@ -69,3 +69,5 @@ extern "C" int damped_polish(void* ptr, int k, Complex* vectors) {
         return op.factor.info()==Eigen::Success ? 0 : -1;
     } catch (...) { return -1; }
 }
+
+extern "C" int damped_abi_version() { return 2; }

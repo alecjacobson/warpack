@@ -86,6 +86,14 @@ def spectra_setup(
     kinematic=False,
 ):
     lib = ctypes.CDLL(str(Path(library).resolve()))
+    try:
+        version = lib.damped_abi_version
+    except AttributeError as error:
+        raise RuntimeError("Recompile damped_spectra.so for the current reference ABI") from error
+    version.argtypes = []
+    version.restype = ctypes.c_int
+    if version() != 2:
+        raise RuntimeError("Recompile damped_spectra.so for reference ABI2")
     ints = np.ctypeslib.ndpointer(dtype=np.int32, flags="C_CONTIGUOUS")
     data = np.ctypeslib.ndpointer(dtype=np.complex128, flags="C_CONTIGUOUS")
     raw = ctypes.c_void_p
