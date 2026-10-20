@@ -24,3 +24,21 @@ def test_duplicate_zero_vectors_and_wrong_end_fail():
     assert not reference.check(values[:2], np.eye(5)[:, :2])["accepted"]
     assert not reference.check(values[-2:], np.zeros((5, 2)))["accepted"]
     assert not reference.check(values[[4, 4]], np.eye(5)[:, [4, 4]])["accepted"]
+
+
+def test_repeated_values_require_independent_vectors():
+    a = np.diag([1.0, 5.0, 5.0, 5.0])
+    reference = GeneralReference(a, 3)
+    values = np.full(3, 5.0)
+    independent = np.eye(4)[:, 1:]
+    assert reference.check(values, independent)["accepted"]
+    duplicate = independent[:, [0, 1, 1]]
+    result = reference.check(values, duplicate)
+    assert result["max_absolute_residual"] == 0
+    assert result["spectrum_error"] == 0
+    assert not result["independent_vectors"]
+    assert not result["accepted"]
+    # General eigenvectors need independence, not mutual orthogonality.
+    independent[:, 1] += independent[:, 0]
+    independent /= np.linalg.norm(independent, axis=0)
+    assert reference.check(values, independent)["accepted"]

@@ -26,7 +26,12 @@ class GeneralReference:
         cost = abs(values[:, None] - self.values)
         rows, cols = linear_sum_assignment(cost)
         error = self.a @ vectors - vectors * values
+        singular_values = la.svdvals(vectors)
+        rank_threshold = max(vectors.shape) * np.finfo(float).eps * singular_values[0]
         result = dict(
+            minimum_vector_singular_value=float(singular_values[-1]),
+            vector_rank_threshold=float(rank_threshold),
+            independent_vectors=bool(singular_values[-1] > rank_threshold),
             max_absolute_residual=float(abs(error).max()),
             max_normalized_residual=float(
                 np.max(np.linalg.norm(error, axis=0) / np.maximum(1, abs(values)))
@@ -39,7 +44,8 @@ class GeneralReference:
             ),
         )
         result["accepted"] = bool(
-            result["required_spectrum_covered"]
+            result["independent_vectors"]
+            and result["required_spectrum_covered"]
             and result["max_absolute_residual"] < self.margin
             and result["spectrum_error"] < self.margin
             and result["vector_norm_error"] < self.margin
