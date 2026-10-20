@@ -1,0 +1,51 @@
+{
+  "issue": 15,
+  "source_base_revision": "ca78d97",
+  "scope": "Settings-only follow-up; no numerical source changes. Same benchmark gates and full three-trial comparisons; no new full-suite run needed.",
+  "input_sha256": {
+    "anvil for export-ftetwild.mesh": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+    "build/anvil_reference.npz": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898"
+  },
+  "profiles": {
+    "anvil-shift100-width20": {
+      "accepted": true,
+      "process_exit": 0,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.8779108189046383,
+      "cupy_median_seconds": 2.8382025100290775,
+      "warp_all_accepted": true,
+      "cupy_all_accepted": true
+    },
+    "anvil-shift100-cg25": {
+      "accepted": true,
+      "process_exit": 0,
+      "occupancy_eligible": true,
+      "warp_median_seconds": 2.3853628374636173,
+      "cupy_median_seconds": 2.453760452568531,
+      "warp_all_accepted": true,
+      "cupy_all_accepted": true
+    },
+    "anvil-shift100-fsai64": {
+      "accepted": false,
+      "process_exit": 1,
+      "occupancy_eligible": false,
+      "warp_median_seconds": 2.4932516776025295,
+      "cupy_median_seconds": 2.5701289400458336,
+      "warp_all_accepted": true,
+      "cupy_all_accepted": false
+    },
+    "anvil-shift100-cg35": {
+      "accepted": false,
+      "process_exit": 1,
+      "occupancy_eligible": false,
+      "warp_median_seconds": 2.645492300391197,
+      "cupy_median_seconds": 2.707374919205904,
+      "warp_all_accepted": true,
+      "cupy_all_accepted": false
+    }
+  },
+  "accepted_best": "anvil-shift100-cg25",
+  "best_vs_previous_accepted": 0.9373309008385147,
+  "remaining_gap": "Best 2.38536s versus preceding cuDSS .46559s, about5.1x. Issue15 remains open.",
+  "rejected_reason": "FSAI64 and CG35 aggregates reject because some CuPy trials meet native absolute1e-5 but miss common returned-pair normalized1e-8. Individual Warp rows pass but rejected aggregates are not accepted cross-backend baselines."
+}

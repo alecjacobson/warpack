@@ -1,5 +1,8 @@
 # Anvil block preconditioner shift follow-up
 
+A subsequent [inner-budget follow-up](ANVIL_BUDGET.md) improves the accepted
+Warp profile to 2.385s with CG25; the shift-only results below are retained.
+
 The existing approximate block preconditioner benefits from a smaller positive
 shift. On the 283,857-DOF Anvil, **2.545s** replaces the preceding **3.111s**
 experimental profile. A fresh control with the old shift takes **3.140s**, so
