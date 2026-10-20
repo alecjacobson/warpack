@@ -110,6 +110,33 @@ def select_symmetric_reference(values, k, which, sigma=None):
     return np.r_[order[: k // 2], order[-(k - k // 2) :]]
 
 
+def generalized_reference_errors(a, b, values, vectors, k, which, tolerance):
+    """Independent SPD-mass reference, including selection ties and multiplicity."""
+    reference, basis = la.eigh(a, b)
+    score = {
+        "LM": abs(reference),
+        "SM": -abs(reference),
+        "LA": reference,
+        "SA": -reference,
+    }[which]
+    boundary = np.sort(score)[-k]
+    allowed_indices = np.flatnonzero(score >= boundary - tolerance)
+    mandatory = set(np.flatnonzero(score > boundary + tolerance))
+    costs = abs(values[:, None] - reference[allowed_indices])
+    rows, cols = linear_sum_assignment(costs)
+    covered = mandatory.issubset(set(allowed_indices[cols]))
+    allowed = basis[:, allowed_indices]
+    # Eigh's reference basis is B-orthonormal, so use the B-inner product in
+    # its projector. An ordinary Euclidean projector would test another space.
+    projected = allowed @ (allowed.conj().T @ (b @ vectors))
+    return dict(
+        spectrum_error=float(costs[rows, cols].max()) if covered else float("inf"),
+        mandatory_spectrum_covered=covered,
+        orthogonality_error=float(np.max(abs(vectors.conj().T @ (b @ vectors) - np.eye(k)))),
+        subspace_error=float(np.linalg.norm(vectors - projected, 2)),
+    )
+
+
 def run(
     case, accuracy_only=False, iteration_budget=None, tolerance_override=None, ncv_override=None
 ):
@@ -228,13 +255,29 @@ def run(
                         tol=threshold,
                     )
             else:
-                if which != "SM":
+                if which not in ("SM", "LM", "LA", "SA"):
                     raise Unsupported(
                         "Generalized extremal selections are not mapped by this adapter"
                     )
-                inv = CuDSSInverse(ma, 1, mtype="general", matching=True, refinement_steps=1)
+                # Preserve the existing A^-1 M route for SM. The public
+                # regular route uses M^-1 A with M-metric orthogonalization.
+                inv = CuDSSInverse(
+                    ma if which == "SM" else mb,
+                    1,
+                    mtype="general",
+                    matching=True,
+                    refinement_steps=1,
+                )
                 solver = GeneralizedKrylovSchur(
-                    SparseOperator(ma), SparseOperator(mb), inv, k, ncv=ncv, target=0, tol=threshold
+                    SparseOperator(ma),
+                    SparseOperator(mb),
+                    inv,
+                    k,
+                    ncv=ncv,
+                    target=0,
+                    tol=threshold,
+                    mode="shift-invert" if which == "SM" else "regular",
+                    which="LM" if which == "SM" else which,
                 )
             iterations = 100
         elif name in ("SymEigsShift", "Example1Shift") or which == "SM":
@@ -307,6 +350,8 @@ def run(
             residual = a @ v - (v if b is None else b @ v) * w
             err = float(np.max(np.abs(residual)))
             errors = {"max_absolute_residual": err, "returned_pairs": len(w)}
+            if name in ("SymGEigsCholesky", "SymGEigsRegInv"):
+                errors.update(generalized_reference_errors(a, b, w, v, k, which, margin))
             if name in ("HermEigs", "DavidsonSymEigs", "SymEigsShift"):
                 ref, basis = la.eigh(a)
                 selected = select_symmetric_reference(
