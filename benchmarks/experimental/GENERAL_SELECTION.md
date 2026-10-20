@@ -123,3 +123,36 @@ Preserving a complete converged result while continuing exploration is being
 investigated separately. It must not hide missing requested modes, accept an
 inaccurate original equation, or reuse stale results after a changed-matrix
 replay. No such policy has yet been promoted to the public solver.
+
+## Experimental preservation of converged results
+
+The benchmark-only `CheckpointGeneral` preserves a complete converged Ritz set
+while the fixed-budget search continues unchanged. It compares the sum of the
+requested selection scores and, within a tolerance-scaled tie, prefers the
+smaller maximum residual. It does not simply freeze the first converged set:
+later discoveries can improve the recorded spectrum. The final output receives
+the usual fresh original-operator residual evaluation and strict count gate.
+The checkpoint decision and conditional vector copies run in Warp on device.
+
+At the same explicit widths (40/60), fixed 80 cycles, k=10, tol=1e-10, original
+matrices and original starts, the prototype passes **20/20 cases and all 60 reset
+replays**. The unmodified fixed-80 control passes only 11/20 cases across every
+replay. Worst accepted normalized original residual is 7.21e-15, requested
+spectrum error 2.95e-13, and invariant-subspace error 7.59e-14.
+[Full checkpoint results](../../results/general-selection-wide-checkpoint80.json).
+
+Seven initial regressions pass (2.23 s), covering all six selectors, changed
+matrix replay, and a previously converged problem followed by an unconverged
+one. These prevent stale results from substituting for a new solve. A small
+partial-space overiteration regression, stock-runtime coverage and performance
+regression measurements are still being added. No checkpoint policy is part of
+the public solver yet. In particular, the benchmark-only fixed direct-operator
+results do not establish accuracy for transformed/physical cuDSS stopping
+criteria or imply a global spectral-completeness certificate.
+
+Reproduce by adding `--checkpoint --fixed --budget 80` to the profile command.
+This compares labeled algorithm configurations; it does not change the original
+upstream fixture settings or certify the original-width adaptive profile. The
+prototype uses cached operator images for checkpoint eligibility, followed by
+fresh original residuals at return, and needs one additional k-by-n complex
+vector buffer. No speedup is claimed before its cost is measured.

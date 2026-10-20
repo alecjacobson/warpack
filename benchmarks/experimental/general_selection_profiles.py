@@ -23,6 +23,9 @@ def main():
     parser.add_argument("--case", action="append")
     parser.add_argument("--ncv-multiplier", type=int, default=2)
     parser.add_argument("--budget", type=int, default=300)
+    parser.add_argument(
+        "--checkpoint", action="store_true", help="Experimental converged-set preservation"
+    )
     parser.add_argument("--fixed", action="store_true", help="Execute every budgeted cycle")
     parser.add_argument("--ncv", type=int, help="Explicit width instead of the multiplier")
     parser.add_argument("--repeats", type=int, default=3)
@@ -38,6 +41,11 @@ def main():
         cases = [case for case in cases if case["id"] in args.case]
         if len(cases) != len(set(args.case)):
             parser.error("Unknown fixture case")
+    solver_type = StartedGeneral
+    if args.checkpoint:
+        from benchmarks.experimental.general_checkpoint import CheckpointGeneral
+
+        solver_type = CheckpointGeneral
     report = dict(
         protocol="Accuracy-only reset graph replays; public GeneralEigensolver with original "
         "Spectra v0, LM, tol=1e-10 and explicit ncv multiplier. No performance claims. "
@@ -55,10 +63,12 @@ def main():
                 "benchmarks/upstream/run_benchmarks.py",
                 "benchmarks/upstream/general_reference.py",
                 "benchmarks/experimental/general_selection_profiles.py",
+                "benchmarks/experimental/general_checkpoint.py",
             )
         },
         budget=args.budget,
         fixed=args.fixed,
+        checkpoint=args.checkpoint,
         requested_ncv=args.ncv,
         repeats=args.repeats,
         ncv_multiplier=args.ncv_multiplier,
@@ -72,7 +82,7 @@ def main():
         a, initial = read(matrix_path), read(initial_path).ravel()
         reference = GeneralReference(a, case["k"])
         ncv = min(len(a), args.ncv if args.ncv is not None else args.ncv_multiplier * case["ncv"])
-        solver = StartedGeneral(complex_matrix(a), case["k"], ncv=ncv, which="LM", tol=1e-10)
+        solver = solver_type(complex_matrix(a), case["k"], ncv=ncv, which="LM", tol=1e-10)
         solver.start_vector = wp.array(np.column_stack([initial, np.zeros(len(a))]), dtype=wp.vec2d)
         graph = solver.capture(args.budget, adaptive=not args.fixed)
         row = dict(
@@ -94,6 +104,9 @@ def main():
                 values=np.stack([values.real, values.imag], axis=-1).tolist(),
             )
             trial["accepted"] &= trial["converged"] == case["k"] and trial["status"] == 0
+            if args.checkpoint:
+                trial["checkpoint_updates"] = int(solver.checkpoint_updates.numpy()[0])
+                trial["checkpoint_valid"] = int(solver.checkpoint_valid.numpy()[0])
             row["trials"].append(trial)
         row["accepted"] = all(trial["accepted"] for trial in row["trials"])
         report["cases"].append(row)
