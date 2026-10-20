@@ -78,7 +78,7 @@ of the 10th. Fixed 80 cycles still miss it; fixed 300 recovers it. These control
 identify premature target selection, not a defective projected eigensolve.
 [Serial control](../../results/general-selection24-serial.json),
 [old restart](../../results/general-selection24-prior.json),
-[fixed 300 control](../../results/general-selection24-fixed 300.json).
+[fixed 300 control](../../results/general-selection24-fixed300.json).
 The remaining selection work is tracked in #104. All three formerly timed-out Spectra workers also finish and pass their
 original assertions and strict counts: `GenEigs_12`, `GenEigs_33`, and
 `ComplexEigs_33`. Both SM cases additionally check the requested spectrum and
