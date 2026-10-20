@@ -106,3 +106,76 @@ def cupy_reciprocal(case, tolerance=1e-9, maxiter=300, scaled=False):
             return case.shift + scale / mu, out, (history, fresh)
 
     return solve, inverse.close
+
+
+def cupy_cg_reciprocal(case, inner_steps=25, working_dtype=wp.float32, tolerance=1e-10):
+    """Native CuPy outer iteration with exact active-width Warp CG captures.
+
+    Same upstream FSAI/CG construction as the Warp block adapter, independently
+    set up in this worker. No padding, no cuDSS and no CuPy source modifications.
+    """
+    import cupy as cp
+    import cupyx.scipy.sparse as cs
+    import cupyx.scipy.sparse.linalg as cl
+    import warp.optim.linear as linear
+
+    from benchmarks.experimental.batched_cg import BatchedCGInverse, CapturedActiveCG
+
+    p = transformed(case)
+    scale = -case.shift
+    stream = cp.cuda.Stream.from_external(wp.get_stream())
+    with stream:
+        mass, metric = cs.csr_matrix(scale * p.a), cs.csr_matrix(p.b)
+        shifted = matrix(p.b)
+        factor = linear.FSAI(
+            shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
+        )
+        inverse = BatchedCGInverse(
+            shifted,
+            case.k,
+            tol=0.01,
+            atol=0.0,
+            maxiter=inner_steps,
+            preconditioner=factor,
+            working_dtype=working_dtype,
+        )
+        captured = CapturedActiveCG(inverse)
+        initial = cp.asarray(np.random.default_rng(2026).normal(size=(case.n, case.k)))
+        free, boundary = cp.asarray(case.free), cp.asarray(case.boundary)
+
+        def apply(x):
+            with stream:
+                xx = x[:, None] if x.ndim == 1 else x
+                rhs = cp.ascontiguousarray(xx.T)
+                out = cp.empty_like(rhs)
+                captured.apply(wp.from_dlpack(rhs), wp.from_dlpack(out))
+                return out[0] if x.ndim == 1 else out.T
+
+        pre = cl.LinearOperator((case.n, case.n), matvec=apply, matmat=apply, dtype=cp.float64)
+
+    def solve():
+        with stream:
+            captured.reset_stats()
+            cp.random.seed(2026)
+            mu, vectors, history = cl.lobpcg(
+                mass,
+                initial.copy(),
+                B=metric,
+                M=pre,
+                largest=True,
+                tol=tolerance,
+                maxiter=300,
+                retResidualNormsHistory=True,
+            )
+            fresh = cp.linalg.norm(mass @ vectors - (metric @ vectors) * mu, axis=0)
+            out = cp.zeros((2 * len(case.xyz), case.k))
+            out[free] = vectors / cp.sqrt(mu / scale)
+            n = len(case.xyz)
+            for offset in (0, n):
+                out[offset : offset + n] -= out[boundary + offset].mean(axis=0)
+            return case.shift + scale / mu, out, (history, fresh, captured.collect_stats())
+
+    def close():
+        return None
+
+    return solve, close

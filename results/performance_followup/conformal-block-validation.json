@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "0556abc",
+  "production_core_changed": false,
+  "new_tests": 20,
+  "pinned": {
+    "warp": "1.18.0",
+    "warp_commit": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "passed": 89,
+    "seconds": 32.34
+  },
+  "command": "pytest -q tests/test_conformal_block.py tests/test_conformal_fixture.py tests/test_conformal_solver.py tests/test_conformal_reference.py tests/test_boundary_projector.py tests/test_conformal_baseline.py tests/test_connection_baseline.py tests/test_runtime_fingerprint.py",
+  "checks": [
+    "ruff check warpack benchmarks tests",
+    "ruff format --check warpack benchmarks tests (284 files)",
+    "git diff --check"
+  ],
+  "baseline": "results/conformal-block-best.json",
+  "regression": "results/conformal-block-best-regression.json",
+  "unchanged_inverse_controls": "results/conformal-products-block-control.json",
+  "sha256": {
+    "benchmarks/experimental/conformal_block.py": "5412cc93cb694a1f720148682edfa6700d7405316b461a99319307de511b649b",
+    "benchmarks/applications/conformal_warp.py": "42058db7e91ef1e6f83fc3509019fc8d7382bb3cb08300f8461c1a9fd4274f41",
+    "benchmarks/applications/conformal_backends.py": "41374caaacb1f0d677378bfa7360a8f39f12398d57d5fd0bfd50b8ed5cbf8a2a",
+    "benchmarks/applications/conformal_compare.py": "5d0e2e13a804353732be88dae598bd25b898be4ccdfb492b6fdf8fde23e387c3",
+    "tests/test_conformal_block.py": "60f532112c4ed8ab352c8b516a6b2cff28f58ba2cb669647310c743d99d1f1cd",
+    "tests/test_conformal_baseline.py": "01ebec7f5189252fcddefb0a8f0d18cc66ce3204d76ac98b4499103b9604e0da"
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "passed": 78,
+    "skipped": 11,
+    "seconds": 30.4,
+    "skip_reason": "pinned upstream FSAI/batched CG unavailable"
+  }
+}

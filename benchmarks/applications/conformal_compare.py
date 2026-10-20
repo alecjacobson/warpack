@@ -29,15 +29,20 @@ METHODS = (
     "spectra",
     "cupy",
     "cupy-scaled",
+    "cupy-cg",
     "warp-cudss",
     "warp-cg",
     "warp-cg-fsai",
     "warp-cudss-implicit",
     "warp-cg-fsai-implicit",
+    "warp-block-cg",
 )
 
 
 def run(args):
+    block = args.method == "warp-block-cg"
+    cupy_cg = args.method == "cupy-cg"
+    truncated = block or cupy_cg
     case = make_conformal_case(args.side, args.modes, args.height, args.pin, args.shift)
     start = time.perf_counter()
     reference = boundary_reference(case)
@@ -53,7 +58,9 @@ def run(args):
         n=case.n,
         full_n=case.stiffness.shape[0],
         k=case.k,
-        ncv=args.ncv,
+        ncv=None if truncated else args.ncv,
+        projection_capacity=3 * case.k if cupy_cg else 3 * args.block_width if block else args.ncv,
+        block_width=case.k if cupy_cg else args.block_width if block else None,
         nnz=case.stiffness.nnz,
         mass_nnz=case.mass.nnz,
         finite_count=2 * (len(case.boundary) - 1),
@@ -64,15 +71,25 @@ def run(args):
         pin=args.pin,
         matrix_sha256=digest.hexdigest(),
         seed=2026,
-        outer_cycles=args.steps,
-        cg_tol=args.cg_tol,
-        correction_steps=1,
-        correction_tol=0.01,
-        outer_tol=1e-10,
+        outer_cycles=None if truncated else args.steps,
+        outer_iteration_budget=300 if cupy_cg else args.steps if block else None,
+        cg_tol=None if truncated else args.cg_tol,
+        correction_steps=0 if truncated else 1,
+        correction_tol=None if truncated else 0.01,
+        outer_tol=args.cupy_tol if cupy_cg else args.block_tol if block else 1e-10,
+        inner_steps=args.inner_cg if truncated else None,
+        inner_precision=args.inner_dtype if truncated else "float64",
+        inner_role="truncated preconditioner" if truncated else "inverse solve",
+        inner_preconditioner_tol=0.01 if truncated else None,
+        physical_tol=1e-10 if args.method.startswith("warp") else None,
         cupy_tol=args.cupy_tol,
         cupy_maxiter=300,
-        reciprocal_scale=-case.shift if args.method == "cupy-scaled" else 1.0,
-        implicit_boundary=args.method.endswith("-implicit"),
+        reciprocal_scale=case.shift
+        if block
+        else -case.shift
+        if args.method in ("cupy-scaled", "cupy-cg")
+        else 1.0,
+        implicit_boundary=block or args.method.endswith("-implicit"),
         reference_seconds=reference_seconds,
         reference_values=reference[0].tolist(),
         reference="static boundary condensation + dense centered boundary eigensolve",
@@ -87,15 +104,29 @@ def run(args):
 
     try:
         if args.method.startswith("warp"):
-            row["setup_seconds"], solver = timed(
-                lambda: ConformalEigensolver(
-                    case,
-                    args.ncv,
-                    args.method.removeprefix("warp-").removesuffix("-implicit"),
-                    cg_tol=args.cg_tol,
-                    implicit=args.method.endswith("-implicit"),
-                )
-            )
+            if block:
+                from benchmarks.experimental.conformal_block import ConformalBlockEigensolver
+
+                def setup():
+                    return ConformalBlockEigensolver(
+                        case,
+                        args.block_width,
+                        args.inner_cg,
+                        args.block_tol,
+                        getattr(wp, args.inner_dtype),
+                    )
+            else:
+
+                def setup():
+                    return ConformalEigensolver(
+                        case,
+                        args.ncv,
+                        args.method.removeprefix("warp-").removesuffix("-implicit"),
+                        cg_tol=args.cg_tol,
+                        implicit=args.method.endswith("-implicit"),
+                    )
+
+            row["setup_seconds"], solver = timed(setup)
             close = solver.close
             row["capture_seconds"], graph = timed(lambda: solver.capture(args.steps))
 
@@ -122,6 +153,9 @@ def run(args):
                 "cupy-scaled": lambda: backends.cupy_reciprocal(
                     case, tolerance=args.cupy_tol, scaled=True
                 ),
+                "cupy-cg": lambda: backends.cupy_cg_reciprocal(
+                    case, args.inner_cg, getattr(wp, args.inner_dtype), args.cupy_tol
+                ),
             }[args.method]
             row["setup_seconds"], (solve, close) = timed(setup)
             row["capture_seconds"] = None
@@ -139,24 +173,29 @@ def run(args):
                 check["physical_count"] = int(solver.converged.numpy()[0])
                 check["reciprocal_count"] = int(solver.core.converged.numpy()[0])
                 check["solver_status"] = int(solver.core.status.numpy()[0])
+                check["outer_iterations"] = int(solver.core.iterations.numpy()[0])
                 check["solver_full_count"] = (
                     check["physical_count"] == case.k and check["reciprocal_count"] == case.k
                 )
-                if hasattr(solver.inverse, "stats"):
+                if getattr(solver, "truncated_preconditioner", False):
+                    check["preconditioner_scheduled_stats"] = solver.inverse.stats.numpy().tolist()
+                elif hasattr(solver.inverse, "stats"):
                     check["cg_stats"] = solver.inverse.stats.numpy().tolist()
                     check["cg_fresh_stats"] = solver.inverse.fresh_stats.numpy().tolist()
                     check["cg_residual_maxima"] = solver.inverse.residual_maxima.numpy().tolist()
                     check["inner_solve_accepted"] = (
                         check["cg_stats"][2] == 0 and check["cg_fresh_stats"][2] == 0
                     )
-            if args.method in ("cupy", "cupy-scaled"):
-                history, fresh = result[2]
+            if args.method in ("cupy", "cupy-scaled", "cupy-cg"):
+                history, fresh = result[2][:2]
                 check["native_iterations"] = len(history)
                 check["native_history_max"] = float(np.max(history[-1].get()))
                 check["native_fresh_max"] = float(np.max(fresh.get()))
                 check["native_stopping_passed"] = (
                     max(check["native_history_max"], check["native_fresh_max"]) <= row["cupy_tol"]
                 )
+                if cupy_cg:
+                    check["preconditioner_scheduled_stats"] = result[2][2].numpy().tolist()
             row["samples"].append(elapsed)
             row["validation"].append(check)
         contenders.extend(other_gpu_processes())
@@ -164,9 +203,10 @@ def run(args):
         row["competing_processes"] = contenders
         row["solve_seconds"] = float(np.median(row["samples"]))
         row["accepted"] = all(v["accepted"] for v in row["validation"])
-        row["inner_solve_accepted"] = all(
-            v.get("inner_solve_accepted", True) for v in row["validation"]
-        )
+        if not truncated:
+            row["inner_solve_accepted"] = all(
+                v.get("inner_solve_accepted", True) for v in row["validation"]
+            )
         row["outcome"] = "passed" if row["accepted"] else "failed"
     except Exception as error:
         import traceback
@@ -186,7 +226,18 @@ def assess_baseline(report, baseline):
     for row in report["cases"]:
         if any(
             row.get(key) != old.get(row["method"], {}).get(key)
-            for key in ("outer_tol", "cupy_tol", "cupy_maxiter", "reciprocal_scale")
+            for key in (
+                "outer_tol",
+                "cupy_tol",
+                "cupy_maxiter",
+                "reciprocal_scale",
+                "block_width",
+                "outer_iteration_budget",
+                "inner_steps",
+            )
+        ) or (
+            row["method"] in ("warp-block-cg", "cupy-cg")
+            and row.get("inner_precision") != old.get(row["method"], {}).get("inner_precision")
         ):
             row["baseline_comparable"] = False
             row.pop("time_ratio", None)
@@ -215,6 +266,10 @@ def main():
     parser.add_argument("--shift", type=float)
     parser.add_argument("--cg-tol", type=float, default=1e-11)
     parser.add_argument("--cupy-tol", type=float, default=1e-9)
+    parser.add_argument("--block-width", type=int, default=24)
+    parser.add_argument("--inner-cg", type=int, default=25)
+    parser.add_argument("--block-tol", type=float, default=1e-12)
+    parser.add_argument("--inner-dtype", choices=["float32", "float64"], default="float32")
     parser.add_argument(
         "--methods", default="scipy,scipy-original,spectra,cupy,warp-cudss,warp-cg-fsai"
     )
@@ -224,15 +279,18 @@ def main():
     parser.add_argument("--baseline", type=Path)
     add_diagnostic_argument(parser)
     args = parser.parse_args()
-    if min(args.steps, args.repeats) < 1 or not args.modes < args.ncv <= 2 * args.side**2 - 2:
+    methods = [args.method] if args.worker else args.methods.split(",")
+    if set(methods) - set(METHODS):
+        parser.error("unknown comparison method")
+    if min(args.steps, args.repeats) < 1 or (
+        any(method not in ("warp-block-cg", "cupy-cg") for method in methods)
+        and not args.modes < args.ncv <= 2 * args.side**2 - 2
+    ):
         parser.error("require positive repeats/steps and modes<ncv<=n")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     if args.worker:
         args.out.write_text(json.dumps(run(args), indent=2) + "\n")
         return
-    methods = args.methods.split(",")
-    if set(methods) - set(METHODS):
-        parser.error("unknown comparison method")
     report = dict(
         gpu=wp.get_device().name,
         warp=wp.__version__,
@@ -247,6 +305,7 @@ def main():
             for p in [
                 *Path(__file__).parent.glob("conformal*.py"),
                 Path("benchmarks/experimental/boundary_projector.py"),
+                Path("benchmarks/experimental/conformal_block.py"),
             ]
         },
         runtime_hashes=warp_runtime_hashes("build/application_spectra.so"),
@@ -275,6 +334,10 @@ def main():
             "height",
             "cg_tol",
             "cupy_tol",
+            "block_width",
+            "inner_cg",
+            "block_tol",
+            "inner_dtype",
             "shift",
         ):
             if getattr(args, name) is not None:

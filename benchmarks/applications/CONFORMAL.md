@@ -7,6 +7,11 @@ small regularized example in `problems.py` remains a separate historical fixture
 Application assembly, gauge selection and reciprocal recovery live in
 `benchmarks/applications/`, outside the installed package.
 
+The [block-preconditioned follow-up](../experimental/CONFORMAL_BLOCK.md) reduces
+the large pure-Warp solve to 0.519 s with short CG preconditioning, retaining the
+same original-pencil acceptance gates. The accurate-inverse profiles below
+remain available and retain their fresh inner-solve audits.
+
 The motivating formulation is [Mullen et al., Spectral Conformal
 Parameterization, equations 5–7](https://www.geometry.caltech.edu/pubs/MTAD08.pdf):
 a boundary-normalized conformal energy and a centered boundary projector.

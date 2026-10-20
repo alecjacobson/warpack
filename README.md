@@ -38,6 +38,12 @@ The installed `warpack` package contains the numerical solvers, inverse backends
 
 The [singular boundary-mass conformal example](benchmarks/applications/CONFORMAL.md) removes the common translation kernel and solves an exact reciprocal pencil in an SPD metric. Flat and curved patches retain their finite modes without energy regularization; this is an explicit benchmark adapter, not a general singular-mass API.
 
+Its [experimental block-preconditioned follow-up](benchmarks/experimental/CONFORMAL_BLOCK.md)
+solves 20 modes at 32,766 unknowns in **0.519 s**, versus **6.801 s** for accurate
+CG inverses and **0.384 s** for cuDSS. Short upstream FP32 CG applications
+precondition FP64 block iteration; all original-pencil and full-count checks
+pass. The report preserves the failed large native-CuPy comparison separately.
+
 ## Install
 
 ```bash

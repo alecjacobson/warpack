@@ -1,0 +1,143 @@
+{
+  "method": "warp-block-cg",
+  "n": 32766,
+  "full_n": 32768,
+  "k": 20,
+  "ncv": null,
+  "projection_capacity": 72,
+  "block_width": 24,
+  "nnz": 328988,
+  "mass_nnz": 516128,
+  "finite_count": 1014,
+  "infinite_count": 31752,
+  "common_nullity_before_gauge": 2,
+  "shift": -0.001,
+  "height": 0.25,
+  "pin": 0,
+  "matrix_sha256": "2e2ccd85bdf68a50db4c66337501e207b3c3b1999ed9c3f43070925e92e2eacc",
+  "seed": 2026,
+  "outer_cycles": null,
+  "outer_iteration_budget": 200,
+  "cg_tol": null,
+  "correction_steps": 0,
+  "correction_tol": null,
+  "outer_tol": 1e-12,
+  "inner_steps": 25,
+  "inner_precision": "float32",
+  "inner_role": "truncated preconditioner",
+  "inner_preconditioner_tol": 0.01,
+  "physical_tol": 1e-10,
+  "cupy_tol": 1e-09,
+  "cupy_maxiter": 300,
+  "reciprocal_scale": -0.001,
+  "implicit_boundary": true,
+  "reference_seconds": 4.3078718818724155,
+  "reference_values": [
+    2.4249239968300908e-08,
+    2.4249240900208397e-08,
+    2.652543301660406e-06,
+    2.6525433025923142e-06,
+    1.0098036952318955e-05,
+    1.0098036953250861e-05,
+    2.6697348695159893e-05,
+    2.66973486960918e-05,
+    5.436712131838659e-05,
+    5.436712131838659e-05,
+    9.651288479621569e-05,
+    9.651288479714759e-05,
+    0.00015664790892384777,
+    0.00015664790892477967,
+    0.00023938541239328613,
+    0.00023938541239328613,
+    0.0003457154429427219,
+    0.00034571544294365383,
+    0.0004797716808617404,
+    0.0004797716808617404
+  ],
+  "reference": "static boundary condensation + dense centered boundary eigensolve",
+  "samples": [
+    0.590701662003994,
+    0.6102815680205822,
+    0.6107282117009163
+  ],
+  "validation": [
+    {
+      "residual": 5.2406512176489387e-14,
+      "orthogonality": 5.672545766444159e-16,
+      "spectrum_error": 1.0805362138897878e-15,
+      "subspace_error": 6.915670506496381e-13,
+      "centered_boundary_error": 8.334868228669667e-17,
+      "accepted": true,
+      "physical_count": 20,
+      "reciprocal_count": 20,
+      "solver_status": 0,
+      "outer_iterations": 25,
+      "solver_full_count": true,
+      "preconditioner_scheduled_stats": [
+        15000,
+        25,
+        600,
+        600
+      ]
+    },
+    {
+      "residual": 3.494388048037796e-14,
+      "orthogonality": 1.1102230246251565e-15,
+      "spectrum_error": 1.188522750269344e-15,
+      "subspace_error": 6.605323043770699e-13,
+      "centered_boundary_error": 7.201151311298997e-17,
+      "accepted": true,
+      "physical_count": 20,
+      "reciprocal_count": 20,
+      "solver_status": 0,
+      "outer_iterations": 26,
+      "solver_full_count": true,
+      "preconditioner_scheduled_stats": [
+        15600,
+        25,
+        624,
+        624
+      ]
+    },
+    {
+      "residual": 3.518208635227308e-14,
+      "orthogonality": 1.1102230246251565e-15,
+      "spectrum_error": 1.0046420618158025e-15,
+      "subspace_error": 6.111529733431331e-13,
+      "centered_boundary_error": 6.540044096832245e-17,
+      "accepted": true,
+      "physical_count": 20,
+      "reciprocal_count": 20,
+      "solver_status": 0,
+      "outer_iterations": 26,
+      "solver_full_count": true,
+      "preconditioner_scheduled_stats": [
+        15600,
+        25,
+        624,
+        624
+      ]
+    }
+  ],
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 59,
+      "MEMCPY": 19,
+      "KERNEL": 859,
+      "CONDITIONAL": 8
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 19
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "setup_seconds": 1.5180558860301971,
+  "capture_seconds": 0.44429726526141167,
+  "device_only_graph": true,
+  "warmup_seconds": 0.6141277700662613,
+  "timing_uncontended": true,
+  "competing_processes": [],
+  "solve_seconds": 0.6102815680205822,
+  "accepted": true,
+  "outcome": "passed"
+}

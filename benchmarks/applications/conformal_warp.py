@@ -43,6 +43,12 @@ def reciprocal(mu: wp.array[wp.float64], shift: wp.float64, values: wp.array[wp.
     values[j] = shift + wp.float64(1.0) / mu[j]
 
 
+@wp.kernel
+def scale_reciprocals(source: wp.array[wp.float64], scale: wp.float64, out: wp.array[wp.float64]):
+    j = wp.tid()
+    out[j] = scale * source[j]
+
+
 class ConformalEigensolver:
     """Kx=lambda Mx -> Mx=mu (K-shift M)x; mu=1/(lambda-shift).
 
@@ -102,6 +108,14 @@ class ConformalEigensolver:
             which="LA",
             initial_vector=start,
         )
+        self._allocate_outputs(case, self.core, inverse, tol)
+
+    def _allocate_outputs(self, case, core, inverse, tol, mu_scale=1.0):
+        """Shared original-pencil recovery; core vectors are A-normalized."""
+        self.case, self.k, self.tol = case, case.k, tol
+        self.core, self.inverse, self.device = core, inverse, core.device
+        self.mu_scale = mu_scale
+        self.mu = core.eigenvalues if mu_scale == 1.0 else wp.empty_like(core.eigenvalues)
         self.original, self.mass = (SparseOperator(matrix(m)) for m in (case.stiffness, case.mass))
         self.free = wp.array(case.free, dtype=wp.int32, device=self.device)
         self.boundary = wp.array(case.boundary, dtype=wp.int32, device=self.device)
@@ -117,11 +131,18 @@ class ConformalEigensolver:
         self.order = wp.array(np.arange(case.k), dtype=wp.int32, device=self.device)
 
     def finalize(self):
+        if self.mu_scale != 1.0:
+            wp.launch(
+                scale_reciprocals,
+                self.k,
+                [self.core.eigenvalues, self.mu_scale, self.mu],
+                device=self.device,
+            )
         self.eigenvectors.zero_()
         wp.launch(
             lift_normalize,
             self.core.eigenvectors.shape,
-            [self.core.eigenvectors, self.core.eigenvalues, self.free, self.eigenvectors],
+            [self.core.eigenvectors, self.mu, self.free, self.eigenvectors],
             device=self.device,
         )
         self.means.zero_()
@@ -140,7 +161,7 @@ class ConformalEigensolver:
         wp.launch(
             reciprocal,
             self.k,
-            [self.core.eigenvalues, self.case.shift, self.eigenvalues],
+            [self.mu, self.case.shift, self.eigenvalues],
             device=self.device,
         )
         self.original.apply(self.eigenvectors, self.ax)

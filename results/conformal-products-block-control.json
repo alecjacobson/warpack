@@ -1,0 +1,351 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "blas_threads": "4",
+  "git_head": "0556abccab1922c46588775d0c442ebaf2b039d1",
+  "implementation_sha256": {
+    "conformal.py": "cd2bd7223e7de3e937223df0e5e78639d65953c20994f81bdf54bb5050dd8bfe",
+    "conformal_backends.py": "41374caaacb1f0d677378bfa7360a8f39f12398d57d5fd0bfd50b8ed5cbf8a2a",
+    "conformal_compare.py": "5d0e2e13a804353732be88dae598bd25b898be4ccdfb492b6fdf8fde23e387c3",
+    "conformal_cupy_repro.py": "629dc2cdfc3c51fada0f8aca98921dd6f394880f5ab55068fa57b35c2e6a583e",
+    "conformal_warp.py": "42058db7e91ef1e6f83fc3509019fc8d7382bb3cb08300f8461c1a9fd4274f41",
+    "boundary_projector.py": "91ed8640ad77a5341af7403da3909e666aa436adc6ae40e47bfc04a306516c20",
+    "conformal_block.py": "5412cc93cb694a1f720148682edfa6700d7405316b461a99319307de511b649b"
+  },
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "warp_cg_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_preconditioner_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_fsai_implementation": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp_sparse_implementation": "ec75cde6ace8704d7043700353b6132ff8450dd83840fd1558a89a0d012dc274",
+    "spectra_binary": "03eef93f96b2b7310a5288caabbdf80fdf587be6e6ef33a56d041decaae05184"
+  },
+  "fixture": "P1 conformal energy, centered boundary mass, translation quotient; no regularization",
+  "cases": [
+    {
+      "method": "warp-cudss-implicit",
+      "n": 32766,
+      "full_n": 32768,
+      "k": 20,
+      "ncv": 64,
+      "projection_capacity": 64,
+      "block_width": null,
+      "nnz": 328988,
+      "mass_nnz": 516128,
+      "finite_count": 1014,
+      "infinite_count": 31752,
+      "common_nullity_before_gauge": 2,
+      "shift": -0.001,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "2e2ccd85bdf68a50db4c66337501e207b3c3b1999ed9c3f43070925e92e2eacc",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "outer_iteration_budget": null,
+      "cg_tol": 1e-09,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "inner_steps": null,
+      "inner_precision": "float64",
+      "inner_role": "inverse solve",
+      "inner_preconditioner_tol": null,
+      "physical_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reciprocal_scale": 1.0,
+      "implicit_boundary": true,
+      "reference_seconds": 4.077815845608711,
+      "reference_values": [
+        2.4249239968300908e-08,
+        2.4249240900208397e-08,
+        2.652543301660406e-06,
+        2.6525433025923142e-06,
+        1.0098036952318955e-05,
+        1.0098036953250861e-05,
+        2.6697348695159893e-05,
+        2.66973486960918e-05,
+        5.436712131838659e-05,
+        5.436712131838659e-05,
+        9.651288479621569e-05,
+        9.651288479714759e-05,
+        0.00015664790892384777,
+        0.00015664790892477967,
+        0.00023938541239328613,
+        0.00023938541239328613,
+        0.0003457154429427219,
+        0.00034571544294365383,
+        0.0004797716808617404,
+        0.0004797716808617404
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        0.3839072920382023,
+        0.38319097086787224,
+        0.3836514875292778
+      ],
+      "validation": [
+        {
+          "residual": 1.951751138664843e-14,
+          "orthogonality": 9.7698238388233e-13,
+          "spectrum_error": 1.052780638274159e-15,
+          "subspace_error": 1.649976523968617e-12,
+          "centered_boundary_error": 7.416967302798474e-17,
+          "accepted": true,
+          "physical_count": 20,
+          "reciprocal_count": 20,
+          "solver_status": 0,
+          "outer_iterations": 4,
+          "solver_full_count": true
+        },
+        {
+          "residual": 1.9439698590988505e-14,
+          "orthogonality": 9.47207590140664e-13,
+          "spectrum_error": 1.1085086299399138e-15,
+          "subspace_error": 1.6430569325044375e-12,
+          "centered_boundary_error": 7.610928510348637e-17,
+          "accepted": true,
+          "physical_count": 20,
+          "reciprocal_count": 20,
+          "solver_status": 0,
+          "outer_iterations": 4,
+          "solver_full_count": true
+        },
+        {
+          "residual": 1.7982923712177453e-14,
+          "orthogonality": 9.719378080141894e-13,
+          "spectrum_error": 1.121952736878734e-15,
+          "subspace_error": 1.5923025975467417e-12,
+          "centered_boundary_error": 8.108124845195533e-17,
+          "accepted": true,
+          "physical_count": 20,
+          "reciprocal_count": 20,
+          "solver_status": 0,
+          "outer_iterations": 4,
+          "solver_full_count": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 3555,
+          "MEMCPY": 1884,
+          "KERNEL": 12052,
+          "CONDITIONAL": 187
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1136,
+          "HtoD (HOST PAGEABLE to DEVICE)": 748
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "setup_seconds": 0.5629882179200649,
+      "capture_seconds": 0.7580622471868992,
+      "device_only_graph": false,
+      "warmup_seconds": 0.4515254460275173,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.3836514875292778,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true,
+      "baseline_comparable": true,
+      "time_ratio": 0.9998795123077644,
+      "performance_regression": false
+    },
+    {
+      "method": "warp-cg-fsai-implicit",
+      "n": 32766,
+      "full_n": 32768,
+      "k": 20,
+      "ncv": 64,
+      "projection_capacity": 64,
+      "block_width": null,
+      "nnz": 328988,
+      "mass_nnz": 516128,
+      "finite_count": 1014,
+      "infinite_count": 31752,
+      "common_nullity_before_gauge": 2,
+      "shift": -0.001,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "2e2ccd85bdf68a50db4c66337501e207b3c3b1999ed9c3f43070925e92e2eacc",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "outer_iteration_budget": null,
+      "cg_tol": 1e-09,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "inner_steps": null,
+      "inner_precision": "float64",
+      "inner_role": "inverse solve",
+      "inner_preconditioner_tol": null,
+      "physical_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reciprocal_scale": 1.0,
+      "implicit_boundary": true,
+      "reference_seconds": 4.469520710408688,
+      "reference_values": [
+        2.4249239968300908e-08,
+        2.4249240900208397e-08,
+        2.652543301660406e-06,
+        2.6525433025923142e-06,
+        1.0098036952318955e-05,
+        1.0098036953250861e-05,
+        2.6697348695159893e-05,
+        2.66973486960918e-05,
+        5.436712131838659e-05,
+        5.436712131838659e-05,
+        9.651288479621569e-05,
+        9.651288479714759e-05,
+        0.00015664790892384777,
+        0.00015664790892477967,
+        0.00023938541239328613,
+        0.00023938541239328613,
+        0.0003457154429427219,
+        0.00034571544294365383,
+        0.0004797716808617404,
+        0.0004797716808617404
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        6.799384351819754,
+        6.7994649186730385,
+        6.798940479755402
+      ],
+      "validation": [
+        {
+          "residual": 1.8470727979903094e-14,
+          "orthogonality": 3.0597746558669314e-13,
+          "spectrum_error": 1.190691154614315e-15,
+          "subspace_error": 6.426098553180354e-13,
+          "centered_boundary_error": 8.616248572017085e-17,
+          "accepted": true,
+          "physical_count": 20,
+          "reciprocal_count": 20,
+          "solver_status": 0,
+          "outer_iterations": 4,
+          "solver_full_count": true,
+          "cg_stats": [
+            135836,
+            748,
+            0,
+            187
+          ],
+          "cg_fresh_stats": [
+            135836,
+            748,
+            0,
+            187
+          ],
+          "cg_residual_maxima": [
+            2.3102015490187716e-10,
+            9.70154777024821e-12
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "residual": 1.846336821615798e-14,
+          "orthogonality": 3.0686564400639327e-13,
+          "spectrum_error": 1.1911248354833093e-15,
+          "subspace_error": 6.425941635519613e-13,
+          "centered_boundary_error": 1.1285264061827071e-16,
+          "accepted": true,
+          "physical_count": 20,
+          "reciprocal_count": 20,
+          "solver_status": 0,
+          "outer_iterations": 4,
+          "solver_full_count": true,
+          "cg_stats": [
+            135836,
+            748,
+            0,
+            187
+          ],
+          "cg_fresh_stats": [
+            135836,
+            748,
+            0,
+            187
+          ],
+          "cg_residual_maxima": [
+            2.3102015490187716e-10,
+            9.701547770248211e-12
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "residual": 1.8485287344783547e-14,
+          "orthogonality": 3.0619951019161817e-13,
+          "spectrum_error": 1.1911248354833093e-15,
+          "subspace_error": 6.426767883783612e-13,
+          "centered_boundary_error": 1.0561324343506041e-16,
+          "accepted": true,
+          "physical_count": 20,
+          "reciprocal_count": 20,
+          "solver_status": 0,
+          "outer_iterations": 4,
+          "solver_full_count": true,
+          "cg_stats": [
+            135836,
+            748,
+            0,
+            187
+          ],
+          "cg_fresh_stats": [
+            135836,
+            748,
+            0,
+            187
+          ],
+          "cg_residual_maxima": [
+            2.3102015490187716e-10,
+            9.70154777024821e-12
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 3929,
+          "MEMCPY": 1136,
+          "KERNEL": 20093,
+          "CONDITIONAL": 561
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1136
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "setup_seconds": 1.5059626214206219,
+      "capture_seconds": 4.2409622967243195,
+      "device_only_graph": true,
+      "warmup_seconds": 6.917958416044712,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 6.799384351819754,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true,
+      "baseline_comparable": true,
+      "time_ratio": 0.9997602109215337,
+      "performance_regression": false
+    }
+  ],
+  "numerical_contract_accepted": true,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate.",
+  "baseline_comparable": true,
+  "performance_regression": false
+}
