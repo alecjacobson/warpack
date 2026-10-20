@@ -1,0 +1,48 @@
+Warp 1.18.0 initialized:
+   CUDA Toolkit 12.9, Driver 12.8
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA L40" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /home/horde/.cache/warp/1.18.0
+Module _bsr_accumulate_triplet_values_5520c14c 2336fbe load on device 'cuda:0' took 0.57 ms  (cached)
+Prepared repeated_bending n= 96
+Module _build_kernels__locals__diagonal_e9b40343 e9b4034 load on device 'cuda:0' took 0.37 ms  (cached)
+Module _build_kernels__locals__build_07478180 0747818 load on device 'cuda:0' took 0.37 ms  (cached)
+Module _pack_kernels__locals__sort_rows_3a34b408 3a34b40 load on device 'cuda:0' took 0.36 ms  (cached)
+Module _pack_kernels__locals__pack_577c8bdf 577c8bd load on device 'cuda:0' took 0.37 ms  (cached)
+Module warp.sparse 628f4a0 load on device 'cuda:0' took 9.94 ms  (cached)
+Module _bsr_assign_copy_blocks_78aeece8 5b440bc load on device 'cuda:0' took 0.37 ms  (cached)
+Module _validate_float32_factor_30a579b6 30a579b load on device 'cuda:0' took 0.36 ms  (cached)
+Module _bsr_transpose_values_657752e3 ce41d54 load on device 'cuda:0' took 0.38 ms  (cached)
+Preconditioner ready 0.04224873706698418
+Module batch_dot_kernel_c57525b8 e956b67 load on device 'cuda:0' took 1.04 ms  (cached)
+Module warp.optim.linear 395da8b load on device 'cuda:0' took 0.88 ms  (cached)
+Module transpose_rows_78c567a5 9ad6011 load on device 'cuda:0' took 751.85 ms  (compiled)
+Module csr_eight_rhs_16871a10 a472723 load on device 'cuda:0' took 604.21 ms  (compiled)
+Module transpose_axpby_728f6a45 8fa9b97 load on device 'cuda:0' took 544.54 ms  (compiled)
+Module csr_eight_rhs_16871a10 2b7ecb9 load on device 'cuda:0' took 444.06 ms  (compiled)
+Module _create_update_condition_kernel__locals___update_condition_7f44a644 f61afc8 load on device 'cuda:0' took 1.25 ms  (cached)
+Module warpack.batched_cg 607039e load on device 'cuda:0' took 439.73 ms  (compiled)
+Module _create_update_condition_kernel__locals___update_condition_608493df 324bba5 load on device 'cuda:0' took 1.19 ms  (cached)
+Module _create_update_condition_kernel__locals___update_condition_ab94f724 10512da load on device 'cuda:0' took 235.97 ms  (compiled)
+Module warpack.kernels 02026bc load on device 'cuda:0' took 0.97 ms  (cached)
+Module csr_four_rhs_093ab8c0 e402b52 load on device 'cuda:0' took 0.55 ms  (cached)
+Module symmetric_gram_kernel__locals__compute_d9f849c4 180757b load on device 'cuda:0' took 70.37 ms  (cached)
+Module warpack.block e157db3 load on device 'cuda:0' took 0.67 ms  (cached)
+Module gram_kernel__locals__compute_1eed9dd3 f8b36dc load on device 'cuda:0' took 75.03 ms  (cached)
+Module warpack.block_products aed69a4 load on device 'cuda:0' took 74.93 ms  (cached)
+Module jacobi_kernel__locals__compute_b276309e b276309 load on device 'cuda:0' took 0.58 ms  (cached)
+Module warpack.linalg_tiles 1750f83 load on device 'cuda:0' took 140.38 ms  (cached)
+Module jacobi_kernel__locals__compute_deb57611 deb5761 load on device 'cuda:0' took 0.71 ms  (cached)
+Module warpack.generalized 6c0d845 load on device 'cuda:0' took 0.65 ms  (cached)
+Module warpack._block_search e07d333 load on device 'cuda:0' took 0.42 ms  (cached)
+Module warpack._active_cg 975220f load on device 'cuda:0' took 0.47 ms  (cached)
+Module jacobi_kernel__locals__compute_29058bd5 29058bd load on device 'cuda:0' took 0.66 ms  (cached)
+Module jacobi_kernel__locals__compute_e5e6da9c e5e6da9 load on device 'cuda:0' took 0.66 ms  (cached)
+Module jacobi_kernel__locals__compute_41d28c96 41d28c9 load on device 'cuda:0' took 0.66 ms  (cached)
+Module jacobi_kernel__locals__compute_5e606eac 5e606ea load on device 'cuda:0' took 0.66 ms  (cached)
+Captured 0.4342633895576
+{'method': 'Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search', 'seconds': 0.896328940987587, 'iterations': 300, 'quality': {'accepted': False, 'residual': 6.182596452795769e-11, 'max_absolute_residual': 1.0125091876034276e-09, 'orthogonality': 6.661338147750939e-16, 'spectrum_error': 2.8605701923987324e-10, 'recovered_nullity': 0, 'nullspace_subspace_error': 0.0, 'requested_subspace_error': 4.478199415147832e-12, 'status': 0, 'converged': 4, 'preconditioner_cg_stats': [2532, 3, 0, 1260], 'cg_iteration_accounting': 'Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.', 'preconditioner_cg_bucket_widths': [4, 8, 12], 'preconditioner_cg_bucket_usage': [291, 3, 6, 678], 'search_bucket_widths': [4, 8, 12], 'search_bucket_usage': [291, 3, 6]}}
+results/bending_floor/fp64_cg.json
+Rejected block comparison; all trial evidence retained

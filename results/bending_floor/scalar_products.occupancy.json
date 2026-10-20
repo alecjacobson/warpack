@@ -1,0 +1,77 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "repeated_bending",
+    "--side",
+    "6",
+    "--modes",
+    "6",
+    "--width",
+    "12",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "1",
+    "--out",
+    "results/bending_floor/scalar_products.json"
+  ],
+  "pid": 202616,
+  "exit_code": 1,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792522096.6179745,
+      "other": [],
+      "gpu": "100 %, 1 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792522097.6980627,
+      "other": [],
+      "gpu": "10 %, 468 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792522098.794056,
+      "other": [],
+      "gpu": "100 %, 14336 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792522099.8333313,
+      "other": [],
+      "gpu": "100 %, 14336 MiB, 2490 MHz, 30",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

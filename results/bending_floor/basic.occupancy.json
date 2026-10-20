@@ -1,0 +1,69 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "repeated_bending",
+    "--side",
+    "6",
+    "--modes",
+    "6",
+    "--width",
+    "12",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "1",
+    "--out",
+    "results/bending_floor/basic.json"
+  ],
+  "pid": 202649,
+  "exit_code": 1,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792522100.5889113,
+      "other": [],
+      "gpu": "41 %, 1 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792522101.6697216,
+      "other": [],
+      "gpu": "28 %, 14314 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792522102.744654,
+      "other": [],
+      "gpu": "100 %, 14322 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792522103.8451424,
+      "other": [],
+      "gpu": "100 %, 14322 MiB, 2490 MHz, 31",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
