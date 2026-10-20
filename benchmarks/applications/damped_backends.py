@@ -9,7 +9,16 @@ import scipy.sparse.linalg as sla
 import warp as wp
 
 from benchmarks.upstream.adapters import complex_matrix
-from warpack import ShiftInvertEigensolver
+from warpack import ComplexShiftInverse, ShiftInvertEigensolver
+from warpack.pencil import GeneralizedShiftInvertEigensolver
+
+
+class _OwnedPencil(GeneralizedShiftInvertEigensolver):
+    """Application setup owns the inverse it constructs; the public API borrows it."""
+
+    def close(self):
+        super().close()
+        self.inverse.close()
 
 
 def initial(case, balance=1.0):
@@ -44,7 +53,8 @@ def scipy_setup(
     case, ncv, tol=1e-10, balance=1.0, polish=0, reference_refinement=0, kinematic=False
 ):
     matrix = coordinates(case, balance)
-    shifted = (matrix - case.target * sp.eye(matrix.shape[0])).tocsc()
+    mass = case.b
+    shifted = (matrix - case.target * (sp.eye(matrix.shape[0]) if mass is None else mass)).tocsc()
     factor = sla.splu(shifted)
 
     def apply(rhs):
@@ -63,13 +73,15 @@ def scipy_setup(
             ncv=ncv,
             sigma=case.target,
             OPinv=inverse,
+            M=mass,
             v0=start.copy(),
             tol=tol,
             maxiter=1000,
         )
         for _ in range(polish):
-            vectors = apply(vectors)
+            vectors = apply(vectors if mass is None else mass @ vectors)
             vectors /= np.linalg.norm(vectors, axis=0)
+        vectors /= np.linalg.norm(vectors, axis=0)
         return values, physical(vectors, balance, values, kinematic), {"count": len(values)}
 
     return solve, lambda: None
@@ -126,16 +138,44 @@ def spectra_setup(
         lib.damped_polish.restype = ctypes.c_int
     matrix = coordinates(case, balance).tocsc()
     matrix.sort_indices()
-    context = lib.damped_factor(
+    prefix = [
         matrix.shape[0],
         matrix.nnz,
         matrix.indptr.astype(np.int32),
         matrix.indices.astype(np.int32),
         matrix.data,
-        case.target.real,
-        case.target.imag,
-        reference_refinement,
-    )
+    ]
+    suffix = [case.target.real, case.target.imag, reference_refinement]
+    if case.b is None:
+        context = lib.damped_factor(*prefix, *suffix)
+    else:
+        if not hasattr(lib, "damped_pencil_abi_version") or lib.damped_pencil_abi_version() != 1:
+            raise RuntimeError("Recompile damped_spectra.so with generalized-pencil support")
+        mass = case.b.astype(complex).tocsc()
+        mass.sort_indices()
+        lib.damped_pencil_factor.argtypes = [
+            ctypes.c_int,
+            ctypes.c_int,
+            ints,
+            ints,
+            data,
+            ctypes.c_int,
+            ints,
+            ints,
+            data,
+            ctypes.c_double,
+            ctypes.c_double,
+            ctypes.c_int,
+        ]
+        lib.damped_pencil_factor.restype = raw
+        context = lib.damped_pencil_factor(
+            *prefix,
+            mass.nnz,
+            mass.indptr.astype(np.int32),
+            mass.indices.astype(np.int32),
+            mass.data,
+            *suffix,
+        )
     if not context:
         raise RuntimeError("Spectra/Eigen sparse factorization failed")
     start = np.ascontiguousarray(initial(case, balance))
@@ -168,9 +208,42 @@ def spectra_setup(
     return solve, lambda: lib.damped_free(context)
 
 
-def warp_setup(case, ncv, tol=1e-10, backend="cudss", balance=1.0, polish=0, kinematic=False):
+def warp_setup(
+    case,
+    ncv,
+    tol=1e-10,
+    backend="cudss",
+    balance=1.0,
+    polish=0,
+    kinematic=False,
+    inner_restart=None,
+):
     start = initial(case, balance)
     device_start = wp.array(np.stack([start.real, start.imag], axis=-1), dtype=wp.vec2d)
+    if case.b is not None:
+        if balance != 1.0 or polish or kinematic:
+            raise ValueError("generalized pencil benchmark currently uses original coordinates")
+        inverse = ComplexShiftInverse(
+            complex_matrix(case.a - case.target * case.b),
+            backend=backend,
+            inner_tol=1e-14,
+            inner_maxiter=1000,
+            inner_restart=inner_restart,
+        )
+        try:
+            return _OwnedPencil(
+                complex_matrix(case.a),
+                complex_matrix(case.b),
+                inverse,
+                case.k,
+                sigma=case.target,
+                ncv=ncv,
+                tol=tol,
+                initial_vector=device_start,
+            )
+        except Exception:
+            inverse.close()
+            raise
     cls = ShiftInvertEigensolver
     operators = [complex_matrix(case.a)]
     kwargs = {}
@@ -192,5 +265,6 @@ def warp_setup(case, ncv, tol=1e-10, backend="cudss", balance=1.0, polish=0, kin
         inner_tol=1e-13,
         inner_maxiter=1000,
         initial_vector=device_start,
+        inner_restart=inner_restart,
         **kwargs,
     )

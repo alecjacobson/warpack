@@ -1,6 +1,7 @@
 """Real or complex shift-invert for general complex CSR, on device."""
 
 from functools import partial
+from operator import index
 
 import warp as wp
 import warp.sparse as ws
@@ -159,18 +160,38 @@ class ComplexShiftInverse:
     every apply, including captured replay with fixed topology/addresses.
     cuDSS factors remain tied to the values at construction; recreate that
     inverse and its graphs when source values change.
+    ``inner_restart`` optionally sets the realified GMRES Krylov width, clipped
+    to ``2*n``. The default remains ``min(2*n,64)``. Increasing it can resolve
+    restart stagnation but increases device workspace; it applies only to GMRES.
     """
 
     requires_static_outer_capture = True
 
-    def __init__(self, operator, sigma=0j, backend="cudss", inner_tol=1.0e-12, inner_maxiter=1000):
+    def __init__(
+        self,
+        operator,
+        sigma=0j,
+        backend="cudss",
+        inner_tol=1.0e-12,
+        inner_maxiter=1000,
+        inner_restart=None,
+    ):
         if backend not in ("cudss", "gmres"):
             raise ValueError("backend must be cudss or gmres")
+        if inner_restart is not None:
+            if backend != "gmres":
+                raise ValueError("inner_restart applies only to the gmres backend")
+            if isinstance(inner_restart, bool):
+                raise TypeError("inner_restart must be a positive integer")
+            inner_restart = index(inner_restart)
+            if inner_restart < 1:
+                raise ValueError("inner_restart must be positive")
         self.original = operator
         self.complex_n = operator.complex_n
         self.device = operator.device
         n = self.complex_n
         self.n = 2 * n
+        self.inner_restart = min(2 * n, 64 if inner_restart is None else inner_restart)
         nnz = len(operator.values)
         size = 4 * (nnz + n)
         rows = wp.zeros(size, dtype=wp.int32, device=self.device)
@@ -233,7 +254,7 @@ class ComplexShiftInverse:
                 self.solution[0],
                 tol=inner_tol,
                 maxiter=inner_maxiter,
-                restart=min(2 * n, 64),
+                restart=self.inner_restart,
                 check_every=0,
                 run=False,
             )
@@ -342,6 +363,7 @@ class ShiftInvertEigensolver:
         hermitian=False,
         initial_vector=None,
         preserve_converged=True,
+        inner_restart=None,
     ):
         if hermitian and complex(sigma).imag != 0:
             raise ValueError("Hermitian shift-invert requires a real sigma")
@@ -350,7 +372,9 @@ class ShiftInvertEigensolver:
             operator = ComplexCSR(
                 operator.complex_n, operator.offsets, operator.columns, operator.values
             )
-        self.inverse = ComplexShiftInverse(operator, sigma, backend, inner_tol, inner_maxiter)
+        self.inverse = ComplexShiftInverse(
+            operator, sigma, backend, inner_tol, inner_maxiter, inner_restart=inner_restart
+        )
         try:
             if self.hermitian:
                 self.core = HermitianEigensolver(

@@ -14,6 +14,7 @@ from .hermitian import HermitianCSR, HermitianEigensolver
 from .iterative import GMRESInverse
 from .normal_svd import NormalSVD
 from .nullspace import NumericalNullspaceDiagnostics
+from .pencil import GeneralizedShiftInvertEigensolver
 from .shift import ComplexShiftInverse, ShiftInvertEigensolver
 from .solver import (
     CuDSSInverse,
@@ -36,6 +37,7 @@ __all__ = [
     "GeneralEigensolver",
     "GeneralizedEigensolver",
     "GeneralizedKrylovSchur",
+    "GeneralizedShiftInvertEigensolver",
     "GMRESInverse",
     "HermitianCSR",
     "HermitianEigensolver",

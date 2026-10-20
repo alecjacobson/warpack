@@ -27,6 +27,7 @@ class DampedCase:
     left: np.ndarray
     full_spectrum: np.ndarray
     nodes: int
+    b: sp.csr_matrix | None = None
 
     @property
     def k(self):
@@ -117,8 +118,9 @@ def quality(case, values, vectors):
     cost = abs(values[:, None] - case.values) / np.maximum(1, abs(case.values))[None, :]
     rows, cols = linear_sum_assignment(cost)
     av = case.a @ vectors
-    residual = np.linalg.norm(av - vectors * values, axis=0) / np.maximum(
-        1, np.linalg.norm(av, axis=0) + abs(values) * np.linalg.norm(vectors, axis=0)
+    bv = vectors if case.b is None else case.b @ vectors
+    residual = np.linalg.norm(av - bv * values, axis=0) / np.maximum(
+        1, np.linalg.norm(av, axis=0) + abs(values) * np.linalg.norm(bv, axis=0)
     )
     q, velocity = vectors[: 2 * case.nodes], vectors[2 * case.nodes :]
     kq, dq, mq = case.stiffness @ q, (case.damping + case.gyroscopic) @ q, case.mass @ q

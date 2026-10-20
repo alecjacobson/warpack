@@ -22,6 +22,7 @@ from benchmarks.upstream.adapters import output
 
 from .damped import coupled_chain, quality
 from .damped_backends import initial, scipy_setup, spectra_setup, warp_setup
+from .damped_pencil import consistent_chain
 
 
 def accepted_physical(check, statistics, k):
@@ -33,6 +34,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--nodes", type=int, default=32)
     parser.add_argument("--k", type=int, default=8)
+    parser.add_argument("--consistent-mass", action="store_true")
     parser.add_argument("--ncv", type=int, default=32)
     parser.add_argument(
         "--kind",
@@ -51,6 +53,7 @@ def main():
     parser.add_argument("--polish", type=int, default=0)
     parser.add_argument("--balance", type=float, default=1.0)
     parser.add_argument("--cycles", type=int, default=20)
+    parser.add_argument("--inner-restart", type=int)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--tol", type=float, default=1e-10)
     parser.add_argument("--out", type=Path, required=True)
@@ -68,20 +71,32 @@ def main():
         parser.error("reference tolerance must be finite and positive")
     if args.polish < 0 or args.reference_refinement < 0:
         parser.error("polish must be nonnegative")
+    if args.consistent_mass and (
+        args.kind not in ("nonproportional", "gyroscopic")
+        or args.balance != 1.0
+        or args.polish
+        or args.kinematic
+    ):
+        parser.error("consistent mass supports nonproportional/gyroscopic original coordinates")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     begin = time.perf_counter()
-    case = coupled_chain(args.nodes, args.k, args.kind)
+    case = (consistent_chain if args.consistent_mass else coupled_chain)(
+        args.nodes, args.k, args.kind
+    )
     report = dict(
         protocol=__doc__,
         reference_setup_seconds=time.perf_counter() - begin,
         kind=args.kind,
         n=case.a.shape[0],
         nnz=case.a.nnz,
+        b_nnz=None if case.b is None else case.b.nnz,
+        generalized_pencil=case.b is not None,
         k=args.k,
         ncv=args.ncv,
         target=[case.target.real, case.target.imag],
         tol=args.tol,
         cycles=args.cycles,
+        inner_restart=args.inner_restart,
         coordinate_scale=args.balance,
         inverse_polish_steps=args.polish,
         recover_velocity=args.kinematic,
@@ -96,6 +111,11 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         matrix_sha256=hashlib.sha256(
             case.a.indptr.tobytes() + case.a.indices.tobytes() + case.a.data.tobytes()
+        ).hexdigest(),
+        mass_sha256=None
+        if case.b is None
+        else hashlib.sha256(
+            case.b.indptr.tobytes() + case.b.indices.tobytes() + case.b.data.tobytes()
         ).hexdigest(),
         runtime_hashes=warp_runtime_hashes("build/damped_spectra.so"),
         versions={
@@ -136,6 +156,7 @@ def main():
                     balance=args.balance,
                     polish=args.polish,
                     kinematic=args.kinematic,
+                    inner_restart=args.inner_restart if method == "warp-gmres" else None,
                 )
                 close = solver.close
                 wp.synchronize()

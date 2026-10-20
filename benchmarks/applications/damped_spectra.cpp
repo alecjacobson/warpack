@@ -8,14 +8,15 @@ using Sparse = Eigen::SparseMatrix<Complex>;
 using Vec = Eigen::VectorXcd;
 struct Inverse {
     using Scalar = Complex;
-    Sparse a, shifted;
+    Sparse a, b, shifted;
     int refinement_steps;
     Eigen::SparseLU<Sparse> factor;
     Complex shift;
     int rows() const { return a.rows(); }
     int cols() const { return a.cols(); }
     void perform_op(const Complex* x, Complex* y) const {
-        const Eigen::Map<const Vec> rhs(x, rows());
+        Vec rhs = Eigen::Map<const Vec>(x, rows());
+        if(b.rows()) rhs = b*rhs;
         Vec solution = factor.solve(rhs);
         for(int i=0;i<refinement_steps;i++) {
             const Vec residual = rhs - shifted*solution;
@@ -71,3 +72,22 @@ extern "C" int damped_polish(void* ptr, int k, Complex* vectors) {
 }
 
 extern "C" int damped_abi_version() { return 2; }
+
+// Additional pencil entry point; the original standardized ABI is unchanged.
+extern "C" int damped_pencil_abi_version() { return 1; }
+extern "C" void* damped_pencil_factor(
+    int n, int annz, const int* ao, const int* ac, const Complex* av,
+    int bnnz, const int* bo, const int* bc, const Complex* bv,
+    double sr, double si, int refinements) {
+    try {
+        auto op = std::make_unique<Inverse>();
+        op->a = Eigen::Map<const Sparse>(n,n,annz,ao,ac,av);
+        op->b = Eigen::Map<const Sparse>(n,n,bnnz,bo,bc,bv);
+        op->shift = Complex(sr,si);
+        op->shifted = op->a - op->shift*op->b;
+        op->refinement_steps = refinements;
+        op->factor.compute(op->shifted);
+        if(op->factor.info()!=Eigen::Success) return nullptr;
+        return op.release();
+    } catch(...) { return nullptr; }
+}
