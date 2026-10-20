@@ -203,10 +203,12 @@ class UpstreamPreconditioner:
     def __init__(self, preconditioner):
         self.preconditioner = preconditioner
         self.n, self.device = preconditioner.shape[0], preconditioner.device
-        # Upstream diagonal LinearOperators retain their (n,) diagonal shape.
+        # Upstream shapes count scalar DOFs. BSR preconditioners retain a matrix
+        # element dtype, but their matvec accepts scalar vectors directly.
+        # Diagonal LinearOperators retain their (n,) diagonal shape.
         if (
             preconditioner.shape not in ((self.n,), (self.n, self.n))
-            or preconditioner.dtype != wp.float64
+            or getattr(preconditioner, "scalar_type", preconditioner.dtype) != wp.float64
         ):
             raise ValueError("upstream preconditioner must be square FP64")
         self.requires_static_outer_capture = getattr(

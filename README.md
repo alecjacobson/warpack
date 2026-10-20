@@ -105,6 +105,9 @@ metric. Arbitrary equality constraints use `ConstrainedKrylovSchur` instead.
 The [computed-start example](examples/block_reuse.py) assembles and updates a
 small FEM bar on device; [block validation](benchmarks/upstream/BLOCK_API.md)
 documents the supported CuPy fixtures and remaining reference mismatch.
+Upstream FP64 BSR block-Jacobi and FSAI preconditioners can also be passed
+directly; see the [adapter validation](benchmarks/experimental/UPSTREAM_PRECONDITIONERS.md)
+for required upstream features and captured application checks.
 
 
 ```python

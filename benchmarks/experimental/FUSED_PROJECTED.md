@@ -41,8 +41,8 @@ include source hashes, graph inspection and numerical checks.
 
 ## Anvil, 283,857 unknowns and 20 elastic modes
 
-The same experimental FSAI32/FP32-CG15 configuration uses Warp width24,
-CuPy width20, seeded random starts, device-selected CG batches and
+The same experimental FSAI32/FP32-CG15 configuration uses Warp width 24,
+CuPy width 20, seeded random starts, device-selected CG batches and
 cached operator images. Matrix/reference inputs, tolerances and stopping
 policies remain unchanged. The reference is loaded from the existing validated
 cache; no giant CPU factorization is run. Warm medians of three trials:
@@ -56,7 +56,7 @@ cache; no giant CPU factorization is run. Warm medians of three trials:
 | Fused global with Ada48+ dispatch | 3.111 | 3.087 |
 
 Every row passes original residual, spectrum, mode-shape and orthogonality
-checks. Warp reports all20 at its normalized tolerance 1e-8; CuPy meets its
+checks. Warp reports all 20 at its normalized tolerance 1e-8; CuPy meets its
 fresh full-block absolute tolerance 1e-5. These are different stopping formulas.
 The final Warp samples are 3.107/3.111/3.188s and 28/28/29 outer iterations;
 CuPy samples are 3.241/3.072/3.087s. Variable reference trajectories preclude a
@@ -97,7 +97,7 @@ Historical raw reports retain their original schema and per-trial evidence.
 
 The 10,890-DOF consistent-mass beam applies a regional 2% stiffness change,
 with previously computed modes/full blocks as starts. The same FSAI32/CG10,
-width24, 20 modes and unchanged physical/count gates pass every trial:
+width 24, 20 modes and unchanged physical/count gates pass every trial:
 
 | Start | Previous Warp, ms | Fused Warp, ms | Fresh CuPy, ms |
 |---|---:|---:|---:|
@@ -126,7 +126,7 @@ Other uncontended, three-trial controls retain full accuracy gates:
   absolute threshold. One scaled trial still exceeds that additional native
   absolute threshold, as in the previous report; it passes its own normalized
   stopping and all common physical gates. Do not claim identical stopping.
-- Anvil Warp+cuDSS remains near its existing .467s control, with all26 original
+- Anvil Warp+cuDSS remains near its existing .467s control, with all 26 original
   mode checks passing. [Data](../../results/performance_followup/fused-anvil-direct.json).
   Its graph retains the known vendor metadata HtoD copies (#29), with no host
   callbacks or device-to-host copies. The main all-backend table is unchanged.
@@ -135,12 +135,12 @@ Other uncontended, three-trial controls retain full accuracy gates:
 
 The full local run passes **839 tests in 400.59s**. A final benchmark-only
 acceptance addition passes with all four gate tests (**.69s**); it was added
-after collection of that full run. Stock Warp1.15 passes **158 focused tests
+after collection of that full run. Stock Warp 1.15 passes **158 focused tests
 in 29.24s**, including that addition. Coverage includes independent dense
 Jacobi rotations, difficult complete projected spectra, changed inputs on
 captured graphs, repeated block eigenspaces, coupled mass, invalid data,
 compatibility dispatch and no-host-transfer graph audits. Lint and formatting
-pass. The clean wheel imports all23 core modules outside the source checkout.
+pass. The clean wheel imports all 23 core modules outside the source checkout.
 [Validation record](../../results/performance_followup/fused-projected-validation.json),
 [wheel record](../../results/performance_followup/fused-projected-wheel.json).
 
