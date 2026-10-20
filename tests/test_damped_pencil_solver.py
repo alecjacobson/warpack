@@ -5,6 +5,7 @@ import pytest
 import warp as wp
 
 from benchmarks.applications.damped import quality
+from benchmarks.applications.damped_backends import warp_setup
 from benchmarks.applications.damped_pencil import consistent_chain
 from benchmarks.upstream.adapters import complex_matrix, output
 from warpack import ComplexShiftInverse
@@ -45,3 +46,20 @@ def test_consistent_damped_pencil_replay(kind, backend):
         solver.close()
         graph = None
         inverse.close()
+
+
+@pytest.mark.parametrize("polish", [1, 2])
+def test_declared_pencil_polish_preserves_physical_modes(polish):
+    case = consistent_chain(nodes=24, k=6, kind="gyroscopic")
+    solver = warp_setup(case, 32, tol=1e-10, polish=polish)
+    try:
+        graph = solver.capture(3)
+        for _ in range(2):
+            wp.capture_launch(graph)
+            assert quality(case, output(solver.eigenvalues), output(solver.eigenvectors).T)[
+                "accepted"
+            ]
+            assert solver.converged.numpy()[0] == case.k
+            assert solver.status.numpy()[0] == 0
+    finally:
+        solver.close()

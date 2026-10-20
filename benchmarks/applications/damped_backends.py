@@ -8,12 +8,12 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
+from benchmarks.experimental.pencil_polish import PolishedPencil
 from benchmarks.upstream.adapters import complex_matrix
 from warpack import ComplexShiftInverse, ShiftInvertEigensolver
-from warpack.pencil import GeneralizedShiftInvertEigensolver
 
 
-class _OwnedPencil(GeneralizedShiftInvertEigensolver):
+class _OwnedPencil(PolishedPencil):
     """Application setup owns the inverse it constructs; the public API borrows it."""
 
     def close(self):
@@ -221,7 +221,7 @@ def warp_setup(
     start = initial(case, balance)
     device_start = wp.array(np.stack([start.real, start.imag], axis=-1), dtype=wp.vec2d)
     if case.b is not None:
-        if balance != 1.0 or polish or kinematic:
+        if balance != 1.0 or kinematic:
             raise ValueError("generalized pencil benchmark currently uses original coordinates")
         inverse = ComplexShiftInverse(
             complex_matrix(case.a - case.target * case.b),
@@ -240,6 +240,7 @@ def warp_setup(
                 ncv=ncv,
                 tol=tol,
                 initial_vector=device_start,
+                polish_steps=polish,
             )
         except Exception:
             inverse.close()

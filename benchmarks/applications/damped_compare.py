@@ -72,10 +72,7 @@ def main():
     if args.polish < 0 or args.reference_refinement < 0:
         parser.error("polish must be nonnegative")
     if args.consistent_mass and (
-        args.kind not in ("nonproportional", "gyroscopic")
-        or args.balance != 1.0
-        or args.polish
-        or args.kinematic
+        args.kind not in ("nonproportional", "gyroscopic") or args.balance != 1.0 or args.kinematic
     ):
         parser.error("consistent mass supports nonproportional/gyroscopic original coordinates")
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -127,6 +124,7 @@ def main():
             for p in [
                 *Path("warpack").glob("*.py"),
                 Path("benchmarks/experimental/damped_coordinates.py"),
+                Path("benchmarks/experimental/pencil_polish.py"),
                 *Path("benchmarks/applications").glob("damped*.*"),
             ]
         },
