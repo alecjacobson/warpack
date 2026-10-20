@@ -37,7 +37,12 @@ the upstream effective tolerance, including its dtype safety floor. GMRES
 checks at restart boundaries and may exceed `maxiter` by up to `restart-1`;
 the counters report the actual work. `residual_maxima` stores maximum absolute
 and relative fresh residuals. Both arrays accumulate until `reset_stats()`.
-Inner failures are retained even when the outer eigenpairs pass.
+Inner failures are retained even when the outer eigenpairs pass. The revised
+comparison driver also requires zero failed inner RHSs for overall acceptance,
+keeps physical/outer/inner gates separate, and returns nonzero on a rejected
+profile ([#81](https://github.com/alecjacobson/warpack/issues/81)). Earlier raw
+records predate this combined gate; their outer `quality.accepted` field must
+be read together with `inner_stats`, as the distinctions below already state.
 
 Small residuals alone do not establish a complete requested eigenspace. Every
 application trial additionally checks the nearest physical eigenvalue set,
@@ -141,3 +146,18 @@ disconnected repeated modes and repeated bending. The reference construction
 is shared with the existing interior-FEM comparisons.
 
 The capability issue [#49](https://github.com/alecjacobson/warpack/issues/49) is closed. Remaining interior GMRES throughput and FP64 FSAI setup-memory costs are tracked separately in [#75](https://github.com/alecjacobson/warpack/issues/75); the accepted near-pole profile still has seven failed inner tolerance checks as recorded above.
+
+## Indefinite foundation coverage
+
+The driver also accepts `--case negative_lumped` or `negative_consistent` for
+the [negative-foundation Q1 fixture](../applications/NEGATIVE_FEM.md), solving
+for both signs nearest zero. Its preconditioner uses SPD `K0+M`, where K0 is
+the diffusion stiffness **before** subtracting the foundation. The solve
+matrix is still indefinite K. It never builds FSAI from that indefinite K.
+`--outer-tol` makes the requested count tolerance explicit (default 1e-9 for
+historical interior controls; 1e-11 for the new foundation comparisons).
+`--no-adaptive-capture` selects stock-Warp compatible fixed outer capture.
+The new raw records include complete source/matrix fingerprints and an
+optional `--baseline` comparison that rejects unlike configurations or failed
+trials. Setup/capture, free-memory observations and all inner failures remain
+separate from accepted solve timing.

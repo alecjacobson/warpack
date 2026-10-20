@@ -22,7 +22,7 @@ installed numerical library.
 | Target | Warp generalized operation | Inverse properties |
 |---|---|---|
 | SA: most negative | Shift-invert with `sigma=-tau-1`, below the spectrum | `K-sigma*M = K0+M` is SPD; cuDSS or upstream CG is valid |
-| SM: nearest zero, both signs | Shift-invert at `sigma=0` | K is nonsingular indefinite; general cuDSS factors; CG is invalid |
+| SM: nearest zero, both signs | Shift-invert at `sigma=0` | K is nonsingular indefinite; general cuDSS factors or upstream GMRES; CG is invalid |
 | LM: largest magnitude | `mode="regular", which="LM"`, supply `M^-1` | SPD mass inverse; cuDSS or upstream CG is valid |
 
 `GeneralizedKrylovSchur(SparseOperator(K), SparseOperator(M), inverse, ...)`
@@ -30,7 +30,9 @@ keeps the mass inner product. It does not pass the nonsymmetric Euclidean
 operator `M^-1 K` to a symmetric solver. `CGInverse` uses unmodified upstream
 Warp CG; block Jacobi and FSAI also come directly from the pinned Warp source.
 The comparison adapter now permits the already-supported regular mass-inverse
-CG route. This does not add a new production eigensolver or preconditioner.
+CG route. The separate `benchmarks.experimental.interior_gmres` driver exercises
+public `GMRESInverse` for SM, with fixed upstream FSAI built from SPD K0+M
+before subtracting the foundation; the solve matrix itself remains indefinite. This does not add a new production eigensolver or preconditioner.
 
 Native CuPy `eigsh` has no generalized mass argument. Its separate diagonal-mass
 SA/LM comparison explicitly scales by `M^-1/2`. Native `eigsh` does not accept
@@ -46,7 +48,7 @@ are impossible.
 Every timed trial must pass the original pencil residual, spectrum, complete
 requested eigenspace and mass orthogonality at the common 1e-8 bounds. In
 addition, this driver requires full Warp counts at its 1e-11 tolerance, zero
-reported inner CG failures, and fresh native CuPy stopping checks. CuPy LOBPCG
+reported inner CG/GMRES failures, and fresh native CuPy stopping checks. CuPy LOBPCG
 uses per-vector absolute residual norms; native `eigsh` additionally checks the
 Frobenius norm of the residual block in the correctly scaled standard problem.
 Setup, reference construction, capture and validation are outside warm solve
@@ -94,14 +96,14 @@ failed trials or a blanket passing claim about a mixed batch.
 
 | Target / mass | ARPACK | Spectra | CuPy | Warp + cuDSS | Warp + upstream FSAI-CG |
 |---|---:|---:|---:|---:|---:|
-| SA / lumped | 3234.1 | 3313.5 | eigsh 129.1 | 296.6 | 483.9 |
-| SA / consistent | 5705.5 | 6090.6 | LOBPCG 390.5 | 307.8 | 514.1 |
-| SM / lumped | 1939.0 | 2054.5 | unsupported | 298.3 | CG invalid |
-| SM / consistent | 3533.6 | 3879.2 | unsupported | 343.3 | CG invalid |
+| SA / lumped | 3234.1 | 3313.5 | eigsh 129.1 | 106.6 | 483.9 |
+| SA / consistent | 5705.5 | 6090.6 | LOBPCG 390.5 | 110.4 | 514.1 |
+| SM / lumped | 1939.0 | 2054.5 | unsupported | 59.4 | CG invalid |
+| SM / consistent | 3533.6 | 3879.2 | unsupported | 68.6 | CG invalid |
 | LM / lumped | 1316.2 | 2392.7 | eigsh 165.2 | 639.6 | 694.3 |
 | LM / consistent | 18022.9 | 18816.9 | rejected | 1593.0 | 2040.1 |
 
-Direct SA/SM uses six cycles; regular LM uses 32. The SA FSAI profile uses three
+Direct SA uses two cycles and SM one; regular LM uses 32. The SA FSAI profile uses three
 cycles, relative inner tolerance 1e-13 and `atol=0`. LM FSAI uses the same inner
 policy and 32 cycles. Native CuPy eigsh uses tolerance 1e-8; the accepted
 LOBPCG SA follow-up uses 1e-9 with a 1,000-iteration cap. CPU references use
@@ -128,6 +130,88 @@ are not claimed converged. With 32 cycles both Warp inverse routes pass all
 case; the remaining regular/adaptive throughput work belongs to #31. The
 longer CuPy LOBPCG runs remain rejected, including the independent instability
 tracked in #80. They are not used as timing wins for Warp.
+
+## Direct work-budget calibration
+
+The original six-cycle SA/SM profile used more work than needed. A shorter
+profile retains full 20/20 counts and all physical/requested-space gates in
+three trials: SA takes 106.6/110.4 ms for lumped/consistent mass with two cycles;
+SM takes 59.4/68.6 ms with one cycle. The prior accepted medians were
+296.6/307.8 ms for SA and 298.3/343.3 ms for SM. This is a validated work-budget
+change, not a production kernel or tolerance change.
+
+One-cycle SA is **rejected**: only 16/20 counts and original residuals up to
+1.52e-5. Those trials remain in
+[negative-direct-cycle1.json](../../results/performance_followup/negative-direct-cycle1.json)
+alongside the accepted SM trials. The accepted
+[two-cycle SA profile](../../results/performance_followup/negative-direct-cycle2.json),
+[SM regression replay](../../results/performance_followup/negative-direct-sm-regression.json)
+and [SA regression replay](../../results/performance_followup/negative-direct-sa-regression.json)
+retain all samples and graph audits. Independent same-setting replays differ
+by less than 0.2%, with uncontended occupancy records. No failed shorter run is
+counted as a performance improvement.
+
+## Pure-Warp GMRES for the indefinite nearest-zero matrix
+
+`GMRESInverse` supplies the missing iterative SM route, using the unmodified
+upstream Warp implementation and a fixed FP64 FSAI32 right preconditioner of
+SPD K0+M. The preconditioner is built before subtracting the foundation; the
+actual solve is still with indefinite K. No reference vectors enter the start
+or preconditioner. The outer tolerance is 1e-11 and inner relative tolerance
+1e-13 with `atol=0`.
+
+At 27,648 DOFs and 20 modes, ncv96 and one outer cycle:
+
+| Mass | Pure-Warp FSAI32 / GMRES128 | cuDSS control | Inner iterations / failed RHSs |
+|---|---:|---:|---:|
+| Lumped | 2.5077 s | .05957 s | 24,576 / 0 of 96 |
+| Consistent | 2.5720 s | .06831 s | 24,576 / 0 of 96 |
+
+All three trials pass full 20/20 counts, original equations, spectrum, complete
+requested subspace, mass orthogonality and fresh inner checks. Each RHS takes
+256 GMRES iterations within the 512 budget. Maximum physical residuals are
+2.83e-14 (lumped) and 2.13e-14 (consistent). Pure-Warp graphs contain only device
+work and DtoD copies. The separate cuDSS graphs retain 192 vendor metadata HtoD
+copies and no host callbacks/DtoH copies. Setup/capture free-memory decrease is
+about 1.86–1.89 GB for this FSAI32 profile, including runtime/pool allocations;
+it is not a live or peak memory measurement.
+
+[Large lumped trials](../../results/performance_followup/negative-gmres-large-lumped.json),
+[large consistent trials](../../results/performance_followup/negative-gmres-large-consistent.json),
+and a [1,024-DOF / 12-mode control](../../results/performance_followup/negative-gmres-medium.json)
+retain all samples, setup/capture costs, diagnostics and occupancy companions.
+The medium consistent control also passes (359.85 ms GMRES, 39.62 ms cuDSS).
+A [same-setting consistent-mass replay](../../results/performance_followup/negative-gmres-consistent-regression.json)
+passes all gates and differs by less than 0.04% for both methods, with clean
+occupancy. Configuration checks reject changed matrices, tolerances, budgets,
+runtimes, failed accuracy and contended profiles. The remaining iterative cost
+is tracked in #75; this is coverage, not timing parity with direct solves.
+
+The revised driver fixes [#81](https://github.com/alecjacobson/warpack/issues/81):
+`physical_accepted`, `outer_stopping_accepted` and `inner_solve_accepted` are
+separate, and all are mandatory for overall acceptance. Rejected profiles now
+return nonzero. Earlier interior data are retained verbatim; their outer
+acceptance field must be read with the already-recorded inner failure counts.
+[Focused validation](../../results/performance_followup/negative-gmres-validation.json)
+passes 43 GMRES/component tests initially and 39 final foundation/CG/GMRES tests
+(overlapping suites). The eight new cases pass on the pinned runtime; stock
+Warp 1.15 passes six and explicitly skips two unavailable FSAI cases. Lint and
+formatting pass. The deliberate exhausted-budget CLI returns exit 1 and keeps
+its [failed row](../../results/performance_followup/negative-gmres-rejected.json).
+This benchmark-only follow-up is not a new full local/upstream suite run.
+
+Eight new captured tests cover both masses with no preconditioner, upstream
+diagonal scaling, and upstream FSAI, plus exhausted inner budgets. The failure
+regression also verifies that a physically exact full-count outer result cannot
+hide recorded inner failures. Reference vectors are used only for that gate
+check, never as input to an eigensolve.
+
+```bash
+python -m benchmarks.experimental.interior_gmres --case negative_consistent \
+  --side 24 --modes 20 --ncv 96 --steps 1 --restart 128 --maxiter 512 \
+  --inner-tol 1e-13 --outer-tol 1e-11 --fsai-width 32 --repeats 3 \
+  --out build/negative-gmres.json
+```
 
 ## Absolute versus relative-only CG stopping
 

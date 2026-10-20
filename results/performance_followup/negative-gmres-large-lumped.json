@@ -1,0 +1,294 @@
+{
+  "args": {
+    "case": "negative_lumped",
+    "side": 24,
+    "modes": 20,
+    "band_index": 6,
+    "fraction": 0.37,
+    "ncv": 96,
+    "steps": 1,
+    "restart": 128,
+    "maxiter": 512,
+    "inner_tol": 1e-13,
+    "outer_tol": 1e-11,
+    "adaptive_capture": true,
+    "baseline": null,
+    "preconditioner": "fsai",
+    "fsai_width": 32,
+    "repeats": 3,
+    "methods": "gmres,cudss",
+    "out": "results/performance_followup/negative-gmres-large-lumped.json"
+  },
+  "n": 27648,
+  "k": 20,
+  "sigma": 0.0,
+  "reference": "Analytic complete tensor-product Q1 sine eigenspace",
+  "matrix_sha256": "f901e83b3f6f9556c784d1af5241491d4cef914c6f7d6dd83314ce78e3cd642b",
+  "nnz": 186624,
+  "mass_nnz": 27648,
+  "ncv": 96,
+  "matrix_properties": "Real symmetric indefinite shifted stiffness; SPD mass",
+  "preconditioner_matrix": "SPD K0+M, before subtracting foundation",
+  "start": "Warp seed 42 restored each replay; no reference vectors as starts",
+  "git_head": "bbdc1a9be43ac7fe02d7ae6a91b739031f22b726",
+  "blas_threads": "4",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "upstream_source_sha256": {
+    "linear": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "fsai": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07"
+  },
+  "expected": [
+    -6.145659403768377,
+    -6.145659403768377,
+    6.145659403768377,
+    6.145659403768377,
+    6.961580132593099,
+    6.961580132593099,
+    8.457758977043028,
+    8.457758977043028,
+    -10.687075006792014,
+    -10.687075006792014,
+    -20.956666255265475,
+    -20.956666255265475,
+    23.268765828540126,
+    23.268765828540126,
+    40.60800216590144,
+    40.60800216590144,
+    -41.546763917881435,
+    -41.546763917881435,
+    56.15018229869284,
+    56.15018229869284
+  ],
+  "selection_margin": null,
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "rows": [
+    {
+      "method": "gmres",
+      "setup_seconds": 0.04965326562523842,
+      "setup_free_memory_decrease_bytes": 1872756736,
+      "capture_free_memory_decrease_bytes": 18874368,
+      "capture_seconds": 18.998883929103613,
+      "warmup_seconds": 3.144142609089613,
+      "free_memory_decrease_bytes": 1891631104,
+      "memory_scope": "Setup/capture pool and runtime free-memory decrease, not peak/live allocation",
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 297,
+          "KERNEL": 128165,
+          "MEMCPY": 578,
+          "CONDITIONAL": 193
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 578
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "trials": [
+        {
+          "seconds": 2.507660184055567,
+          "quality": {
+            "accepted": true,
+            "residual": 2.8235034954251324e-14,
+            "max_absolute_residual": 9.197287029194534e-16,
+            "orthogonality": 4.04121180963557e-14,
+            "spectrum_error": 1.0521147480858028e-13,
+            "requested_subspace_error": 7.397120916893765e-14,
+            "physical_accepted": true,
+            "status": 0,
+            "converged": 20,
+            "outer_stopping_accepted": true,
+            "inner_solve_accepted": true
+          },
+          "outer_iterations": 1,
+          "inner_stats": [
+            24576,
+            256,
+            0,
+            96
+          ],
+          "inner_fresh_residual_maxima": [
+            5.634556741255237e-16,
+            7.043195926569048e-14
+          ]
+        },
+        {
+          "seconds": 2.507658403366804,
+          "quality": {
+            "accepted": true,
+            "residual": 2.823530484576305e-14,
+            "max_absolute_residual": 9.19837123136702e-16,
+            "orthogonality": 4.04121180963557e-14,
+            "spectrum_error": 1.050669535519751e-13,
+            "requested_subspace_error": 7.397120916893765e-14,
+            "physical_accepted": true,
+            "status": 0,
+            "converged": 20,
+            "outer_stopping_accepted": true,
+            "inner_solve_accepted": true
+          },
+          "outer_iterations": 1,
+          "inner_stats": [
+            24576,
+            256,
+            0,
+            96
+          ],
+          "inner_fresh_residual_maxima": [
+            5.634556741255237e-16,
+            7.043195926569046e-14
+          ]
+        },
+        {
+          "seconds": 2.5076307766139507,
+          "quality": {
+            "accepted": true,
+            "residual": 2.823478854742033e-14,
+            "max_absolute_residual": 9.196202827022049e-16,
+            "orthogonality": 4.04121180963557e-14,
+            "spectrum_error": 1.050669535519751e-13,
+            "requested_subspace_error": 7.397120916893765e-14,
+            "physical_accepted": true,
+            "status": 0,
+            "converged": 20,
+            "outer_stopping_accepted": true,
+            "inner_solve_accepted": true
+          },
+          "outer_iterations": 1,
+          "inner_stats": [
+            24576,
+            256,
+            0,
+            96
+          ],
+          "inner_fresh_residual_maxima": [
+            5.634556741255237e-16,
+            7.043195926569046e-14
+          ]
+        }
+      ],
+      "accepted": true,
+      "host_nodes": 0,
+      "device_only_graph": true,
+      "graph_accepted": true,
+      "median_seconds": 2.507658403366804
+    },
+    {
+      "method": "cudss",
+      "setup_seconds": 0.2385212555527687,
+      "setup_free_memory_decrease_bytes": 222298112,
+      "capture_free_memory_decrease_bytes": -33554432,
+      "capture_seconds": 0.21401139348745346,
+      "warmup_seconds": 0.07294406369328499,
+      "free_memory_decrease_bytes": 188743680,
+      "memory_scope": "Setup/capture pool and runtime free-memory decrease, not peak/live allocation",
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 585,
+          "KERNEL": 3747,
+          "MEMCPY": 482,
+          "CONDITIONAL": 96
+        },
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 192,
+          "DtoD (DEVICE to DEVICE)": 290
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "trials": [
+        {
+          "seconds": 0.059570565819740295,
+          "quality": {
+            "accepted": true,
+            "residual": 9.812420328934016e-13,
+            "max_absolute_residual": 4.024973849223526e-14,
+            "orthogonality": 3.863576125695545e-14,
+            "spectrum_error": 1.0622312360481664e-13,
+            "requested_subspace_error": 5.832974165776701e-13,
+            "physical_accepted": true,
+            "status": 0,
+            "converged": 20,
+            "outer_stopping_accepted": true,
+            "inner_solve_accepted": true
+          },
+          "outer_iterations": 1
+        },
+        {
+          "seconds": 0.05905531719326973,
+          "quality": {
+            "accepted": true,
+            "residual": 9.796542874583815e-13,
+            "max_absolute_residual": 6.852678147151181e-14,
+            "orthogonality": 3.1530333899354446e-14,
+            "spectrum_error": 1.0593408109160625e-13,
+            "requested_subspace_error": 9.762364348901921e-13,
+            "physical_accepted": true,
+            "status": 0,
+            "converged": 20,
+            "outer_stopping_accepted": true,
+            "inner_solve_accepted": true
+          },
+          "outer_iterations": 1
+        },
+        {
+          "seconds": 0.059578120708465576,
+          "quality": {
+            "accepted": true,
+            "residual": 1.3421044803264424e-12,
+            "max_absolute_residual": 8.37487631327738e-14,
+            "orthogonality": 3.7969627442180354e-14,
+            "spectrum_error": 1.0521147480858028e-13,
+            "requested_subspace_error": 8.646948170187259e-13,
+            "physical_accepted": true,
+            "status": 0,
+            "converged": 20,
+            "outer_stopping_accepted": true,
+            "inner_solve_accepted": true
+          },
+          "outer_iterations": 1
+        }
+      ],
+      "accepted": true,
+      "host_nodes": 0,
+      "device_only_graph": false,
+      "graph_accepted": true,
+      "median_seconds": 0.059570565819740295
+    }
+  ],
+  "other_gpu_processes_before": [],
+  "source_sha256": {
+    "/home/horde/projects/warpack-negative-gmres/benchmarks/experimental/interior_gmres.py": "f9fcf766805ceed3970e28beb3596ef8ad7622b00011384d3466a5a0263e68eb",
+    "benchmarks/applications/negative_foundation.py": "551a150882fcaafaaf601779c023aad3fa0d63d223958b537e1f4fe6a471fc56",
+    "benchmarks/applications/runner.py": "45150e745ce8f6e9baade5ad7df3a1e5b97c75766b31f07c6af09c2b9f033311",
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "33ccb8eb43292a48330e11b101bf45c2e945d87eb1a1bb40f8701c43951db8ca",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "e3b84d7ae06374b8cdec150d1ac53b6fded1fec25da807c5e5c5cdfe376cebb6",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "protocol": "Sequential warm replay trials; setup includes preconditioner/inverse and solver allocation, capture separate. CPU reference and device matrix transfer excluded. Every original-pencil and complete requested-space gate retained. GMRES uses a fixed right preconditioner of the stated SPD proxy, never an SPD factorization of K-sigma M. Actual inner iterations and fresh linear failures retained. cuDSS vendor HtoD metadata is tracked separately in #29.",
+  "other_gpu_processes_after": [],
+  "timing_eligible": true
+}
