@@ -12,7 +12,7 @@ Pinned sources:
 
 CuPy's tests are copied unchanged into `build/`. The pytest plugin substitutes the solver entry points and expands dtype decorators so each precision is reported individually. Fixtures, NumPy/SciPy references, and assertions retain their upstream definitions. CuPy remains a **test boundary and reference dependency**, not a production eigensolver backend. Dense/CSC/COO and matrix-backed LinearOperator inputs are materialized into Warp CSR by the adapter outside the solve. This tests their numerical problems, not native support for those input containers. Unsupported precision, interfaces, and methods are explicit skips.
 
-Automatic `SM` shifts and output ordering follow the pinned CuPy adapter contract. Real shift-invert supports LM/LA/SA selection through Warp Krylov iteration on the cuDSS inverse. Complex Hermitian shift-invert remains limited to nearest eigenvalues and now accepts complex starting vectors; nonsymmetric starting-vector support is separate.
+Automatic `SM` shifts and output ordering follow the pinned CuPy adapter contract. Real shift-invert supports LM/LA/SA selection through Warp Krylov iteration on the cuDSS inverse. Complex Hermitian shift-invert remains limited to nearest eigenvalues and now accepts complex starting vectors; nonsymmetric starting vectors are also supported through the [general start API](GENERAL_STARTS.md).
 
 Standard complex Hermitian LM/LA/SA problems accept device starting vectors; the adapter forwards `v0` to this API. See the [complex-start follow-up](HERMITIAN_STARTS.md) for the direct coverage, and the [Hermitian shift-invert follow-up](HERMITIAN_SHIFT.md) for the subsequently enabled SM cases.
 

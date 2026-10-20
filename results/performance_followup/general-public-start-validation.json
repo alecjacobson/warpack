@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-20",
+  "issue": 107,
+  "pinned": {
+    "warp": "1.18.0+cu12",
+    "passed": 159,
+    "seconds": 31.73
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "passed": 159,
+    "seconds": 36.55
+  },
+  "new_tests": 15,
+  "replaced_obsolete_rejection_test": 1,
+  "command": "python -m pytest tests/test_general*.py tests/test_arnoldi.py tests/test_shift.py tests/test_hermitian.py tests/test_complex_shift_refresh.py tests/test_schur.py tests/test_tiled_schur.py -q",
+  "source_sha256": {
+    "warpack/arnoldi.py": "fc42e0eb19817a142e758f871d839f147151139f52d9393958bdfc915e3bb565",
+    "warpack/shift.py": "554fd6e6b51725707325d878e660df48a825db8ff41e3423031facaecccc4b78",
+    "tests/test_general_starts.py": "352159ac05f6094d41da5e66bb86e81351abb5ab716777d200e19231bc5d5afc",
+    "tests/test_shift.py": "bd374e0c8704b4d63ddf7008b07e79bf1a11309910d02bfacab46ab2e733192d"
+  },
+  "checks": [
+    "Replay reads changed device starts and preserves inputs",
+    "Finite scale coverage from 1e-320 to 1e300",
+    "Zero/NaN/+Inf/-Inf rejection and changed-start recovery",
+    "No false core or physical full convergence on invalid general starts",
+    "Direct/cuDSS/GMRES requested spectra and original residuals",
+    "Original Spectra selection fixture at explicitly widened ncv40",
+    "Direct/GMRES graphs contain no HOST/HtoD/DtoH; cuDSS vendor HtoD remains #29",
+    "Shape/dtype/device/type validation; constructor failure cleanup",
+    "Default no-start capture adds no new kernels or buffers",
+    "No new performance claim; existing default arithmetic unchanged"
+  ]
+}

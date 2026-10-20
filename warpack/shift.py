@@ -287,7 +287,7 @@ class ShiftInvertEigensolver:
     complex dimensions and is doubled internally on this path. The output
     eigenvalues retain the general API's ``wp.vec2d`` storage, with zero imaginary
     parts; ``converged`` and ``residuals`` check the original complex equation.
-    Starting vectors are currently supported only with ``hermitian=True``.
+    Both paths accept a replayable complex ``initial_vector``.
     As with the direct Hermitian API, zero/nonfinite starts set ``status=1``;
     outputs must not be used unless ``status`` is zero.
     """
@@ -307,8 +307,6 @@ class ShiftInvertEigensolver:
     ):
         if hermitian and complex(sigma).imag != 0:
             raise ValueError("Hermitian shift-invert requires a real sigma")
-        if initial_vector is not None and not hermitian:
-            raise ValueError("initial_vector requires hermitian=True")
         self.hermitian = bool(hermitian)
         if self.hermitian and not hasattr(operator, "apply_complex"):
             operator = ComplexCSR(
@@ -326,7 +324,14 @@ class ShiftInvertEigensolver:
                     initial_vector=initial_vector,
                 )
             else:
-                self.core = GeneralEigensolver(self.inverse, k, ncv=ncv, which="LM", tol=tol * 0.01)
+                self.core = GeneralEigensolver(
+                    self.inverse,
+                    k,
+                    ncv=ncv,
+                    which="LM",
+                    tol=tol * 0.01,
+                    initial_vector=initial_vector,
+                )
         except Exception:
             self.inverse.close()
             raise
@@ -384,6 +389,9 @@ class ShiftInvertEigensolver:
             ],
             device=self.device,
         )
+
+        if not self.hermitian:
+            self.core._check_start(self.converged)
 
     def solve(self, iterations=10):
         (self.core.real if self.hermitian else self.core).solve(iterations)

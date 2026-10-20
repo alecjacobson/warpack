@@ -16,6 +16,7 @@ from .hermitian import (
     complex_norm,
     complex_subtract,
     norm2,
+    start_scale,
 )
 from .kernels import loop_update
 from .schur import cabs, schur
@@ -54,6 +55,36 @@ def random_vector(q: wp.array[wp.vec2d], seed: int):
     i = wp.tid()
     state = wp.rand_init(seed, i)
     q[i] = wp.vec2d(wp.float64(wp.randn(state)), wp.float64(wp.randn(state)))
+
+
+@wp.kernel
+def copy_scaled_start(
+    source: wp.array[wp.vec2d],
+    target: wp.array[wp.vec2d],
+    scale: wp.array[wp.float64],
+    invalid: wp.array[wp.int32],
+):
+    i = wp.tid()
+    value = wp.vec2d(0.0)
+    if scale[0] > wp.float64(0.0) and invalid[0] == 0:
+        value = source[i] / scale[0]
+    elif i == 0:
+        # Safe work vector for an invalid start. The device status rejects
+        # outputs; keeping arithmetic finite also permits changed-start replay.
+        value = wp.vec2d(1.0, 0.0)
+    target[i] = value
+
+
+@wp.kernel
+def check_start(
+    scale: wp.array[wp.float64],
+    invalid: wp.array[wp.int32],
+    status: wp.array[wp.int32],
+    converged: wp.array[wp.int32],
+):
+    if scale[0] == wp.float64(0.0) or invalid[0] != 0:
+        wp.atomic_max(status, 0, 1)
+        converged[0] = 0
 
 
 @wp.kernel
@@ -229,7 +260,12 @@ class GeneralEigensolver:
 
     SM interior targets generally need a shift-inverse operator for reliable
     convergence. No host-side eigensolve, factorization, or convergence checks.
-    Inspect device `status` (0 success, 2 projected QR failure) and `converged`.
+    Inspect device `status` (0 success, 1 invalid start, 2 projected QR failure)
+    and `converged`. Optional ``initial_vector`` is a finite nonzero ``wp.vec2d``
+    array of shape ``(n,)`` on the operator device. Capture rereads its current
+    contents at every replay; safe scaling and normalization run on device.
+    Zero/nonfinite starts set a failure status and zero the convergence count.
+    Check status before using outputs. A start does not certify target completeness.
     CUDA projections of size 16–64 use a cooperative QR loop when conditional
     graphs are supported; other sizes/devices retain the serial reference.
     Right eigenvectors of a general matrix need not be orthogonal.
@@ -241,10 +277,20 @@ class GeneralEigensolver:
     produce initialized Ritz vectors and are rejected before warmup.
     """
 
-    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9):
+    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
         self.op = operator
         self.n = operator.complex_n
         self.device = operator.device
+        if initial_vector is not None:
+            if (
+                not isinstance(initial_vector, wp.array)
+                or initial_vector.dtype != wp.vec2d
+                or initial_vector.shape != (self.n,)
+            ):
+                raise ValueError("initial_vector must have shape (n,) and dtype wp.vec2d")
+            if initial_vector.device != self.device:
+                raise ValueError("initial_vector must be on the operator device")
+        self.initial_vector = initial_vector
         self.k = k
         self.m = min(self.n, ncv or max(2 * k + 12, 32))
         self.keep = min(k + 4, self.m - 1)
@@ -256,6 +302,9 @@ class GeneralEigensolver:
         def zero(shape, dtype=wp.vec2d):
             return wp.zeros(shape, dtype=dtype, device=self.device)
 
+        if initial_vector is not None:
+            self.start_scale = zero(1, wp.float64)
+            self.start_invalid = zero(1, wp.int32)
         self.q, self.z = zero((self.m, self.n)), zero((self.m, self.n))
         self.qrows = [self.q[i] for i in range(self.m)]
         self.views = [self.q[i : i + 1] for i in range(self.m)]
@@ -367,11 +416,28 @@ class GeneralEigensolver:
         self.residual_restarts.zero_()
         self.residual_fallbacks.zero_()
         self.status.zero_()
-        wp.launch(random_vector, self.n, [self.qrows[0], seed], device=self.device)
+        if self.initial_vector is None:
+            wp.launch(random_vector, self.n, [self.qrows[0], seed], device=self.device)
+        else:
+            self.start_scale.zero_()
+            self.start_invalid.zero_()
+            wp.launch(
+                start_scale,
+                self.n,
+                [self.initial_vector, self.start_scale, self.start_invalid],
+                device=self.device,
+            )
+            wp.launch(
+                copy_scaled_start,
+                self.n,
+                [self.initial_vector, self.qrows[0], self.start_scale, self.start_invalid],
+                device=self.device,
+            )
         self.length(0, self.norm)
         wp.launch(scale_vector, self.n, [self.qrows[0], self.norm], device=self.device)
         for j in range(1, self.keep):
             self.expand(j)
+        self._check_start(self.converged)
 
     def step(self):
         for j in range(self.keep - 1):
@@ -495,6 +561,17 @@ class GeneralEigensolver:
             ],
             device=self.device,
         )
+
+        self._check_start(self.converged)
+
+    def _check_start(self, converged):
+        if self.initial_vector is not None:
+            wp.launch(
+                check_start,
+                1,
+                [self.start_scale, self.start_invalid, self.status, converged],
+                device=self.device,
+            )
 
     def solve(self, iterations=20):
         iterations = integer_index(iterations)

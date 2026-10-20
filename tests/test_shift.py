@@ -81,10 +81,9 @@ def test_hermitian_shift_changed_start_and_repeated_modes(backend, tmp_path):
         solver.close()
 
 
-@pytest.mark.parametrize("options", [dict(hermitian=True, sigma=1j), dict(initial_vector=True)])
-def test_shift_rejects_incompatible_hermitian_arguments(options):
+def test_shift_rejects_incompatible_hermitian_arguments():
     with pytest.raises(ValueError):
-        ShiftInvertEigensolver(None, 2, **options)
+        ShiftInvertEigensolver(None, 2, hermitian=True, sigma=1j)
 
 
 @pytest.mark.parametrize("in_place", [False, True])
