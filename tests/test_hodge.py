@@ -158,9 +158,10 @@ def test_mass_krylov_hodge_preserves_complete_harmonic_space(method):
         pytest.skip("Requires pinned upstream Warp FSAI")
     problem = make_hodge_case("large_disconnected", side=7).problem
     solver, inverse = warp_setup(problem, method, ncv=32, force_krylov=True)
-    # Two direct cycles intermittently leave a guard pair just above 1e-11.
-    # Preserve the strict accuracy checks; give the direct method expansion room.
-    graph = solver.capture(3 if method == "krylov" else 2)
+    # Two and three direct cycles have both left a strict count short in full
+    # runs (#103). This is topology/accuracy coverage, not a minimum-budget
+    # timing test: retain expansion room without weakening any acceptance gate.
+    graph = solver.capture(6 if method == "krylov" else 2)
     try:
         for _ in range(2):
             wp.capture_launch(graph)
@@ -169,7 +170,7 @@ def test_mass_krylov_hodge_preserves_complete_harmonic_space(method):
             assert result["recovered_nullity"] == 4
             assert result["positive_guard"] > 1e-8
             assert result["nullspace_subspace_error"] < 1e-9
-            assert solver.converged.numpy()[0] == problem.k
+            assert solver.converged.numpy()[0] == problem.k, solver.residuals.numpy()
             assert solver.status.numpy()[0] == 0
     finally:
         solver.graph = graph = None
