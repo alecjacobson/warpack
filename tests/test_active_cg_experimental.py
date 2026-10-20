@@ -7,9 +7,9 @@ import warp as wp
 import warp.optim.linear as linear
 import warp.sparse as ws
 
-from benchmarks.experimental.active_cg import DeviceBucketedCG
-from benchmarks.experimental.batched_cg import BatchedCGInverse
 from benchmarks.upstream.adapters import matrix
+from warpack import BatchedCGPreconditioner as BatchedCGInverse
+from warpack._active_cg import DeviceBucketedCG
 
 pytestmark = pytest.mark.skipif(
     not hasattr(linear.LinearOperator, "batch_offsets"), reason="upstream batched CG required"

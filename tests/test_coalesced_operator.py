@@ -7,8 +7,8 @@ import warp as wp
 import warp.sparse as ws
 
 from benchmarks.audit_profile import graph_summary
-from benchmarks.experimental.coalesced_operator import CoalescedSparseApplication
 from benchmarks.upstream.adapters import matrix
+from warpack._coalesced_operator import CoalescedSparseApplication
 
 
 @pytest.mark.parametrize("dtype", [wp.float32, wp.float64])

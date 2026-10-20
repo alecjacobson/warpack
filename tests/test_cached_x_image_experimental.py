@@ -1,14 +1,17 @@
 """Cached operator images must follow both QR/projection passes and replay inputs."""
 
+from functools import partial
+
 import numpy as np
 import pytest
 import scipy.linalg as la
 import scipy.sparse as sp
 import warp as wp
 
-from benchmarks.experimental.cached_x_image import CachedXBlockLOBPCG
 from benchmarks.upstream.adapters import matrix
-from warpack import SparseOperator
+from warpack import BlockLOBPCG, SparseOperator
+
+CachedXBlockLOBPCG = partial(BlockLOBPCG, reuse_operator_images=True)
 
 
 @pytest.mark.parametrize("optimized", [False, True])

@@ -8,8 +8,8 @@ import warp as wp
 import warp.sparse as ws
 
 from benchmarks.audit_profile import graph_summary
-from benchmarks.experimental.coalesced_fsai import CoalescedFactorApplication
 from benchmarks.upstream.adapters import matrix
+from warpack._coalesced_fsai import CoalescedFactorApplication
 
 
 @pytest.mark.parametrize("factor_dtype", [wp.float32, wp.float64])

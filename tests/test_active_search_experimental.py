@@ -1,5 +1,7 @@
 """Experimental search compaction keeps complete Ritz blocks and fresh checks."""
 
+from functools import partial
+
 import numpy as np
 import pytest
 import scipy.linalg as la
@@ -7,9 +9,11 @@ import scipy.sparse as sp
 import warp as wp
 
 from benchmarks.audit_profile import graph_summary
-from benchmarks.experimental.active_search import ActiveSearchBlockLOBPCG, select_search
 from benchmarks.upstream.adapters import matrix
-from warpack import SparseOperator
+from warpack import BlockLOBPCG, SparseOperator
+from warpack._block_search import select_search
+
+ActiveSearchBlockLOBPCG = partial(BlockLOBPCG, reuse_operator_images=True)
 
 
 def operator(a):

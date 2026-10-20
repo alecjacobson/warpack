@@ -1,6 +1,8 @@
 """Sparse eigenproblems computed in NVIDIA Warp kernels."""
 
 from .arnoldi import ComplexCSR, GeneralEigensolver
+from .batched_cg import BatchedCGPreconditioner
+from .batched_sparse import BatchedSparseOperator
 from .block import BlockLOBPCG
 from .constrained import ConstrainedKrylovSchur, saddle_point_matrix
 from .constraints import (
@@ -27,6 +29,8 @@ from .svd import PartialSVD
 from .transforms import BucklingEigensolver, CayleyEigensolver
 
 __all__ = [
+    "BatchedCGPreconditioner",
+    "BatchedSparseOperator",
     "BlockLOBPCG",
     "CGInverse",
     "ComplexCSR",

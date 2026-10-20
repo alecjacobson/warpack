@@ -139,6 +139,9 @@ def main():
     )
     p.add_argument("--profile", action="store_true")
     p.add_argument(
+        "--public-api", action="store_true", help="Use only installed solver constructors"
+    )
+    p.add_argument(
         "--keep-graph", action="store_true", help="Retain the potentially large DOT dump"
     )
     p.add_argument("--gram-chunk", type=int, default=256)
@@ -211,27 +214,35 @@ def main():
     def create_solver():
         solver_type = BlockLOBPCG
         solver_options = {}
-        if args.reuse_x_image:
+        if args.reuse_x_image and not args.public_api:
             from benchmarks.experimental.cached_x_image import CachedXBlockLOBPCG
 
             solver_type = CachedXBlockLOBPCG
-        if args.active_search_bucket_size:
+        if args.active_search_bucket_size and not args.public_api:
             from benchmarks.experimental.active_search import ActiveSearchBlockLOBPCG
 
             solver_type = ActiveSearchBlockLOBPCG
             solver_options["search_bucket_size"] = args.active_search_bucket_size
             solver_options["keep_history"] = args.active_search_keep_history
+        if args.public_api:
+            from warpack import BlockLOBPCG as PublicBlockLOBPCG
+
+            solver_type = PublicBlockLOBPCG
+            solver_options = dict(
+                reuse_operator_images=args.reuse_x_image,
+                search_bucket_size=args.active_search_bucket_size,
+                keep_history=args.active_search_keep_history,
+                preconditioner_bucket_size=args.active_cg_bucket_size,
+            )
         starts = wp.array(initial.T.copy(), dtype=wp.float64)
-        from benchmarks.experimental.block_kernels import (
-            BatchedSparseOperator,
-            UpstreamSparseOperator,
-        )
+        from benchmarks.experimental.block_kernels import UpstreamSparseOperator
+        from warpack import BatchedSparseOperator
 
         operator = UpstreamSparseOperator if args.native_products else SparseOperator
         if args.batched_products:
             operator = BatchedSparseOperator
         if args.batched_cg:
-            from benchmarks.experimental.batched_cg import BatchedCGInverse
+            from warpack import BatchedCGPreconditioner as BatchedCGInverse
 
             preconditioner = BatchedCGInverse(
                 shifted,
@@ -265,14 +276,14 @@ def main():
             paired_rotation=args.paired_rotation,
             **solver_options,
         )
-        if args.active_cg_bucket_size:
+        if args.active_cg_bucket_size and not args.public_api:
             from benchmarks.experimental.active_cg import DeviceBucketedCG
 
             preconditioner = DeviceBucketedCG(
                 preconditioner, solver.errors, solver.tol, args.active_cg_bucket_size
             )
             solver.preconditioner = preconditioner
-        return solver, preconditioner
+        return solver, solver.preconditioner
 
     solver_setup_seconds, (solver, preconditioner) = timed(create_solver)
     capture_seconds, graph = timed(
@@ -353,7 +364,7 @@ def main():
             quality["cg_iteration_accounting"] = (
                 "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs."
             )
-        if args.active_search_bucket_size:
+        if args.active_search_bucket_size and not args.public_api:
             quality["search_bucket_widths"] = solver.search_widths.numpy().tolist()
             quality["search_bucket_usage"] = solver.search_usage.numpy().tolist()
         report["rows"].append(

@@ -282,6 +282,16 @@ class BlockLOBPCG:
     proof. Rank-deficient/non-finite inputs set nonzero device status, not a
     numerical host exception. Budget exhaustion leaves an incomplete count.
 
+    ``reuse_operator_images`` carries A-images through basis transformations.
+    With it enabled, ``search_bucket_size > 0`` selects a preallocated search
+    width on device from current residuals; ``keep_history`` retains every
+    history row (otherwise only selected rows). ``preconditioner_bucket_size``
+    similarly selects RHS batches for a BatchedCGPreconditioner whose width must
+    equal the block width. Zero disables bucketing. These options trade setup
+    memory and capture time for less replay work; sizes/settings are problem
+    dependent. Topology and operator coefficients must remain fixed during each
+    solve, but coefficients may change between graph replays.
+
     The product/rotation tuning switches are opt-in. Existing Krylov defaults
     are unaffected. All numerical work here is FP64 Warp; a supplied inverse
     may independently use upstream CG or optional cuDSS.
@@ -304,6 +314,10 @@ class BlockLOBPCG:
         paired_rotation=False,
         normalize_constraints=False,
         initial_perturbation=0.0,
+        reuse_operator_images=False,
+        search_bucket_size=0,
+        keep_history=True,
+        preconditioner_bucket_size=0,
     ):
         if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
             raise ValueError("operator must expose n, device and apply")
@@ -313,6 +327,15 @@ class BlockLOBPCG:
         if not 1 <= k <= self.b or 3 * self.b > self.n:
             raise ValueError("require 1 <= k <= width and 3*width <= n")
         self.m = 3 * self.b
+        search_bucket_size = integer_index(search_bucket_size)
+        preconditioner_bucket_size = integer_index(preconditioner_bucket_size)
+        if search_bucket_size < 0 or preconditioner_bucket_size < 0:
+            raise ValueError("bucket sizes must be nonnegative")
+        if search_bucket_size and not reuse_operator_images:
+            raise ValueError("search buckets require reuse_operator_images=True")
+        self.reuse_operator_images = bool(reuse_operator_images)
+        self._image_reuse_active = False
+        self._search = None
         self.mass = mass if mass is not None else Identity(self.n, self.device)
         if preconditioner is not None and not hasattr(preconditioner, "apply"):
             if not all(
@@ -323,6 +346,11 @@ class BlockLOBPCG:
         self.preconditioner = (
             preconditioner if preconditioner is not None else Identity(self.n, self.device)
         )
+        from .batched_cg import BatchedCGPreconditioner
+
+        if isinstance(self.preconditioner, BatchedCGPreconditioner):
+            if self.preconditioner.width != self.b:
+                raise ValueError("batched preconditioner width must match the block width")
         for name, supplied in (("mass", self.mass), ("preconditioner", self.preconditioner)):
             if (
                 not all(hasattr(supplied, attr) for attr in ("n", "device", "apply"))
@@ -414,6 +442,26 @@ class BlockLOBPCG:
             empty(self.b) if initial_vectors is not None and self.initial_perturbation else None
         )
 
+        if self.reuse_operator_images:
+            self._image_x = self.az[: self.b]
+            self._image_scratch = self.z[: self.b]
+            self._image_constraints = (
+                None if self.constraints is None else wp.empty_like(self.constraints)
+            )
+        if search_bucket_size:
+            from ._block_search import ActiveSearch
+
+            self._search = ActiveSearch(self, search_bucket_size, keep_history)
+            self.search_widths, self.search_usage = self._search.widths, self._search.usage
+        if preconditioner_bucket_size:
+            from ._active_cg import DeviceBucketedCG
+
+            if not isinstance(self.preconditioner, BatchedCGPreconditioner):
+                raise TypeError("preconditioner buckets require BatchedCGPreconditioner")
+            self.preconditioner = DeviceBucketedCG(
+                self.preconditioner, self.errors, self.tol, preconditioner_bucket_size
+            )
+
     def launch(self, kernel, shape, args):
         wp.launch(kernel, shape, args, device=self.device)
 
@@ -441,6 +489,13 @@ class BlockLOBPCG:
             for _ in range(2):
                 self.gram(self.s, self.bconstraints, self.projection)
                 self.subtract(self.constraints, self.projection, self.s, self.z)
+                if self._image_reuse_active:
+                    self.subtract(
+                        self._image_constraints,
+                        self.projection[: self.b],
+                        self._image_x,
+                        self._image_scratch,
+                    )
 
     def orthogonalize_x(self):
         for i in range(2):
@@ -449,9 +504,13 @@ class BlockLOBPCG:
             if i == 0:
                 self.launch(scales, self.b, [self.gx, self.xscale, self.status])
                 self.launch(scale_rows, self.sx.shape, [self.sx, self.xscale])
+                if self._image_reuse_active:
+                    self.launch(scale_rows, self.sx.shape, [self._image_x, self.xscale])
                 self.launch(normalize_gram, self.gx.shape, [self.gx, self.xscale])
             self.launch(K.cholesky, 1, [self.gx, self.lx, self.status])
             self.launch(K.triangular, self.n, [self.sx, self.lx])
+            if self._image_reuse_active:
+                self.launch(K.triangular, self.n, [self._image_x, self.lx])
         self.mass.apply(self.sx, self.bx)
 
     def orthogonalize_search(self, x):
@@ -466,7 +525,7 @@ class BlockLOBPCG:
         self.mass.apply(x, self.bu)
         self.gram(x, self.bu, self.metric.g, symmetric=True)
         if normalize:
-            self.launch(scales, 2 * self.b, [self.metric.g, self.scale, self.status])
+            self.launch(scales, x.shape[0], [self.metric.g, self.scale, self.status])
             self.launch(scale_rows, x.shape, [x, self.scale])
             self.launch(normalize_gram, self.metric.g.shape, [self.metric.g, self.scale])
         else:
@@ -499,7 +558,10 @@ class BlockLOBPCG:
         self.whiten(self.u1, self.u2)
         wp.copy(self.su, self.u2)
         self.launch(activate_x, self.b, [self.active_x, self.rank])
-        self.op.apply(self.s, self.az)
+        if self._image_reuse_active:
+            self.op.apply(self.s[self.b :], self.az[self.b :])
+        else:
+            self.op.apply(self.s, self.az)
         self.gram(self.s, self.az, self.small.g, symmetric=True)
         self.launch(mask_projected, 1, [self.small.g, self.active, self.rank, self.status, self.b])
         self.small.which = 0
@@ -536,6 +598,7 @@ class BlockLOBPCG:
         self.finalize()
 
     def initialize(self, seed=42):
+        self._image_reuse_active = False
         self.status.zero_()
         self.iterations.zero_()
         if hasattr(self.preconditioner, "reset_history"):
@@ -573,12 +636,25 @@ class BlockLOBPCG:
                 wp.copy(self.sx[: self.initial_vectors.shape[0]], self.initial_vectors)
         self.launch(K.identity_order, self.b, [self.order])
         self.rayleigh_ritz()
+        if self.reuse_operator_images and self.constraints is not None:
+            self.op.apply(self.constraints, self._image_constraints)
+        if self._search is not None:
+            self._search.usage.zero_()
 
     def step(self):
-        wp.copy(self.sx, self.x)
-        self.preconditioner.apply(self.r, self.sw)
-        wp.copy(self.sp, self.p)
-        self.rayleigh_ritz()
+        if self._search is not None:
+            self._search.step()
+            return
+        if self.reuse_operator_images:
+            wp.copy(self._image_x, self.ax)
+            self._image_reuse_active = True
+        try:
+            wp.copy(self.sx, self.x)
+            self.preconditioner.apply(self.r, self.sw)
+            wp.copy(self.sp, self.p)
+            self.rayleigh_ritz()
+        finally:
+            self._image_reuse_active = False
 
     def finalize(self):
         self.op.apply(self.x, self.ax)
@@ -607,6 +683,7 @@ class BlockLOBPCG:
         self.initialize()
         for _ in range(steps):
             self.step()
+        self.iterations.fill_(steps)
         return self
 
     def capture(self, max_iterations=100, adaptive=None, finalizer=None):
@@ -627,6 +704,8 @@ class BlockLOBPCG:
         if adaptive and static_only:
             raise ValueError("This preconditioner requires adaptive=False for the outer graph")
         self.solve(1)
+        if self._search is not None:
+            self._search.warm()
         if finalizer is not None:
             finalizer()
         wp.synchronize_device(self.device)
