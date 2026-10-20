@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-20",
+  "candidate": "f8212ae",
+  "issues": [
+    113,
+    114
+  ],
+  "before": {
+    "lifetime": "2 failed, 10 deselected in 1.76s; direct and shifted owners remained reachable after fixed capture and deletion, without gc.collect()",
+    "iteration_counter": "main ba7a517: observed [0,3,3] after solve(2), fixed-3 replay, solve(1); expected [2,3,1]"
+  },
+  "after": {
+    "command": "python -m pytest tests/test_general_checkpoint.py tests/test_general_budgets.py tests/test_general_benchmark_start.py tests/test_general_checkpoint_experiment.py tests/test_shift.py -q",
+    "passed": 53,
+    "seconds": 15.42
+  },
+  "fix": "Checkpoint state receives the solver only for each call. Shift validator binds operator and arrays through functools.partial, not the owner. Ordinary general solve resets and fills its device iteration counter.",
+  "source_sha256": {
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/shift.py": "84db517eb8cc6ac7ddf9e82f3faa49f2896ae546a4d6a53e824f564c915cd421",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "tests/test_general_checkpoint.py": "f17d9b1b0635652770340858d94832724a2604d097654d4512bf3287865d2790",
+    "tests/test_general_budgets.py": "2a799ff7092ae938cd5875f170dcc47b87a1f6d3f8cf2cfe09ce443cf22923b3"
+  }
+}

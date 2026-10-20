@@ -1,5 +1,7 @@
 """Real or complex shift-invert for general complex CSR, on device."""
 
+from functools import partial
+
 import warp as wp
 import warp.sparse as ws
 from warp.optim import linear
@@ -289,6 +291,26 @@ class ComplexShiftInverse:
             self.inverse.close()
 
 
+def shift_checkpoint_candidate(
+    source, vectors, ritz, selection, sigma, value_buffer, order, ax, norms, tol
+):
+    # Bind only operator/workspace data: an owner-bound callback would create
+    # a reference cycle through the core and delay GPU workspace release.
+    k, device = vectors.shape[0], source.device
+    wp.launch(unshift_selected, k, [ritz, selection, value_buffer, sigma], device=device)
+    wp.launch(identity_order, k, [order], device=device)
+    source.apply_complex(vectors, ax)
+    norms.zero_()
+    wp.launch_tiled(
+        complex_residual,
+        dim=(k, (source.complex_n + 255) // 256),
+        inputs=[vectors, ax, value_buffer, order, norms],
+        block_dim=128,
+        device=device,
+    )
+    return norms, value_buffer, order, tol
+
+
 class ShiftInvertEigensolver:
     """Eigenpairs nearest a real or complex sigma; original-problem residuals.
 
@@ -366,30 +388,19 @@ class ShiftInvertEigensolver:
         self.converged = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.value_buffer = wp.empty_like(self.eigenvalues)
         if not self.hermitian:
-            self.core._checkpoint_validator = self._checkpoint_candidate
-
-    def _checkpoint_candidate(self):
-        # Inverse Ritz residuals do not certify the original equation. Check
-        # the unshifted candidate before saving, without modifying core state.
-        source = self.inverse.original
-        vectors = self.core.eigenvectors
-        wp.launch(
-            unshift_selected,
-            self.k,
-            [self.core.ritz, self.core.order, self.value_buffer, self.inverse.sigma],
-            device=self.device,
-        )
-        wp.launch(identity_order, self.k, [self.order], device=self.device)
-        source.apply_complex(vectors, self.ax)
-        self.norms.zero_()
-        wp.launch_tiled(
-            complex_residual,
-            dim=(self.k, (source.complex_n + 255) // 256),
-            inputs=[vectors, self.ax, self.value_buffer, self.order, self.norms],
-            block_dim=128,
-            device=self.device,
-        )
-        return self.norms, self.value_buffer, self.order, self.tol
+            self.core._checkpoint_validator = partial(
+                shift_checkpoint_candidate,
+                operator,
+                self.core.eigenvectors,
+                self.core.ritz,
+                self.core.order,
+                self.inverse.sigma,
+                self.value_buffer,
+                self.order,
+                self.ax,
+                self.norms,
+                self.tol,
+            )
 
     def finalize(self):
         if self.hermitian:

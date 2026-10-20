@@ -118,7 +118,6 @@ class GeneralCheckpoint:
     """Preallocated state; never modifies the working projected spectrum."""
 
     def __init__(self, solver):
-        self.solver = solver
         self.valid = wp.zeros(1, dtype=wp.int32, device=solver.device)
         self.replace = wp.zeros_like(self.valid)
         self.updates = wp.zeros_like(self.valid)
@@ -135,8 +134,7 @@ class GeneralCheckpoint:
         for array in (self.valid, self.replace, self.updates, self.score, self.error, self.scale):
             array.zero_()
 
-    def consider(self):
-        s = self.solver
+    def consider(self, s):
         if s._checkpoint_validator is None:
             norms, values, order, tol = s.norms, s.ritz, s.order, s.tol
         else:
@@ -170,8 +168,7 @@ class GeneralCheckpoint:
             device=s.device,
         )
 
-    def restore(self):
-        s = self.solver
+    def restore(self, s):
         wp.launch(
             restore_checkpoint,
             s.eigenvectors.shape,

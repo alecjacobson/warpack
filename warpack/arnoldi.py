@@ -560,7 +560,7 @@ class GeneralEigensolver:
         )
 
         if self._checkpoint_enabled:
-            self._checkpoint.consider()
+            self._checkpoint.consider(self)
 
     def _enable_checkpoint(self, enabled):
         self._checkpoint_enabled = bool(enabled and self.preserve_converged)
@@ -570,7 +570,7 @@ class GeneralEigensolver:
     def finalize(self):
         values, order = self.ritz, self.order
         if self._checkpoint_enabled:
-            values, order = self._checkpoint.restore()
+            values, order = self._checkpoint.restore(self)
         self.op.apply_complex(self.eigenvectors, self.ax)
         self.norms.zero_()
         self.converged.zero_()
@@ -613,9 +613,11 @@ class GeneralEigensolver:
             raise ValueError("General iteration needs at least one restart cycle")
         self._enable_checkpoint(True)
         self.initialize()
+        self.iterations.zero_()
         for _ in range(iterations):
             self.step()
         self.finalize()
+        self.iterations.fill_(iterations)
         return self
 
     def capture(self, max_iterations=100, adaptive=None, finalizer=None):

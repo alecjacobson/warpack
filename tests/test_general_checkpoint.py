@@ -129,7 +129,7 @@ def test_checkpoint_resolves_cluster_with_loose_requested_tolerance():
         candidate = np.r_[values[indices], [0, 0]]
         solver.ritz.assign(np.column_stack([candidate, np.zeros(6)]))
         solver.norms.zero_()
-        solver._checkpoint.consider()
+        solver._checkpoint.consider(solver)
     assert solver._checkpoint.updates.numpy()[0] == 2
     solver.finalize()
     np.testing.assert_array_equal(output(solver.eigenvalues).real, values[:4])
@@ -156,7 +156,7 @@ def test_shift_checkpoint_requires_original_equation():
             # Model a perfect inverse Ritz residual even for the wrong physical pair.
             core.norms.zero_()
             previous = core._checkpoint.updates.numpy()[0]
-            core._checkpoint.consider()
+            core._checkpoint.consider(core)
             assert core._checkpoint.updates.numpy()[0] == previous + int(accepted)
         core.finalize()
         solver.finalize()
@@ -165,3 +165,23 @@ def test_shift_checkpoint_requires_original_equation():
         assert solver.status.numpy()[0] == 0
     finally:
         solver.close()
+
+
+@pytest.mark.parametrize("shifted", [False, True])
+def test_checkpoint_does_not_retain_solver_in_reference_cycle(shifted):
+    import weakref
+
+    op = complex_matrix(np.diag(np.arange(1.0, 9.0)))
+    solver = (
+        ShiftInvertEigensolver(op, 2, ncv=6, backend="gmres")
+        if shifted
+        else GeneralEigensolver(op, 2, ncv=6)
+    )
+    solver.capture(2) if shifted else solver.capture(2, adaptive=False)
+    assert (solver.core if shifted else solver)._checkpoint is not None
+    reference = weakref.ref(solver)
+    if shifted:
+        solver.close()
+    del solver
+    # Dropping a solver must release its workspaces without a cyclic-GC pass.
+    assert reference() is None

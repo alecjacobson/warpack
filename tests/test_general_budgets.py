@@ -88,3 +88,19 @@ def test_legitimate_zero_modes_have_nonzero_vectors(shifted):
     finally:
         graph = None
         close(solver)
+
+
+@pytest.mark.parametrize("shifted", [False, True])
+def test_ordinary_solve_updates_iterations_after_graph_replay(shifted):
+    _, solver = make_solver(shifted)
+    core = getattr(solver, "core", solver)
+    try:
+        solver.solve(2)
+        assert core.iterations.numpy()[0] == 2
+        graph = solver.capture(3) if shifted else solver.capture(3, adaptive=False)
+        wp.capture_launch(graph)
+        assert core.iterations.numpy()[0] == 3
+        solver.solve(1)
+        assert core.iterations.numpy()[0] == 1
+    finally:
+        close(solver)
