@@ -90,7 +90,13 @@ The Spectra adapter retains its strict `passed` policy: all original numerical
 bounds must pass **and** the internal reported count must reach `k`. It does not
 relax assertions for an upstream section that permits nonconvergence.
 `checked_numerical_bounds_pass`, `reported_count_pass`, and
-`upstream_allows_nonconvergence` record these three separate facts. A numerical
+`upstream_allows_nonconvergence` record these three separate facts.
+New reports also require and record `solver_status == 0`, including wrapped
+SVD, transformed and realified solvers. `reported_status_pass` is separate from
+physical accuracy and counts; a nonzero status cannot pass strict acceptance.
+Historical absent status remains unknown, and its original classification is
+preserved rather than inventing a successful status. A comparison rejects loss
+of previously recorded passing status even when both overall labels are failed. A numerical
 pass with a short count is not relabeled a full pass. Missing results,
 unsupported cases, errors and timeouts are not numerical successes.
 
