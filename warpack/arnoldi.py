@@ -4,6 +4,8 @@ Uses the pure-Warp projected Schur reference backend. Complex data are vec2d.
 This path emphasizes coverage; benchmark it separately from the symmetric path.
 """
 
+from operator import index as integer_index
+
 import warp as wp
 
 from .hermitian import (
@@ -163,6 +165,8 @@ class GeneralEigensolver:
     convergence. No host-side eigensolve, factorization, or convergence checks.
     Inspect device `status` (0 success, 2 projected QR failure) and `converged`.
     Right eigenvectors of a general matrix need not be orthogonal.
+    Solve and capture budgets must be positive integers; zero cycles cannot
+    produce initialized Ritz vectors and are rejected before warmup.
     """
 
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9):
@@ -334,6 +338,9 @@ class GeneralEigensolver:
         )
 
     def solve(self, iterations=20):
+        iterations = integer_index(iterations)
+        if iterations < 1:
+            raise ValueError("General iteration needs at least one restart cycle")
         self.initialize()
         for _ in range(iterations):
             self.step()
@@ -341,6 +348,9 @@ class GeneralEigensolver:
         return self
 
     def capture(self, max_iterations=100, adaptive=None, finalizer=None):
+        max_iterations = integer_index(max_iterations)
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be positive")
         if adaptive is None:
             adaptive = not getattr(self.op, "requires_static_outer_capture", False)
         if adaptive and getattr(self.op, "requires_static_outer_capture", False):

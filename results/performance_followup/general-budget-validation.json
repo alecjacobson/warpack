@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "7886b60",
+  "issue": 101,
+  "change": "Reject nonpositive or noninteger general solve/capture budgets before initialization; shift-invert wrappers inherit the check.",
+  "original_reproduction": {
+    "matrix": "diag(1,...,8)",
+    "n": 8,
+    "k": 2,
+    "ncv": 6,
+    "cycles": 0,
+    "converged": 2,
+    "vector_norms": [
+      0,
+      0
+    ],
+    "residuals": [
+      0,
+      0
+    ]
+  },
+  "new_tests": 16,
+  "pinned": {
+    "warp": "1.18.0",
+    "related_passed": 65,
+    "related_seconds": 11.68,
+    "additional_zero_mode_tests": 2,
+    "additional_seconds": 0.99
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "related_passed": 65,
+    "related_seconds": 12.19,
+    "additional_zero_mode_tests": 2,
+    "additional_seconds": 0.97
+  },
+  "commands": [
+    "pytest -q tests/test_general_budgets.py tests/test_arnoldi.py tests/test_shift.py tests/test_upstream_contracts.py",
+    "pytest -q tests/test_general_budgets.py -k legitimate"
+  ],
+  "checks": [
+    "ruff check warpack benchmarks tests",
+    "ruff format --check warpack benchmarks tests",
+    "git diff --check"
+  ],
+  "performance_experiments": "Not rerun: validation executes on the host before solve setup and introduces no replay arithmetic.",
+  "sha256": {
+    "warpack/arnoldi.py": "1a3809b10df87c60889f023be7aed2c37d89dea917c3211b19524f196fd64e4b",
+    "tests/test_general_budgets.py": "a1860265a557de6039e54c7b53acbb2639f3c7f57d5394d097d673714656c31e"
+  }
+}
