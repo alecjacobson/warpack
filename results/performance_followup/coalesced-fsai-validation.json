@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-20",
+  "environment": "L40, driver 570.158.01; pinned Warp 1.18.0+cu12 overlay 04427b997fe7ff07bc6ed1dde5ca9813496c6b55; stock Warp 1.15 compatibility separately",
+  "tests": [
+    {
+      "environment": "pinned",
+      "command": "python -m pytest tests/test_coalesced_fsai.py tests/test_batched_cg_experimental.py tests/test_active_cg_experimental.py tests/test_active_search_experimental.py -q",
+      "passed": 128,
+      "seconds": 6.06
+    },
+    {
+      "environment": "stock 1.15",
+      "command": "python -m pytest tests/test_coalesced_fsai.py -q",
+      "passed": 32,
+      "seconds": 1.35
+    }
+  ],
+  "lint": "ruff check and format --check passed on seven changed Python files; git diff --check passed",
+  "source_sha256": {
+    "benchmarks/experimental/coalesced_fsai.py": "caf01798dbaf1217566113f29a0846b2d48e5c2f75b9e6e5f23da99969b023ca",
+    "benchmarks/experimental/batched_cg.py": "204391d169448967bc526f6f9c35851ebd15c04f1099a98e9b6ca04e2a66f3c9",
+    "benchmarks/experimental/compare_fsai_layout.py": "3ace31f561c4ebd66f2a04390fc118443c4ea5f42dd1c28558ddd463ad55f2dc",
+    "benchmarks/experimental/compare_block.py": "4aaa0d9af2d592fa5512b97d667d1de2fb09880a932d3dddbaf1fa30d02abfb1",
+    "tests/test_coalesced_fsai.py": "ff256e9f2aeb1db861b7b1153cff00388a6fdbea0852fc5f71efda390954e8e6",
+    "tests/test_batched_cg_experimental.py": "31b693cccf97c1252989cab32e6b76e3a3a22e5b02f55077b0051c2405a1f7ad",
+    "tests/test_active_cg_experimental.py": "cc7a5dd31fd3e689ae4e769fbcd97639c5d5f4286dd59c56bd9f174135dc7d42"
+  },
+  "input_sha256": {
+    "anvil for export-ftetwild.mesh": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+    "build/anvil_reference.npz": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898"
+  },
+  "scope": "Experimental FSAI factor application only; unchanged upstream factors and CG; no installed core changes. Full previous suite record is separate.",
+  "records": [
+    "coalesced-fsai-components.json",
+    "coalesced-fsai-rows.json",
+    "coalesced-fsai-columns.json",
+    "coalesced-fsai-repeat.json"
+  ]
+}

@@ -19,8 +19,9 @@ pytestmark = pytest.mark.skipif(
 @pytest.mark.parametrize("dtype", [wp.float32, wp.float64])
 @pytest.mark.parametrize("block", [1, 3])
 @pytest.mark.parametrize("in_place", [False, True])
+@pytest.mark.parametrize("layout", ["rows", "columns"])
 def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
-    dtype, block, in_place, tmp_path
+    dtype, block, in_place, tmp_path, layout
 ):
     n, width = 45, 7
     a = sp.diags(
@@ -39,7 +40,10 @@ def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
         )
     values = wa.values.numpy().copy()
     tol = 1e-5 if dtype == wp.float32 else 1e-12
-    inverse = BatchedCGInverse(wa, width, tol=tol, maxiter=50, working_dtype=dtype)
+    pre = linear.FSAI(wa, max_row_size=8, factor_dtype=wp.float32) if layout == "columns" else None
+    inverse = BatchedCGInverse(
+        wa, width, tol=tol, maxiter=50, working_dtype=dtype, preconditioner=pre, fsai_layout=layout
+    )
     if inverse.requires_static_outer_capture:
         pytest.skip("upstream CG lacks preallocated loop control")
     errors = wp.zeros(width, dtype=wp.float64)

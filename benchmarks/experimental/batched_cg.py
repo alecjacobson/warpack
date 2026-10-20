@@ -124,10 +124,19 @@ class RepeatedOperator:
 
 
 class RepeatedPreconditioner:
-    def __init__(self, preconditioner, width, n, offsets, device, dtype=wp.float64):
+    def __init__(self, preconditioner, width, n, offsets, device, dtype=wp.float64, layout="rows"):
         self.preconditioner, self.width, self.n = preconditioner, width, n
-        self.tmp = wp.empty((width, n), dtype=dtype, device=device)
-        self.out = wp.empty_like(self.tmp)
+        self.coalesced = None
+        if layout not in ("rows", "columns"):
+            raise ValueError("FSAI layout must be rows or columns")
+        if layout == "columns":
+            from .coalesced_fsai import CoalescedFactorApplication
+
+            self.coalesced = CoalescedFactorApplication(preconditioner, width, n, device, dtype)
+        self.tmp = (
+            wp.empty((width, n), dtype=dtype, device=device) if self.coalesced is None else None
+        )
+        self.out = wp.empty_like(self.tmp) if self.tmp is not None else None
         self.linear = linear.LinearOperator(
             (width * n, width * n),
             dtype,
@@ -138,6 +147,8 @@ class RepeatedPreconditioner:
         )
 
     def matvec(self, x, y, z, alpha, beta):
+        if self.coalesced is not None:
+            return self.coalesced.matvec(x, y, z, alpha, beta)
         pre = self.preconditioner
         rows = x.reshape((self.width, self.n))
         if hasattr(pre, "G") and hasattr(pre, "GT"):
@@ -181,6 +192,7 @@ class BatchedCGInverse:
         atol=0.0,
         working_dtype=wp.float64,
         _working_matrix=None,
+        fsai_layout="rows",
     ):
         if not hasattr(linear.LinearOperator, "batch_offsets"):
             raise RuntimeError("Requires upstream Warp batched LinearOperator/CG support")
@@ -198,6 +210,13 @@ class BatchedCGInverse:
             and preconditioner.scalar_type != working_dtype
         ):
             raise ValueError("preconditioner must match working precision, or be upstream FSAI")
+        if fsai_layout not in ("rows", "columns"):
+            raise ValueError("FSAI layout must be rows or columns")
+        if fsai_layout == "columns" and (
+            preconditioner is None or not hasattr(preconditioner, "G")
+        ):
+            raise ValueError("column layout requires upstream FSAI factors")
+        self.fsai_layout = fsai_layout
         self.working_dtype = working_dtype
         self.source_matrix = matrix
         self.tol, self.atol, self.maxiter = tol, atol, maxiter
@@ -224,7 +243,7 @@ class BatchedCGInverse:
         self.operator = RepeatedOperator(working_matrix, width, self.offsets)
         self.preconditioner = (
             RepeatedPreconditioner(
-                preconditioner, width, self.n, self.offsets, self.device, working_dtype
+                preconditioner, width, self.n, self.offsets, self.device, working_dtype, fsai_layout
             )
             if preconditioner is not None
             else None
@@ -257,6 +276,7 @@ class BatchedCGInverse:
             preconditioner=self.single_preconditioner,
             working_dtype=self.working_dtype,
             _working_matrix=self.operator.matrix,
+            fsai_layout=self.fsai_layout,
         )
 
     def reset_stats(self):

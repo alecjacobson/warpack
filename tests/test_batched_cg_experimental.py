@@ -79,13 +79,14 @@ def test_batched_cg_scaled_and_zero_rhs_replay(block, preconditioner, in_place, 
 
 
 @pytest.mark.parametrize("dtype", [wp.float32, wp.float64])
-def test_batched_fsai_application_matches_upstream(dtype):
+@pytest.mark.parametrize("layout", ["rows", "columns"])
+def test_batched_fsai_application_matches_upstream(layout, dtype):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     a, wa = fixture(3)
     pre = linear.FSAI(wa, max_row_size=8, factor_dtype=dtype)
     offsets = wp.array([j * len(a) for j in range(8)], dtype=wp.int32)
-    batched = RepeatedPreconditioner(pre, 7, len(a), offsets, wa.device)
+    batched = RepeatedPreconditioner(pre, 7, len(a), offsets, wa.device, layout=layout)
     rng = np.random.default_rng(51)
     x, y = [wp.array(rng.normal(size=7 * len(a)), dtype=wp.float64) for _ in range(2)]
     out, expected = wp.empty_like(x), wp.empty_like(x)
@@ -98,13 +99,20 @@ def test_batched_fsai_application_matches_upstream(dtype):
 
 @pytest.mark.parametrize("block", [1, 3])
 @pytest.mark.parametrize("in_place", [False, True])
-def test_fp32_inner_solve_keeps_scaled_rhs_independent(block, in_place):
+@pytest.mark.parametrize("layout", ["rows", "columns"])
+def test_fp32_inner_solve_keeps_scaled_rhs_independent(layout, block, in_place):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     a, wa = fixture(block)
     pre = linear.FSAI(wa, max_row_size=8, factor_dtype=wp.float32)
     solver = BatchedCGInverse(
-        wa, 7, preconditioner=pre, tol=1e-6, maxiter=100, working_dtype=wp.float32
+        wa,
+        7,
+        preconditioner=pre,
+        tol=1e-6,
+        maxiter=100,
+        working_dtype=wp.float32,
+        fsai_layout=layout,
     )
     source = wp.zeros((7, len(a)), dtype=wp.float64)
     out = source if in_place else wp.empty_like(source)
@@ -126,7 +134,8 @@ def test_fp32_inner_solve_keeps_scaled_rhs_independent(block, in_place):
 
 
 @pytest.mark.parametrize("coupled_mass", [False, True])
-def test_fp32_preconditioning_preserves_fp64_eigen_accuracy(coupled_mass):
+@pytest.mark.parametrize("layout", ["rows", "columns"])
+def test_fp32_preconditioning_preserves_fp64_eigen_accuracy(layout, coupled_mass):
     import scipy.linalg as la
 
     from benchmarks.experimental.block_lobpcg import BlockLOBPCG
@@ -143,7 +152,13 @@ def test_fp32_preconditioning_preserves_fp64_eigen_accuracy(coupled_mass):
     shifted = matrix(a + mass)
     pre = linear.FSAI(shifted, max_row_size=8, factor_dtype=wp.float32)
     inverse = BatchedCGInverse(
-        shifted, width, preconditioner=pre, tol=0.01, maxiter=3, working_dtype=wp.float32
+        shifted,
+        width,
+        preconditioner=pre,
+        tol=0.01,
+        maxiter=3,
+        working_dtype=wp.float32,
+        fsai_layout=layout,
     )
     solver = BlockLOBPCG(
         SparseOperator(matrix(a)),
@@ -258,11 +273,18 @@ def test_captured_cg_matches_changing_active_rhs_blocks(dtype, tolerance, active
 
 @pytest.mark.parametrize("block", [1, 3])
 @pytest.mark.parametrize("dtype,tolerance", [(wp.float64, 1e-11), (wp.float32, 1e-5)])
-def test_batched_cg_changed_source_values_replay(block, dtype, tolerance, tmp_path):
+@pytest.mark.parametrize("layout", ["rows", "columns"])
+def test_batched_cg_changed_source_values_replay(layout, block, dtype, tolerance, tmp_path):
     a, wa = fixture(block)
     pre = linear.FSAI(wa, max_row_size=8, factor_dtype=wp.float32)
     inverse = BatchedCGInverse(
-        wa, 3, tol=tolerance * 0.1, maxiter=50, preconditioner=pre, working_dtype=dtype
+        wa,
+        3,
+        tol=tolerance * 0.1,
+        maxiter=50,
+        preconditioner=pre,
+        working_dtype=dtype,
+        fsai_layout=layout,
     )
     rhs = wp.zeros((3, len(a)), dtype=wp.float64)
     inverse.apply(rhs, rhs)

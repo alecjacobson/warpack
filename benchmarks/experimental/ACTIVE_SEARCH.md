@@ -1,5 +1,9 @@
 # Device-selected block search spaces
 
+A subsequent [factor-application layout optimization](COALESCED_FSAI.md) lowers
+the same configuration to 1.90–1.94 seconds. This report retains the preceding
+search-space experiment and controls.
+
 An experimental adapter reduces the Anvil block solve to **2.270 seconds**,
 versus a fresh **2.356-second** control: about **3.7%** faster. All 20 elastic
 modes and the six analytic rigid modes pass the existing checks. This is a
