@@ -1,0 +1,67 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "hodge_large_disconnected",
+    "--side",
+    "81",
+    "--width",
+    "6",
+    "--steps",
+    "100",
+    "--shift",
+    ".001",
+    "--fsai-width",
+    "32",
+    "--repeats",
+    "5",
+    "--tol",
+    "1e-11",
+    "--cupy",
+    "--cupy-tol",
+    "5e-11",
+    "--symmetric-products",
+    "--fused-updates",
+    "--batched-products",
+    "--inner-cg",
+    "10",
+    "--batched-cg",
+    "--inner-fp32",
+    "--inner-tol",
+    ".01",
+    "--out",
+    "build/hodge-layout-control.json"
+  ],
+  "pid": 180901,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792498362.0488324,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 25",
+      "error": null
+    },
+    {
+      "time": 1792498363.153942,
+      "other": [],
+      "gpu": "0 %, 364 MiB, 210 MHz, 25",
+      "error": null
+    },
+    {
+      "time": 1792498364.2685194,
+      "other": [],
+      "gpu": "88 %, 2276 MiB, 2490 MHz, 34",
+      "error": null
+    },
+    {
+      "time": 1792498365.4280965,
+      "other": [],
+      "gpu": "79 %, 2398 MiB, 2490 MHz, 31",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

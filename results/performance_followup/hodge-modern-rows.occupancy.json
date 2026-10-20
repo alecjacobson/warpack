@@ -1,0 +1,74 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "hodge_large_disconnected",
+    "--side",
+    "81",
+    "--width",
+    "6",
+    "--steps",
+    "100",
+    "--shift",
+    ".001",
+    "--fsai-width",
+    "32",
+    "--repeats",
+    "5",
+    "--tol",
+    "1e-11",
+    "--cupy",
+    "--cupy-tol",
+    "5e-11",
+    "--symmetric-products",
+    "--fused-updates",
+    "--batched-products",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--active-search-bucket-size",
+    "2",
+    "--active-search-keep-history",
+    "--active-cg-bucket-size",
+    "2",
+    "--inner-cg",
+    "10",
+    "--batched-cg",
+    "--inner-fp32",
+    "--inner-tol",
+    ".01",
+    "--out",
+    "build/hodge-modern-rows.json"
+  ],
+  "pid": 180953,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792498379.810154,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 26",
+      "error": null
+    },
+    {
+      "time": 1792498380.9223735,
+      "other": [],
+      "gpu": "7 %, 22 MiB, 2490 MHz, 27",
+      "error": null
+    },
+    {
+      "time": 1792498382.0028412,
+      "other": [],
+      "gpu": "92 %, 2328 MiB, 2490 MHz, 34",
+      "error": null
+    },
+    {
+      "time": 1792498383.100554,
+      "other": [],
+      "gpu": "73 %, 2406 MiB, 2490 MHz, 33",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

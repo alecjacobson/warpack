@@ -157,3 +157,12 @@ python -m benchmarks.applications.hodge_cg_probe --variant rayleigh \
 The probe uses a benchmark-only reference to the upstream CG operator and
 leaves its recurrence/preconditioner unchanged. Rejected budgets, raw trials,
 source revisions and strict-count classifications are retained in the report.
+
+## Subsequent block-layout measurements
+
+The [fresh Hodge layout follow-up](../experimental/HODGE_LAYOUT.md) applies the
+later Anvil optimizations to the 39,366-unknown problem. Accepted five-trial
+CG10 medians improve from a fresh 76.60 ms to 62.77 ms, with a 65.08 ms repeat.
+All four harmonic modes and both positive guards remain checked. CG25 reduces
+outer steps but leaves Warp total time near 63 ms. This is a separate block
+profile, not an update to the historical Krylov timings above; #40 remains open.
