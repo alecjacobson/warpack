@@ -105,3 +105,78 @@ def test_fixed_restarts_preserve_completed_partial_spectrum(tmp_path):
     wp.capture_debug_dot_print(graph, str(dot))
     audit = dot.read_text()
     assert "HOST" not in audit and "HtoD" not in audit and "DtoH" not in audit
+
+
+def test_checkpoint_recognizes_resolved_cluster_improvement():
+    """Exact genuine eigenpairs must not be tied by a loose requested tolerance."""
+    from benchmarks.experimental.general_checkpoint import choose_checkpoint, save_checkpoint
+
+    values = np.array([1e6 + 3, 1e6 + 2, 1e6 + 1, 1e6 + 0.001, 1e6, 0])
+    n, k = len(values), 4
+    solver = CheckpointGeneral(complex_matrix(np.diag(values)), k, ncv=n, tol=1e-10)
+    solver.order.assign(np.arange(n, dtype=np.int32))
+    candidates = []
+    for indices in ([0, 1, 2, 4], [0, 1, 2, 3]):
+        vectors = np.eye(n)[indices]
+        candidates.append(
+            (
+                wp.array(np.stack([vectors, np.zeros_like(vectors)], axis=-1), dtype=wp.vec2d),
+                wp.array(
+                    np.column_stack([np.r_[values[indices], np.zeros(n - k)], np.zeros(n)]),
+                    dtype=wp.vec2d,
+                ),
+            )
+        )
+
+    def record_exact_candidates():
+        solver.checkpoint_valid.zero_()
+        solver.checkpoint_updates.zero_()
+        solver.status.zero_()
+        # Both candidates are exact eigenpairs of the same original matrix;
+        # their cached residuals are exactly zero, with unit independent vectors.
+        solver.norms.zero_()
+        for vectors, candidate_values in candidates:
+            wp.copy(solver.eigenvectors, vectors)
+            wp.copy(solver.ritz, candidate_values)
+            wp.launch(
+                choose_checkpoint,
+                1,
+                [
+                    solver.ritz,
+                    solver.order,
+                    solver.norms,
+                    solver.status,
+                    solver.checkpoint_valid,
+                    solver.checkpoint_replace,
+                    solver.checkpoint_score,
+                    solver.checkpoint_error,
+                    solver.checkpoint_scale,
+                    solver.checkpoint_updates,
+                    solver.which,
+                    solver.tol,
+                ],
+            )
+            wp.launch(
+                save_checkpoint,
+                solver.eigenvectors.shape,
+                [
+                    solver.eigenvectors,
+                    solver.ritz,
+                    solver.order,
+                    solver.checkpoint_replace,
+                    solver.checkpoint_vectors,
+                    solver.checkpoint_values,
+                ],
+            )
+        solver.finalize()
+
+    record_exact_candidates()
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        record_exact_candidates()
+    wp.capture_launch(capture.graph)
+    assert solver.converged.numpy()[0] == k
+    np.testing.assert_array_equal(solver.residuals.numpy(), 0)
+    np.testing.assert_allclose(
+        np.sort(output(solver.eigenvalues).real), np.sort(values[:k]), atol=1e-8, rtol=0
+    )

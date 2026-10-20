@@ -201,3 +201,29 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
 Clustered-spectrum comparisons and physical shift-invert stopping still need
 validation before considering public promotion. The measured candidate and
 broader accuracy profile remain explicitly experimental.
+
+## Resolved-cluster comparator correction
+
+A further adversarial test found an error in the initial checkpoint policy
+([#109](https://github.com/alecjacobson/warpack/issues/109)). For the diagonal
+matrix with eigenvalues `[1000003, 1000002, 1000001, 1000000.001, 1000000, 0]`,
+k=4 and tol=1e-10, two supplied complete Ritz sets have exactly zero original
+residuals. The second replaces 1000000 with the larger 1000000.001. The old
+requested-tolerance tie width (~0.0016) nevertheless discarded that resolved
+improvement. The regression failed with a 0.001 target error despite 4/4 counts.
+[Failure record](../../results/performance_followup/general-checkpoint-cluster-failure.json).
+
+The comparator now bases ties on the observed maximum residuals and a
+32-machine-epsilon floor, scaled by the sum of eigenvalue magnitudes. It no
+longer multiplies the requested tolerance by an additional k. This is a
+comparison heuristic, not a forward-error bound for arbitrary nonnormal
+matrices; fresh original residuals and independent requested-set gates remain
+necessary.
+
+All **nine** regressions pass on pinned Warp (5.97 s) and stock 1.15 (6.34 s).
+The full 20-case / 60-replay fixed-80 audit was repeated after this correction,
+and all cases pass again.
+[Corrected-policy results](../../results/general-selection-checkpoint-cluster-fixed.json).
+The overhead measurement above belongs to the preceding policy; a final
+matched timing control is being recorded separately. Public solver behavior
+is still unchanged by this experiment.

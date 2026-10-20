@@ -37,11 +37,13 @@ def choose_checkpoint(
     replace: wp.array[wp.int32],
     previous_score: wp.array[wp.float64],
     previous_error: wp.array[wp.float64],
+    previous_scale: wp.array[wp.float64],
     updates: wp.array[wp.int32],
     which: int,
     tol: wp.float64,
 ):
     score = wp.float64(0.0)
+    scale = wp.float64(0.0)
     worst = wp.float64(0.0)
     accepted = status[0] == 0
     for j in range(norms.shape[0]):
@@ -49,9 +51,14 @@ def choose_checkpoint(
         error = wp.sqrt(norms[j, 0]) / wp.max(wp.float64(1.0), cabs(value))
         accepted = accepted and wp.isfinite(error) and error <= tol
         score += target_score(value, which)
+        scale += wp.max(wp.float64(1.0), cabs(value))
         worst = wp.max(worst, error)
     replace[0] = 0
-    slack = wp.float64(norms.shape[0]) * tol * wp.max(wp.float64(1.0), wp.abs(score))
+    # A requested tolerance can be much looser than the observed residuals.
+    # It must not erase a resolved improvement between accurate clustered modes.
+    # This is a comparison heuristic, not a nonnormal eigenvalue-error bound.
+    accuracy = wp.max(wp.float64(7.105427357601002e-15), worst + previous_error[0])
+    slack = accuracy * wp.max(scale, previous_scale[0])
     if accepted and (
         valid[0] == 0
         or score > previous_score[0] + slack
@@ -61,6 +68,7 @@ def choose_checkpoint(
         valid[0] = 1
         previous_score[0] = score
         previous_error[0] = worst
+        previous_scale[0] = scale
         updates[0] += 1
 
 
@@ -104,6 +112,7 @@ class CheckpointGeneral(StartedGeneral):
         self.checkpoint_updates = wp.zeros_like(self.checkpoint_valid)
         self.checkpoint_score = wp.zeros(1, dtype=wp.float64, device=self.device)
         self.checkpoint_error = wp.zeros_like(self.checkpoint_score)
+        self.checkpoint_scale = wp.zeros_like(self.checkpoint_score)
         self.checkpoint_values = wp.empty_like(self.eigenvalues)
         self.checkpoint_vectors = wp.empty_like(self.eigenvectors)
         self.working_values = wp.empty_like(self.ritz)
@@ -127,6 +136,7 @@ class CheckpointGeneral(StartedGeneral):
                 self.checkpoint_replace,
                 self.checkpoint_score,
                 self.checkpoint_error,
+                self.checkpoint_scale,
                 self.checkpoint_updates,
                 self.which,
                 self.tol,
