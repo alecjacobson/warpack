@@ -388,7 +388,7 @@ class GeneralEigensolver:
             device=self.device,
         )
         self.diagonalize()
-        wp.launch(sort_complex, 1, [self.ritz, self.order, self.which], device=self.device)
+        self.select()
         wp.launch(
             rotate_complex,
             self.eigenvectors.shape,
@@ -407,6 +407,9 @@ class GeneralEigensolver:
             wp.launch(scale_vector, self.n, [self.qrows[j], self.norm], device=self.device)
 
         self.prepare_restart()
+
+    def select(self):
+        wp.launch(sort_complex, 1, [self.ritz, self.order, self.which], device=self.device)
 
     def diagonalize(self):
         if self.projected_solver is not None:
