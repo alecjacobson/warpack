@@ -16,7 +16,7 @@ from warpack.schur_tiled import TiledSchur
 @pytest.fixture(params=["tiled", "fused"])
 def solver_type(request):
     if request.param == "fused":
-        from benchmarks.experimental.schur_fused import FusedSchur
+        from warpack.schur_fused import FusedSchur
 
         return FusedSchur
     return TiledSchur
@@ -183,3 +183,31 @@ def test_fixed_general_capture_without_conditional_support(monkeypatch, tmp_path
     dot = tmp_path / "fixed.dot"
     wp.capture_debug_dot_print(graph, str(dot))
     assert graph_summary(dot)["node_types_including_conditional_body"].get("CONDITIONAL", 0) == 0
+
+
+def test_general_projection_falls_back_when_shared_memory_is_limited(monkeypatch):
+    import warpack.arnoldi as arnoldi
+    from benchmarks.upstream.adapters import complex_matrix
+
+    monkeypatch.setattr(arnoldi, "fused_supported", lambda device, size: False)
+    values = np.arange(1.0, 25)
+    solver = arnoldi.GeneralEigensolver(complex_matrix(np.diag(values)), 4, ncv=24, tol=1e-10)
+    assert type(solver.projected_solver) is TiledSchur
+    graph = solver.capture(2, adaptive=False)
+    wp.capture_launch(graph)
+    assert solver.converged.numpy()[0] == 4
+    np.testing.assert_allclose(np.sort(output(solver.eigenvalues).real), values[-4:], atol=1e-11)
+
+
+def test_fused_shared_memory_capacity():
+    from types import SimpleNamespace
+
+    from warpack.schur_fused import fused_supported
+
+    small = SimpleNamespace(is_cuda=True, max_shared_memory_per_block=48 * 1024)
+    large = SimpleNamespace(is_cuda=True, max_shared_memory_per_block=96 * 1024)
+    assert fused_supported(small, 32)
+    assert not fused_supported(small, 33)
+    assert fused_supported(large, 64)
+    assert not fused_supported(large, 65)
+    assert not fused_supported(SimpleNamespace(is_cuda=False), 32)

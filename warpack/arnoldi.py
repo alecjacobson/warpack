@@ -20,6 +20,7 @@ from .hermitian import (
 )
 from .kernels import loop_update
 from .schur import cabs, schur
+from .schur_fused import FusedSchur, fused_supported
 from .schur_tiled import TiledSchur
 
 
@@ -338,7 +339,8 @@ class GeneralEigensolver:
         self.residual_fallbacks = zero(1, wp.int32)
         self.projected_solver = None
         if self.device.is_cuda and 16 <= self.m <= 64 and wp.is_conditional_graph_supported():
-            self.projected_solver = TiledSchur(
+            projection = FusedSchur if fused_supported(self.device, self.m) else TiledSchur
+            self.projected_solver = projection(
                 self.h,
                 self.schur_vectors,
                 self.projected,

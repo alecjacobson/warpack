@@ -62,6 +62,7 @@ def main():
                 "warpack/arnoldi.py",
                 "warpack/schur.py",
                 "warpack/schur_tiled.py",
+                "warpack/schur_fused.py",
                 "benchmarks/upstream/run_benchmarks.py",
                 "benchmarks/upstream/general_reference.py",
                 "benchmarks/experimental/general_selection_profiles.py",

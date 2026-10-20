@@ -391,6 +391,9 @@ class TiledSchur:
             self.normalize,
         ):
             wp.load_module(module=kernel.module, device=self.device, block_dim=self.block_dim)
+        self.prepare_qr()
+
+    def prepare_qr(self):
         # The supported 570 driver needs pending setup writes completed before
         # graph upload; this is setup-only, as in the production capture paths.
         wp.synchronize_device(self.device)
@@ -431,6 +434,13 @@ class TiledSchur:
                 (self.n, self.n),
                 [self.h, self.q, self.u, self.coefficients, self.enabled, k],
             )
+        self.run_qr()
+        self.launch(diagonal_values, 1, [self.h, self.values, self.scale])
+        self.launch(triangular_vectors, self.n, [self.h, self.values, self.scale, self.triangular])
+        self.launch(multiply_vectors, (self.n, self.n), [self.q, self.triangular, self.vectors])
+        self.tiled(self.normalize, self.n, [self.vectors])
+
+    def run_qr(self):
         self.launch(
             advance, 1, [self.h, self.state, self.status, self.running, self.shift, self.maxiter, 0]
         )
@@ -438,7 +448,3 @@ class TiledSchur:
             wp.capture_while(self.running, self.qr_step)
         else:
             wp.capture_launch(self.eager_qr)
-        self.launch(diagonal_values, 1, [self.h, self.values, self.scale])
-        self.launch(triangular_vectors, self.n, [self.h, self.values, self.scale, self.triangular])
-        self.launch(multiply_vectors, (self.n, self.n), [self.q, self.triangular, self.vectors])
-        self.tiled(self.normalize, self.n, [self.vectors])

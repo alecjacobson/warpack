@@ -35,7 +35,10 @@ def main():
     p.add_argument("--iterations", type=int)
     p.add_argument("--tol", type=float, default=1e-12)
     p.add_argument("--trace", action="store_true")
-    p.add_argument("--fused", action="store_true", help="Experimental single-block QR")
+    p.add_argument("--fused", action="store_true", help="Alias for --projected-backend fused")
+    p.add_argument(
+        "--projected-backend", choices=["auto", "serial", "tiled", "fused"], default="auto"
+    )
     p.add_argument("--profile", action="store_true")
     p.add_argument("--warmup", action="store_true")
     p.add_argument("--diagnostic", action="store_true")
@@ -61,10 +64,15 @@ def main():
         else GeneralEigensolver(complex_matrix(a), c["k"], ncv=c["ncv"], which="SR", tol=args.tol)
     )
     core = getattr(s, "core", s)
-    if args.fused:
-        from benchmarks.experimental.schur_fused import FusedSchur
+    selected = "fused" if args.fused else args.projected_backend
+    if selected == "serial":
+        core.projected_solver = None
+    elif selected != "auto":
+        from warpack.schur_fused import FusedSchur
+        from warpack.schur_tiled import TiledSchur
 
-        core.projected_solver = FusedSchur(
+        cls = FusedSchur if selected == "fused" else TiledSchur
+        core.projected_solver = cls(
             core.h,
             core.schur_vectors,
             core.projected,
@@ -90,14 +98,10 @@ def main():
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         matrix_sha256=hashlib.sha256(a.tobytes()).hexdigest(),
         projected_sha256=hashlib.sha256(Path("warpack/schur.py").read_bytes()).hexdigest(),
-        projected_backend="fused"
-        if args.fused
-        else ("tiled" if core.projected_solver is not None else "serial"),
-        fused_sha256=hashlib.sha256(
-            Path("benchmarks/experimental/schur_fused.py").read_bytes()
-        ).hexdigest()
-        if args.fused
-        else None,
+        projected_backend=type(core.projected_solver).__name__
+        if core.projected_solver
+        else "serial",
+        fused_sha256=hashlib.sha256(Path("warpack/schur_fused.py").read_bytes()).hexdigest(),
         tiled_sha256=hashlib.sha256(Path("warpack/schur_tiled.py").read_bytes()).hexdigest(),
         arnoldi_sha256=hashlib.sha256(Path("warpack/arnoldi.py").read_bytes()).hexdigest(),
         gpu=wp.get_device().name,

@@ -31,7 +31,7 @@ def compare(a, repeats, batches, methods=("serial", "tiled")):
     cs, status = wp.empty(n, dtype=wp.float64), wp.zeros(1, dtype=wp.int32)
     engines = {"tiled": TiledSchur(h, q, v, values, u, cs, ss, status)}
     if "fused" in methods:
-        from benchmarks.experimental.schur_fused import FusedSchur
+        from warpack.schur_fused import FusedSchur
 
         engines["fused"] = FusedSchur(h, q, v, values, u, cs, ss, status)
     reference = la.eigvals(a)
@@ -119,7 +119,7 @@ def main():
             for name in (
                 "warpack/schur.py",
                 "warpack/schur_tiled.py",
-                "benchmarks/experimental/schur_fused.py",
+                "warpack/schur_fused.py",
                 "benchmarks/experimental/compare_schur.py",
             )
         },
