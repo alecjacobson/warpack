@@ -364,7 +364,7 @@ def main():
             quality["cg_iteration_accounting"] = (
                 "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs."
             )
-        if args.active_search_bucket_size and not args.public_api:
+        if args.active_search_bucket_size:
             quality["search_bucket_widths"] = solver.search_widths.numpy().tolist()
             quality["search_bucket_usage"] = solver.search_usage.numpy().tolist()
         report["rows"].append(
