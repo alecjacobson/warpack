@@ -2,6 +2,7 @@
 
 import warp as wp
 
+from warpack import BatchedCGPreconditioner
 from warpack.batched_cg import (
     RepeatedOperator as RepeatedOperator,
 )
@@ -11,6 +12,8 @@ from warpack.batched_cg import (
 from warpack.batched_cg import (
     merge_statistics,
 )
+
+BatchedCGInverse = BatchedCGPreconditioner
 
 
 class CapturedPaddedCG:

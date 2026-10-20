@@ -125,3 +125,22 @@ def test_batched_width_mismatch_is_rejected_at_setup(bucket):
             preconditioner=preconditioner,
             preconditioner_bucket_size=bucket,
         )
+
+
+@pytest.mark.parametrize("wrong", ["shape", "device"])
+def test_batched_preconditioner_metadata_rejected_before_application(wrong):
+    if not hasattr(linear.LinearOperator, "batch_offsets"):
+        pytest.skip("upstream batched CG required")
+    a = matrix(np.eye(32))
+
+    def never_apply(*args):
+        raise AssertionError("invalid operator must not be applied")
+
+    pre = linear.LinearOperator(
+        (16, 16) if wrong == "shape" else (32, 32),
+        wp.float64,
+        wp.get_device("cpu") if wrong == "device" else a.device,
+        never_apply,
+    )
+    with pytest.raises(ValueError, match="shape and device"):
+        BatchedCGPreconditioner(a, 4, preconditioner=pre)
