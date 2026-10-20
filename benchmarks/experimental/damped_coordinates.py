@@ -44,6 +44,9 @@ class DampedCoordinates(ShiftInvertEigensolver):
     def __init__(
         self, original, balanced, *args, coordinate_scale, polish_steps=0, kinematic=False, **kwargs
     ):
+        # This adapter has its own coordinate/polish/kinematic extraction.
+        # Preserve its established policy until a matching candidate guard exists.
+        kwargs.setdefault("preserve_converged", False)
         super().__init__(balanced, *args, **kwargs)
         self.coordinate_scale = wp.float64(coordinate_scale)
         self.polish_steps = polish_steps

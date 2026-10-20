@@ -132,6 +132,17 @@ def unshift(values: wp.array[wp.vec2d], out: wp.array[wp.vec2d], sigma: wp.vec2d
 
 
 @wp.kernel
+def unshift_selected(
+    values: wp.array[wp.vec2d],
+    order: wp.array[wp.int32],
+    out: wp.array[wp.vec2d],
+    sigma: wp.vec2d,
+):
+    i = wp.tid()
+    out[i] = sigma + cdiv(wp.vec2d(1.0, 0.0), values[order[i]])
+
+
+@wp.kernel
 def unshift_hermitian(values: wp.array[wp.float64], out: wp.array[wp.vec2d], sigma: wp.vec2d):
     i = wp.tid()
     out[i] = wp.vec2d(sigma[0] + wp.float64(1.0) / values[i], 0.0)
@@ -287,7 +298,11 @@ class ShiftInvertEigensolver:
     complex dimensions and is doubled internally on this path. The output
     eigenvalues retain the general API's ``wp.vec2d`` storage, with zero imaginary
     parts; ``converged`` and ``residuals`` check the original complex equation.
-    Both paths accept a replayable complex ``initial_vector``.
+    Both paths accept a replayable complex ``initial_vector``. The general
+    path preserves complete converged sets during fixed budgets by default;
+    candidates must pass the unshifted original equation, and final residuals
+    are recomputed after restoration. ``preserve_converged=False`` disables it.
+    This setting does not affect the Hermitian path.
     As with the direct Hermitian API, zero/nonfinite starts set ``status=1``;
     outputs must not be used unless ``status`` is zero.
     """
@@ -304,6 +319,7 @@ class ShiftInvertEigensolver:
         inner_maxiter=1000,
         hermitian=False,
         initial_vector=None,
+        preserve_converged=True,
     ):
         if hermitian and complex(sigma).imag != 0:
             raise ValueError("Hermitian shift-invert requires a real sigma")
@@ -331,6 +347,7 @@ class ShiftInvertEigensolver:
                     which="LM",
                     tol=tol * 0.01,
                     initial_vector=initial_vector,
+                    preserve_converged=preserve_converged,
                 )
         except Exception:
             self.inverse.close()
@@ -348,6 +365,31 @@ class ShiftInvertEigensolver:
         self.order = wp.empty(k, dtype=wp.int32, device=self.device)
         self.converged = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.value_buffer = wp.empty_like(self.eigenvalues)
+        if not self.hermitian:
+            self.core._checkpoint_validator = self._checkpoint_candidate
+
+    def _checkpoint_candidate(self):
+        # Inverse Ritz residuals do not certify the original equation. Check
+        # the unshifted candidate before saving, without modifying core state.
+        source = self.inverse.original
+        vectors = self.core.eigenvectors
+        wp.launch(
+            unshift_selected,
+            self.k,
+            [self.core.ritz, self.core.order, self.value_buffer, self.inverse.sigma],
+            device=self.device,
+        )
+        wp.launch(identity_order, self.k, [self.order], device=self.device)
+        source.apply_complex(vectors, self.ax)
+        self.norms.zero_()
+        wp.launch_tiled(
+            complex_residual,
+            dim=(self.k, (source.complex_n + 255) // 256),
+            inputs=[vectors, self.ax, self.value_buffer, self.order, self.norms],
+            block_dim=128,
+            device=self.device,
+        )
+        return self.norms, self.value_buffer, self.order, self.tol
 
     def finalize(self):
         if self.hermitian:

@@ -24,6 +24,8 @@ class StartedGeneral(GeneralEigensolver):
     """Benchmark-only start adapter; identical Warp initialization after copy."""
 
     def initialize(self, seed=42):
+        if self._checkpoint is not None:
+            self._checkpoint.reset()
         self.restart_index.fill_(-1)
         self.residual_restarts.zero_()
         self.residual_fallbacks.zero_()

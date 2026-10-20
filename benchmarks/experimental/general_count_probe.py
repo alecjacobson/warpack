@@ -41,6 +41,9 @@ def main():
     )
     p.add_argument("--profile", action="store_true")
     p.add_argument("--warmup", action="store_true")
+    p.add_argument(
+        "--no-preserve", action="store_true", help="Disable public fixed-budget checkpoints"
+    )
     p.add_argument("--diagnostic", action="store_true")
     args = p.parse_args()
     if args.repeats < 1 or (args.iterations is not None and args.iterations < 1):
@@ -58,10 +61,22 @@ def main():
     target = ref[np.argsort(abs(ref - c["sigma_real"]) if shifted else ref.real)[: c["k"]]]
     s = (
         ShiftInvertEigensolver(
-            complex_matrix(a), c["k"], c["sigma_real"], ncv=c["ncv"], tol=args.tol
+            complex_matrix(a),
+            c["k"],
+            c["sigma_real"],
+            ncv=c["ncv"],
+            tol=args.tol,
+            preserve_converged=not args.no_preserve,
         )
         if shifted
-        else GeneralEigensolver(complex_matrix(a), c["k"], ncv=c["ncv"], which="SR", tol=args.tol)
+        else GeneralEigensolver(
+            complex_matrix(a),
+            c["k"],
+            ncv=c["ncv"],
+            which="SR",
+            tol=args.tol,
+            preserve_converged=not args.no_preserve,
+        )
     )
     core = getattr(s, "core", s)
     selected = "fused" if args.fused else args.projected_backend
@@ -103,6 +118,11 @@ def main():
         else "serial",
         fused_sha256=hashlib.sha256(Path("warpack/schur_fused.py").read_bytes()).hexdigest(),
         tiled_sha256=hashlib.sha256(Path("warpack/schur_tiled.py").read_bytes()).hexdigest(),
+        preserve_converged=not args.no_preserve,
+        checkpoint_sha256=hashlib.sha256(
+            Path("warpack/general_checkpoint.py").read_bytes()
+        ).hexdigest(),
+        shift_sha256=hashlib.sha256(Path("warpack/shift.py").read_bytes()).hexdigest(),
         arnoldi_sha256=hashlib.sha256(Path("warpack/arnoldi.py").read_bytes()).hexdigest(),
         gpu=wp.get_device().name,
         warp=wp.__version__,

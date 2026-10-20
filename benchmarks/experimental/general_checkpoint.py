@@ -106,6 +106,7 @@ def restore_checkpoint(
 
 class CheckpointGeneral(StartedGeneral):
     def __init__(self, *args, **kwargs):
+        kwargs.setdefault("preserve_converged", False)
         super().__init__(*args, **kwargs)
         self.checkpoint_valid = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.checkpoint_replace = wp.zeros_like(self.checkpoint_valid)

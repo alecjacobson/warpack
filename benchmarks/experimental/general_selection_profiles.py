@@ -26,6 +26,9 @@ def main():
     parser.add_argument(
         "--checkpoint", action="store_true", help="Experimental converged-set preservation"
     )
+    parser.add_argument(
+        "--no-preserve", action="store_true", help="Disable public fixed-budget preservation"
+    )
     parser.add_argument("--fixed", action="store_true", help="Execute every budgeted cycle")
     parser.add_argument("--ncv", type=int, help="Explicit width instead of the multiplier")
     parser.add_argument("--repeats", type=int, default=3)
@@ -60,6 +63,7 @@ def main():
             name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
             for name in (
                 "warpack/arnoldi.py",
+                "warpack/general_checkpoint.py",
                 "warpack/schur.py",
                 "warpack/schur_tiled.py",
                 "warpack/schur_fused.py",
@@ -72,6 +76,7 @@ def main():
         budget=args.budget,
         fixed=args.fixed,
         checkpoint=args.checkpoint,
+        public_preserve_converged=not args.no_preserve and not args.checkpoint,
         requested_ncv=args.ncv,
         repeats=args.repeats,
         ncv_multiplier=args.ncv_multiplier,
@@ -85,7 +90,14 @@ def main():
         a, initial = read(matrix_path), read(initial_path).ravel()
         reference = GeneralReference(a, case["k"])
         ncv = min(len(a), args.ncv if args.ncv is not None else args.ncv_multiplier * case["ncv"])
-        solver = solver_type(complex_matrix(a), case["k"], ncv=ncv, which="LM", tol=1e-10)
+        solver = solver_type(
+            complex_matrix(a),
+            case["k"],
+            ncv=ncv,
+            which="LM",
+            tol=1e-10,
+            preserve_converged=not args.no_preserve and not args.checkpoint,
+        )
         solver.start_vector = wp.array(np.column_stack([initial, np.zeros(len(a))]), dtype=wp.vec2d)
         graph = solver.capture(args.budget, adaptive=not args.fixed)
         row = dict(
@@ -110,6 +122,9 @@ def main():
             if args.checkpoint:
                 trial["checkpoint_updates"] = int(solver.checkpoint_updates.numpy()[0])
                 trial["checkpoint_valid"] = int(solver.checkpoint_valid.numpy()[0])
+            if solver._checkpoint is not None:
+                trial["checkpoint_updates"] = int(solver._checkpoint.updates.numpy()[0])
+                trial["checkpoint_valid"] = int(solver._checkpoint.valid.numpy()[0])
             row["trials"].append(trial)
         row["accepted"] = all(trial["accepted"] for trial in row["trials"])
         report["cases"].append(row)

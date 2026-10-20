@@ -8,6 +8,7 @@ from operator import index as integer_index
 
 import warp as wp
 
+from .general_checkpoint import GeneralCheckpoint
 from .hermitian import (
     HermitianCSR,
     cdot,
@@ -269,6 +270,11 @@ class GeneralEigensolver:
     Check status before using outputs. A start does not certify target completeness.
     CUDA projections of size 16–64 use a cooperative QR loop when conditional
     graphs are supported; other sizes/devices retain the serial reference.
+    Fixed budgets preserve the best complete converged set observed during
+    the solve, while continuing exploration. ``preserve_converged=False`` opts
+    out. Scratch is allocated before the first fixed solve/capture and reset
+    on every replay. Adaptive graphs do not use checkpoints. Preservation is
+    not a certificate of globally requested-spectrum completeness.
     Right eigenvectors of a general matrix need not be orthogonal.
     Restarts expand from the largest remaining requested Ritz residual, using
     cached operator images. Device ``residual_restarts`` and ``residual_fallbacks``
@@ -278,7 +284,16 @@ class GeneralEigensolver:
     produce initialized Ritz vectors and are rejected before warmup.
     """
 
-    def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
+    def __init__(
+        self,
+        operator,
+        k,
+        ncv=None,
+        which="LM",
+        tol=1.0e-9,
+        initial_vector=None,
+        preserve_converged=True,
+    ):
         self.op = operator
         self.n = operator.complex_n
         self.device = operator.device
@@ -292,6 +307,10 @@ class GeneralEigensolver:
             if initial_vector.device != self.device:
                 raise ValueError("initial_vector must be on the operator device")
         self.initial_vector = initial_vector
+        self.preserve_converged = bool(preserve_converged)
+        self._checkpoint = None
+        self._checkpoint_enabled = False
+        self._checkpoint_validator = None
         self.k = k
         self.m = min(self.n, ncv or max(2 * k + 12, 32))
         self.keep = min(k + 4, self.m - 1)
@@ -414,6 +433,8 @@ class GeneralEigensolver:
         wp.launch(scale_vector, self.n, [self.qrows[j], self.norm], device=self.device)
 
     def initialize(self, seed=42):
+        if self._checkpoint is not None:
+            self._checkpoint.reset()
         self.restart_index.fill_(-1)
         self.residual_restarts.zero_()
         self.residual_fallbacks.zero_()
@@ -538,14 +559,25 @@ class GeneralEigensolver:
             device=self.device,
         )
 
+        if self._checkpoint_enabled:
+            self._checkpoint.consider()
+
+    def _enable_checkpoint(self, enabled):
+        self._checkpoint_enabled = bool(enabled and self.preserve_converged)
+        if self._checkpoint_enabled and self._checkpoint is None:
+            self._checkpoint = GeneralCheckpoint(self)
+
     def finalize(self):
+        values, order = self.ritz, self.order
+        if self._checkpoint_enabled:
+            values, order = self._checkpoint.restore()
         self.op.apply_complex(self.eigenvectors, self.ax)
         self.norms.zero_()
         self.converged.zero_()
         wp.launch_tiled(
             complex_residual,
             dim=(self.k, (self.n + 255) // 256),
-            inputs=[self.eigenvectors, self.ax, self.ritz, self.order, self.norms],
+            inputs=[self.eigenvectors, self.ax, values, order, self.norms],
             block_dim=128,
             device=self.device,
         )
@@ -553,8 +585,8 @@ class GeneralEigensolver:
             complex_outputs,
             self.k,
             [
-                self.ritz,
-                self.order,
+                values,
+                order,
                 self.norms,
                 self.eigenvalues,
                 self.residuals,
@@ -579,6 +611,7 @@ class GeneralEigensolver:
         iterations = integer_index(iterations)
         if iterations < 1:
             raise ValueError("General iteration needs at least one restart cycle")
+        self._enable_checkpoint(True)
         self.initialize()
         for _ in range(iterations):
             self.step()
@@ -593,7 +626,10 @@ class GeneralEigensolver:
             adaptive = not getattr(self.op, "requires_static_outer_capture", False)
         if adaptive and getattr(self.op, "requires_static_outer_capture", False):
             raise ValueError("This backend needs a fixed outer graph")
-        self.solve(1)
+        self._enable_checkpoint(not adaptive)
+        self.initialize()
+        self.step()
+        self.finalize()
         if finalizer is not None:
             finalizer()
         wp.synchronize_device(self.device)

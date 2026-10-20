@@ -28,6 +28,9 @@ def main():
     parser.add_argument("--budget", type=int, default=80)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--public", action="store_true", help="Compare public preservation with explicit opt-out"
+    )
     args = parser.parse_args()
     cases = [
         json.loads(line)
@@ -67,6 +70,8 @@ def main():
             name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
             for name in (
                 "warpack/arnoldi.py",
+                "warpack/general_checkpoint.py",
+                "warpack/schur_fused.py",
                 "warpack/schur.py",
                 "warpack/schur_tiled.py",
                 "benchmarks/upstream/run_benchmarks.py",
@@ -79,9 +84,18 @@ def main():
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     solvers, graphs = {}, {}
-    for name, cls in (("baseline", StartedGeneral), ("checkpoint", CheckpointGeneral)):
+    for name, cls in (
+        ("baseline", StartedGeneral),
+        ("checkpoint", StartedGeneral if args.public else CheckpointGeneral),
+    ):
         start = time.perf_counter()
-        solver = cls(op, case["k"], ncv=args.ncv, tol=1e-10)
+        solver = cls(
+            op,
+            case["k"],
+            ncv=args.ncv,
+            tol=1e-10,
+            preserve_converged=args.public and name == "checkpoint",
+        )
         solver.start_vector = v0
         wp.synchronize()
         workspace_seconds = time.perf_counter() - start
@@ -95,6 +109,8 @@ def main():
         dot.unlink()
         solvers[name], graphs[name] = solver, graph
         report["variants"][name] = dict(
+            public_preserve_converged=solver.preserve_converged,
+            solver_class=type(solver).__module__ + "." + type(solver).__qualname__,
             workspace_setup_seconds=workspace_seconds,
             capture_seconds=capture_seconds,
             graph=audit,
