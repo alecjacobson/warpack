@@ -46,3 +46,32 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
 Use `--fixtures` for an existing export and repeated `--case` to select a
 subset. Capture warmup precedes the reset replays; original v0 is read again
 inside every replay. No additional vendor eigensolver runs inside Warp.
+
+## Longer fixed-budget control
+
+A separate width-60 / fixed-80-cycle control on `benchmark_gen_38` initially
+passes all three replays: requested eigenvalue errors below 3e-13 and original
+normalized residuals below 8e-15. However, the full 20-case fixed-80 audit passes
+only **11/20** cases across three reset replays each. All ten n=100 matrices
+pass, but only `benchmark_gen_36` passes all three large-matrix replays. The
+other nine large cases each have at least one failed replay. This includes a
+later failure for case 38: the isolated successful control was not robust.
+
+Some fixed replay failures have one or two inaccurate requested vectors while
+the others remain near machine precision. For example, the third case-30 replay
+reports 9/10 with normalized residual 0.09715 and spectrum error 32.54, whereas
+its first two fixed replays and all three adaptive wide-profile replays pass.
+The comparisons establish trajectory sensitivity and poor final results after
+more work; a per-cycle trace is still needed to establish exactly when a given
+failed replay had recovered or lost its requested set. Neither a larger fixed
+budget nor the isolated successful control is recommended as a general fix.
+
+[Complete fixed audit](../../results/general-selection-wide-fixed80.json),
+[isolated case-38 control](../../results/general-selection38-wide-fixed80.json).
+All failures remain rejected; no timings are claimed. Investigation and a
+partial-space replay regression are tracked in
+[#108](https://github.com/alecjacobson/warpack/issues/108).
+
+To reproduce the fixed audit, add `--fixed --budget 80` to the command above.
+Use `--ncv N` to select an explicit width instead of the multiplier. These
+options alter the reported experimental profile, not production defaults.

@@ -23,10 +23,12 @@ def main():
     parser.add_argument("--case", action="append")
     parser.add_argument("--ncv-multiplier", type=int, default=2)
     parser.add_argument("--budget", type=int, default=300)
+    parser.add_argument("--fixed", action="store_true", help="Execute every budgeted cycle")
+    parser.add_argument("--ncv", type=int, help="Explicit width instead of the multiplier")
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    if min(args.ncv_multiplier, args.budget, args.repeats) < 1:
+    if min(args.ncv_multiplier, args.budget, args.repeats, args.ncv or 1) < 1:
         parser.error("width multiplier, budget and repeats must be positive")
     cases = [
         json.loads(line)
@@ -56,6 +58,8 @@ def main():
             )
         },
         budget=args.budget,
+        fixed=args.fixed,
+        requested_ncv=args.ncv,
         repeats=args.repeats,
         ncv_multiplier=args.ncv_multiplier,
         cases=[],
@@ -67,10 +71,10 @@ def main():
         )
         a, initial = read(matrix_path), read(initial_path).ravel()
         reference = GeneralReference(a, case["k"])
-        ncv = min(len(a), args.ncv_multiplier * case["ncv"])
+        ncv = min(len(a), args.ncv if args.ncv is not None else args.ncv_multiplier * case["ncv"])
         solver = StartedGeneral(complex_matrix(a), case["k"], ncv=ncv, which="LM", tol=1e-10)
         solver.start_vector = wp.array(np.column_stack([initial, np.zeros(len(a))]), dtype=wp.vec2d)
-        graph = solver.capture(args.budget)
+        graph = solver.capture(args.budget, adaptive=not args.fixed)
         row = dict(
             case=case,
             ncv=ncv,

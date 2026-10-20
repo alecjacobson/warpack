@@ -1,0 +1,223 @@
+{
+  "protocol": "Accuracy-only reset graph replays; public GeneralEigensolver with original Spectra v0, LM, tol=1e-10 and explicit ncv multiplier. No performance claims. Every replay must pass fresh original residuals, target assignment, mandatory modes, vector norms, independence, subspace and device counters.",
+  "warp": "1.18.0",
+  "gpu": "NVIDIA L40",
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "warp_cg_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_preconditioner_implementation": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+    "warp_fsai_implementation": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp_sparse_implementation": "ec75cde6ace8704d7043700353b6132ff8450dd83840fd1558a89a0d012dc274",
+    "spectra_binary": null
+  },
+  "source_sha256": {
+    "warpack/arnoldi.py": "81f9e0b4f176fc4d7beb4b4c8cc2ea516862a6ed143b51c05a151ce127b858dd",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_tiled.py": "ce0c15b6161c4540c86d1ab190b1df8e87c1f288b04c4e85192f20c3d956114d",
+    "benchmarks/upstream/run_benchmarks.py": "545ffae8b8c691e968c31cf75dca4a9b5626695a3ef2db6c5bc111c87086ac92",
+    "benchmarks/upstream/general_reference.py": "9c40ac32d5c81879e8cddb3ee655539a08474d2ae3844818495e3859f18b3354",
+    "benchmarks/experimental/general_selection_profiles.py": "5cc5d68fb943215d770c74ae5b41a47d358591c246017bb24f7fa61bb1ea175f"
+  },
+  "budget": 80,
+  "fixed": true,
+  "requested_ncv": null,
+  "repeats": 3,
+  "ncv_multiplier": 2,
+  "cases": [
+    {
+      "case": {
+        "id": "benchmark_gen_38",
+        "family": "benchmark_gen",
+        "name": "upstream benchmark",
+        "k": 10,
+        "ncv": 30,
+        "selection": 0,
+        "sigma_real": 0,
+        "sigma_imag": 0,
+        "upstream_allows_nonconvergence": false
+      },
+      "ncv": 60,
+      "keep": 14,
+      "matrix_sha256": "4c045abccd47153d3b6f5853fb890e9ea630dad99fa2fda1f2fd9aed91230c76",
+      "start_sha256": "1e7bc2f0a77215ec1456f46cbe8b9e2d287a099bc2f03e82dea30b4f5fe224c5",
+      "trials": [
+        {
+          "minimum_vector_singular_value": 0.865930557823121,
+          "vector_rank_threshold": 2.563339960957268e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 1.126961821113074e-14,
+          "max_normalized_residual": 7.092569250107828e-15,
+          "spectrum_error": 2.9447989227305964e-13,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 7.111632811265713e-14,
+          "accepted": true,
+          "converged": 10,
+          "status": 0,
+          "iterations": 80,
+          "values": [
+            [
+              -18.52080427607731,
+              -0.8925592501005291
+            ],
+            [
+              -18.520804276077243,
+              0.8925592501005445
+            ],
+            [
+              -13.238398704735035,
+              -12.921159869494872
+            ],
+            [
+              -13.238398704735028,
+              12.921159869494877
+            ],
+            [
+              -14.432224631357997,
+              -11.436219025894339
+            ],
+            [
+              -14.432224631357979,
+              11.436219025894346
+            ],
+            [
+              14.289847601710841,
+              -11.603192979664552
+            ],
+            [
+              14.289847601710814,
+              11.603192979664543
+            ],
+            [
+              1.4551834321303645,
+              -18.3018425737014
+            ],
+            [
+              1.4551834321303883,
+              18.301842573701318
+            ]
+          ]
+        },
+        {
+          "minimum_vector_singular_value": 0.8659305578231151,
+          "vector_rank_threshold": 2.5633399609572747e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 1.1801832636420707e-14,
+          "max_normalized_residual": 7.324671703491822e-15,
+          "spectrum_error": 2.2505817248531705e-13,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 7.791144873345239e-14,
+          "accepted": true,
+          "converged": 10,
+          "status": 0,
+          "iterations": 80,
+          "values": [
+            [
+              -18.520804276077243,
+              0.8925592501005127
+            ],
+            [
+              -18.520804276077243,
+              -0.8925592501004955
+            ],
+            [
+              -13.238398704735047,
+              -12.921159869494845
+            ],
+            [
+              -13.238398704735014,
+              12.921159869494847
+            ],
+            [
+              -14.432224631357995,
+              11.436219025894397
+            ],
+            [
+              -14.432224631357986,
+              -11.436219025894363
+            ],
+            [
+              14.28984760171086,
+              -11.603192979664557
+            ],
+            [
+              14.289847601710836,
+              11.603192979664538
+            ],
+            [
+              1.4551834321303883,
+              -18.30184257370135
+            ],
+            [
+              1.4551834321303807,
+              18.30184257370133
+            ]
+          ]
+        },
+        {
+          "minimum_vector_singular_value": 0.8659305578231186,
+          "vector_rank_threshold": 2.563339960957265e-13,
+          "independent_vectors": true,
+          "max_absolute_residual": 1.3166795732977764e-14,
+          "max_normalized_residual": 7.744235322429407e-15,
+          "spectrum_error": 2.523931319066219e-13,
+          "required_spectrum_covered": true,
+          "vector_norm_error": 2.220446049250313e-16,
+          "subspace_error": 5.738551657371004e-14,
+          "accepted": true,
+          "converged": 10,
+          "status": 0,
+          "iterations": 80,
+          "values": [
+            [
+              -18.52080427607727,
+              -0.8925592501005096
+            ],
+            [
+              -18.520804276077243,
+              0.8925592501005263
+            ],
+            [
+              -13.238398704735022,
+              -12.921159869494875
+            ],
+            [
+              -13.238398704735015,
+              12.921159869494883
+            ],
+            [
+              -14.432224631358013,
+              -11.436219025894363
+            ],
+            [
+              -14.432224631357986,
+              11.436219025894358
+            ],
+            [
+              14.289847601710816,
+              -11.603192979664572
+            ],
+            [
+              14.289847601710788,
+              11.603192979664511
+            ],
+            [
+              1.4551834321304074,
+              18.301842573701382
+            ],
+            [
+              1.4551834321303994,
+              -18.30184257370135
+            ]
+          ]
+        }
+      ],
+      "accepted": true
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "total": 1
+  }
+}
