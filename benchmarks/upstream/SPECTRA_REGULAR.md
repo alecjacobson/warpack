@@ -23,7 +23,7 @@ any valid boundary member, but injective assignment and mandatory-mode coverage
 reject omission of a strictly required mode. Exact residuals from the wrong
 spectrum cannot pass these checks.
 
-Worst errors across all36 accepted cases and both replays:
+Worst errors across all 36 accepted cases and both replays:
 
 | Check | Maximum error |
 |---|---:|
@@ -33,7 +33,7 @@ Worst errors across all36 accepted cases and both replays:
 | Allowed-subspace error | 2.671e-12 |
 
 Every device status is zero and every required count is complete. The unchanged
-absolute acceptance bound is1e-9. Unsupported BothEnds rows have no invented
+absolute acceptance bound is 1e-9. Unsupported BothEnds rows have no invented
 numerical results.
 
 ## Every replay is now checked
@@ -45,20 +45,20 @@ Aggregate success requires every trial to pass; summary errors are maxima,
 counts are minima, and any failed/missing status remains rejecting. Warmup is
 separate. References and host inspection remain outside captured computation.
 
-Sixty-four focused tests pass on pinned Warp1.18 and stock1.15. Thirteen new
+Sixty-four focused tests pass on pinned Warp 1.18 and stock 1.15. Thirteen new
 CPU checks cover metric selection, ties/multiplicity and first-fail/last-pass
 aggregation (including SVD's two physical counts). Six new actual GPU adapter
 cases cover indefinite A/non-diagonal SPD B, all three regular selections,
 both families, and both independently checked replays. Lint/format checks pass.
 
-Overlaying these45 cases onto the frozen360-case baseline gives **197 passes,
-14 failures and149 unsupported**, with no lost passes or checked-numerical
+Overlaying these 45 cases onto the frozen 360-case baseline gives **197 passes,
+14 failures and 149 unsupported**, with no lost passes or checked-numerical
 regressions. This is a **composite inventory**, not a new full per-replay run;
-the remaining315 rows retain the baseline's final-replay-only protocol.
+the remaining 315 rows retain the baseline's final-replay-only protocol.
 
 ## Evidence and reproduction
 
-- [All45 original family cases, including per-replay results](../../results/performance_followup/spectra-regular-followup.json)
+- [All 45 original family cases, including per-replay results](../../results/performance_followup/spectra-regular-followup.json)
 - [Validation, exact source hashes and worst errors](../../results/performance_followup/spectra-regular-validation.json)
 - [Explicit composite comparison](../../results/performance_followup/spectra-regular-comparison.json)
 - [Regenerable fixture hashes](../../results/performance_followup/spectra-regular-fixture-hashes.json)

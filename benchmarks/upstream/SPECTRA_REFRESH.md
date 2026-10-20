@@ -61,7 +61,8 @@ were collected. The serial replacement report is retained separately.
 [Issue #121](https://github.com/alecjacobson/warpack/issues/121) tracks an adapter
 coverage gap found during this audit: 27 generalized LM/LA/SA fixtures can use
 an already supported public API but still appear unsupported in this baseline.
-Their follow-up is separate from this completed frozen inventory.
+The [completed follow-up](SPECTRA_REGULAR.md) enables all 27 successfully,
+checks every replay, and remains separate from this frozen baseline.
 
 ## Evidence and reproduction
 
