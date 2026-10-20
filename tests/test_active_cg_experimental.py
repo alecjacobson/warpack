@@ -12,7 +12,8 @@ from warpack import BatchedCGPreconditioner as BatchedCGInverse
 from warpack._active_cg import DeviceBucketedCG
 
 pytestmark = pytest.mark.skipif(
-    not hasattr(linear.LinearOperator, "batch_offsets"), reason="upstream batched CG required"
+    not all(hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")),
+    reason="upstream batched CG required",
 )
 
 

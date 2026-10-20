@@ -216,8 +216,12 @@ class BatchedCGPreconditioner:
         fsai_layout="rows",
         matrix_layout="rows",
     ):
-        if not hasattr(linear.LinearOperator, "batch_offsets"):
-            raise RuntimeError("Requires upstream Warp batched LinearOperator/CG support")
+        if not all(
+            hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")
+        ):
+            raise RuntimeError(
+                "Requires upstream Warp batched CG with max_batch_length; use the pinned FSAI environment"
+            )
         if isinstance(width, bool) or isinstance(maxiter, bool):
             raise ValueError("width and maxiter must be positive integers")
         width, maxiter = index(width), index(maxiter)

@@ -15,7 +15,9 @@ from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 
 @pytest.mark.parametrize("bucket", [0, 2])
 def test_installed_block_replays_current_pencil_and_drops_owner(bucket, tmp_path):
-    if not hasattr(linear.LinearOperator, "batch_offsets"):
+    if not all(
+        hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")
+    ):
         pytest.skip("upstream batched CG required")
     n, k, width = 64, 4, 8
     rng = np.random.default_rng(183)
@@ -85,7 +87,9 @@ def test_installed_block_replays_current_pencil_and_drops_owner(bucket, tmp_path
     ],
 )
 def test_batched_invalid_metadata(kwargs):
-    if not hasattr(linear.LinearOperator, "batch_offsets"):
+    if not all(
+        hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")
+    ):
         pytest.skip("upstream batched CG required")
     args = dict(width=4)
     args.update(kwargs)
@@ -94,7 +98,7 @@ def test_batched_invalid_metadata(kwargs):
 
 
 def test_stock_runtime_rejects_missing_batched_cg():
-    if hasattr(linear.LinearOperator, "batch_offsets"):
+    if all(hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")):
         pytest.skip("stock-runtime negative control")
     with pytest.raises(RuntimeError, match="batched"):
         BatchedCGPreconditioner(matrix(np.eye(32)), 4)
@@ -113,7 +117,9 @@ def test_block_eager_iteration_counter():
 
 @pytest.mark.parametrize("bucket", [0, 2])
 def test_batched_width_mismatch_is_rejected_at_setup(bucket):
-    if not hasattr(linear.LinearOperator, "batch_offsets"):
+    if not all(
+        hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")
+    ):
         pytest.skip("upstream batched CG required")
     a = matrix(np.eye(32))
     preconditioner = BatchedCGPreconditioner(a, 3)
@@ -129,7 +135,9 @@ def test_batched_width_mismatch_is_rejected_at_setup(bucket):
 
 @pytest.mark.parametrize("wrong", ["shape", "device"])
 def test_batched_preconditioner_metadata_rejected_before_application(wrong):
-    if not hasattr(linear.LinearOperator, "batch_offsets"):
+    if not all(
+        hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")
+    ):
         pytest.skip("upstream batched CG required")
     a = matrix(np.eye(32))
 
