@@ -144,6 +144,7 @@ def main():
     p.add_argument("--fused-updates", action="store_true")
     p.add_argument("--paired-rotation", action="store_true")
     p.add_argument("--reuse-x-image", action="store_true")
+    p.add_argument("--active-search-bucket-size", type=int, default=0)
     p.add_argument("--native-products", action="store_true")
     p.add_argument("--batched-products", action="store_true")
     p.add_argument("--inner-cg", type=int, default=0)
@@ -159,6 +160,10 @@ def main():
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
     args = p.parse_args()
+    if args.active_search_bucket_size < 0:
+        p.error("active-search-bucket-size must be nonnegative")
+    if args.active_search_bucket_size and (not args.reuse_x_image or args.profile):
+        p.error("active search requires --reuse-x-image and does not support --profile")
     if args.cupy and args.inner_cg and not args.batched_cg:
         p.error("CuPy iterative comparison requires --batched-cg")
     if args.inner_cg < 0 or args.repeats < 1:
@@ -196,10 +201,16 @@ def main():
 
     def create_solver():
         solver_type = BlockLOBPCG
+        solver_options = {}
         if args.reuse_x_image:
             from benchmarks.experimental.cached_x_image import CachedXBlockLOBPCG
 
             solver_type = CachedXBlockLOBPCG
+        if args.active_search_bucket_size:
+            from benchmarks.experimental.active_search import ActiveSearchBlockLOBPCG
+
+            solver_type = ActiveSearchBlockLOBPCG
+            solver_options["search_bucket_size"] = args.active_search_bucket_size
         starts = wp.array(initial.T.copy(), dtype=wp.float64)
         from benchmarks.experimental.block_kernels import (
             BatchedSparseOperator,
@@ -240,6 +251,7 @@ def main():
             symmetric_products=args.symmetric_products,
             fused_updates=args.fused_updates,
             paired_rotation=args.paired_rotation,
+            **solver_options,
         )
         if args.active_cg_bucket_size:
             from benchmarks.experimental.active_cg import DeviceBucketedCG
@@ -302,6 +314,7 @@ def main():
                 "benchmarks/experimental/batched_cg.py",
                 "benchmarks/experimental/active_cg.py",
                 "benchmarks/experimental/cached_x_image.py",
+                "benchmarks/experimental/active_search.py",
             )
         },
     )
@@ -326,11 +339,15 @@ def main():
             quality["cg_iteration_accounting"] = (
                 "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs."
             )
+        if args.active_search_bucket_size:
+            quality["search_bucket_widths"] = solver.search_widths.numpy().tolist()
+            quality["search_bucket_usage"] = solver.search_usage.numpy().tolist()
         report["rows"].append(
             dict(
                 method="Warp BlockLOBPCG"
                 + (" + device-bucketed CG" if args.active_cg_bucket_size else "")
-                + (" + cached A X" if args.reuse_x_image else ""),
+                + (" + cached A X" if args.reuse_x_image else "")
+                + (" + device-bucketed search" if args.active_search_bucket_size else ""),
                 seconds=seconds,
                 iterations=int(solver.iterations.numpy()[0]),
                 quality=quality,
