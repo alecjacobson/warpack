@@ -1,0 +1,90 @@
+{
+  "method": "warp-cg-fsai",
+  "n": 1150,
+  "full_n": 1152,
+  "k": 6,
+  "ncv": 32,
+  "nnz": 11436,
+  "mass_nnz": 16928,
+  "finite_count": 182,
+  "infinite_count": 968,
+  "common_nullity_before_gauge": 2,
+  "shift": -8.218952905399852e-05,
+  "height": 0.25,
+  "pin": 0,
+  "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+  "seed": 2026,
+  "outer_cycles": 4,
+  "cg_tol": 1e-11,
+  "correction_steps": 1,
+  "correction_tol": 0.01,
+  "outer_tol": 1e-10,
+  "cupy_tol": 1e-09,
+  "cupy_maxiter": 300,
+  "reference_seconds": 0.01806209608912468,
+  "reference_values": [
+    4.035001354927355e-06,
+    4.035001355783155e-06,
+    0.0004446618462008707,
+    0.0004446618462008707,
+    0.0016858445172252834,
+    0.0016858445172261392
+  ],
+  "reference": "static boundary condensation + dense centered boundary eigensolve",
+  "samples": [
+    0.5712559707462788
+  ],
+  "validation": [
+    {
+      "residual": 1.4402900733940115e-14,
+      "orthogonality": 8.613110225041964e-13,
+      "spectrum_error": 5.199833619240479e-16,
+      "subspace_error": 1.8492958586224564e-13,
+      "centered_boundary_error": 6.245004513516506e-17,
+      "accepted": true,
+      "physical_count": 6,
+      "reciprocal_count": 6,
+      "solver_status": 0,
+      "solver_full_count": true,
+      "cg_stats": [
+        14860,
+        193,
+        0,
+        101
+      ],
+      "cg_fresh_stats": [
+        14860,
+        193,
+        3,
+        101
+      ],
+      "cg_residual_maxima": [
+        1.2267367405718312e-09,
+        1.1497275469799592e-11
+      ],
+      "inner_solve_accepted": false
+    }
+  ],
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 823,
+      "MEMCPY": 814,
+      "KERNEL": 8053,
+      "CONDITIONAL": 299
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 814
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "setup_seconds": 0.3735412396490574,
+  "capture_seconds": 1.0515092015266418,
+  "device_only_graph": true,
+  "warmup_seconds": 0.6123574450612068,
+  "timing_uncontended": true,
+  "competing_processes": [],
+  "solve_seconds": 0.5712559707462788,
+  "accepted": true,
+  "inner_solve_accepted": false,
+  "outcome": "passed"
+}

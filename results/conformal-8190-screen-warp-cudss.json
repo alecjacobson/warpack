@@ -1,0 +1,88 @@
+{
+  "method": "warp-cudss",
+  "n": 8190,
+  "full_n": 8192,
+  "k": 20,
+  "ncv": 64,
+  "nnz": 82380,
+  "mass_nnz": 127008,
+  "finite_count": 502,
+  "infinite_count": 7688,
+  "common_nullity_before_gauge": 2,
+  "shift": -0.001,
+  "height": 0.25,
+  "pin": 0,
+  "matrix_sha256": "8a8dff44b040e0fd9a31faa7c2828028400f3655956f331e63a0297ef085ebc2",
+  "seed": 2026,
+  "outer_cycles": 8,
+  "cg_tol": 1e-09,
+  "correction_steps": 1,
+  "correction_tol": 0.01,
+  "outer_tol": 1e-10,
+  "cupy_tol": 1e-09,
+  "cupy_maxiter": 300,
+  "reference_seconds": 0.37739329785108566,
+  "reference_values": [
+    1.9840386657037968e-07,
+    1.9840386657037968e-07,
+    2.1719908395967307e-05,
+    2.1719908395967307e-05,
+    8.265055511114142e-05,
+    8.265055511114142e-05,
+    0.00021841675609903064,
+    0.00021841675609903064,
+    0.0004444987788034717,
+    0.0004444987788034717,
+    0.00078841736855388,
+    0.000788417368554821,
+    0.0012783523364115527,
+    0.0012783523364115527,
+    0.0019517338458052186,
+    0.0019517338458052186,
+    0.002815249817233084,
+    0.0028152498172340245,
+    0.003901623843624525,
+    0.003901623843624525
+  ],
+  "reference": "static boundary condensation + dense centered boundary eigensolve",
+  "samples": [
+    0.4043671116232872
+  ],
+  "validation": [
+    {
+      "residual": 5.457545243300164e-14,
+      "orthogonality": 2.580366476045981e-13,
+      "spectrum_error": 1.2047654540658925e-15,
+      "subspace_error": 1.672839824944782e-13,
+      "centered_boundary_error": 8.409278564497093e-17,
+      "accepted": true,
+      "physical_count": 20,
+      "reciprocal_count": 20,
+      "solver_status": 0,
+      "solver_full_count": true
+    }
+  ],
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 2835,
+      "MEMCPY": 3536,
+      "KERNEL": 16058,
+      "CONDITIONAL": 351
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 2132,
+      "HtoD (HOST PAGEABLE to DEVICE)": 1404
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "setup_seconds": 0.2281108722090721,
+  "capture_seconds": 0.9369974620640278,
+  "device_only_graph": false,
+  "warmup_seconds": 0.4977269619703293,
+  "timing_uncontended": true,
+  "competing_processes": [],
+  "solve_seconds": 0.4043671116232872,
+  "accepted": true,
+  "inner_solve_accepted": true,
+  "outcome": "passed"
+}

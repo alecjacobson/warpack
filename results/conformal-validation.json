@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "4b01aad",
+  "production_core_changed": false,
+  "pinned": {
+    "warp": "1.18.0",
+    "warp_commit": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "passed": 84,
+    "seconds": 49.12,
+    "command": "pytest -q tests/test_conformal_fixture.py tests/test_conformal_solver.py tests/test_conformal_reference.py tests/test_conformal_baseline.py tests/test_applications.py tests/test_benchmark_acceptance.py"
+  },
+  "stock": {
+    "warp": "1.15.0",
+    "passed": 40,
+    "seconds": 24.54,
+    "command": "pytest -q tests/test_conformal_fixture.py tests/test_conformal_solver.py tests/test_conformal_reference.py tests/test_conformal_baseline.py"
+  },
+  "new_tests": 40,
+  "checks": [
+    "ruff check warpack benchmarks tests",
+    "ruff format --check warpack benchmarks tests",
+    "git diff --check"
+  ],
+  "benchmark": "results/conformal-32766.json",
+  "regression": "results/conformal-32766-regression.json",
+  "notes": "Application/benchmark-only changes. The previous full suite remains 1,034 passed; no new full-suite run is claimed. Native CuPy failures and strict inner-CG rejection are retained.",
+  "sha256": {
+    "benchmarks/applications/conformal.py": "cd2bd7223e7de3e937223df0e5e78639d65953c20994f81bdf54bb5050dd8bfe",
+    "benchmarks/applications/conformal_warp.py": "267312650766cb1d1e5902bf9a90af2897a010abfc688abd1fa78ead1c20bf50",
+    "benchmarks/applications/conformal_backends.py": "fb5e84b105429e7c3f1f5b73e7d5ca5ee8a35e87bbd3b93a15d936fa216ede4e",
+    "benchmarks/applications/conformal_compare.py": "f55a477d98eee3b551d13fe51e6111544c59060dd06005115dd6efbf811831cf",
+    "benchmarks/applications/conformal_cupy_repro.py": "629dc2cdfc3c51fada0f8aca98921dd6f394880f5ab55068fa57b35c2e6a583e",
+    "tests/test_conformal_fixture.py": "c5e8e060c49105522f3c0a5f8f456a01be3bf1157932c5d17099977c6d4ad858",
+    "tests/test_conformal_solver.py": "198a448fcca03a34eb3fed346e354830244f6891133c03475b1da579e274c617",
+    "tests/test_conformal_reference.py": "dd7099c7ba72fb90eb5fbeca7d8a36f6eb74abca0d9a281d3859701989600ae9",
+    "tests/test_conformal_baseline.py": "a7668d5607f5628379d1bf8a4e9378d7e258b82b48226c80957588f47af05b87"
+  }
+}

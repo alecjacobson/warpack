@@ -36,6 +36,8 @@ Constrained replay refreshes current constraint transposes and row norms on devi
 
 The installed `warpack` package contains the numerical solvers, inverse backends, spectral transforms, constraint operations, and diagnostics. Application matrix construction lives in [`examples/problems/`](examples/problems/README.md), shared by the showcase, benchmarks, and tests. This includes tetrahedral elasticity, mesh loading, rigid-motion bases, and skinning weight/rig matrices. These helpers require a source checkout and are not installed as library APIs.
 
+The [singular boundary-mass conformal example](benchmarks/applications/CONFORMAL.md) removes the common translation kernel and solves an exact reciprocal pencil in an SPD metric. Flat and curved patches retain their finite modes without energy regularization; this is an explicit benchmark adapter, not a general singular-mass API.
+
 ## Install
 
 ```bash

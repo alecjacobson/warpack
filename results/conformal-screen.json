@@ -1,0 +1,424 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "blas_threads": "4",
+  "git_head": "4b01aad6ac5a828c3dee1a1e5bc09f550ebffd45",
+  "implementation_sha256": {
+    "conformal.py": "cd2bd7223e7de3e937223df0e5e78639d65953c20994f81bdf54bb5050dd8bfe",
+    "conformal_warp.py": "267312650766cb1d1e5902bf9a90af2897a010abfc688abd1fa78ead1c20bf50",
+    "conformal_backends.py": "ed5f54fca8710b24ff5262e7dfcc4223348eb7f6205297a7d75a7a0cdadc13b5",
+    "conformal_compare.py": "1d28f5057a39615eed86a1b1fcd14f076485830ee747ef43a4282e756b648f68"
+  },
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "spectra_binary": "03eef93f96b2b7310a5288caabbdf80fdf587be6e6ef33a56d041decaae05184"
+  },
+  "fixture": "P1 conformal energy, centered boundary mass, translation quotient; no regularization",
+  "cases": [
+    {
+      "method": "scipy",
+      "n": 1150,
+      "full_n": 1152,
+      "k": 6,
+      "ncv": 32,
+      "nnz": 11436,
+      "mass_nnz": 16928,
+      "finite_count": 182,
+      "infinite_count": 968,
+      "common_nullity_before_gauge": 2,
+      "shift": -8.218952905399852e-05,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "cg_tol": 1e-11,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reference_seconds": 0.02436518296599388,
+      "reference_values": [
+        4.035001354927355e-06,
+        4.035001355783155e-06,
+        0.0004446618462008707,
+        0.0004446618462008707,
+        0.0016858445172252834,
+        0.0016858445172261392
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        0.011999748647212982
+      ],
+      "validation": [
+        {
+          "residual": 4.962437817912717e-14,
+          "orthogonality": 2.215940878797376e-12,
+          "spectrum_error": 6.584656255036007e-16,
+          "subspace_error": 2.1883828852391066e-13,
+          "centered_boundary_error": 3.6202924716037714e-17,
+          "accepted": true
+        }
+      ],
+      "graph": null,
+      "setup_seconds": 0.01191769540309906,
+      "capture_seconds": null,
+      "warmup_seconds": 0.012158650904893875,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.011999748647212982,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "scipy-original",
+      "n": 1150,
+      "full_n": 1152,
+      "k": 6,
+      "ncv": 32,
+      "nnz": 11436,
+      "mass_nnz": 16928,
+      "finite_count": 182,
+      "infinite_count": 968,
+      "common_nullity_before_gauge": 2,
+      "shift": -8.218952905399852e-05,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "cg_tol": 1e-11,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reference_seconds": 0.01802661269903183,
+      "reference_values": [
+        4.035001354927355e-06,
+        4.035001355783155e-06,
+        0.0004446618462008707,
+        0.0004446618462008707,
+        0.0016858445172252834,
+        0.0016858445172261392
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        0.011575177311897278
+      ],
+      "validation": [
+        {
+          "residual": 1.0579839005517123e-14,
+          "orthogonality": 7.229111193653552e-16,
+          "spectrum_error": 5.945654599627363e-16,
+          "subspace_error": 1.0747783524669085e-13,
+          "centered_boundary_error": 4.827056628805028e-17,
+          "accepted": true
+        }
+      ],
+      "graph": null,
+      "setup_seconds": 0.011483773589134216,
+      "capture_seconds": null,
+      "warmup_seconds": 0.011365696787834167,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.011575177311897278,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "spectra",
+      "n": 1150,
+      "full_n": 1152,
+      "k": 6,
+      "ncv": 32,
+      "nnz": 11436,
+      "mass_nnz": 16928,
+      "finite_count": 182,
+      "infinite_count": 968,
+      "common_nullity_before_gauge": 2,
+      "shift": -8.218952905399852e-05,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "cg_tol": 1e-11,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reference_seconds": 0.01845104992389679,
+      "reference_values": [
+        4.035001354927355e-06,
+        4.035001355783155e-06,
+        0.0004446618462008707,
+        0.0004446618462008707,
+        0.0016858445172252834,
+        0.0016858445172261392
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        0.014360625296831131
+      ],
+      "validation": [
+        {
+          "residual": 6.082733013754886e-14,
+          "orthogonality": 4.6532909729799236e-12,
+          "spectrum_error": 1.2305694657710475e-15,
+          "subspace_error": 1.7252792998522225e-13,
+          "centered_boundary_error": 7.421599566787731e-17,
+          "accepted": true
+        }
+      ],
+      "graph": null,
+      "setup_seconds": 0.012416236102581024,
+      "capture_seconds": null,
+      "warmup_seconds": 0.014574781060218811,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.014360625296831131,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "cupy",
+      "n": 1150,
+      "full_n": 1152,
+      "k": 6,
+      "ncv": 32,
+      "nnz": 11436,
+      "mass_nnz": 16928,
+      "finite_count": 182,
+      "infinite_count": 968,
+      "common_nullity_before_gauge": 2,
+      "shift": -8.218952905399852e-05,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "cg_tol": 1e-11,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reference_seconds": 0.019335605204105377,
+      "reference_values": [
+        4.035001354927355e-06,
+        4.035001355783155e-06,
+        0.0004446618462008707,
+        0.0004446618462008707,
+        0.0016858445172252834,
+        0.0016858445172261392
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [],
+      "validation": [],
+      "graph": null,
+      "setup_seconds": 0.23459909111261368,
+      "capture_seconds": null,
+      "accepted": false,
+      "outcome": "error",
+      "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_compare.py\", line 113, in run\n    row[\"warmup_seconds\"], _ = timed(solve)\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/compare.py\", line 38, in timed\n    value = fn()\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_backends.py\", line 89, in solve\n    mu, vectors, history = cl.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n",
+      "numerical_contract_failures": [
+        "no trial evidence",
+        "physical acceptance",
+        "requested method error"
+      ],
+      "numerical_contract_accepted": false
+    },
+    {
+      "method": "warp-cudss",
+      "n": 1150,
+      "full_n": 1152,
+      "k": 6,
+      "ncv": 32,
+      "nnz": 11436,
+      "mass_nnz": 16928,
+      "finite_count": 182,
+      "infinite_count": 968,
+      "common_nullity_before_gauge": 2,
+      "shift": -8.218952905399852e-05,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "cg_tol": 1e-11,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reference_seconds": 0.0179004929959774,
+      "reference_values": [
+        4.035001354927355e-06,
+        4.035001355783155e-06,
+        0.0004446618462008707,
+        0.0004446618462008707,
+        0.0016858445172252834,
+        0.0016858445172261392
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        0.048823144286870956
+      ],
+      "validation": [
+        {
+          "residual": 1.2589893839101317e-14,
+          "orthogonality": 1.0774714453987144e-12,
+          "spectrum_error": 4.820362858870553e-16,
+          "subspace_error": 1.8852047067239804e-13,
+          "centered_boundary_error": 8.749040139709113e-17,
+          "accepted": true,
+          "physical_count": 6,
+          "reciprocal_count": 6,
+          "solver_status": 0,
+          "solver_full_count": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 823,
+          "MEMCPY": 1016,
+          "KERNEL": 4316,
+          "CONDITIONAL": 97
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 612,
+          "HtoD (HOST PAGEABLE to DEVICE)": 404
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "setup_seconds": 0.22260675206780434,
+      "capture_seconds": 0.33311039954423904,
+      "device_only_graph": false,
+      "warmup_seconds": 0.0799199789762497,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.048823144286870956,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-cg-fsai",
+      "n": 1150,
+      "full_n": 1152,
+      "k": 6,
+      "ncv": 32,
+      "nnz": 11436,
+      "mass_nnz": 16928,
+      "finite_count": 182,
+      "infinite_count": 968,
+      "common_nullity_before_gauge": 2,
+      "shift": -8.218952905399852e-05,
+      "height": 0.25,
+      "pin": 0,
+      "matrix_sha256": "f67fba45465bfc82e19ade8809297f72bb1e377c23e83487f649758e094c95f1",
+      "seed": 2026,
+      "outer_cycles": 4,
+      "cg_tol": 1e-11,
+      "correction_steps": 1,
+      "correction_tol": 0.01,
+      "outer_tol": 1e-10,
+      "cupy_tol": 1e-09,
+      "cupy_maxiter": 300,
+      "reference_seconds": 0.01806209608912468,
+      "reference_values": [
+        4.035001354927355e-06,
+        4.035001355783155e-06,
+        0.0004446618462008707,
+        0.0004446618462008707,
+        0.0016858445172252834,
+        0.0016858445172261392
+      ],
+      "reference": "static boundary condensation + dense centered boundary eigensolve",
+      "samples": [
+        0.5712559707462788
+      ],
+      "validation": [
+        {
+          "residual": 1.4402900733940115e-14,
+          "orthogonality": 8.613110225041964e-13,
+          "spectrum_error": 5.199833619240479e-16,
+          "subspace_error": 1.8492958586224564e-13,
+          "centered_boundary_error": 6.245004513516506e-17,
+          "accepted": true,
+          "physical_count": 6,
+          "reciprocal_count": 6,
+          "solver_status": 0,
+          "solver_full_count": true,
+          "cg_stats": [
+            14860,
+            193,
+            0,
+            101
+          ],
+          "cg_fresh_stats": [
+            14860,
+            193,
+            3,
+            101
+          ],
+          "cg_residual_maxima": [
+            1.2267367405718312e-09,
+            1.1497275469799592e-11
+          ],
+          "inner_solve_accepted": false
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 823,
+          "MEMCPY": 814,
+          "KERNEL": 8053,
+          "CONDITIONAL": 299
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 814
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "setup_seconds": 0.3735412396490574,
+      "capture_seconds": 1.0515092015266418,
+      "device_only_graph": true,
+      "warmup_seconds": 0.6123574450612068,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.5712559707462788,
+      "accepted": true,
+      "inner_solve_accepted": false,
+      "outcome": "passed",
+      "numerical_contract_failures": [
+        "inner_solve_accepted"
+      ],
+      "numerical_contract_accepted": false
+    }
+  ],
+  "numerical_contract_accepted": false,
+  "diagnostic": true,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

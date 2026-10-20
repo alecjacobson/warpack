@@ -1,0 +1,181 @@
+{
+  "cupy": "14.2.0",
+  "scipy": "1.15.0",
+  "note": "Diagnostic only; no Warp/cuDSS imported. Installed CuPy source unchanged.",
+  "cases": [
+    {
+      "side": 16,
+      "n": 510,
+      "k": 6,
+      "shift": -0.0002962962962962963,
+      "scale": 1.0,
+      "tolerance": 1e-09,
+      "seed": 2026,
+      "preconditioner": "native CuPy dense Cholesky and triangular solves",
+      "trials": [
+        {
+          "accepted": false,
+          "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_cupy_repro.py\", line 53, in run\n    mu, vectors, history = linear.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n"
+        },
+        {
+          "accepted": false,
+          "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_cupy_repro.py\", line 53, in run\n    mu, vectors, history = linear.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n"
+        }
+      ]
+    },
+    {
+      "side": 16,
+      "n": 510,
+      "k": 6,
+      "shift": -0.0002962962962962963,
+      "scale": 0.0002962962962962963,
+      "tolerance": 1e-11,
+      "seed": 2026,
+      "preconditioner": "native CuPy dense Cholesky and triangular solves",
+      "trials": [
+        {
+          "residual": 7.07873988629399e-12,
+          "orthogonality": 1.3322676295501878e-15,
+          "spectrum_error": 1.3791051634015616e-15,
+          "subspace_error": 3.797582542121957e-11,
+          "centered_boundary_error": 4.94974431812049e-17,
+          "accepted": true,
+          "native_history_max": 4.184972827394033e-12,
+          "native_fresh_max": 4.1850153705418726e-12,
+          "iterations": 11,
+          "native_stopping_passed": true
+        },
+        {
+          "residual": 1.0022439104415764e-11,
+          "orthogonality": 1.9984014443252818e-15,
+          "spectrum_error": 2.7226484955455987e-15,
+          "subspace_error": 4.139886805004542e-11,
+          "centered_boundary_error": 8.049116928532385e-17,
+          "accepted": true,
+          "native_history_max": 5.930933463107926e-12,
+          "native_fresh_max": 5.931212225066081e-12,
+          "iterations": 11,
+          "native_stopping_passed": true
+        }
+      ]
+    },
+    {
+      "side": 24,
+      "n": 1150,
+      "k": 6,
+      "shift": -8.218952905399852e-05,
+      "scale": 1.0,
+      "tolerance": 1e-09,
+      "seed": 2026,
+      "preconditioner": "native CuPy dense Cholesky and triangular solves",
+      "trials": [
+        {
+          "accepted": false,
+          "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_cupy_repro.py\", line 53, in run\n    mu, vectors, history = linear.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n"
+        },
+        {
+          "accepted": false,
+          "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_cupy_repro.py\", line 53, in run\n    mu, vectors, history = linear.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n"
+        }
+      ]
+    },
+    {
+      "side": 24,
+      "n": 1150,
+      "k": 6,
+      "shift": -8.218952905399852e-05,
+      "scale": 8.218952905399852e-05,
+      "tolerance": 1e-11,
+      "seed": 2026,
+      "preconditioner": "native CuPy dense Cholesky and triangular solves",
+      "trials": [
+        {
+          "residual": 1.7522734815754683e-12,
+          "orthogonality": 2.4424906541753444e-15,
+          "spectrum_error": 6.561591547882273e-16,
+          "subspace_error": 1.7240114992862134e-11,
+          "centered_boundary_error": 6.214835409586475e-17,
+          "accepted": true,
+          "native_history_max": 5.3577463279990525e-12,
+          "native_fresh_max": 5.399711000980018e-12,
+          "iterations": 12,
+          "native_stopping_passed": true
+        },
+        {
+          "residual": 4.5452346439214676e-12,
+          "orthogonality": 1.5543122344752192e-15,
+          "spectrum_error": 1.0483150805762342e-15,
+          "subspace_error": 4.5314316572206014e-11,
+          "centered_boundary_error": 6.305342721376569e-17,
+          "accepted": true,
+          "native_history_max": 8.34117312843362e-12,
+          "native_fresh_max": 8.381319557231347e-12,
+          "iterations": 12,
+          "native_stopping_passed": true
+        }
+      ]
+    },
+    {
+      "side": 32,
+      "n": 2046,
+      "k": 6,
+      "shift": -3.3567184720217515e-05,
+      "scale": 1.0,
+      "tolerance": 1e-09,
+      "seed": 2026,
+      "preconditioner": "native CuPy dense Cholesky and triangular solves",
+      "trials": [
+        {
+          "accepted": false,
+          "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_cupy_repro.py\", line 53, in run\n    mu, vectors, history = linear.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n"
+        },
+        {
+          "accepted": false,
+          "error": "AttributeError(\"'NoneType' object has no attribute 'ndim'\")",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-conformal/benchmarks/applications/conformal_cupy_repro.py\", line 53, in run\n    mu, vectors, history = linear.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n"
+        }
+      ]
+    },
+    {
+      "side": 32,
+      "n": 2046,
+      "k": 6,
+      "shift": -3.3567184720217515e-05,
+      "scale": 3.3567184720217515e-05,
+      "tolerance": 1e-11,
+      "seed": 2026,
+      "preconditioner": "native CuPy dense Cholesky and triangular solves",
+      "trials": [
+        {
+          "residual": 9.097186702977578e-13,
+          "orthogonality": 1.7763568394002505e-15,
+          "spectrum_error": 4.607859233063394e-16,
+          "subspace_error": 1.1558539985675751e-11,
+          "centered_boundary_error": 6.80459273157354e-17,
+          "accepted": true,
+          "native_history_max": 8.124796125037023e-12,
+          "native_fresh_max": 8.193343572984883e-12,
+          "iterations": 12,
+          "native_stopping_passed": true
+        },
+        {
+          "residual": 3.645822607851563e-12,
+          "orthogonality": 1.2212453270876722e-15,
+          "spectrum_error": 1.6967763999398144e-15,
+          "subspace_error": 4.419957508681525e-11,
+          "centered_boundary_error": 5.774950410348596e-17,
+          "accepted": true,
+          "native_history_max": 7.162217786929454e-12,
+          "native_fresh_max": 7.21929421223407e-12,
+          "iterations": 12,
+          "native_stopping_passed": true
+        }
+      ]
+    }
+  ]
+}
