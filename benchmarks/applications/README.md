@@ -153,3 +153,9 @@ The [coupled damped and gyroscopic follow-up](DAMPED.md) adds nonproportional
 damping, native complex Spectra references, original quadratic checks and
 small pure-Warp GMRES coverage. It retains the rejected large-system profile
 and separates physical convergence from tighter transformed counts.
+
+The [generalized pencil follow-up](GENERALIZED_PENCILS.md) adds the public finite
+right-mode API and consistent spatial mass, including singular/nonsymmetric B
+controls. Large damped/gyroscopic comparisons separate the public solver from
+explicit mechanics-specific vector recovery and retain strict-tolerance failures.
+Large iterative and left-mode coverage remain open.
