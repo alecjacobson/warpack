@@ -78,6 +78,10 @@ RHS calls. Unfinished truncated preconditioner solves are distinct from failed
 outer eigensolves. The [Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
 provides a tested configuration and the required runtime.
 
+Upstream FSAI setup can consume much more device memory than its stored factors.
+See the [row-size memory/time comparison](../results/fsai_memory/README.md) before
+using a large factor-row cap on a smaller GPU.
+
 ## Standard symmetric eigenpairs
 
 ```python
@@ -185,6 +189,9 @@ array identities and resource lifetimes fixed. Matrix values, constraints and
 supplied starts can change; update the associated inverse factors when needed.
 The caller owns preconditioner validity. Stale preconditioning may still be
 useful for nearby SPD problems, but it is not the updated exact inverse.
+For FEM material edits, reserve the full structural sparsity: entries that are
+zero through cancellation can become nonzero even on an unchanged mesh. If
+they were omitted from storage, updating values alone is insufficient.
 
 Keep the solver, input buffers and factors alive until graph execution finishes.
 Instances and shared-width CG variants own mutable scratch and cannot be used
@@ -201,6 +208,10 @@ distinguishes these from application synchronization.
 Accept a result only when status, requested counts and relevant original
 residual/orthogonality checks pass. `status == 0` alone does not mean convergence.
 A successful residual count is not a global requested-spectrum certificate.
+
+The [FEM reuse example and measured comparison](../results/fem_public_starts/README.md)
+show computed starts for related material configurations, including the setup
+costs and the fixed-address replay contract.
 
 ## Limitations
 

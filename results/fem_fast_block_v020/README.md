@@ -44,7 +44,7 @@ Warp setup includes FSAI construction and solver/operator/CG workspaces, upload 
 | heterogeneous / 6 | 0.8471 | 0.4337 | 13898.0 |
 | repeated_bending / 6 | 0.1086 | 0.4785 | 13864.0 |
 
-Memory is a device free-memory difference including allocator pools/runtime/JIT, excluding original fixture storage and the CuPy adapter. It is **not peak memory or live solver workspace**; the roughly 14 GiB tetrahedral deltas must not be interpreted as a minimum storage requirement. Peak-memory qualification remains open.
+Memory is a device free-memory difference including allocator pools/runtime/JIT, excluding original fixture storage and the CuPy adapter. It is **not peak memory or live solver workspace**; the roughly 14 GiB tetrahedral deltas include real CUDA context usage. A [subsequent isolated study](../fsai_memory/README.md) attributes the dominant drop to upstream FSAI setup outside the Warp pool, consistent with its per-thread local storage. It is not merely cached factor storage; smaller-GPU qualification remains open.
 
 ## Failures and validation
 

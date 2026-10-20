@@ -80,7 +80,9 @@ material contrasts, mesh aspect ratios, or all large mode counts.
 
 The strict bending profile stalls at 4/6 counted modes at `1e-11` despite
 passing the `1e-8` physical checks; [#130](https://github.com/alecjacobson/warpack/issues/130)
-tracks the attainable tolerance and scaling investigation. Do not silently
+documents the [precision study](../../results/bending_floor/README.md). A 60-digit
+reference rounded to FP64 also misses this particular `1e-11` target; this is
+evidence of precision sensitivity, not a proof of the best attainable residual. Do not silently
 relax a caller's requested tolerance. The separate practical profile passes
 all six Warp modes at `1e-8`.
 
@@ -90,3 +92,20 @@ orthogonalization on bending ([#90](https://github.com/alecjacobson/warpack/issu
 The harness now retains completed rows and an explicit failure row when the
 optional reference raises ([#129](https://github.com/alecjacobson/warpack/issues/129)).
 Rejected comparisons cannot establish a speedup.
+
+## Related material updates
+
+The [public warm-start comparison](../../results/fem_public_starts/README.md)
+adds 34,560-DOF, 20-mode consistent/lumped FEM pencils after a 2% regional
+stiffness change. It separates computed-start reuse from first-solve cost and
+includes same-graph material-update regression tests.
+
+## Setup memory
+
+The [FSAI memory study](../../results/fsai_memory/README.md) isolates substantial
+upstream CUDA context usage at row size 64. A fresh 20-mode comparison on two
+consistent-mass FEM fixtures qualifies row size 32 with similar replay speed,
+about 3.5x lower setup time and 7.5x lower device-memory increase. Specify
+`--fsai-width 32` to try that profile; verify accuracy on the actual matrix.
+The historical commands above use 64 and are unchanged. The released Anvil
+configuration already uses 32.

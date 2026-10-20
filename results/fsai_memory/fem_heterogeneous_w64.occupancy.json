@@ -1,0 +1,105 @@
+{
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "heterogeneous",
+    "--side",
+    "10",
+    "--modes",
+    "20",
+    "--width",
+    "24",
+    "--steps",
+    "300",
+    "--tol",
+    "1e-11",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--active-search-bucket-size",
+    "4",
+    "--active-search-keep-history",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--cupy",
+    "--cupy-tol",
+    "1e-10",
+    "--repeats",
+    "5",
+    "--out",
+    "results/fsai_memory/fem_heterogeneous_w64.json",
+    "--fsai-width",
+    "64"
+  ],
+  "pid": 203951,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792522990.9607527,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 25",
+      "error": null
+    },
+    {
+      "time": 1792522992.1007116,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 25",
+      "error": null
+    },
+    {
+      "time": 1792522993.2299488,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 25",
+      "error": null
+    },
+    {
+      "time": 1792522994.427011,
+      "other": [],
+      "gpu": "0 %, 22 MiB, 2490 MHz, 26",
+      "error": null
+    },
+    {
+      "time": 1792522995.5293891,
+      "other": [],
+      "gpu": "86 %, 14412 MiB, 2490 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792522996.604809,
+      "other": [],
+      "gpu": "100 %, 14464 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792522997.7254832,
+      "other": [],
+      "gpu": "3 %, 14690 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792522998.8929272,
+      "other": [],
+      "gpu": "71 %, 14738 MiB, 2490 MHz, 30",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

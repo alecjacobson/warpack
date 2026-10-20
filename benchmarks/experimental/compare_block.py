@@ -33,6 +33,20 @@ FEM_CASES = (
 )
 
 
+def memory_snapshot():
+    device = wp.get_device()
+    snapshot = {"device_free_bytes": device.free_memory}
+    for label, name in (
+        ("warp_pool_used_bytes", "get_mempool_used_mem_current"),
+        ("warp_pool_high_bytes", "get_mempool_used_mem_high"),
+    ):
+        query = getattr(wp, name, None)
+        snapshot[label] = (
+            query(device) if query is not None and device.is_mempool_supported else None
+        )
+    return snapshot
+
+
 def prepare(args, *, metadata=None):
     if args.case == "anvil":
         reference = np.load("build/anvil_reference.npz")
@@ -240,7 +254,8 @@ def main():
         p.error("require k <= cupy-width <= width")
     print("Prepared", args.case, "n=", a.shape[0], flush=True)
     shifted.nnz_sync()
-    memory_before_setup = wp.get_device().free_memory
+    memory_before = memory_snapshot()
+    memory_before_setup = memory_before["device_free_bytes"]
     setup_seconds, pre = timed(
         lambda: (
             linear.FSAI(
@@ -254,6 +269,7 @@ def main():
             else linear.preconditioner(shifted, ptype="block_jacobi_sequential")
         )
     )
+    memory_after_preconditioner = memory_snapshot()
     print("Preconditioner ready", setup_seconds, flush=True)
     initial = np.random.default_rng(42).normal(size=(a.shape[0], args.width))
 
@@ -335,7 +351,8 @@ def main():
     capture_seconds, graph = timed(
         lambda: solver.capture(args.steps, adaptive=False if args.fixed_outer else None)
     )
-    memory_after_capture = wp.get_device().free_memory
+    memory_after = memory_snapshot()
+    memory_after_capture = memory_after["device_free_bytes"]
     print("Captured", capture_seconds, flush=True)
     destination = Path(args.out)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -365,6 +382,12 @@ def main():
         ),
         setup_capture_device_free_memory_decrease_bytes=memory_before_setup - memory_after_capture,
         memory_scope="Device free-memory decrease from after fixture preparation through preconditioner/workspace setup and capture. Includes allocator pools/runtime/JIT allocations; excludes original fixture storage and CuPy adapter. Not peak memory or a pure live-workspace count.",
+        memory_snapshots=dict(
+            before_setup=memory_before,
+            after_preconditioner=memory_after_preconditioner,
+            after_capture=memory_after,
+        ),
+        pool_memory_scope="Warp CUDA pool counters only, excluding driver/context allocations. The high-water counter covers the whole process, including fixture preparation; it is not the setup interval peak. Missing counters are null. Upstream FSAI can consume substantial device memory outside this pool.",
         capture_seconds=capture_seconds,
         warmup_seconds=warmup_seconds,
         graph=audit,

@@ -1,0 +1,1611 @@
+{
+  "args": {
+    "case": "heterogeneous",
+    "side": 10,
+    "modes": 20,
+    "width": 24,
+    "steps": 300,
+    "shift": 0.01,
+    "fsai_width": 32,
+    "fsai_layout": "columns",
+    "matrix_layout": "columns",
+    "preconditioner": "fsai",
+    "repeats": 5,
+    "tol": 1e-11,
+    "cupy": true,
+    "cupy_width": null,
+    "cupy_tol": 1e-10,
+    "cupy_padding": false,
+    "profile": false,
+    "public_api": true,
+    "keep_graph": false,
+    "gram_chunk": 4096,
+    "symmetric_products": true,
+    "fused_updates": true,
+    "paired_rotation": true,
+    "reuse_x_image": true,
+    "active_search_bucket_size": 4,
+    "active_search_keep_history": true,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 25,
+    "batched_cg": true,
+    "active_cg_bucket_size": 4,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "results/fsai_memory/fem_heterogeneous_w32.json"
+  },
+  "n": 10890,
+  "k": 20,
+  "fixture": {
+    "reference": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis",
+    "requested_nontrivial_modes": 20,
+    "actual_nontrivial_modes": 20,
+    "retained_rigid_modes": 0,
+    "boundary_cluster_complete": true,
+    "first_excluded_eigenvalue": 54.7385289907196,
+    "preconditioner_block_size": 3,
+    "notes": "Independent ARPACK shift-invert reference, seed 913, tol 1e-12, expanded basis; retain 0 known rigid modes and 20 nontrivial modes; ROM caller discards the known rigid block; full boundary cluster included"
+  },
+  "setup_seconds": 0.14424636960029602,
+  "preconditioner_setup_seconds": 0.14424636960029602,
+  "solver_setup_seconds": 0.09175247326493263,
+  "total_setup_seconds": 0.23599884286522865,
+  "setup_scope": "Preconditioner construction plus solver/operator/CG workspaces, input upload, and optional FP32 matrix copy. Excludes mesh assembly, reference loading, host random-start generation, graph capture and warmup. JIT work is included where encountered; these are not warmed setup measurements. Historical setup_seconds is an alias for preconditioner_setup_seconds.",
+  "setup_capture_device_free_memory_decrease_bytes": 1950351360,
+  "memory_scope": "Device free-memory decrease from after fixture preparation through preconditioner/workspace setup and capture. Includes allocator pools/runtime/JIT allocations; excludes original fixture storage and CuPy adapter. Not peak memory or a pure live-workspace count.",
+  "memory_snapshots": {
+    "before_setup": {
+      "device_free_bytes": 50387091456,
+      "warp_pool_used_bytes": 10698876,
+      "warp_pool_high_bytes": 26288803
+    },
+    "after_preconditioner": {
+      "device_free_bytes": 48573054976,
+      "warp_pool_used_bytes": 16111508,
+      "warp_pool_high_bytes": 37448043
+    },
+    "after_capture": {
+      "device_free_bytes": 48436740096,
+      "warp_pool_used_bytes": 120491696,
+      "warp_pool_high_bytes": 120491696
+    }
+  },
+  "pool_memory_scope": "Warp CUDA pool counters only, excluding driver/context allocations. The high-water counter covers the whole process, including fixture preparation; it is not the setup interval peak. Missing counters are null. Upstream FSAI can consume substantial device memory outside this pool.",
+  "capture_seconds": 0.4955722205340862,
+  "warmup_seconds": 0.21500403434038162,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 139,
+      "MEMCPY": 61,
+      "KERNEL": 1921,
+      "CONDITIONAL": 30
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 61
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.20730240643024445,
+      "iterations": 21,
+      "quality": {
+        "accepted": true,
+        "residual": 3.6848623887931546e-12,
+        "max_absolute_residual": 9.585914961113273e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.1760592499854283e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 1.978072557054025e-12,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          6364,
+          25,
+          53,
+          356
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8,
+          341
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.20878269523382187,
+      "iterations": 21,
+      "quality": {
+        "accepted": true,
+        "residual": 5.372359894677179e-12,
+        "max_absolute_residual": 1.3834672340021226e-12,
+        "orthogonality": 8.881784197001252e-16,
+        "spectrum_error": 1.0877826417399206e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 1.9029066310710405e-12,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          6412,
+          25,
+          53,
+          360
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          4,
+          4,
+          3,
+          2,
+          8,
+          339
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          4,
+          4,
+          3,
+          2,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.20724157243967056,
+      "iterations": 21,
+      "quality": {
+        "accepted": true,
+        "residual": 6.437748875392304e-12,
+        "max_absolute_residual": 1.6016910020510977e-12,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.1260992138772963e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 2.4752594180661155e-12,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          6352,
+          25,
+          53,
+          356
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8,
+          340
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.20604893565177917,
+      "iterations": 21,
+      "quality": {
+        "accepted": true,
+        "residual": 3.880182765874565e-12,
+        "max_absolute_residual": 7.922031086682324e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.0897949209720537e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 1.6291376748154938e-12,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          6312,
+          25,
+          53,
+          356
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8,
+          339
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 0.2062515839934349,
+      "iterations": 21,
+      "quality": {
+        "accepted": true,
+        "residual": 4.079406789653687e-12,
+        "max_absolute_residual": 8.808409730776123e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.1859402349045922e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 1.3821366042943197e-12,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          6368,
+          25,
+          53,
+          356
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8,
+          339
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          5,
+          3,
+          3,
+          2,
+          8
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.21528499945998192,
+      "residual_history_length": 39,
+      "last_history_absolute_residuals": [
+        1.3212055008647239e-11,
+        6.458206368180074e-11,
+        7.207728179641302e-11,
+        4.4300576859875545e-12,
+        8.442564604178317e-11,
+        8.012259231781122e-11,
+        4.1291905810187326e-12,
+        1.565173629614837e-11,
+        5.481344601662793e-12,
+        3.659988305090963e-12,
+        6.570486331465508e-12,
+        5.852520380437832e-12,
+        9.790255080670664e-12,
+        2.1923542989369534e-11,
+        1.3558696512825652e-11,
+        2.4493110445972588e-11,
+        2.167770870526655e-11,
+        1.0094800039000124e-11,
+        2.975674277560454e-11,
+        2.076381407125105e-11,
+        1.7574883677865938e-11,
+        9.054499248119012e-12,
+        2.919747834749761e-11,
+        6.07048637313949e-11
+      ],
+      "returned_absolute_residuals": [
+        1.3298645115368381e-11,
+        6.460827842141948e-11,
+        7.210503862891104e-11,
+        4.598644161808397e-12,
+        8.443320640798164e-11,
+        8.013010790521483e-11,
+        4.193635776219618e-12,
+        1.568446984437348e-11,
+        5.522036110124862e-12,
+        3.721674986681627e-12,
+        6.597049000722018e-12,
+        5.880808769144755e-12,
+        9.795538961866671e-12,
+        2.1923345717600952e-11,
+        1.3561512189512621e-11,
+        2.4495954288849037e-11,
+        2.167588534492703e-11,
+        1.0097999579269175e-11,
+        2.9760246375339e-11,
+        2.0766692152839822e-11,
+        1.757994297404416e-11,
+        9.056560133834597e-12,
+        2.919852118599847e-11,
+        6.07013151270073e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 8.443187519684638e-11,
+        "max_absolute_residual": 4.627601145161531e-12,
+        "orthogonality": 1.5543122344752192e-15,
+        "spectrum_error": 1.1514122988387498e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 3.4961982441877793e-12,
+        "preconditioner_cg_stats": [
+          6972,
+          25,
+          56,
+          378
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            24,
+            12,
+            0,
+            2
+          ],
+          "2": [
+            152,
+            14,
+            0,
+            12
+          ],
+          "3": [
+            249,
+            16,
+            0,
+            18
+          ],
+          "4": [
+            132,
+            18,
+            0,
+            8
+          ],
+          "5": [
+            125,
+            25,
+            1,
+            5
+          ],
+          "6": [
+            84,
+            14,
+            0,
+            6
+          ],
+          "7": [
+            203,
+            15,
+            0,
+            14
+          ],
+          "8": [
+            248,
+            16,
+            0,
+            16
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            150,
+            15,
+            0,
+            10
+          ],
+          "11": [
+            165,
+            15,
+            0,
+            11
+          ],
+          "12": [
+            156,
+            13,
+            0,
+            12
+          ],
+          "13": [
+            195,
+            15,
+            0,
+            13
+          ],
+          "14": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "15": [
+            600,
+            25,
+            1,
+            30
+          ],
+          "16": [
+            240,
+            15,
+            0,
+            16
+          ],
+          "17": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "18": [
+            270,
+            15,
+            0,
+            18
+          ],
+          "19": [
+            475,
+            25,
+            1,
+            19
+          ],
+          "20": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "21": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "22": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "23": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "24": [
+            3504,
+            25,
+            53,
+            168
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.20957807824015617,
+      "residual_history_length": 38,
+      "last_history_absolute_residuals": [
+        1.3121539663953029e-11,
+        6.514104440641768e-11,
+        7.196012070280768e-11,
+        1.0898921731037773e-12,
+        8.533386425667939e-11,
+        8.099669281266201e-11,
+        4.101349069581897e-12,
+        1.5580763599309302e-11,
+        5.560720366365027e-12,
+        5.379488988288013e-12,
+        5.046332061440679e-12,
+        9.818810971393351e-12,
+        9.652001344701563e-12,
+        2.1729379265067063e-11,
+        1.347228752647754e-11,
+        2.651616191629331e-11,
+        2.2098153307410782e-11,
+        9.463319160406369e-12,
+        3.0318356520675156e-11,
+        1.9447208531637635e-11,
+        1.6169252746706148e-11,
+        8.22433309652028e-12,
+        3.887065546718363e-11,
+        8.494516808943237e-11
+      ],
+      "returned_absolute_residuals": [
+        1.3220867069231046e-11,
+        6.514173537087354e-11,
+        7.196602094816218e-11,
+        1.6007214136508559e-12,
+        8.533689554420733e-11,
+        8.099315244209803e-11,
+        4.1650639528247595e-12,
+        1.5603463193792335e-11,
+        5.615383957238424e-12,
+        5.427184803629581e-12,
+        5.088701554196985e-12,
+        9.839663535643377e-12,
+        9.665761839914647e-12,
+        2.1732125200172497e-11,
+        1.3479654087012304e-11,
+        2.6517523705528828e-11,
+        2.209766057157728e-11,
+        9.468997815005113e-12,
+        3.0317997520158394e-11,
+        1.9440171467587007e-11,
+        1.616784376452783e-11,
+        8.225487108806095e-12,
+        3.886915512780186e-11,
+        8.495055074125543e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 8.533884625335426e-11,
+        "max_absolute_residual": 4.65626105380923e-12,
+        "orthogonality": 1.3322676295501878e-15,
+        "spectrum_error": 1.0798098526443312e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 3.463312458207421e-12,
+        "preconditioner_cg_stats": [
+          6891,
+          25,
+          55,
+          377
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            15,
+            15,
+            0,
+            1
+          ],
+          "2": [
+            148,
+            14,
+            0,
+            12
+          ],
+          "3": [
+            234,
+            15,
+            0,
+            18
+          ],
+          "4": [
+            108,
+            14,
+            0,
+            8
+          ],
+          "5": [
+            80,
+            16,
+            0,
+            5
+          ],
+          "6": [
+            84,
+            14,
+            0,
+            6
+          ],
+          "7": [
+            203,
+            15,
+            0,
+            14
+          ],
+          "8": [
+            248,
+            16,
+            0,
+            16
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            150,
+            15,
+            0,
+            10
+          ],
+          "11": [
+            165,
+            15,
+            0,
+            11
+          ],
+          "12": [
+            156,
+            13,
+            0,
+            12
+          ],
+          "13": [
+            325,
+            25,
+            1,
+            13
+          ],
+          "14": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "15": [
+            600,
+            25,
+            1,
+            30
+          ],
+          "16": [
+            240,
+            15,
+            0,
+            16
+          ],
+          "17": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "18": [
+            270,
+            15,
+            0,
+            18
+          ],
+          "19": [
+            361,
+            19,
+            0,
+            19
+          ],
+          "20": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "21": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "22": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "23": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "24": [
+            3504,
+            25,
+            53,
+            168
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.21061189472675323,
+      "residual_history_length": 38,
+      "last_history_absolute_residuals": [
+        1.306732534956745e-11,
+        6.539251581536611e-11,
+        7.221441128144926e-11,
+        1.2119415363870903e-12,
+        8.453144772276867e-11,
+        7.956715552089716e-11,
+        4.144542766778275e-12,
+        1.5404065163050075e-11,
+        5.319347927701196e-12,
+        5.199823804761469e-12,
+        5.1455499840536465e-12,
+        8.157857011124902e-12,
+        1.0435719378412315e-11,
+        2.1275203724705804e-11,
+        1.3666400928214342e-11,
+        2.5108535031799814e-11,
+        2.262666808791627e-11,
+        9.349072487712571e-12,
+        2.9137101328734057e-11,
+        1.9796616925267968e-11,
+        1.541596095783142e-11,
+        8.74294794319226e-12,
+        3.832330269034116e-11,
+        7.431742863267409e-11
+      ],
+      "returned_absolute_residuals": [
+        1.3129295351188403e-11,
+        6.541903998489375e-11,
+        7.22289541522083e-11,
+        1.6824078497769206e-12,
+        8.455030490560636e-11,
+        7.95399089445156e-11,
+        4.187131542651973e-12,
+        1.542056070426043e-11,
+        5.3578115821477394e-12,
+        5.2393477155375855e-12,
+        5.1856747474595324e-12,
+        8.190527693071843e-12,
+        1.0452682501907798e-11,
+        2.1279954153222053e-11,
+        1.3672169743784584e-11,
+        2.510576112997603e-11,
+        2.2624455725392776e-11,
+        9.350828272610953e-12,
+        2.9133869040661974e-11,
+        1.9807203896139928e-11,
+        1.542185072540779e-11,
+        8.748110828575906e-12,
+        3.8322262130086246e-11,
+        7.431325914575366e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 8.454818079937221e-11,
+        "max_absolute_residual": 4.4412918438416216e-12,
+        "orthogonality": 2.1094237467877974e-15,
+        "spectrum_error": 1.1756151607755783e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 3.5186095272816204e-12,
+        "preconditioner_cg_stats": [
+          6943,
+          25,
+          56,
+          376
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            28,
+            14,
+            0,
+            2
+          ],
+          "2": [
+            122,
+            13,
+            0,
+            10
+          ],
+          "3": [
+            237,
+            16,
+            0,
+            18
+          ],
+          "4": [
+            156,
+            25,
+            1,
+            8
+          ],
+          "5": [
+            75,
+            15,
+            0,
+            5
+          ],
+          "6": [
+            84,
+            14,
+            0,
+            6
+          ],
+          "7": [
+            203,
+            15,
+            0,
+            14
+          ],
+          "8": [
+            248,
+            16,
+            0,
+            16
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            150,
+            15,
+            0,
+            10
+          ],
+          "11": [
+            165,
+            15,
+            0,
+            11
+          ],
+          "12": [
+            156,
+            13,
+            0,
+            12
+          ],
+          "13": [
+            325,
+            25,
+            1,
+            13
+          ],
+          "14": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "15": [
+            600,
+            25,
+            1,
+            30
+          ],
+          "16": [
+            240,
+            15,
+            0,
+            16
+          ],
+          "17": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "18": [
+            270,
+            15,
+            0,
+            18
+          ],
+          "19": [
+            380,
+            20,
+            0,
+            19
+          ],
+          "20": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "21": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "22": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "23": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "24": [
+            3504,
+            25,
+            53,
+            168
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.21055710688233376,
+      "residual_history_length": 38,
+      "last_history_absolute_residuals": [
+        1.303557469954755e-11,
+        6.532963827359814e-11,
+        7.19306953433136e-11,
+        4.601897018674758e-12,
+        8.480843046998403e-11,
+        8.058142748524162e-11,
+        4.173791082163586e-12,
+        1.559643312873976e-11,
+        4.509876642397427e-12,
+        3.681179382653419e-12,
+        7.544374156773673e-12,
+        5.925823959249509e-12,
+        9.912635655124782e-12,
+        2.2119457299386123e-11,
+        1.3811241248221086e-11,
+        2.4288205392525327e-11,
+        2.169046677862202e-11,
+        1.008331271290593e-11,
+        2.8973198001772298e-11,
+        1.9574179249894018e-11,
+        1.6067107267726676e-11,
+        7.919169382605278e-12,
+        4.390479925776444e-11,
+        9.398338684968841e-11
+      ],
+      "returned_absolute_residuals": [
+        1.312958007917484e-11,
+        6.53567335795314e-11,
+        7.193615915402118e-11,
+        4.739440432186588e-12,
+        8.479817500017253e-11,
+        8.058788269827525e-11,
+        4.238069299097367e-12,
+        1.5614555998536796e-11,
+        4.56825371191015e-12,
+        3.738506557537849e-12,
+        7.573388085628088e-12,
+        5.955012508423835e-12,
+        9.919302594538194e-12,
+        2.211788526508288e-11,
+        1.3813076724636196e-11,
+        2.428822547483027e-11,
+        2.1692584885002948e-11,
+        1.008853220248602e-11,
+        2.8972724808503017e-11,
+        1.9580586047661056e-11,
+        1.607000235104793e-11,
+        7.921711899846107e-12,
+        4.3908057794885055e-11,
+        9.398941863997827e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 8.480173101881663e-11,
+        "max_absolute_residual": 4.810111293648833e-12,
+        "orthogonality": 1.3322676295501878e-15,
+        "spectrum_error": 1.1100009800202315e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 3.4960594235552253e-12,
+        "preconditioner_cg_stats": [
+          6911,
+          25,
+          55,
+          377
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            11,
+            11,
+            0,
+            1
+          ],
+          "2": [
+            152,
+            15,
+            0,
+            12
+          ],
+          "3": [
+            246,
+            16,
+            0,
+            18
+          ],
+          "4": [
+            112,
+            15,
+            0,
+            8
+          ],
+          "5": [
+            70,
+            14,
+            0,
+            5
+          ],
+          "6": [
+            84,
+            14,
+            0,
+            6
+          ],
+          "7": [
+            217,
+            16,
+            0,
+            14
+          ],
+          "8": [
+            248,
+            16,
+            0,
+            16
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            150,
+            15,
+            0,
+            10
+          ],
+          "11": [
+            165,
+            15,
+            0,
+            11
+          ],
+          "12": [
+            156,
+            13,
+            0,
+            12
+          ],
+          "13": [
+            195,
+            15,
+            0,
+            13
+          ],
+          "14": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "15": [
+            600,
+            25,
+            1,
+            30
+          ],
+          "16": [
+            256,
+            16,
+            0,
+            16
+          ],
+          "17": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "18": [
+            270,
+            15,
+            0,
+            18
+          ],
+          "19": [
+            475,
+            25,
+            1,
+            19
+          ],
+          "20": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "21": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "22": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "23": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "24": [
+            3504,
+            25,
+            53,
+            168
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 0.20998268201947212,
+      "residual_history_length": 38,
+      "last_history_absolute_residuals": [
+        1.3275284080518972e-11,
+        6.60865970770214e-11,
+        7.135728351315231e-11,
+        5.001077448050454e-12,
+        8.441534988367935e-11,
+        8.02022624213651e-11,
+        4.203831666921167e-12,
+        1.562627411173375e-11,
+        5.3490475297245954e-12,
+        3.655990742284172e-12,
+        5.108027058829837e-12,
+        8.629039354489453e-12,
+        1.0064016706377083e-11,
+        2.3265122230233338e-11,
+        1.2833008369852608e-11,
+        2.4686529844563397e-11,
+        2.230251163171349e-11,
+        9.053864449922019e-12,
+        2.6852286995494872e-11,
+        2.0006505565363747e-11,
+        1.6311509016053632e-11,
+        8.048093325081619e-12,
+        4.709479717074897e-11,
+        9.15100598409022e-11
+      ],
+      "returned_absolute_residuals": [
+        1.3349978668729232e-11,
+        6.60939977449204e-11,
+        7.133866801000956e-11,
+        5.126075643562342e-12,
+        8.44291978710711e-11,
+        8.021532393187711e-11,
+        4.2618172643996414e-12,
+        1.5650017905182157e-11,
+        5.384509727095507e-12,
+        3.724735333563588e-12,
+        5.1423468940046406e-12,
+        8.669186527841964e-12,
+        1.0083908723104222e-11,
+        2.3263050373711265e-11,
+        1.2835792303302044e-11,
+        2.4688357918167303e-11,
+        2.2312694105387278e-11,
+        9.059093623915694e-12,
+        2.6852402478999206e-11,
+        2.000308879058567e-11,
+        1.6318110722011722e-11,
+        8.053580650141777e-12,
+        4.709707056044371e-11,
+        9.150834170766823e-11
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "accepted": true,
+        "residual": 8.443069776492982e-11,
+        "max_absolute_residual": 4.8528186406392865e-12,
+        "orthogonality": 1.9984014443252818e-15,
+        "spectrum_error": 1.1689538226278273e-12,
+        "recovered_nullity": 0,
+        "nullspace_subspace_error": 0.0,
+        "requested_subspace_error": 3.4516586081170533e-12,
+        "preconditioner_cg_stats": [
+          6927,
+          25,
+          56,
+          376
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            28,
+            15,
+            0,
+            2
+          ],
+          "2": [
+            126,
+            13,
+            0,
+            10
+          ],
+          "3": [
+            237,
+            15,
+            0,
+            18
+          ],
+          "4": [
+            112,
+            14,
+            0,
+            8
+          ],
+          "5": [
+            70,
+            14,
+            0,
+            5
+          ],
+          "6": [
+            84,
+            14,
+            0,
+            6
+          ],
+          "7": [
+            280,
+            25,
+            1,
+            14
+          ],
+          "8": [
+            240,
+            15,
+            0,
+            16
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            150,
+            15,
+            0,
+            10
+          ],
+          "11": [
+            165,
+            15,
+            0,
+            11
+          ],
+          "12": [
+            156,
+            13,
+            0,
+            12
+          ],
+          "13": [
+            325,
+            25,
+            1,
+            13
+          ],
+          "14": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "15": [
+            465,
+            16,
+            0,
+            30
+          ],
+          "16": [
+            240,
+            15,
+            0,
+            16
+          ],
+          "17": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "18": [
+            270,
+            15,
+            0,
+            18
+          ],
+          "19": [
+            475,
+            25,
+            1,
+            19
+          ],
+          "20": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "21": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "22": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "23": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "24": [
+            3504,
+            25,
+            53,
+            168
+          ]
+        }
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/experimental/block_lobpcg.py": "1853838759eaf90a9fec6d775ac01221f06d7b7729e83332950bcafe6384d33e",
+    "warpack/__init__.py": "1092fa8edcaa9a6c7982bdeb2630aa2de8158062c8ca73e9fc9897b2bace8097",
+    "warpack/_active_cg.py": "22de5741e7718a63bd5a184c5b33fa9d9fcc3f9195b7b8a05cae5c264a42d650",
+    "warpack/_block_search.py": "0a2f5e190cf36fa173ed47998774a7db9c984215897b5e34cb25d2eb52606fa2",
+    "warpack/_coalesced_fsai.py": "caf01798dbaf1217566113f29a0846b2d48e5c2f75b9e6e5f23da99969b023ca",
+    "warpack/_coalesced_operator.py": "c12914049fb2dba837ce1526f20c1bdcc170d0680348e8256184f0e8e07686b3",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "38b5c7bb8320a682ee9aa6c64403dddc6adf78b20bbadf27232aacfde17f2f6c",
+    "warpack/batched_sparse.py": "9a7b03e763592404fa77da660d8d10486efc2bcec6bc39b243fe15c5a67c1ef2",
+    "warpack/block.py": "ff417cd6734d1eb4b9dd62e0b1d76f7258132e13ffd48d906402a375fdcd572d",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "1b2bfb4887cf18d6c0ed94af2980119d1d441ce345dd3772e6bb8f8d85eaaa92",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "benchmarks/experimental/block_kernels.py": "eaab62a6274e995e710f4b3b3666520ec6eb50449e104babec883ef0aa289a8f",
+    "benchmarks/experimental/block_updates.py": "ba4cba56f35f1b7e0bcc25558578d9f77fa17655b0219afd6a9fe0b51cb01d8c",
+    "benchmarks/experimental/compare_block.py": "330a73b94501dbb9d4d88e3634a694b9562c7aeb0777aa7fa47a1c99f7e8c5b0",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/runner.py": "45a4ba1321eca6cc7ca70c55db0b570a5e886704c83231b83b9a6c79b47f847b",
+    "benchmarks/experimental/batched_cg.py": "b52ef7f795036acc2aa1c7a4859ff6db25726aed4ce034a4f7070a51bd196bfc",
+    "benchmarks/experimental/coalesced_fsai.py": "97578e47d47293aa0a4c966ce06129a9d853f34b38f029e2021f3245e78f18eb",
+    "benchmarks/experimental/coalesced_operator.py": "92eeec4add8ee1766b3297b78a4a8126651730d2a45bf2545f897ba5a63a3361",
+    "benchmarks/experimental/active_cg.py": "8b26f68e144b8b2387182b34d9888d05f7483316022e311793ad4bf955d35863",
+    "benchmarks/experimental/cached_x_image.py": "d9ce02e7ec77fd6c68f18754b2def83d5c30e2101a4cf6862702b7d15816b239",
+    "benchmarks/experimental/active_search.py": "5be7e186d32331886de833fbd33bfcba17f595e91eb82c0d584f1e991e3df0b5"
+  },
+  "cupy_adapter": {
+    "width": 24,
+    "absolute_tolerance": 1e-10,
+    "padding_width": null,
+    "preallocated_active_widths": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "inner_adapter_setup_capture_seconds": 0.16073636710643768,
+    "inner_adapter_device_memory_delta_bytes": 169869312,
+    "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+    "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+    "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges its entire starting block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence.",
+  "accepted": true
+}
