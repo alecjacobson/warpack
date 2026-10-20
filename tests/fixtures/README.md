@@ -81,3 +81,15 @@ and sigma=1/10. SM on the inverse selects physical eigenvalues farthest from
 sigma. The regressions use explicit ncv=8/48 profiles and retain the original
 100-cycle budget and accuracy bounds; they do not redefine SM as nearest-shift
 selection or claim convergence for the original compact profiles.
+
+`general_projections.npz` contains only the complex 50-by-50 projected matrices
+from the final pre-Schur snapshots in `results/counts-direct-trace.json` and
+`results/counts-shift-trace.json` (`direct` and `shift` keys). These are generated
+numerical data from the pinned Spectra `ComplexEigs_16` and
+`GenEigsRealShift_12` problems, after 400 and 30 outer cycles respectively.
+They retain the near-converged projected spectra that exposed restart stagnation
+in #35, without storing the full original matrices or basis. Array SHA256 values
+are `f3cc97999ca0577b8f4c35210ea8049d52830509eb03da61ca098626dd462c33`
+and `8876fd837d5edea223c9fac804df091d6235f1362bf17c0c306e6db5eec01d1e`.
+The tests check independent eigenvalues, backward residuals, normalization and
+nested device-conditional replay; these matrices are not an outer-solver test.
