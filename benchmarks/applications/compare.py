@@ -18,6 +18,7 @@ import warp as wp
 import warp.optim.linear as linear
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+from warpack import CGInverse, CuDSSInverse
 
 from .problems import make_problem
 from .references import Unsupported, cupy_setup, spectra_setup
@@ -173,7 +174,13 @@ def run(
             # Complex shift-invert wraps the real factor object twice.
             factor = getattr(inverse, "inverse", inverse)
             factor = getattr(factor, "inverse", factor)
-            row["cudss_refinement_steps"] = getattr(factor, "refinement_steps", None)
+            row["cudss_refinement_steps"] = (
+                factor.refinement_steps if isinstance(factor, CuDSSInverse) else None
+            )
+            row["cg_refinement_steps"] = (
+                factor.refinement_steps or None if isinstance(factor, CGInverse) else None
+            )
+            row["cg_refinement_tol"] = factor.refinement_tol if row["cg_refinement_steps"] else None
             row["cudss_reordering"] = getattr(factor, "reordering", None)
             row["cudss_matching"] = getattr(factor, "matching", None)
             row["cudss_mtype"] = getattr(factor, "mtype", None)
@@ -418,6 +425,8 @@ def compare_baseline(rows, baseline, limit):
                 "cg_absolute_tolerance",
                 "reference_maxiter",
                 "cg_maxiter",
+                "cg_refinement_steps",
+                "cg_refinement_tol",
                 "projected_rigid_modes",
             ]
         )

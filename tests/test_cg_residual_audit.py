@@ -148,12 +148,13 @@ def test_audit_nonfinite_failure_and_recovery_on_same_graph():
     np.testing.assert_allclose(output.numpy(), 1.0, atol=1e-12)
 
 
-def test_audit_uses_current_matrix_values_on_replay():
+@pytest.mark.parametrize("refinement_steps", [0, 1])
+def test_audit_uses_current_matrix_values_on_replay(refinement_steps):
     n = 32
     diagonal = np.linspace(1.0, 2.0, n)
     a = matrix(sp.diags(diagonal, format="csr"))
     a.nnz_sync()
-    inverse = CGInverse(a, tol=1e-11, verify_residuals=True)
+    inverse = CGInverse(a, tol=1e-11, verify_residuals=True, refinement_steps=refinement_steps)
     rhs = np.random.default_rng(99).normal(size=(1, n))
     inputs = wp.array(rhs, dtype=wp.float64)
     output = wp.empty_like(inputs)
@@ -171,7 +172,8 @@ def test_audit_uses_current_matrix_values_on_replay():
 
 
 @pytest.mark.parametrize("block_size", [2, 3])
-def test_audit_supports_upstream_bsr_block_shapes(block_size):
+@pytest.mark.parametrize("refinement_steps", [0, 1])
+def test_audit_supports_upstream_bsr_block_shapes(block_size, refinement_steps):
     import warp.sparse as ws
 
     count = 7
@@ -186,7 +188,9 @@ def test_audit_supports_upstream_bsr_block_shapes(block_size):
         wp.array(a.indices, dtype=wp.int32),
         wp.array(a.data, dtype=dtype),
     )
-    inverse = CGInverse(device, tol=1e-12, atol=0.0, verify_residuals=True)
+    inverse = CGInverse(
+        device, tol=1e-12, atol=0.0, verify_residuals=True, refinement_steps=refinement_steps
+    )
     rhs = np.random.default_rng(72).normal(size=(2, a.shape[0]))
     inputs = wp.array(rhs, dtype=wp.float64)
     output = wp.empty_like(inputs)

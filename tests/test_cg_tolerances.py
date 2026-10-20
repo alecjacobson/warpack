@@ -49,7 +49,8 @@ def test_invalid_absolute_tolerance(atol):
         CGInverse(matrix(sp.eye(4, format="csr")), atol=atol)
 
 
-def test_adaptive_cg_capture_opt_in_and_changed_starts(tmp_path):
+@pytest.mark.parametrize("refinement_steps", [0, 1])
+def test_adaptive_cg_capture_opt_in_and_changed_starts(tmp_path, refinement_steps):
     import re
 
     from warpack import SparseOperator, SymmetricEigensolver
@@ -61,9 +62,16 @@ def test_adaptive_cg_capture_opt_in_and_changed_starts(tmp_path):
     assert default.requires_static_outer_capture  # Preserve production default.
     if not hasattr(default.state, "_cur_iter_and_condition"):
         with pytest.raises(ValueError, match="preallocated loop control"):
-            CGInverse(wa, adaptive_capture=True)
+            CGInverse(wa, adaptive_capture=True, refinement_steps=refinement_steps)
         return
-    inverse = CGInverse(wa, tol=1e-13, maxiter=100, adaptive_capture=True)
+    inverse = CGInverse(
+        wa,
+        tol=1e-13,
+        maxiter=100,
+        adaptive_capture=True,
+        refinement_steps=refinement_steps,
+        verify_residuals=bool(refinement_steps),
+    )
     rng = np.random.default_rng(41)
     starts = wp.array(rng.normal(size=(8, 40)), dtype=wp.float64)
     solver = SymmetricEigensolver(
@@ -81,6 +89,8 @@ def test_adaptive_cg_capture_opt_in_and_changed_starts(tmp_path):
         assert solver.converged.numpy()[0] == 3
         assert solver.status.numpy()[0] == 0
         assert 0 < solver.iterations.numpy()[0] < 100
+        if refinement_steps:
+            assert inverse.fresh_stats.numpy()[2] == 0
     dot = tmp_path / "adaptive-cg.dot"
     wp.capture_debug_dot_print(graph, str(dot))
     text = dot.read_text()

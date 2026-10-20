@@ -132,9 +132,17 @@ def run(args):
                     check["cg_stats"] = inverse.stats.numpy().tolist()
                     check["cg_fresh_stats"] = inverse.fresh_stats.numpy().tolist()
                     check["cg_residual_maxima"] = inverse.residual_maxima.numpy().tolist()
-                    if hasattr(inverse, "correction"):
-                        check["initial_cg_stats"] = inverse.base.stats.numpy().tolist()
-                        check["correction_cg_stats"] = inverse.correction.stats.numpy().tolist()
+                    if args.method == "warp-cg-corrected":
+                        check["initial_cg_stats"] = (
+                            inverse.initial_stats.numpy().tolist()
+                            if inverse.initial_stats is not None
+                            else inverse.stats.numpy().tolist()
+                        )
+                        check["correction_cg_stats"] = (
+                            inverse.refinement_stats.numpy().tolist()
+                            if inverse.refinement_stats is not None
+                            else [0, 0, 0, 0]
+                        )
                     check["inner_solve_accepted"] = (
                         check["cg_stats"][2] == 0 and check["cg_fresh_stats"][2] == 0
                     )
@@ -272,7 +280,7 @@ def main():
         implementation_sha256={
             path.name: hashlib.sha256(path.read_bytes()).hexdigest()
             for path in list(Path(__file__).parent.glob("connection*.*"))
-            + [Path("benchmarks/experimental/corrected_cg.py")]
+            + [Path("benchmarks/experimental/corrected_cg.py"), Path("warpack/generalized.py")]
             if path.suffix in (".py", ".cpp")
         },
         runtime_hashes={

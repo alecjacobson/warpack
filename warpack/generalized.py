@@ -1,6 +1,7 @@
 """Generalized SPD-mass eigenproblems and a pure-Warp inverse operator."""
 
 import math
+from operator import index
 
 import warp as wp
 import warp.optim.linear as linear
@@ -21,6 +22,33 @@ def accumulate_cg_statistics(
     if residual_sq[0] > tolerance_sq[0] or not wp.isfinite(residual_sq[0]):
         wp.atomic_add(stats, 2, 1)
     wp.atomic_add(stats, 3, 1)
+
+
+@wp.kernel
+def accumulate_refinement_stage(
+    iterations: wp.array[wp.int32],
+    residual_sq: wp.array[wp.float64],
+    tolerance_sq: wp.array[wp.float64],
+    stage: wp.array[wp.int32],
+    native: wp.array[wp.int32],
+):
+    failed = int(residual_sq[0] > tolerance_sq[0] or not wp.isfinite(residual_sq[0]))
+    stage[0] += iterations[0]
+    stage[1] = wp.max(stage[1], iterations[0])
+    stage[2] += failed
+    stage[3] += 1
+    native[0] += iterations[0]
+    native[1] = wp.max(native[1], iterations[0])
+    native[2] += failed
+    native[3] += 1
+
+
+@wp.kernel
+def finish_refinement_statistics(stage: wp.array[wp.int32], stats: wp.array[wp.int32]):
+    stats[0] += stage[0]
+    stats[1] = wp.max(stats[1], stage[0])
+    stats[2] += int(stage[2] > 0)
+    stats[3] += 1
 
 
 def _cg_preallocates_loop_control(state):
@@ -58,6 +86,18 @@ class CGInverse:
     stopping on small right-hand sides, such as eigenvector residuals used
     for preconditioning. Warp still applies its dtype-dependent safety floor.
 
+    Setting ``refinement_steps>0`` adds a fixed number of fresh-residual
+    corrections. Each uses another upstream CG state with the same
+    preconditioner, relative ``refinement_tol`` (default 0.01), zero absolute
+    tolerance and the same maximum iteration budget. No correction is enabled
+    by default. Corrections need not attain an arbitrarily strict residual.
+    With corrections, ``stats`` counts original RHS calls, total initial plus
+    correction iterations, and a failed RHS if any constituent CG state fails.
+    ``initial_stats`` and ``refinement_stats`` separately expose the native
+    state totals; both are None when refinement is disabled. Optional fresh
+    auditing checks the final solution against the original RHS and the
+    initial state's effective tolerance, not the correction RHS tolerance.
+
     ``adaptive_capture=True`` opts into nested device-controlled outer graphs
     when the upstream CG state preallocates loop control (tested on Warp 1.18).
     Older states, including stock Warp 1.15, reject the opt-in. The default
@@ -75,7 +115,15 @@ class CGInverse:
         atol=None,
         adaptive_capture=False,
         verify_residuals=False,
+        refinement_steps=0,
+        refinement_tol=0.01,
     ):
+        if isinstance(refinement_steps, bool) or index(refinement_steps) < 0:
+            raise ValueError("refinement_steps must be a nonnegative integer")
+        if not math.isfinite(refinement_tol) or not 0 < refinement_tol < 1:
+            raise ValueError("refinement_tol must be finite and between zero and one")
+        self.refinement_steps = index(refinement_steps)
+        self.refinement_tol = refinement_tol
         if atol is not None and (not math.isfinite(atol) or atol < 0):
             raise ValueError("atol must be finite and nonnegative, or None")
         self.n, self.device = matrix.shape[0], matrix.device
@@ -108,6 +156,11 @@ class CGInverse:
         self.verify_residuals = bool(verify_residuals)
         self.fresh_stats = None
         self.residual_maxima = None
+        self.initial_stats = None
+        self.refinement_stats = None
+        if self.verify_residuals or self.refinement_steps:
+            self._audit_operator = linear.aslinearoperator(matrix)
+            self._audit_ax = wp.empty((1, self.n), dtype=wp.float64, device=self.device)
         if self.verify_residuals:
             # Shared with GMRES; imported at setup to avoid the module cycle
             # through accumulate_cg_statistics. No Python callback on replay.
@@ -115,14 +168,34 @@ class CGInverse:
 
             self._residual_norms_kernel = residual_norms
             self._residual_maxima_kernel = residual_maxima
-            self._audit_operator = linear.aslinearoperator(matrix)
-            self._audit_ax = wp.empty((1, self.n), dtype=wp.float64, device=self.device)
             self._audit_norms = wp.zeros(2, dtype=wp.float64, device=self.device)
             self.fresh_stats = wp.zeros(4, dtype=wp.int32, device=self.device)
             self.residual_maxima = wp.zeros(2, dtype=wp.float64, device=self.device)
+        if self.refinement_steps:
+            self._correction = wp.empty_like(self._audit_ax)
+            self._refinement_state = linear.cg(
+                matrix,
+                self._audit_ax[0],
+                self._correction[0],
+                M=self.preconditioner,
+                tol=refinement_tol,
+                atol=0.0,
+                maxiter=maxiter,
+                check_every=0,
+                run=False,
+            )
+            if adaptive_capture and not _cg_preallocates_loop_control(self._refinement_state):
+                raise ValueError("adaptive_capture requires preallocated refinement loop control")
+            self._refinement_stage = wp.zeros(4, dtype=wp.int32, device=self.device)
+            self._refinement_iterations = self._refinement_stage[:1]
+            self.initial_stats = wp.zeros_like(self._refinement_stage)
+            self.refinement_stats = wp.zeros_like(self._refinement_stage)
 
     def reset_stats(self):
         self.stats.zero_()
+        if self.refinement_steps:
+            self.initial_stats.zero_()
+            self.refinement_stats.zero_()
         if self.verify_residuals:
             self.fresh_stats.zero_()
             self.residual_maxima.zero_()
@@ -157,7 +230,7 @@ class CGInverse:
             if max(xlo, ylo) < min(xhi, yhi):
                 raise ValueError("partially overlapping CG input/output views are unsupported")
         snapshot = self.b
-        if alias or self.verify_residuals:
+        if alias or self.verify_residuals or self.refinement_steps:
             # Also allow callers to use this inverse's exposed b/x workspaces.
             # The snapshot must not be the output that is about to be cleared.
             ylo, yhi = span(y)
@@ -166,17 +239,71 @@ class CGInverse:
                 snapshot = self.x
         for j in range(x.shape[0]):
             rhs = x[j]
-            if alias or self.verify_residuals:
+            if alias or self.verify_residuals or self.refinement_steps:
                 wp.copy(snapshot, rhs)
                 rhs = snapshot
             y[j].zero_()
             iterations, residual_sq, tolerance_sq = self.state(b=rhs, x=y[j])
-            wp.launch(
-                accumulate_cg_statistics,
-                1,
-                [iterations, residual_sq, tolerance_sq, self.stats],
-                device=self.device,
-            )
+            if self.refinement_steps:
+                self._refinement_stage.zero_()
+                wp.launch(
+                    accumulate_refinement_stage,
+                    1,
+                    [
+                        iterations,
+                        residual_sq,
+                        tolerance_sq,
+                        self._refinement_stage,
+                        self.initial_stats,
+                    ],
+                    device=self.device,
+                )
+                for _ in range(self.refinement_steps):
+                    self._audit_operator.matvec(
+                        y[j], self._audit_ax[0], self._audit_ax[0], 1.0, 0.0
+                    )
+                    wp.launch(
+                        K.linear_residual,
+                        (1, self.n),
+                        [rhs.reshape((1, self.n)), self._audit_ax],
+                        device=self.device,
+                    )
+                    self._correction.zero_()
+                    correction_iterations, correction_residual, correction_tolerance = (
+                        self._refinement_state(b=self._audit_ax[0], x=self._correction[0])
+                    )
+                    wp.launch(
+                        accumulate_refinement_stage,
+                        1,
+                        [
+                            correction_iterations,
+                            correction_residual,
+                            correction_tolerance,
+                            self._refinement_stage,
+                            self.refinement_stats,
+                        ],
+                        device=self.device,
+                    )
+                    wp.launch(
+                        K.add_correction,
+                        (1, self.n),
+                        [y[j : j + 1], self._correction],
+                        device=self.device,
+                    )
+                wp.launch(
+                    finish_refinement_statistics,
+                    1,
+                    [self._refinement_stage, self.stats],
+                    device=self.device,
+                )
+                iterations = self._refinement_iterations
+            else:
+                wp.launch(
+                    accumulate_cg_statistics,
+                    1,
+                    [iterations, residual_sq, tolerance_sq, self.stats],
+                    device=self.device,
+                )
             if self.verify_residuals:
                 self._audit_operator.matvec(y[j], self._audit_ax[0], self._audit_ax[0], 1.0, 0.0)
                 self._audit_norms.zero_()

@@ -30,8 +30,10 @@ factors and graphs. No NumPy/SciPy/CuPy computation occurs in its replay.
 * Warp+cuDSS uses realified general factors, matching, and one FP64 residual
   correction through `ComplexShiftInverse`. All other arithmetic is Warp.
 * Pure Warp uses upstream FSAI32 (FP32 factors) and FP64 `CGInverse`, or upstream
-  diagonal CG in tests. Fresh inner residual auditing is enabled. Large strict
-  inner failures remain tracked in [#95](https://github.com/alecjacobson/warpack/issues/95).
+  diagonal CG in tests. Fresh inner residual auditing is enabled. The
+  [correction follow-up](../experimental/CG_CORRECTION.md) adds an accepted
+  public-CG configuration while retaining the earlier strict failures from
+  [#95](https://github.com/alecjacobson/warpack/issues/95).
 * SciPy uses complex ARPACK with a supplied SuperLU inverse; setup excludes
   solve timing. Its complex `eigsh` dispatches to the nonsymmetric ARPACK engine.
   `scipy-ritz` additionally performs a timed small generalized Ritz solve in

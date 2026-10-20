@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-20",
+  "full_pinned_suite": {
+    "passed": 1034,
+    "seconds": 452.03
+  },
+  "focused_pinned_before_full_suite": {
+    "passed": 49,
+    "seconds": 8.3
+  },
+  "focused_stock_warp_1_15": {
+    "passed": 57,
+    "seconds": 11.21
+  },
+  "focused_stock_files": [
+    "tests/test_cg_refinement.py",
+    "tests/test_cg_residual_audit.py",
+    "tests/test_cg_tolerances.py",
+    "tests/test_connection_baseline.py"
+  ],
+  "runtime": {
+    "gpu": "NVIDIA L40",
+    "driver": "570.158.01",
+    "pinned_warp": "1.18.0",
+    "upstream_commit": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "versions": {
+      "numpy": "2.2.6",
+      "scipy": "1.15.0",
+      "cupy-cuda12x": "14.2.0",
+      "nvidia-cudss-cu12": "0.8.0.10"
+    }
+  },
+  "lint": "ruff check warpack benchmarks tests: passed",
+  "format": "ruff format --check warpack benchmarks tests: passed (including new diagnostic)",
+  "default_performance": {
+    "case": "positive signed buckling n41616 k20",
+    "seconds": 5.472928196191788,
+    "baseline_ratio": 1.0013236195182291,
+    "accepted": true,
+    "graph_summary_identical_to_baseline": true,
+    "scope": "Positive branch only; no claim of a fresh negative-branch measurement"
+  },
+  "refined_performance": {
+    "case": "consistent complex connection n16384 k20",
+    "seconds": 2.585151571780443,
+    "baseline_ratio": 0.9997970471168804,
+    "accepted": true,
+    "fresh_inner_misses": 0,
+    "complex_count": 20,
+    "real_count": 40
+  },
+  "roundoff_reference": "cg-refinement-roundoff.json: all12 extended-precision reference checks below1e-13; rounding low-mode reference vectors toFP64 loses that accuracy",
+  "metadata_smoke": "Generic application CG and cuDSS small cases both pass physical gates and distinct backend refinement metadata; checked after the metadata-label update",
+  "wheel": "cg-refinement-wheel.json:23 core Python modules, no benchmark modules",
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "1b2bfb4887cf18d6c0ed94af2980119d1d441ce345dd3772e6bb8f8d85eaaa92",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "tests/test_cg_refinement.py": "d10207e4fb4888eb6a0c80a8cef3aaf15e7c517817ccabf2c4113d53b82f4eb2",
+    "benchmarks/applications/connection_roundoff.py": "a21d1a5351e778c991fce57dc6bfbeea3c372272a130b4057f015a70fb0f723e"
+  }
+}

@@ -385,7 +385,9 @@ def run(
             cudss_mtype=getattr(factor, "mtype", None),
             cudss_reordering=getattr(factor, "reordering", None),
             cudss_matching=getattr(factor, "matching", None),
-            cudss_refinement_steps=getattr(factor, "refinement_steps", None),
+            cudss_refinement_steps=factor.refinement_steps
+            if isinstance(factor, CuDSSInverse)
+            else None,
             outcome="passed" if ok else "failed",
             **timing,
             iteration_budget=iterations,
