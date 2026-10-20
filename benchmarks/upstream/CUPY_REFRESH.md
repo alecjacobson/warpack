@@ -12,13 +12,17 @@ not a claim of complete upstream conformance.
 | Full Warp adapter, before the boundary follow-up | 821 | 1 | 3,054 | 72 | 36 |
 | Full unchanged native CuPy overlay | 2,500 | 0 | 1,195 | 173 | 116 |
 | Composite Warp inventory after the 40-case focused follow-up | 857 | 1 | 3,018 | 72 | 36 |
+| Full Warp rerun including device SVD starts | 860 | 1 | 3,015 | 72 | 36 |
 
 Every inventory accounts for 3,984 selected cases; 7,745 unrelated tests are
 excluded. Expected failures and unexpected passes retain upstream markers.
 The composite overlays 40 exact node IDs onto the complete run; it is not a
-second full-suite run. The native overlay's counts match its original inventory.
+second full-suite run. The final row is a new complete run after [device SVD starts](SVD_STARTS.md):
+all 39 newly enabled starting-vector cases pass and no previous passes are lost.
+The native overlay's counts match its original inventory.
 
-The full Warp run takes 453.08 s and native CuPy 191.90 s, including setup,
+The first full Warp run takes 453.08 s, the SVD-start full rerun 461.09 s, and
+native CuPy 191.90 s, including setup,
 capture, assertions and test overhead. These are **not eigensolver performance
 comparisons**. Spectra's unchanged native suite also passes all 31 executables;
 its numerical-fixture refresh is separate ongoing work.
@@ -46,8 +50,8 @@ exact starts, physical equations and unchanged input vectors.
 
 ## Remaining unsupported contracts
 
-After the focused overlay, 580 skips are upstream fixture conditions and
-**2,438** are unsupported precision or adapter contracts:
+After the final full rerun, 580 skips are upstream fixture conditions and
+**2,435** are unsupported precision or adapter contracts:
 
 | Contract | Skipped cases | Meaning |
 |---|---:|---|
@@ -56,7 +60,6 @@ After the focused overlay, 580 skips are upstream fixture conditions and
 | Complex partial SVD | 256 | Current partial SVD is real FP64 |
 | Complex shifted selection beyond nearest | 16 | Generalized complex selection API work remains separate |
 | CuPy RNG/internal API | 8 | No drop-in RNG contract |
-| SVD v0/RNG passthrough | 3 | Distinct from supported eigenproblem starts |
 | Full-space block fallback | 2 | No dense k=n fallback |
 | FP32 block starts/matrices in fixed fixtures | 2 | Not covered by parameterized precision rows |
 | Block per-iteration history | 1 | No equivalent public history API |
@@ -70,7 +73,8 @@ numerical success.
 
 ## Evidence
 
-- [Full Warp run](../../results/performance_followup/upstream-refresh-cupy-warp.json)
+- [Full Warp run before the boundary changes](../../results/performance_followup/upstream-refresh-cupy-warp.json)
+- [Full Warp rerun with SVD starts](../../results/performance_followup/upstream-cupy-svd-start-full.json)
 - [Full unchanged native CuPy run](../../results/performance_followup/upstream-refresh-cupy-native.json)
 - [Environment and exact source hashes](../../results/performance_followup/upstream-refresh-manifest.json)
 - [Focused 36 passes / four precision skips](../../results/performance_followup/cupy-width-contracts.json)

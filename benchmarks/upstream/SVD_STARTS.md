@@ -52,8 +52,17 @@ All three original pinned CuPy `TestSvdsV0` cases now pass: repeatability and
 input preservation, parity with SciPy, and the smaller-side length for wide
 matrices. The adapter materializes the supplied boundary array before capture
 and forwards it to this API. CuPy RNG/internal-generator parity remains
-unsupported. The separate complete upstream and full local candidate runs are
-recorded once finished; focused passes do not stand in for a full-suite result.
+unsupported. The [complete CuPy candidate rerun](../../results/performance_followup/upstream-cupy-svd-start-full.json)
+records 860 ordinary passes, one known Fiedler failure (#72), 3,015 skips,
+72 expected failures and 36 unexpected passes across all 3,984 selected cases.
+All 39 newly enabled eigenproblem/SVD starting-vector cases pass and no
+previous pass is lost. This is a full run, not an overlay of focused results.
+The full local candidate suite passes all **1,365 tests in 500.37 s**. Lint,
+formatting and whitespace checks pass. A wheel built from the clean candidate
+commit installs all 26 core modules byte-for-byte, imports outside the checkout
+and exposes the new argument without packaging benchmarks or tests. The
+separate main-branch status-harness follow-up adds eight CPU tests; those are
+not included in this candidate full-suite count.
 
 ## Default-path performance control
 
