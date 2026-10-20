@@ -1,0 +1,40 @@
+{
+  "issue": 88,
+  "base_revision": "34032ae",
+  "reproducer": {
+    "before": {
+      "accepted": true,
+      "residual": 0.0,
+      "max_absolute_residual": 0.0,
+      "orthogonality": 0.0,
+      "spectrum_error": 0.0,
+      "requested_subspace_error": 0.0
+    },
+    "after": {
+      "accepted": false,
+      "residual": 0.0,
+      "max_absolute_residual": 0.0,
+      "orthogonality": 0.0,
+      "spectrum_error": 0.0,
+      "requested_subspace_error": 1.0
+    }
+  },
+  "pinned": {
+    "command": "python -m pytest -q tests/test_buckling_validation.py tests/test_applications.py tests/test_buckling_krylov.py tests/test_transforms.py",
+    "passed": 28,
+    "seconds": 28.93,
+    "note": "Collected before three final ordinary-metric controls were added."
+  },
+  "stock_host_validation": {
+    "command": "python -m pytest -q tests/test_buckling_validation.py",
+    "passed": 8,
+    "seconds": 0.54
+  },
+  "source_sha256": {
+    "benchmarks/applications/runner.py": "45a4ba1321eca6cc7ca70c55db0b570a5e886704c83231b83b9a6c79b47f847b",
+    "tests/test_buckling_validation.py": "9f51b60a1a866a7cb7400e3baf63c0ececc914c11ea7cfa02271b2edc545a73c"
+  },
+  "lint": "passed",
+  "format": "247 files passed",
+  "scope": "Benchmark validation only. Buckling requested-space projection and norm now use SPD K, matching existing K-orthogonality. No installed solver arithmetic or timing changed. Existing G fixtures lacked requested_basis, so their historical measurements did not exercise the defective branch."
+}

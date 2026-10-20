@@ -114,8 +114,12 @@ def accuracy(p, values, vectors, right=None, reference=None):
         result["accepted"] &= result["nullspace_subspace_error"] < 1e-8
     if p.requested_basis is not None:
         basis = p.requested_basis
-        remainder = vectors - basis @ (basis.conj().T @ bv)
-        metric_remainder = remainder if p.b is None else p.b @ remainder
+        # Buckling uses the SPD stiffness metric, not the possibly indefinite
+        # geometric stiffness. An indefinite quadratic form is not a norm.
+        metric = p.a if p.mode == "buckling" else p.b
+        metric_vectors = vectors if metric is None else metric @ vectors
+        remainder = vectors - basis @ (basis.conj().T @ metric_vectors)
+        metric_remainder = remainder if metric is None else metric @ remainder
         result["requested_subspace_error"] = float(
             np.sqrt(max(0.0, np.sum(remainder.conj() * metric_remainder).real))
         )
