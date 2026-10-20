@@ -77,3 +77,7 @@ def test_regular_generalized_spectra_adapter(family, selection, tmp_path, monkey
     assert row["requested_spectrum_checked"] and row["mandatory_spectrum_covered"]
     assert row["reported_converged"] == 3 and row["solver_status"] == 0
     assert row["effective_ncv"] == len(a)
+    assert row["generalized_mode"] == "regular"
+    assert row["all_replays_pass"] and row["validated_replays"] == 2
+    assert len(row["accuracy_trials"]) == 2
+    assert all(trial["outcome"] == "passed" for trial in row["accuracy_trials"])

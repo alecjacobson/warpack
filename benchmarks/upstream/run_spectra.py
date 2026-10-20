@@ -137,6 +137,63 @@ def generalized_reference_errors(a, b, values, vectors, k, which, tolerance):
     )
 
 
+def combine_accuracy_trials(case, trials):
+    """Retain every replay and report worst errors/counts, never just the last."""
+    if not trials:
+        raise ValueError("at least one evaluated replay is required")
+    result = trials[-1].copy()
+    checks = [contracts(dict(**case, **trial)) for trial in trials]
+    fields = set().union(*(check["checked_fields"] for check in checks))
+    for field in fields:
+        values = [trial.get(field, float("inf")) for trial in trials]
+        result[field] = max(values) if all(math.isfinite(v) for v in values) else float("inf")
+    for field in (
+        "reported_converged",
+        "original_evaluation_converged",
+        "left_converged",
+        "right_converged",
+        "reported_converged_real",
+        "extracted_complex_pairs",
+        "returned_pairs",
+    ):
+        if any(field in trial for trial in trials):
+            values = [trial.get(field) for trial in trials]
+            result[field] = min(values) if all(v is not None for v in values) else None
+    statuses = [trial.get("solver_status") for trial in trials]
+    result["solver_status"] = (
+        None
+        if any(value is None for value in statuses)
+        else next((value for value in statuses if not math.isfinite(value) or value != 0), 0)
+    )
+    if any("mandatory_spectrum_covered" in trial for trial in trials):
+        result["mandatory_spectrum_covered"] = all(
+            trial.get("mandatory_spectrum_covered", False) for trial in trials
+        )
+    # The aggregate is deliberately labeled independently of each trial's
+    # outcome. Both the actual assertions and every replay's success are needed.
+    result["outcome"] = "failed"
+    contract = contracts(dict(**case, **result))
+    for field in (
+        "checked_numerical_bounds_pass",
+        "reported_count_pass",
+        "reported_status_pass",
+        "requested_spectrum_checked",
+    ):
+        result[field] = contract[field]
+    accepted = contract["strict_contract_pass"] and all(
+        trial["outcome"] == "passed" and check["strict_contract_pass"]
+        for trial, check in zip(trials, checks)
+    )
+    result.update(
+        outcome="passed" if accepted else "failed",
+        all_replays_pass=accepted,
+        validated_replays=len(trials),
+        accuracy_trials=trials,
+        summary_scope="Worst checked errors and minimum counts across all validated replays",
+    )
+    return result
+
+
 def run(
     case, accuracy_only=False, iteration_budget=None, tolerance_override=None, ncv_override=None
 ):
@@ -326,140 +383,151 @@ def run(
             )
         if iteration_budget is not None:
             iterations = iteration_budget
+
+        def evaluate():
+            if name == "SVD":
+                w = output(solver.singular_values)
+                u = output(solver.u).T
+                v = output(solver.v).T
+                errors = svd_errors(a, w, u, v)
+                err = max(errors.values())
+                errors["reported_converged"] = int(solver.core.converged.numpy()[0])
+                errors["left_converged"] = int(solver.count_left.numpy()[0])
+                errors["right_converged"] = int(solver.count_right.numpy()[0])
+            else:
+                w = output(solver.eigenvalues if evaluation is None else evaluation.values)
+                v = output(solver.eigenvectors).T
+                residual = a @ v - (v if b is None else b @ v) * w
+                err = float(np.max(np.abs(residual)))
+                errors = {"max_absolute_residual": err, "returned_pairs": len(w)}
+                if name in ("SymGEigsCholesky", "SymGEigsRegInv"):
+                    errors.update(generalized_reference_errors(a, b, w, v, k, which, margin))
+                if name in ("HermEigs", "DavidsonSymEigs", "SymEigsShift"):
+                    ref, basis = la.eigh(a)
+                    selected = select_symmetric_reference(
+                        ref, k, which, sigma.real if name == "SymEigsShift" else None
+                    )
+                    expected = ref[selected]
+                    allowed = basis[:, np.min(abs(ref[:, None] - expected), axis=1) <= 1e-9]
+                    errors.update(
+                        spectrum_error=float(np.max(abs(np.sort(w) - np.sort(expected)))),
+                        orthogonality_error=float(np.max(abs(v.conj().T @ v - np.eye(k)))),
+                        subspace_error=float(
+                            np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)
+                        ),
+                    )
+                if name == "DavidsonSymEigs":
+                    errors.update(
+                        max_normalized_residual=float(
+                            np.max(np.linalg.norm(residual, axis=0) / np.maximum(1.0, abs(w)))
+                        ),
+                        reported_max_normalized_residual=float(np.max(solver.residuals.numpy())),
+                        vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
+                    )
+                if name in ("GenEigs", "ComplexEigs") and which == "SM":
+                    ref, basis = la.eig(a)
+                    # A real problem may cut through a conjugate pair with equal
+                    # magnitude. Accept either boundary eigenvalue, but match each
+                    # returned value to a distinct reference slot.
+                    cutoff = np.sort(abs(ref))[k - 1] + margin
+                    selected = np.flatnonzero(abs(ref) <= cutoff)
+                    costs = abs(w[:, None] - ref[selected])
+                    rows, cols = linear_sum_assignment(costs)
+                    allowed = la.orth(basis[:, selected])
+                    errors.update(
+                        spectrum_error=float(np.max(costs[rows, cols])),
+                        vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
+                        subspace_error=float(
+                            np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)
+                        ),
+                    )
+                # Upstream generic tests require residuals and successful convergence.
+                # Examples 1/2/4 additionally check the requested eigenvalues.
+                if name in ("Example1", "Example1Shift", "Example2", "Example4"):
+                    ref = la.eigvalsh(a)
+                    ref = ref[:k] if name == "Example1Shift" else ref[-k:]
+                    errors["spectrum_error"] = float(np.max(np.abs(np.sort(w.real) - ref)))
+                    err = max(err, errors["spectrum_error"])
+                conv = getattr(
+                    solver, "converged", getattr(getattr(solver, "real", None), "converged", None)
+                )
+                if conv is not None:
+                    count = int(conv.numpy()[0])
+                    if isinstance(solver, HermitianEigensolver):
+                        # The realification solves for 2*k real pairs. Its count
+                        # must not be compared directly with k complex pairs.
+                        errors["reported_converged_real"] = count
+                        errors["extracted_complex_pairs"] = int(solver.count.numpy()[0])
+                        count = min(count // 2, errors["extracted_complex_pairs"])
+                    errors["reported_converged"] = count
+            errors["solver_status"] = solver_status(solver)
+            errors["solver_status_required"] = True
+            contract = contracts(
+                dict(
+                    **case,
+                    **errors,
+                    outcome="failed",  # Evaluated; final status is derived below.
+                    upstream_absolute_tolerance=margin,
+                )
+            )
+            numerical_pass = contract["checked_numerical_bounds_pass"]
+            ok = contract["strict_contract_pass"]
+            # Keep the strict historical outcome, but do not conflate original
+            # assertions with the solver's stricter/transformed stopping test.
+            count = errors.get("reported_converged")
+            convergence_space = "original_problem"
+            physical_count = count
+            if evaluation is not None:
+                convergence_space = "inverse_operator"
+                physical_count = int(evaluation.converged.numpy()[0])
+            elif isinstance(solver, PartialSVD):
+                convergence_space = "augmented_operator"
+                physical_count = min(
+                    int(solver.count_left.numpy()[0]), int(solver.count_right.numpy()[0])
+                )
+            elif isinstance(solver, HermitianEigensolver):
+                convergence_space = "realification_and_extraction"
+                physical_count = None  # No independent complex residual counter in this API.
+            factor = getattr(inv, "inverse", inv)
+            factor = getattr(factor, "inverse", factor)
+            return dict(
+                solver_type=type(solver).__name__,
+                requested_ncv=ncv,
+                **solver_metadata(solver),
+                iteration_method=getattr(solver, "method", None),
+                generalized_mode=getattr(solver, "mode", None),
+                cudss_mtype=getattr(factor, "mtype", None),
+                cudss_reordering=getattr(factor, "reordering", None),
+                cudss_matching=getattr(factor, "matching", None),
+                cudss_refinement_steps=factor.refinement_steps
+                if isinstance(factor, CuDSSInverse)
+                else None,
+                outcome="passed" if ok else "failed",
+                **timing,
+                iteration_budget=iterations,
+                upstream_absolute_tolerance=margin,
+                checked_numerical_bounds_pass=numerical_pass,
+                requested_spectrum_checked=contract["requested_spectrum_checked"],
+                internal_tolerance=threshold,
+                reported_convergence_space=convergence_space,
+                reported_count_pass=None if count is None else count >= k,
+                reported_status_pass=contract["reported_status_pass"],
+                original_evaluation_converged=physical_count,
+                **errors,
+            )
+
         if accuracy_only:
             graph = solver.capture(iterations, **options)
+            timing = dict(execution="accuracy_only", replays=2)
+            trials = []
             for _ in range(2):
                 wp.capture_launch(graph)
-            wp.synchronize_device(solver.device)
-            timing = dict(execution="accuracy_only", replays=2)
-        else:
-            setup = time.perf_counter() - started
-            timing = dict(setup_seconds=setup, **execute(solver, iterations, **options))
-        if name == "SVD":
-            w = output(solver.singular_values)
-            u = output(solver.u).T
-            v = output(solver.v).T
-            errors = svd_errors(a, w, u, v)
-            err = max(errors.values())
-            errors["reported_converged"] = int(solver.core.converged.numpy()[0])
-            errors["left_converged"] = int(solver.count_left.numpy()[0])
-            errors["right_converged"] = int(solver.count_right.numpy()[0])
-        else:
-            w = output(solver.eigenvalues if evaluation is None else evaluation.values)
-            v = output(solver.eigenvectors).T
-            residual = a @ v - (v if b is None else b @ v) * w
-            err = float(np.max(np.abs(residual)))
-            errors = {"max_absolute_residual": err, "returned_pairs": len(w)}
-            if name in ("SymGEigsCholesky", "SymGEigsRegInv"):
-                errors.update(generalized_reference_errors(a, b, w, v, k, which, margin))
-            if name in ("HermEigs", "DavidsonSymEigs", "SymEigsShift"):
-                ref, basis = la.eigh(a)
-                selected = select_symmetric_reference(
-                    ref, k, which, sigma.real if name == "SymEigsShift" else None
-                )
-                expected = ref[selected]
-                allowed = basis[:, np.min(abs(ref[:, None] - expected), axis=1) <= 1e-9]
-                errors.update(
-                    spectrum_error=float(np.max(abs(np.sort(w) - np.sort(expected)))),
-                    orthogonality_error=float(np.max(abs(v.conj().T @ v - np.eye(k)))),
-                    subspace_error=float(np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)),
-                )
-            if name == "DavidsonSymEigs":
-                errors.update(
-                    max_normalized_residual=float(
-                        np.max(np.linalg.norm(residual, axis=0) / np.maximum(1.0, abs(w)))
-                    ),
-                    reported_max_normalized_residual=float(np.max(solver.residuals.numpy())),
-                    vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
-                )
-            if name in ("GenEigs", "ComplexEigs") and which == "SM":
-                ref, basis = la.eig(a)
-                # A real problem may cut through a conjugate pair with equal
-                # magnitude. Accept either boundary eigenvalue, but match each
-                # returned value to a distinct reference slot.
-                cutoff = np.sort(abs(ref))[k - 1] + margin
-                selected = np.flatnonzero(abs(ref) <= cutoff)
-                costs = abs(w[:, None] - ref[selected])
-                rows, cols = linear_sum_assignment(costs)
-                allowed = la.orth(basis[:, selected])
-                errors.update(
-                    spectrum_error=float(np.max(costs[rows, cols])),
-                    vector_norm_error=float(np.max(abs(np.linalg.norm(v, axis=0) - 1))),
-                    subspace_error=float(np.linalg.norm(v - allowed @ (allowed.conj().T @ v), 2)),
-                )
-            # Upstream generic tests require residuals and successful convergence.
-            # Examples 1/2/4 additionally check the requested eigenvalues.
-            if name in ("Example1", "Example1Shift", "Example2", "Example4"):
-                ref = la.eigvalsh(a)
-                ref = ref[:k] if name == "Example1Shift" else ref[-k:]
-                errors["spectrum_error"] = float(np.max(np.abs(np.sort(w.real) - ref)))
-                err = max(err, errors["spectrum_error"])
-            conv = getattr(
-                solver, "converged", getattr(getattr(solver, "real", None), "converged", None)
-            )
-            if conv is not None:
-                count = int(conv.numpy()[0])
-                if isinstance(solver, HermitianEigensolver):
-                    # The realification solves for 2*k real pairs. Its count
-                    # must not be compared directly with k complex pairs.
-                    errors["reported_converged_real"] = count
-                    errors["extracted_complex_pairs"] = int(solver.count.numpy()[0])
-                    count = min(count // 2, errors["extracted_complex_pairs"])
-                errors["reported_converged"] = count
-        errors["solver_status"] = solver_status(solver)
-        errors["solver_status_required"] = True
-        contract = contracts(
-            dict(
-                **case,
-                **errors,
-                outcome="failed",  # Evaluated; final status is derived below.
-                upstream_absolute_tolerance=margin,
-            )
-        )
-        numerical_pass = contract["checked_numerical_bounds_pass"]
-        ok = contract["strict_contract_pass"]
-        # Keep the strict historical outcome, but do not conflate original
-        # assertions with the solver's stricter/transformed stopping test.
-        count = errors.get("reported_converged")
-        convergence_space = "original_problem"
-        physical_count = count
-        if evaluation is not None:
-            convergence_space = "inverse_operator"
-            physical_count = int(evaluation.converged.numpy()[0])
-        elif isinstance(solver, PartialSVD):
-            convergence_space = "augmented_operator"
-            physical_count = min(
-                int(solver.count_left.numpy()[0]), int(solver.count_right.numpy()[0])
-            )
-        elif isinstance(solver, HermitianEigensolver):
-            convergence_space = "realification_and_extraction"
-            physical_count = None  # No independent complex residual counter in this API.
-        factor = getattr(inv, "inverse", inv)
-        factor = getattr(factor, "inverse", factor)
-        return dict(
-            solver_type=type(solver).__name__,
-            requested_ncv=ncv,
-            **solver_metadata(solver),
-            iteration_method=getattr(solver, "method", None),
-            cudss_mtype=getattr(factor, "mtype", None),
-            cudss_reordering=getattr(factor, "reordering", None),
-            cudss_matching=getattr(factor, "matching", None),
-            cudss_refinement_steps=factor.refinement_steps
-            if isinstance(factor, CuDSSInverse)
-            else None,
-            outcome="passed" if ok else "failed",
-            **timing,
-            iteration_budget=iterations,
-            upstream_absolute_tolerance=margin,
-            checked_numerical_bounds_pass=numerical_pass,
-            requested_spectrum_checked=contract["requested_spectrum_checked"],
-            internal_tolerance=threshold,
-            reported_convergence_space=convergence_space,
-            reported_count_pass=None if count is None else count >= k,
-            reported_status_pass=contract["reported_status_pass"],
-            original_evaluation_converged=physical_count,
-            **errors,
-        )
+                wp.synchronize_device(solver.device)
+                trials.append(evaluate())
+            return combine_accuracy_trials(case, trials)
+        setup = time.perf_counter() - started
+        timing = dict(setup_seconds=setup, **execute(solver, iterations, **options))
+        return evaluate()
     except Unsupported as e:
         return dict(outcome="unsupported", reason=str(e))
     except Exception as e:
