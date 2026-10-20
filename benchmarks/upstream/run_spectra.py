@@ -82,6 +82,18 @@ def solver_metadata(solver):
     )
 
 
+def solver_status(solver):
+    """Read a device status only after execution, including wrapped solvers."""
+    visited = set()
+    while solver is not None and id(solver) not in visited:
+        visited.add(id(solver))
+        status = getattr(solver, "status", None)
+        if status is not None:
+            return int(status.numpy()[0])
+        solver = getattr(solver, "core", getattr(solver, "real", None))
+    return None
+
+
 def select_symmetric_reference(values, k, which, sigma=None):
     """Select on the iteration spectrum, retaining physical reference indices."""
     ranking = values if sigma is None else 1.0 / (values - sigma)
@@ -349,6 +361,8 @@ def run(
                     errors["extracted_complex_pairs"] = int(solver.count.numpy()[0])
                     count = min(count // 2, errors["extracted_complex_pairs"])
                 errors["reported_converged"] = count
+        errors["solver_status"] = solver_status(solver)
+        errors["solver_status_required"] = True
         contract = contracts(
             dict(
                 **case,
@@ -397,6 +411,7 @@ def run(
             internal_tolerance=threshold,
             reported_convergence_space=convergence_space,
             reported_count_pass=None if count is None else count >= k,
+            reported_status_pass=contract["reported_status_pass"],
             original_evaluation_converged=physical_count,
             **errors,
         )

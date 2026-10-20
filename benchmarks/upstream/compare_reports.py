@@ -41,6 +41,8 @@ def contracts(row):
         )
     count = row.get("reported_converged")
     count_pass = None if count is None or not evaluated else count >= row["k"]
+    status = row.get("solver_status")
+    status_pass = None if status is None or not evaluated else math.isfinite(status) and status == 0
     physical_count_pass = None
     if (
         evaluated
@@ -53,11 +55,18 @@ def contracts(row):
         checked_fields=fields if evaluated else [],
         requested_spectrum_checked=spectrum_checked and evaluated,
         reported_count_pass=count_pass,
+        reported_status_pass=status_pass,
         physical_count_pass=physical_count_pass,
         upstream_allows_nonconvergence=row.get("upstream_allows_nonconvergence", False),
         # This field is deliberately stricter than numerical conformance alone.
         strict_contract_pass=(
-            numerical is True and count_pass is True and physical_count_pass is not False
+            numerical is True
+            and count_pass is True
+            and physical_count_pass is not False
+            and (
+                status_pass is True
+                or (status_pass is None and not row.get("solver_status_required", False))
+            )
         ),
         numerical_pass_count_short=(
             numerical is True and (count_pass is False or physical_count_pass is False)
@@ -79,6 +88,7 @@ def index(paths):
 
 def compare(baseline, current):
     changes, numerical_regressions, lost_passes = [], [], []
+    status_regressions = []
     contradictions = []
     classifications = {key: contracts(row) for key, row in current.items()}
     for key, row in current.items():
@@ -98,6 +108,11 @@ def compare(baseline, current):
             and contract["checked_numerical_bounds_pass"] is not True
         ):
             numerical_regressions.append(key)
+        if (
+            previous["reported_status_pass"] is True
+            and contract["reported_status_pass"] is not True
+        ):
+            status_regressions.append(key)
     missing = sorted(baseline.keys() - current.keys())
     return dict(
         current_counts=dict(Counter(row["outcome"] for row in current.values())),
@@ -117,10 +132,13 @@ def compare(baseline, current):
         outcome_changes=changes,
         lost_passes=lost_passes,
         numerical_regressions=numerical_regressions,
+        status_regressions=status_regressions,
         missing_cases=missing,
         new_cases=sorted(current.keys() - baseline.keys()),
         contradictory_successes=contradictions,
-        regression_free=not (lost_passes or numerical_regressions or missing or contradictions),
+        regression_free=not (
+            lost_passes or numerical_regressions or status_regressions or missing or contradictions
+        ),
         contracts=classifications,
     )
 
