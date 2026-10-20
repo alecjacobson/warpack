@@ -50,7 +50,14 @@ def physical(vectors, balance, values=None, kinematic=False):
 
 
 def scipy_setup(
-    case, ncv, tol=1e-10, balance=1.0, polish=0, reference_refinement=0, kinematic=False
+    case,
+    ncv,
+    tol=1e-10,
+    balance=1.0,
+    polish=0,
+    reference_refinement=0,
+    kinematic=False,
+    pencil_rayleigh=False,
 ):
     matrix = coordinates(case, balance)
     mass = case.b
@@ -82,6 +89,9 @@ def scipy_setup(
             vectors = apply(vectors if mass is None else mass @ vectors)
             vectors /= np.linalg.norm(vectors, axis=0)
         vectors /= np.linalg.norm(vectors, axis=0)
+        if pencil_rayleigh:
+            bv = mass @ vectors
+            values = np.sum(bv.conj() * (matrix @ vectors), axis=0) / np.sum(abs(bv) ** 2, axis=0)
         return values, physical(vectors, balance, values, kinematic), {"count": len(values)}
 
     return solve, lambda: None
@@ -96,6 +106,7 @@ def spectra_setup(
     polish=0,
     reference_refinement=0,
     kinematic=False,
+    pencil_rayleigh=False,
 ):
     lib = ctypes.CDLL(str(Path(library).resolve()))
     try:
@@ -192,6 +203,10 @@ def spectra_setup(
                 raise RuntimeError("Spectra reference inverse polishing failed")
             shaped = vectors.reshape((matrix.shape[0], case.k), order="F")
             shaped /= np.linalg.norm(shaped, axis=0)
+        if pencil_rayleigh:
+            shaped = vectors.reshape((matrix.shape[0], case.k), order="F")
+            bv = case.b @ shaped
+            values = np.sum(bv.conj() * (matrix @ shaped), axis=0) / np.sum(abs(bv) ** 2, axis=0)
         return (
             values,
             physical(
@@ -217,6 +232,7 @@ def warp_setup(
     polish=0,
     kinematic=False,
     inner_restart=None,
+    pencil_rayleigh=False,
 ):
     start = initial(case, balance)
     device_start = wp.array(np.stack([start.real, start.imag], axis=-1), dtype=wp.vec2d)
@@ -241,6 +257,7 @@ def warp_setup(
                 tol=tol,
                 initial_vector=device_start,
                 polish_steps=polish,
+                rayleigh=pencil_rayleigh,
             )
         except Exception:
             inverse.close()

@@ -51,6 +51,7 @@ def main():
     parser.add_argument("--reference-refinement", type=int, default=0)
     parser.add_argument("--kinematic", action="store_true")
     parser.add_argument("--polish", type=int, default=0)
+    parser.add_argument("--pencil-rayleigh", action="store_true")
     parser.add_argument("--balance", type=float, default=1.0)
     parser.add_argument("--cycles", type=int, default=20)
     parser.add_argument("--inner-restart", type=int)
@@ -71,6 +72,8 @@ def main():
         parser.error("reference tolerance must be finite and positive")
     if args.polish < 0 or args.reference_refinement < 0:
         parser.error("polish must be nonnegative")
+    if args.pencil_rayleigh and not args.consistent_mass:
+        parser.error("pencil Rayleigh postprocessing requires --consistent-mass")
     if args.consistent_mass and (
         args.kind not in ("nonproportional", "gyroscopic") or args.balance != 1.0 or args.kinematic
     ):
@@ -96,6 +99,7 @@ def main():
         inner_restart=args.inner_restart,
         coordinate_scale=args.balance,
         inverse_polish_steps=args.polish,
+        pencil_rayleigh=args.pencil_rayleigh,
         recover_velocity=args.kinematic,
         reference_refinement_steps=args.reference_refinement,
         reference_tol=args.tol if args.reference_tol is None else args.reference_tol,
@@ -155,6 +159,7 @@ def main():
                     polish=args.polish,
                     kinematic=args.kinematic,
                     inner_restart=args.inner_restart if method == "warp-gmres" else None,
+                    pencil_rayleigh=args.pencil_rayleigh,
                 )
                 close = solver.close
                 wp.synchronize()
@@ -191,6 +196,7 @@ def main():
                     polish=args.polish,
                     reference_refinement=args.reference_refinement,
                     kinematic=args.kinematic,
+                    pencil_rayleigh=args.pencil_rayleigh,
                 )
                 row["setup_seconds"] = time.perf_counter() - begin
                 latest = None
