@@ -231,8 +231,9 @@ class BatchedCGPreconditioner:
             raise ValueError("Call warp.sparse.bsr_compress before constructing an inverse")
         if working_dtype not in (wp.float32, wp.float64):
             raise ValueError("working_dtype must be float32 or float64")
+        # Upstream scalar diagonal preconditioners expose shape (n,), not (n,n).
         if preconditioner is not None and (
-            getattr(preconditioner, "shape", None) != matrix.shape
+            getattr(preconditioner, "shape", None) not in (matrix.shape, (matrix.shape[0],))
             or getattr(preconditioner, "device", None) != matrix.device
         ):
             raise ValueError("preconditioner must match matrix shape and device")
