@@ -1,0 +1,28 @@
+{
+  "issue": 109,
+  "date": "2026-10-20",
+  "scope": "Experimental fixed direct-general checkpoint policy; no public promotion",
+  "pinned": {
+    "passed": 9,
+    "seconds": 5.97
+  },
+  "stock_warp115": {
+    "passed": 9,
+    "seconds": 6.34
+  },
+  "command": "python -m pytest tests/test_general_checkpoint_experiment.py -q",
+  "source_sha256": {
+    "benchmarks/experimental/general_checkpoint.py": "67775c326cde2bd6658c3d54dafc6c885b38c328a5256ffa106e3b63b37caf64",
+    "benchmarks/experimental/general_selection_profiles.py": "326b07ecf76d1fe7d2b80d6107b7de078741051de5be3bb468995906d20ee8fa",
+    "benchmarks/experimental/compare_general_checkpoint.py": "7a1f89ffae872519beb5c1ae1d215493af24ffbc258e87e5cff83b30904f0b73",
+    "tests/test_general_checkpoint_experiment.py": "ea8d6202937fb90479cda607b0e444d52f669b7adc01ad1eae7a647349f9ab4c"
+  },
+  "checks": [
+    "Six selectors and changed-matrix replay",
+    "No stale checkpoint after newly unconverged problem",
+    "Small fixed-budget partial-space regression",
+    "Returned and working spectra remain separate",
+    "Graph has no HOST/HtoD/DtoH",
+    "Resolved cluster target improvement; full20-case/60-replay audit passes. Final matched timing rejected due baseline accuracy failure."
+  ]
+}

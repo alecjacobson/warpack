@@ -224,6 +224,12 @@ All **nine** regressions pass on pinned Warp (5.97 s) and stock 1.15 (6.34 s).
 The full 20-case / 60-replay fixed-80 audit was repeated after this correction,
 and all cases pass again.
 [Corrected-policy results](../../results/general-selection-checkpoint-cluster-fixed.json).
-The overhead measurement above belongs to the preceding policy; a final
-matched timing control is being recorded separately. Public solver behavior
-is still unchanged by this experiment.
+The overhead measurement above belongs to the preceding policy. The final
+matched control is **rejected**: all three checkpoint samples pass, but one
+baseline sample returns only nine converged pairs (normalized residual 0.0872,
+spectrum error 29.95). This reproduces #108; no final-policy overhead ratio is
+claimed. The monitor observed no competing GPU job; the child exit status is
+nonzero because numerical acceptance failed.
+[Final control](../../results/general-checkpoint-final-overhead.json),
+[occupancy](../../results/general-checkpoint-final-overhead.occupancy.json).
+Public solver behavior is still unchanged by this experiment.
