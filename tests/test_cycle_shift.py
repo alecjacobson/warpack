@@ -19,7 +19,19 @@ def test_captured_cycle_shift_original_modes(k, ncv):
     inverse = CuDSSInverse(matrix(a - sigma * eye), 1, mtype="symmetric")
     solver = KrylovSchur(inverse, k, ncv=ncv, tol=1e-12)
     evaluation = EigenpairEvaluation(SparseOperator(matrix(a)), solver.eigenvectors, tol=1e-9)
-    graph = solver.capture(100, finalizer=evaluation.run)
+    fresh = EigenpairEvaluation(
+        inverse,
+        solver.eigenvectors,
+        tol=solver.tol,
+        eigenvalues=solver.eigenvalues,
+        rhs_width=1,
+    )
+
+    def finalize():
+        evaluation.run()
+        fresh.run()
+
+    graph = solver.capture(100, finalizer=finalize)
     try:
         for _ in range(2):
             wp.capture_launch(graph)
@@ -37,6 +49,15 @@ def test_captured_cycle_shift_original_modes(k, ncv):
             # Do not substitute the inverse-space counter for physical accuracy.
             assert solver.converged.numpy()[0] == np.count_nonzero(
                 solver.residuals.numpy() <= np.float32(solver.tol)
+            )
+            mu = solver.eigenvalues.numpy()
+            expected_fresh = np.linalg.norm(fresh.ax.numpy().T - vectors * mu, axis=0)
+            expected_fresh /= np.maximum(1, abs(mu))
+            np.testing.assert_allclose(
+                fresh.residuals.numpy(), expected_fresh, rtol=1e-3, atol=1e-15
+            )
+            assert fresh.converged.numpy()[0] == np.count_nonzero(
+                fresh.residuals.numpy() <= np.float32(solver.tol)
             )
     finally:
         solver.graph = graph = None

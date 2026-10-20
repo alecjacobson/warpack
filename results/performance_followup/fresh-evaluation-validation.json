@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-20",
+  "base_commit": "c295594",
+  "issues": [
+    36,
+    93
+  ],
+  "scope": "Optional fresh returned-value evaluation and fixed RHS batching; no Krylov algorithm/default stopping changes.",
+  "focused_pinned": {
+    "passed": 32,
+    "seconds": 7.83,
+    "note": "Before final existing cycle tests added fresh-finalizer assertions; final full suite will include these."
+  },
+  "focused_stock": {
+    "passed": 32,
+    "seconds": 9.4,
+    "note": "Final focused source including cycle finalizer assertions, Warp1.15."
+  },
+  "source_sha256": {
+    "warpack/solver.py": "1b2bfb4887cf18d6c0ed94af2980119d1d441ce345dd3772e6bb8f8d85eaaa92",
+    "tests/test_cycle_shift.py": "8d6e3417b14d4fb96d4d2eaa573b60d1108353b49b0ba35770948eea26ca00f6",
+    "tests/test_fresh_eigenpair_evaluation.py": "3f20dae8b33b9bebe728bbe964d1b0d5c4b04666e2792307a0230360eb81fbdb",
+    "benchmarks/upstream/cycle_floor.py": "b7b8a21d964866d71856ade08979f795ee6d8f27aa44940231e7f2b4bcf4c4ef",
+    "benchmarks/experimental/fresh_eigenpair_cost.py": "4ab1c9a52eb68108d8179c59418e66eda1cb9be9a31926a35ac15becde493fc7"
+  },
+  "precision_probes": {
+    "initial": "cycle-floor-initial.json:48 manual fresh post-replay measurements before API change; prototype retained in historical/cycle-floor-initial-probe.md",
+    "first_captured": "cycle-floor-first-fresh.json:48 fresh evaluator runs; physical Rayleigh checks",
+    "final": "cycle-floor-fresh.json:48 runs with returned physical values, complete subspace and stored vectors; all physical checks pass; inverse1e-12 remains failed"
+  },
+  "component": "fresh-eigenpair-cost.json:both graphs pass all8 counts and gates; medians79.6577/81.4553ms, alternating five trials; no competing GPU processes",
+  "wheel": "fresh-evaluation-wheel.json:clean23-module wheel; new evaluator signature imported outside checkout",
+  "limitations": [
+    "Cached Krylov residual estimates remain iteration diagnostics; optional fresh check does not change stopping.",
+    "Fresh inverse1e-12 is not claimed as passed in cycle precision probes.",
+    "Fresh cuDSS evaluation adds known vendor metadata HtoD nodes; no HOST or DtoH.",
+    "Probe high-precision references are benchmark-only, never part of production computation."
+  ],
+  "full_suite": {
+    "passed": 941,
+    "seconds": 415.67,
+    "environment": "Python3.10, pinned Warp1.18.0+cu12 overlay04427b997fe7ff07bc6ed1dde5ca9813496c6b55, NVIDIA L40, driver570.158.01; BLAS/OpenMP4",
+    "command": "PYTHONPATH=/home/horde/projects/warpack/build/warp-fsai:$PWD OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q"
+  },
+  "lint": "ruff check warpack tests benchmarks examples:passed",
+  "format": "ruff format --check warpack tests benchmarks examples:262 files formatted",
+  "full_suite_note": "Final core arithmetic and tests; only core docstring wording clarified during the run."
+}

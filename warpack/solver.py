@@ -512,6 +512,13 @@ class KrylovSchur(SymmetricEigensolver):
     basis spans the full problem). Thus it can continue after all ``k`` returned
     residuals pass. ``converged`` counts residual-passing pairs; neither that
     count nor a fixed iteration budget proves global spectrum completeness.
+
+    Unless sparse products are explicitly reapplied after restart, residuals
+    use rotated cached operator images (including inverse and generic callback
+    operators). At tight tolerances these are estimates, not fresh applications of
+    the operator. ``EigenpairEvaluation(..., eigenvalues=solver.eigenvalues)``
+    checks the returned pairs with fresh products; use ``rhs_width=1`` for a
+    one-RHS inverse. This optional final check does not alter iteration stopping.
     """
 
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
@@ -787,12 +794,37 @@ class KrylovSchur(SymmetricEigensolver):
 
 
 class EigenpairEvaluation:
-    """Evaluate Rayleigh quotients and normalized residuals in the original problem."""
+    """Evaluate fresh real standard-problem residuals for unit-norm vectors.
 
-    def __init__(self, operator, vectors, tol=1.0e-9):
+    By default, recompute Rayleigh values. Supplying ``eigenvalues`` instead
+    checks the current provided values without replacing them by Rayleigh
+    values. ``residuals`` is ``||A*x-lambda*x|| / max(1, abs(lambda))`` and
+    ``converged`` counts passing pairs; neither certifies spectrum selection.
+
+    ``rhs_width`` optionally splits operator applications into fixed-size row
+    batches, e.g. 1 for a one-RHS inverse. It must divide the vector count.
+    All work remains on device and can be recorded as a capture finalizer.
+    This independent check does not change the eigensolver's stopping rule or
+    cached residual estimates. Input array identities/topology must stay fixed.
+    """
+
+    def __init__(self, operator, vectors, tol=1.0e-9, *, eigenvalues=None, rhs_width=None):
         self.op, self.vectors, self.tol = operator, vectors, tol
         self.k, self.n = vectors.shape
         self.device = operator.device
+        if eigenvalues is not None and (
+            eigenvalues.shape != (self.k,)
+            or eigenvalues.dtype != wp.float64
+            or eigenvalues.device != self.device
+        ):
+            raise ValueError("eigenvalues must be FP64 (k,) on the operator device")
+        if rhs_width is not None:
+            from operator import index
+
+            rhs_width = index(rhs_width)
+            if rhs_width < 1 or self.k % rhs_width:
+                raise ValueError("rhs_width must be positive and divide the vector count")
+        self.input_eigenvalues, self.rhs_width = eigenvalues, rhs_width
         self.ax = wp.empty_like(vectors)
         self.quotients = wp.zeros((self.k, 1), dtype=wp.float64, device=self.device)
         self.flat = self.quotients.flatten()
@@ -803,18 +835,26 @@ class EigenpairEvaluation:
         self.converged = wp.zeros(1, dtype=wp.int32, device=self.device)
 
     def run(self):
-        self.op.apply(self.vectors, self.ax)
-        self.quotients.zero_()
+        if self.rhs_width is None:
+            self.op.apply(self.vectors, self.ax)
+        else:
+            for start in range(0, self.k, self.rhs_width):
+                rows = slice(start, start + self.rhs_width)
+                self.op.apply(self.vectors[rows], self.ax[rows])
         self.norms.zero_()
         self.converged.zero_()
         wp.launch(K.identity_order, self.k, [self.order], device=self.device)
-        wp.launch_tiled(
-            K.rayleigh,
-            dim=(self.k, (self.n + 255) // 256),
-            inputs=[self.vectors, self.ax, self.quotients],
-            block_dim=128,
-            device=self.device,
-        )
+        if self.input_eigenvalues is None:
+            self.quotients.zero_()
+            wp.launch_tiled(
+                K.rayleigh,
+                dim=(self.k, (self.n + 255) // 256),
+                inputs=[self.vectors, self.ax, self.quotients],
+                block_dim=128,
+                device=self.device,
+            )
+        else:
+            wp.copy(self.flat, self.input_eigenvalues)
         wp.launch_tiled(
             K.residual,
             dim=(self.k, (self.n + 255) // 256),

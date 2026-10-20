@@ -1,0 +1,223 @@
+{
+  "args": {
+    "side": 16,
+    "repeats": 5,
+    "out": "results/performance_followup/fresh-eigenpair-cost.json"
+  },
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "n": 4096,
+  "nnz": 27136,
+  "k": 8,
+  "ncv": 32,
+  "cycles": 12,
+  "sigma": -0.1,
+  "setup_seconds": 0.07084572687745094,
+  "setup_scope": "Shared cuDSS factor/workspace setup only; fixture, solver/evaluator allocations and capture excluded",
+  "protocol": "Dirichlet3D Poisson; independent sine-product spectrum and complete allowed space. Seed42 starts; no reference initialization. Both graphs include original Rayleigh/physical residual finalization. Optional graph additionally checks returned inverse values with8 one-RHS solves. Three warmups each then alternating timing order. Default graph receives fresh check outside timing for validation. No numerical/tolerance changes.",
+  "capture_seconds": {
+    "False": 0.39185378700494766,
+    "True": 0.22980105504393578
+  },
+  "rows": [
+    {
+      "fresh_in_graph": false,
+      "repeat": 0,
+      "seconds": 0.07965772226452827,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.1421660101358533e-14,
+      "physical_residual": 3.650619811031968e-15,
+      "returned_spectrum_error": 3.497202527569243e-15,
+      "rayleigh_spectrum_error": 3.164135620181696e-15,
+      "subspace_error": 6.662151797722738e-15,
+      "orthogonality_error": 1.1546319456101628e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": true,
+      "repeat": 0,
+      "seconds": 0.08132842928171158,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 9.794889122669905e-15,
+      "physical_residual": 4.08471819926613e-15,
+      "returned_spectrum_error": 4.163336342344337e-15,
+      "rayleigh_spectrum_error": 3.83026943495679e-15,
+      "subspace_error": 7.126491744625474e-15,
+      "orthogonality_error": 1.021405182655144e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": true,
+      "repeat": 1,
+      "seconds": 0.08153019472956657,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.2897914056980358e-14,
+      "physical_residual": 3.343668014951255e-15,
+      "returned_spectrum_error": 3.552713678800501e-15,
+      "rayleigh_spectrum_error": 2.609024107869118e-15,
+      "subspace_error": 6.775260495894783e-15,
+      "orthogonality_error": 1.2656542480726785e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": false,
+      "repeat": 1,
+      "seconds": 0.07957946509122849,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.1606284333318549e-14,
+      "physical_residual": 4.693985033843473e-15,
+      "returned_spectrum_error": 5.051514762044462e-15,
+      "rayleigh_spectrum_error": 4.385380947269368e-15,
+      "subspace_error": 4.871677346820233e-15,
+      "orthogonality_error": 1.176836406102666e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": false,
+      "repeat": 2,
+      "seconds": 0.0794965922832489,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.2703033437477262e-14,
+      "physical_residual": 3.556059033783641e-15,
+      "returned_spectrum_error": 3.497202527569243e-15,
+      "rayleigh_spectrum_error": 3.219646771412954e-15,
+      "subspace_error": 5.552323022005567e-15,
+      "orthogonality_error": 1.2212453270876722e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": true,
+      "repeat": 2,
+      "seconds": 0.08147437497973442,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.1872025679918486e-14,
+      "physical_residual": 5.2138799396969996e-15,
+      "returned_spectrum_error": 5.162537064506978e-15,
+      "rayleigh_spectrum_error": 4.440892098500626e-15,
+      "subspace_error": 8.483387053454379e-15,
+      "orthogonality_error": 1.176836406102666e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": true,
+      "repeat": 3,
+      "seconds": 0.0814552865922451,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 9.60005794807817e-15,
+      "physical_residual": 4.4229080723017804e-15,
+      "returned_spectrum_error": 2.220446049250313e-15,
+      "rayleigh_spectrum_error": 2.7200464103316335e-15,
+      "subspace_error": 4.634064257010128e-15,
+      "orthogonality_error": 9.769962616701378e-15,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": false,
+      "repeat": 3,
+      "seconds": 0.07968201860785484,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.186788011776944e-14,
+      "physical_residual": 3.558944881412297e-15,
+      "returned_spectrum_error": 3.219646771412954e-15,
+      "rayleigh_spectrum_error": 2.6645352591003757e-15,
+      "subspace_error": 7.0445431326273266e-15,
+      "orthogonality_error": 1.2212453270876722e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": false,
+      "repeat": 4,
+      "seconds": 0.0796934925019741,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.3664382335547847e-14,
+      "physical_residual": 4.080414085220176e-15,
+      "returned_spectrum_error": 4.385380947269368e-15,
+      "rayleigh_spectrum_error": 3.774758283725532e-15,
+      "subspace_error": 9.66719874357384e-15,
+      "orthogonality_error": 1.3988810110276972e-14,
+      "accepted": true
+    },
+    {
+      "fresh_in_graph": true,
+      "repeat": 4,
+      "seconds": 0.08138633146882057,
+      "cached_count": 8,
+      "fresh_count": 8,
+      "physical_count": 8,
+      "status": 0,
+      "fresh_residual": 1.1675883088909427e-14,
+      "physical_residual": 3.0536849229951718e-15,
+      "returned_spectrum_error": 3.164135620181696e-15,
+      "rayleigh_spectrum_error": 2.3314683517128287e-15,
+      "subspace_error": 6.475007378604476e-15,
+      "orthogonality_error": 1.1546319456101628e-14,
+      "accepted": true
+    }
+  ],
+  "source_sha256": {
+    "/home/horde/projects/warpack-cycle-floor/benchmarks/experimental/fresh_eigenpair_cost.py": "4ab1c9a52eb68108d8179c59418e66eda1cb9be9a31926a35ac15becde493fc7",
+    "warpack/solver.py": "28b4b6d8277a388702f52064db2c6f2ee5fefc5ac068d1dbe46a5b3b561180a7"
+  },
+  "graphs": {
+    "False": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 1074,
+        "KERNEL": 6264,
+        "MEMCPY": 1329,
+        "CONDITIONAL": 251
+      },
+      "memcpy_kinds": {
+        "HtoD (HOST PAGEABLE to DEVICE)": 526,
+        "DtoD (DEVICE to DEVICE)": 803
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "True": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 1108,
+        "KERNEL": 6323,
+        "MEMCPY": 1362,
+        "CONDITIONAL": 251
+      },
+      "memcpy_kinds": {
+        "HtoD (HOST PAGEABLE to DEVICE)": 542,
+        "DtoD (DEVICE to DEVICE)": 820
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    }
+  },
+  "accepted": true,
+  "competing_gpu_processes": [],
+  "timing_eligible": true,
+  "median_seconds": {
+    "False": 0.07965772226452827,
+    "True": 0.0814552865922451
+  }
+}
