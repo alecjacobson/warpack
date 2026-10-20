@@ -1,0 +1,28 @@
+{
+  "issue": 108,
+  "date": "2026-10-20",
+  "scope": "Experimental fixed direct-general checkpoint policy; no public promotion",
+  "pinned": {
+    "passed": 8,
+    "seconds": 5.12
+  },
+  "stock_warp115": {
+    "passed": 8,
+    "seconds": 6.33
+  },
+  "command": "python -m pytest tests/test_general_checkpoint_experiment.py -q",
+  "source_sha256": {
+    "benchmarks/experimental/general_checkpoint.py": "600933e1e673f0c79728e6ab1db0bb15ed8a0648cfd11cf25de9d51591206af4",
+    "benchmarks/experimental/general_selection_profiles.py": "326b07ecf76d1fe7d2b80d6107b7de078741051de5be3bb468995906d20ee8fa",
+    "benchmarks/experimental/compare_general_checkpoint.py": "7a1f89ffae872519beb5c1ae1d215493af24ffbc258e87e5cff83b30904f0b73",
+    "tests/test_general_checkpoint_experiment.py": "b6078ffe354b84642e65400f962cd73aaa917a9cba45f6f6d75d57a4cf4c4317"
+  },
+  "checks": [
+    "Six selectors and changed-matrix replay",
+    "No stale checkpoint after newly unconverged problem",
+    "Small fixed-budget partial-space regression",
+    "Returned and working spectra remain separate",
+    "Graph has no HOST/HtoD/DtoH",
+    "Matched case36 overhead ratio1.00146 with full per-trial acceptance and clean occupancy"
+  ]
+}

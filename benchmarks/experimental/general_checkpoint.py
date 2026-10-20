@@ -106,6 +106,7 @@ class CheckpointGeneral(StartedGeneral):
         self.checkpoint_error = wp.zeros_like(self.checkpoint_score)
         self.checkpoint_values = wp.empty_like(self.eigenvalues)
         self.checkpoint_vectors = wp.empty_like(self.eigenvectors)
+        self.working_values = wp.empty_like(self.ritz)
 
     def initialize(self, seed=42):
         self.checkpoint_valid.zero_()
@@ -146,7 +147,13 @@ class CheckpointGeneral(StartedGeneral):
             device=self.device,
         )
 
+    def capture(self, max_iterations=100, adaptive=False, finalizer=None):
+        if adaptive is not False:
+            raise ValueError("Experimental checkpoints require fixed capture (adaptive=False)")
+        return super().capture(max_iterations, adaptive=False, finalizer=finalizer)
+
     def finalize(self):
+        wp.copy(self.working_values, self.ritz)
         wp.launch(
             restore_checkpoint,
             self.eigenvectors.shape,
@@ -161,3 +168,6 @@ class CheckpointGeneral(StartedGeneral):
             device=self.device,
         )
         super().finalize()
+        # Keep the working Schur spectrum consistent with h/projected. The
+        # returned snapshot can precede the final projected search state.
+        wp.copy(self.ritz, self.working_values)

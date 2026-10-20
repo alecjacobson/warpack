@@ -75,3 +75,33 @@ def test_checkpoint_cannot_reuse_previous_convergence_on_new_problem():
             np.testing.assert_allclose(np.sort(w.real), [5, 7, 9], atol=1e-10)
         else:
             assert errors.max() > 1e-4
+
+
+def test_fixed_restarts_preserve_completed_partial_spectrum(tmp_path):
+    # The unmodified ncv=24 / fixed-60 profile can replace a converged
+    # conjugate-boundary mode with an inaccurate larger Ritz estimate. A
+    # per-cycle trace of this deterministic input first passed at cycle 15,
+    # then failed ten later selections, including cycle 60.
+    from benchmarks.upstream.general_reference import GeneralReference
+
+    n, k = 96, 4
+    rng = np.random.default_rng(1)
+    a = rng.normal(size=(n, n))
+    initial = rng.normal(size=n)
+    solver = CheckpointGeneral(complex_matrix(a), k, ncv=24, tol=1e-10)
+    solver.start_vector = wp.array(np.column_stack([initial, np.zeros(n)]), dtype=wp.vec2d)
+    graph = solver.capture(60, adaptive=False)
+    reference = GeneralReference(a, k)
+    for _ in range(3):
+        wp.capture_launch(graph)
+        assert reference.check(output(solver.eigenvalues), output(solver.eigenvectors).T)[
+            "accepted"
+        ]
+        assert solver.converged.numpy()[0] == k
+        assert solver.status.numpy()[0] == 0
+        # Restoring output must not corrupt the working projected spectrum.
+        np.testing.assert_array_equal(output(solver.ritz), np.diag(output(solver.h)))
+    dot = tmp_path / "general-checkpoint.dot"
+    wp.capture_debug_dot_print(graph, str(dot))
+    audit = dot.read_text()
+    assert "HOST" not in audit and "HtoD" not in audit and "DtoH" not in audit

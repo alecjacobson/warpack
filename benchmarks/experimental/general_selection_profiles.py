@@ -33,6 +33,8 @@ def main():
     args = parser.parse_args()
     if min(args.ncv_multiplier, args.budget, args.repeats, args.ncv or 1) < 1:
         parser.error("width multiplier, budget and repeats must be positive")
+    if args.checkpoint and not args.fixed:
+        parser.error("The checkpoint experiment requires --fixed")
     cases = [
         json.loads(line)
         for line in (args.fixtures / "benchmark_gen.jsonl").read_text().splitlines()

@@ -143,9 +143,7 @@ spectrum error 2.95e-13, and invariant-subspace error 7.59e-14.
 
 Seven initial regressions pass (2.23 s), covering all six selectors, changed
 matrix replay, and a previously converged problem followed by an unconverged
-one. These prevent stale results from substituting for a new solve. A small
-partial-space overiteration regression, stock-runtime coverage and performance
-regression measurements are still being added. No checkpoint policy is part of
+one. These prevent stale results from substituting for a new solve. The subsequent small partial-space regression and overhead checks are recorded below. No checkpoint policy is part of
 the public solver yet. In particular, the benchmark-only fixed direct-operator
 results do not establish accuracy for transformed/physical cuDSS stopping
 criteria or imply a global spectral-completeness certificate.
@@ -156,3 +154,50 @@ upstream fixture settings or certify the original-width adaptive profile. The
 prototype uses cached operator images for checkpoint eligibility, followed by
 fresh original residuals at return, and needs one additional k-by-n complex
 vector buffer. No speedup is claimed before its cost is measured.
+
+## Checkpoint regression and overhead control
+
+A deterministic n=96, k=4, ncv=24 real Gaussian problem (NumPy RNG seed 1)
+provides a small partial-space regression without storing a large binary.
+The diagnostic first passed at cycle 15, then lost the selected set at ten
+later cycles, including 60. The checkpoint version passes three reset
+fixed-60 replays with the complete requested set, original residuals and no
+host transfers/callbacks. Returning a saved result also preserves the separate
+working Schur spectrum instead of overwriting it. The experimental capture API
+now explicitly requires fixed iteration.
+
+All **eight** checkpoint regressions pass on pinned Warp (5.12 s) and stock
+Warp 1.15 (6.33 s). This is focused prototype validation, not a full public-solver
+suite. [Validation record](../../results/performance_followup/general-checkpoint-validation.json).
+
+A matched overhead control uses `benchmark_gen_36`, n=1,000, k=10, ncv=60,
+fixed 80 cycles, tol=1e-10, and identical matrix/start buffers. Three synchronized
+warm samples per variant alternate order; every timed replay passes all common
+accuracy/count gates. Median full-solve time is **4.420655 s** without snapshots
+and **4.427092 s** with snapshots (ratio 1.00146, about 0.15% overhead). This is
+within ordinary unlocked-clock variation at this sample count, not a speedup
+claim or a general overhead bound. Failed fixed-budget cases are not used as
+accepted performance baselines.
+
+The checkpoint graph adds 161 kernels, two memsets and two DtoD copies to this
+80-cycle solve. Both graphs contain only device-to-device copies and no HOST
+nodes. Setup/capture and per-trial validation are excluded from solve timing
+and reported separately. The occupancy monitor observed no competing GPU jobs;
+its approximately one-second samples are evidence, not an exclusive reservation.
+[Timing/accuracy record](../../results/general-checkpoint-overhead.json),
+[occupancy](../../results/general-checkpoint-overhead.occupancy.json).
+
+```bash
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
+  PYTHONPATH="$PWD/build/warp-fsai:$PWD" \
+  python -m benchmarks.monitor_gpu \
+  --out build/general-checkpoint-overhead.occupancy.json \
+  --log build/general-checkpoint-overhead.log -- \
+  python -m benchmarks.experimental.compare_general_checkpoint \
+  --case benchmark_gen_36 --ncv 60 --budget 80 --repeats 3 \
+  --out build/general-checkpoint-overhead.json
+```
+
+Clustered-spectrum comparisons and physical shift-invert stopping still need
+validation before considering public promotion. The measured candidate and
+broader accuracy profile remain explicitly experimental.
