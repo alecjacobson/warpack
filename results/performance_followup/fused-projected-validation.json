@@ -1,0 +1,81 @@
+{
+  "issues": [
+    83,
+    84,
+    67
+  ],
+  "new_issues": [
+    85,
+    86
+  ],
+  "base_revision": "fc08d49",
+  "checkpoint_revision": "f798e88",
+  "date": "2026-10-20",
+  "full_suite": {
+    "passed": 839,
+    "seconds": 400.59,
+    "command": "PYTHONPATH=\"/home/horde/projects/warpack/build/warp-fsai:$PWD\" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 python -m pytest -q",
+    "scope": "Full collected local suite. One final benchmark-only acceptance test was added after collection; all four final acceptance tests separately passed."
+  },
+  "focused": {
+    "pinned_initial_passed": 129,
+    "pinned_initial_seconds": 7.92,
+    "pinned_final_acceptance_passed": 4,
+    "pinned_final_acceptance_seconds": 0.69,
+    "stock_passed": 158,
+    "stock_seconds": 29.24
+  },
+  "lint": "ruff check warpack tests benchmarks examples: passed",
+  "format": "ruff format --check warpack tests benchmarks examples: passed",
+  "packaging": "fused-projected-wheel.json: clean 23-module core wheel, isolated import including fused kernel",
+  "rejected_numerical_cli": {
+    "report": "fused-block-rejected-cg.json",
+    "exit_code": 1,
+    "converged": 0,
+    "requested": 4,
+    "failed_row_retained": true
+  },
+  "setup_failures": {
+    "issue": 86,
+    "reports": [
+      "fused-block-rejected.json",
+      "fused-block-rejected-fsai.json"
+    ],
+    "note": "Not numerical rejection tests; retain separately. Existing upstream FP64 BSR direct-preconditioner adapter rejects matrix element dtype."
+  },
+  "accepted_benchmarks": [
+    "anvil-projection-fused.json",
+    "block-projected-fused.json",
+    "related-consistent-fused.json",
+    "fused-normal-64.json",
+    "fused-normal-128.json",
+    "fused-regular-lm.json",
+    "fused-anvil-direct.json"
+  ],
+  "benchmark_policy": "Sequential monitored GPU jobs, restored starts, three warm samples, independent unchanged physical/spectrum/subspace/orthogonality/count gates. Native stopping requirements preserved; normal and direct references inspected per row. Setup/capture separate. Scaled regular route does not meet the extra native absolute threshold in every trial and is explicitly distinguished.",
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "aa756981307cdc3ef2d23d9d10fc42f27d2d5093f894bf9f0fcd0a3b103c0998",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  }
+}

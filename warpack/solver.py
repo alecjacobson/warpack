@@ -252,9 +252,14 @@ class SymmetricEigensolver:
         self.converged = empty(1, wp.int32)
         self.iterations = empty(1, wp.int32)
         self.running = empty(1, wp.int32)
+        # Measured Ada crossover: the fused global rounds outperform the
+        # shared kernel from 48 columns. Preserve other architectures' policy.
+        self._prefer_global_projected = (
+            self.m >= 48 and self.device.is_cuda and self.device.arch == 89
+        )
         self._global_jacobi = None
         if (
-            self.m > 64
+            (self.m > 64 or self._prefer_global_projected)
             and self.m % 2 == 0
             and self.device.is_cuda
             and wp.is_conditional_graph_supported()
@@ -305,6 +310,15 @@ class SymmetricEigensolver:
                 device=self.device,
             )
             return
+        if self._global_jacobi is not None:
+            self._global_jacobi.apply()
+            wp.launch(
+                K.sort_diagonal,
+                self.m,
+                [self.g, self.ritz, self.order, self.which],
+                device=self.device,
+            )
+            return
         if self.m <= 64:
             from .projected import jacobi_kernel
 
@@ -315,15 +329,6 @@ class SymmetricEigensolver:
                 block_dim=256,
                 device=self.device,
             )
-            wp.launch(
-                K.sort_diagonal,
-                self.m,
-                [self.g, self.ritz, self.order, self.which],
-                device=self.device,
-            )
-            return
-        if self._global_jacobi is not None:
-            self._global_jacobi.apply()
             wp.launch(
                 K.sort_diagonal,
                 self.m,

@@ -90,6 +90,21 @@ def prepare(args):
     return (matrix(p.a), matrix(p.b), shifted, None, p.a, p.b, p.k, lambda w, v: accuracy(p, w, v))
 
 
+def finalize_acceptance(report):
+    """Require outer accuracy/counts and each reference's declared stopping rule.
+
+    Truncated CG here is a preconditioner, not an exact inverse. Its diagnostic
+    unfinished RHS count is therefore deliberately not an acceptance failure.
+    """
+    for row in report["rows"]:
+        row["physical_and_outer_accepted"] = bool(row["quality"]["accepted"])
+        row["native_stopping_accepted"] = bool(row.get("full_block_absolute_tolerance_met", True))
+        row["accepted"] = row["physical_and_outer_accepted"] and row["native_stopping_accepted"]
+    report["accepted"] = bool(report["rows"]) and all(row["accepted"] for row in report["rows"])
+    report["accepted"] &= report.get("post_profile_quality", {}).get("accepted", True)
+    return report["accepted"]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
@@ -280,15 +295,13 @@ def main():
             path: hashlib.sha256(Path(path).read_bytes()).hexdigest()
             for path in (
                 "benchmarks/experimental/block_lobpcg.py",
-                "warpack/block.py",
-                "warpack/block_products.py",
+                *map(str, sorted(Path("warpack").glob("*.py"))),
                 "benchmarks/experimental/block_kernels.py",
                 "benchmarks/experimental/block_updates.py",
                 "benchmarks/experimental/compare_block.py",
                 "benchmarks/experimental/batched_cg.py",
                 "benchmarks/experimental/active_cg.py",
                 "benchmarks/experimental/cached_x_image.py",
-                "warpack/generalized.py",
             )
         },
     )
@@ -345,6 +358,11 @@ def main():
         report["post_profile_quality"] = check(
             solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
         )
+        post = report["post_profile_quality"]
+        post.update(
+            status=int(solver.status.numpy()[0]), converged=int(solver.converged.numpy()[0])
+        )
+        post["accepted"] &= post["status"] == 0 and post["converged"] == k
     after = other_gpu_processes()
     report.update(
         other_gpu_processes_before=before,
@@ -352,8 +370,11 @@ def main():
         timing_eligible=not (before or after),
         timing_note="Warm replay wall times; setup/capture separate. CuPy converges its entire starting block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence.",
     )
+    finalize_acceptance(report)
     destination.write_text(json.dumps(report, indent=2) + "\n")
     print(destination, flush=True)
+    if not report["accepted"]:
+        raise SystemExit("Rejected block comparison; all trial evidence retained")
 
 
 def profile_step(solver):

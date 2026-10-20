@@ -164,25 +164,29 @@ class GlobalJacobi:
     def _sweep(self):
         from . import kernels as K
 
+        current_h, current_v = self.h, self.v
+        next_h, next_v = self.temp, self.vtemp
         for r in range(self.n - 1):
             wp.launch(
                 K.jacobi_pairs,
                 self.n // 2,
-                [self.h, self.cs, self.ss, self.partners, r],
+                [current_h, self.cs, self.ss, self.partners, r],
                 device=self.device,
             )
             wp.launch(
-                K.jacobi_right,
+                K.jacobi_two_sided,
                 self.h.shape,
-                [self.h, self.v, self.temp, self.vtemp, self.cs, self.ss, self.partners],
+                [current_h, current_v, next_h, next_v, self.cs, self.ss, self.partners],
                 device=self.device,
             )
-            wp.launch(
-                K.jacobi_left,
-                self.h.shape,
-                [self.h, self.v, self.temp, self.vtemp, self.cs, self.ss, self.partners],
-                device=self.device,
-            )
+            current_h, next_h = next_h, current_h
+            current_v, next_v = next_v, current_v
+        # Even projected dimensions have an odd number of rounds. Restore the
+        # public buffers once per sweep. Copy locations are fixed at setup;
+        # both copies execute on device inside the bounded convergence loop.
+        if current_h is not self.h:
+            wp.copy(self.h, current_h)
+            wp.copy(self.v, current_v)
         wp.launch_tiled(
             global_jacobi_update,
             dim=1,

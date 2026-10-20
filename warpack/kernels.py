@@ -316,6 +316,25 @@ def jacobi_left(
 
 
 @wp.kernel
+def jacobi_two_sided(
+    h: wp.array2d[wp.float64],
+    v: wp.array2d[wp.float64],
+    out_h: wp.array2d[wp.float64],
+    out_v: wp.array2d[wp.float64],
+    c: wp.array[wp.float64],
+    s: wp.array[wp.float64],
+    p: wp.array[wp.int32],
+):
+    # Out-of-place J^T H J and V J for disjoint plane rotations. Preserve the
+    # right-then-left arithmetic order without materializing the first product.
+    i, j = wp.tid()
+    right_i = c[j] * h[i, j] - s[j] * h[i, p[j]]
+    right_p = c[j] * h[p[i], j] - s[j] * h[p[i], p[j]]
+    out_h[i, j] = c[i] * right_i - s[i] * right_p
+    out_v[i, j] = c[j] * v[i, j] - s[j] * v[i, p[j]]
+
+
+@wp.kernel
 def sort_diagonal(
     h: wp.array2d[wp.float64],
     values: wp.array[wp.float64],

@@ -1,0 +1,110 @@
+{
+  "args": {
+    "sizes": "96,128",
+    "repeats": 3,
+    "batch": 10,
+    "out": "results/performance_followup/fused-projected-large-before.json"
+  },
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "rows": [
+    {
+      "n": 96,
+      "samples": [
+        0.007254615798592568,
+        0.007254696637392044,
+        0.007254907116293907
+      ],
+      "seconds": 0.007254696637392044,
+      "checks": [
+        {
+          "residual": 2.5488731124388157e-14,
+          "orthogonality": 2.7755575615628914e-14,
+          "spectrum_error": 2.5437429940211587e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.5488731124388157e-14,
+          "orthogonality": 2.7755575615628914e-14,
+          "spectrum_error": 2.5437429940211587e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.5488731124388157e-14,
+          "orthogonality": 2.7755575615628914e-14,
+          "spectrum_error": 2.5437429940211587e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 1,
+          "KERNEL": 291,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 128,
+      "samples": [
+        0.010126532241702079,
+        0.01012699194252491,
+        0.01012762300670147
+      ],
+      "seconds": 0.01012699194252491,
+      "checks": [
+        {
+          "residual": 3.7290713924694576e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 1,
+          "KERNEL": 387,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    }
+  ],
+  "competing_gpu_processes": [],
+  "source_sha256": {
+    "warpack/solver.py": "e3b84d7ae06374b8cdec150d1ac53b6fded1fec25da807c5e5c5cdfe376cebb6",
+    "warpack/projected.py": "2c3eda7ca6586dc21e988f679dd15454c97238ee47c462919fbae96faff54b61",
+    "warpack/kernels.py": "ad8615c2376c58c63de80753ce2c4f92f0e75df7db999bce3bec67dade6d0a93",
+    "/home/horde/projects/warpack/benchmarks/experimental/projected_profile.py": "2c1c8f2531f304f45205439bfa7e4932c67fbb06c4ed403a1b56628020a36792"
+  },
+  "protocol": "Isolated projected diagonalization; three warm samples of ten captured solves each. Restore identical input before each solve. Original dense equation, complete spectrum and orthogonality checked after every sample. Setup/capture/host reference excluded. No eigensolver end-to-end speedup claim."
+}

@@ -1,0 +1,209 @@
+{
+  "matrix_sha256": "c98828df7f7a3d206d5e6372069fb5eb89346e679698d157141f6d402a2d325e",
+  "args": {
+    "case": "clustered",
+    "size": 100000,
+    "modes": 20,
+    "snapshots": 64,
+    "full_basis_products": false,
+    "ncv": 64,
+    "reference_ncv": 48,
+    "steps": 100,
+    "repeats": 3,
+    "compare": "cupy",
+    "out": "results/performance_followup/fused-normal-64.json"
+  },
+  "matrix_shape": [
+    100000,
+    64
+  ],
+  "formulation": "complete_coordinate_projection",
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "/home/horde/projects/warpack-block-global72/benchmarks/experimental/normal_pod.py": "2450d9748cfe12b9d71bc4715fbe577df4d4a4c8bb4398e4d88b4c87605ac943",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "/home/horde/projects/warpack-block-global72/benchmarks/experimental/full_normal_basis.py": "950de018a1d78bca53db3a0fcb7264e86415021638ce580ef074dbab2501406f",
+    "benchmarks/applications/pod_compare.py": "963e5bee72b78d7c4e5d5e9034738ce9a8313799348fa426729a5115cc38798e",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a"
+  },
+  "protocol": "Sequential methods on identical input. Synchronized warm replays restore starts. Assembly/reference/validation excluded. Normal method has its own explicit ncv; reference methods use reference_ncv. Pure Warp; normal equations square conditioning. Physical triplets and requested spaces must pass unchanged 1e-8 gates and normal method strict 1e-11 counts. Full-basis products explicitly form the small normal matrix by projecting onto the entire coordinate basis; no Krylov expansion.",
+  "normal": {
+    "setup_seconds": 0.17394572123885155,
+    "capture_seconds": 0.17152754589915276,
+    "warmup_seconds": 0.013092350214719772,
+    "ncv": 64,
+    "samples_seconds": [
+      0.012300729751586914,
+      0.012318864464759827,
+      0.012318957597017288
+    ],
+    "solve_seconds": 0.012318864464759827,
+    "validation": [
+      {
+        "accepted": true,
+        "residual": 1.9348005853667896e-14,
+        "orthogonality": 1.9095836023552692e-14,
+        "spectrum_error": 9.592897110131521e-15,
+        "captured_energy": 0.9794694415261641,
+        "relative_reconstruction_error": 0.1432848857131671,
+        "optimal_relative_reconstruction_error": 0.14328488571321904,
+        "reconstruction_energy_error": 1.488497578362829e-14,
+        "left_subspace_error": 5.725300289628351e-15,
+        "right_subspace_error": 9.980358174494013e-15,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.7810934476412965e-15,
+          1.887379141862766e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      },
+      {
+        "accepted": true,
+        "residual": 1.9197531119044042e-14,
+        "orthogonality": 1.9095836023552692e-14,
+        "spectrum_error": 1.0009979593180717e-14,
+        "captured_energy": 0.9794694415261641,
+        "relative_reconstruction_error": 0.1432848857131671,
+        "optimal_relative_reconstruction_error": 0.14328488571321904,
+        "reconstruction_energy_error": 1.488497578362829e-14,
+        "left_subspace_error": 5.728847654123895e-15,
+        "right_subspace_error": 9.980358174494013e-15,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.7793112903202735e-15,
+          1.887379141862766e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      },
+      {
+        "accepted": true,
+        "residual": 1.9038177024165722e-14,
+        "orthogonality": 1.9095836023552692e-14,
+        "spectrum_error": 9.731924604481254e-15,
+        "captured_energy": 0.9794694415261643,
+        "relative_reconstruction_error": 0.1432848857131671,
+        "optimal_relative_reconstruction_error": 0.14328488571321904,
+        "reconstruction_energy_error": 1.488497578362829e-14,
+        "left_subspace_error": 5.706909727841815e-15,
+        "right_subspace_error": 9.980358174494013e-15,
+        "status": 0,
+        "left_converged": 20,
+        "right_converged": 20,
+        "orthogonality_errors": [
+          1.7786878740710943e-15,
+          1.887379141862766e-14
+        ],
+        "outer_iterations": 1,
+        "independent_recoveries": 0
+      }
+    ],
+    "accepted": true,
+    "graph": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 15,
+        "KERNEL": 184,
+        "CONDITIONAL": 2,
+        "MEMCPY": 3
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 3
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "timing_uncontended": true
+  },
+  "references": [
+    {
+      "api_class": "I",
+      "requested_size": 100000,
+      "problem": "snapshot_pod_clustered",
+      "n": 100000,
+      "columns": 64,
+      "nnz": 6400000,
+      "mass_nnz": null,
+      "k": 20,
+      "ncv": 48,
+      "method": "cupy",
+      "matrix_sha256": "c98828df7f7a3d206d5e6372069fb5eb89346e679698d157141f6d402a2d325e",
+      "notes": "Known singular spectrum, two exact zero singular values, independent left/right requested subspaces; top multiplicity three for clustered variant",
+      "target": [
+        0.0,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "implementation": "CuPy svds with explicit ncv",
+      "reference_ncv": 48,
+      "reference_tolerance": 1e-11,
+      "setup_seconds": 0.04780953377485275,
+      "warmup_seconds": 0.33311399072408676,
+      "samples_seconds": [
+        0.09332120791077614,
+        0.09353574737906456,
+        0.09362545236945152
+      ],
+      "solve_seconds": 0.09353574737906456,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.1876651996163759e-14,
+          "orthogonality": 1.5952625505299967e-14,
+          "spectrum_error": 7.58214649211842e-15,
+          "captured_energy": 0.9794694415261496,
+          "relative_reconstruction_error": 0.14328488571321651,
+          "optimal_relative_reconstruction_error": 0.14328488571321904,
+          "reconstruction_energy_error": 7.260963796891849e-16,
+          "left_subspace_error": 7.820972367402888e-14,
+          "right_subspace_error": 1.2173667132347732e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.3530647630111288e-14,
+          "orthogonality": 1.3501752613078594e-14,
+          "spectrum_error": 5.4117610647635555e-15,
+          "captured_energy": 0.9794694415261501,
+          "relative_reconstruction_error": 0.14328488571321904,
+          "optimal_relative_reconstruction_error": 0.14328488571321904,
+          "reconstruction_energy_error": 0.0,
+          "left_subspace_error": 4.639998573784048e-14,
+          "right_subspace_error": 1.1085911095058744e-13
+        },
+        {
+          "accepted": true,
+          "residual": 1.1825346702448918e-14,
+          "orthogonality": 2.115003322217951e-14,
+          "spectrum_error": 2.4598913930743436e-15,
+          "captured_energy": 0.979469441526149,
+          "relative_reconstruction_error": 0.143284885713214,
+          "optimal_relative_reconstruction_error": 0.14328488571321904,
+          "reconstruction_energy_error": 1.4521927593783698e-15,
+          "left_subspace_error": 5.455032939838285e-14,
+          "right_subspace_error": 1.0166480426890665e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    }
+  ],
+  "competing_gpu_processes": []
+}

@@ -1,0 +1,52 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "benchmarks.experimental.compare_block",
+    "--case",
+    "clamped_consistent",
+    "--side",
+    "3",
+    "--modes",
+    "4",
+    "--width",
+    "8",
+    "--steps",
+    "1",
+    "--preconditioner",
+    "fsai",
+    "--fsai-width",
+    "32",
+    "--inner-cg",
+    "5",
+    "--batched-cg",
+    "--repeats",
+    "1",
+    "--out",
+    "results/performance_followup/fused-block-rejected-cg.json"
+  ],
+  "pid": 128060,
+  "exit_code": 1,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792460740.9289465,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792460742.0533595,
+      "other": [],
+      "gpu": "5 %, 2158 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792460743.1330843,
+      "other": [],
+      "gpu": "0 %, 2204 MiB, 2490 MHz, 30",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

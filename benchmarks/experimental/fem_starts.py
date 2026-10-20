@@ -81,6 +81,29 @@ def check(problem, solver):
     return q
 
 
+def finalize_starts_acceptance(report):
+    """Apply the same strict comparison contract to every related-pencil start."""
+    from benchmarks.experimental.compare_block import finalize_acceptance
+
+    for row in report["rows"]:
+        warp = dict(rows=row["trials"])
+        row["warp_accepted"] = finalize_acceptance(warp)
+        row["cupy_accepted"] = (
+            finalize_acceptance(dict(rows=row["cupy_trials"])) if "cupy_trials" in row else True
+        )
+        row["accepted"] = row["warp_accepted"] and row["cupy_accepted"]
+    report["accepted"] = (
+        report["source_quality"]["accepted"]
+        and bool(report["rows"])
+        and all(row["accepted"] for row in report["rows"])
+        and all(
+            row.get("contract_accepted", row["accepted"])
+            for row in report.get("production_baselines", [])
+        )
+    )
+    return report["accepted"]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
@@ -229,8 +252,7 @@ def main():
             for f in [
                 Path(__file__),
                 Path("benchmarks/experimental/block_lobpcg.py"),
-                Path("warpack/block.py"),
-                Path("warpack/block_products.py"),
+                *sorted(Path("warpack").glob("*.py")),
                 Path("benchmarks/experimental/block_kernels.py"),
                 Path("benchmarks/experimental/block_updates.py"),
                 Path("benchmarks/experimental/batched_cg.py"),
@@ -330,9 +352,12 @@ def main():
         timing_eligible=not (before or after),
         timing_note="Optional perturbed full-block trial measures the explicit Warp exploration policy; CuPy comparisons use only identical unperturbed starts. Same changed pencil, preconditioner and stopping criteria for every Warp start; no GPU speed claim if contention is observed. Source solve and setup costs are separate.",
     )
+    finalize_starts_acceptance(report)
     dest = Path(args.out)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(report, indent=2) + "\n")
+    if not report["accepted"]:
+        raise SystemExit("Rejected related-pencil comparison; all trial evidence retained")
 
 
 if __name__ == "__main__":

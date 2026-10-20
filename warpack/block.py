@@ -219,7 +219,33 @@ class UpstreamPreconditioner:
 
 
 class ProjectedSolver(SymmetricEigensolver):
-    """Block projection using the common global/shared Jacobi dispatch."""
+    """Block projection with the measured Ada global path and existing fallback."""
+
+    def _diagonalize_projected(self):
+        # Keep the established shared-72 path on other devices and when the
+        # bounded global loop is unavailable. Ada uses the common fused path.
+        if (
+            self.m == 72
+            and self.device.max_shared_memory_per_block >= 98304
+            and not (self._prefer_global_projected and self._global_jacobi is not None)
+        ):
+            from .projected import jacobi_kernel
+
+            wp.launch_tiled(
+                jacobi_kernel(self.m),
+                dim=1,
+                inputs=[self.g, self.v],
+                block_dim=256,
+                device=self.device,
+            )
+            wp.launch(
+                K.sort_diagonal,
+                self.m,
+                [self.g, self.ritz, self.order, self.which],
+                device=self.device,
+            )
+        else:
+            super()._diagonalize_projected()
 
 
 class BlockLOBPCG:

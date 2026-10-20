@@ -79,3 +79,32 @@ def test_projected_runtime_without_conditionals(monkeypatch, captured):
     assert np.linalg.norm(host @ v - v * w, axis=0).max() / 400 < 1e-11
     assert abs(np.sort(w) - np.sort(values)).max() / 400 < 1e-11
     np.testing.assert_allclose(v.T @ v, np.eye(n), atol=1e-11, rtol=0)
+
+
+@pytest.mark.parametrize("arch", [80, 89])
+@pytest.mark.parametrize("conditional", [False, True])
+def test_projected_ada_dispatch_and_compatibility(monkeypatch, arch, conditional):
+    n = 64
+    rng = np.random.default_rng(838)
+    a = rng.normal(size=(n, n))
+    a += a.T
+    operator = SparseOperator(matrix(a))
+    # Only simulate setup-time policy metadata. Restore the real architecture
+    # before compiling or launching any kernel.
+    with monkeypatch.context() as patch:
+        patch.setattr(operator.device, "arch", arch)
+        patch.setattr(wp, "is_conditional_graph_supported", lambda: conditional)
+        solver = SymmetricEigensolver(operator, 20, ncv=n)
+    assert (solver._global_jacobi is not None) == (arch == 89 and conditional)
+    source = wp.array(a, dtype=wp.float64)
+    wp.copy(solver.g, source)
+    solver.diagonalize()
+    wp.synchronize()
+    with wp.ScopedCapture() as cap:
+        wp.copy(solver.g, source)
+        solver.diagonalize()
+    wp.capture_launch(cap.graph)
+    w, v = solver.ritz.numpy(), solver.v.numpy()
+    assert np.linalg.norm(a @ v - v * w) / np.linalg.norm(a) < 1e-12
+    np.testing.assert_allclose(np.sort(w), np.linalg.eigvalsh(a), rtol=1e-11, atol=1e-12)
+    np.testing.assert_allclose(v.T @ v, np.eye(n), rtol=0, atol=1e-12)
