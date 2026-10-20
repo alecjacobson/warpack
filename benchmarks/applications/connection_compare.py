@@ -58,6 +58,8 @@ def run(args):
         outer_cycles=args.steps,
         seed=2026,
         cg_tol=args.cg_tol,
+        correction_steps=args.correction_steps if args.method == "warp-cg-corrected" else None,
+        correction_tol=args.correction_tol if args.method == "warp-cg-corrected" else None,
     )
 
     def close():
@@ -68,7 +70,12 @@ def run(args):
         if args.method.startswith("warp"):
             row["setup_seconds"], (solver, inverse) = timed(
                 lambda: backends.warp_setup(
-                    p, args.ncv, args.method.removeprefix("warp-"), args.cg_tol
+                    p,
+                    args.ncv,
+                    args.method.removeprefix("warp-"),
+                    args.cg_tol,
+                    correction_steps=args.correction_steps,
+                    correction_tol=args.correction_tol,
                 )
             )
             close = getattr(inverse, "close", close)
@@ -125,6 +132,9 @@ def run(args):
                     check["cg_stats"] = inverse.stats.numpy().tolist()
                     check["cg_fresh_stats"] = inverse.fresh_stats.numpy().tolist()
                     check["cg_residual_maxima"] = inverse.residual_maxima.numpy().tolist()
+                    if hasattr(inverse, "correction"):
+                        check["initial_cg_stats"] = inverse.base.stats.numpy().tolist()
+                        check["correction_cg_stats"] = inverse.correction.stats.numpy().tolist()
                     check["inner_solve_accepted"] = (
                         check["cg_stats"][2] == 0 and check["cg_fresh_stats"][2] == 0
                     )
@@ -174,7 +184,18 @@ def assess_baseline(report, baseline):
         item.get("numerical_contract_accepted", False) for item in (report, baseline)
     )
     old = {row["method"]: row for row in baseline["cases"]}
-    keys = ("matrix_sha256", "n", "k", "ncv", "real_ncv", "outer_cycles", "cg_tol", "seed")
+    keys = (
+        "matrix_sha256",
+        "n",
+        "k",
+        "ncv",
+        "real_ncv",
+        "outer_cycles",
+        "cg_tol",
+        "seed",
+        "correction_steps",
+        "correction_tol",
+    )
     for row in report["cases"]:
         previous = old.get(row["method"], {})
         comparable = same_runtime and all(row.get(key) == previous.get(key) for key in keys)
@@ -210,6 +231,8 @@ def main():
     parser.add_argument("--worker", action="store_true")
     parser.add_argument("--timeout", type=int, default=240)
     parser.add_argument("--cg-tol", type=float, default=1e-13)
+    parser.add_argument("--correction-steps", type=int, default=1)
+    parser.add_argument("--correction-tol", type=float, default=0.01)
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     add_diagnostic_argument(parser)
@@ -234,6 +257,7 @@ def main():
         "warp-cudss",
         "warp-cg",
         "warp-cg-fsai",
+        "warp-cg-corrected",
     }:
         parser.error("unknown method")
     report = dict(
@@ -247,7 +271,8 @@ def main():
         git_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], text=True)),
         implementation_sha256={
             path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in Path(__file__).parent.glob("connection*.*")
+            for path in list(Path(__file__).parent.glob("connection*.*"))
+            + [Path("benchmarks/experimental/corrected_cg.py")]
             if path.suffix in (".py", ".cpp")
         },
         runtime_hashes={
@@ -276,7 +301,18 @@ def main():
             "--out",
             str(destination),
         ]
-        for name in ("side", "modes", "mass", "copies", "ncv", "steps", "repeats", "cg_tol"):
+        for name in (
+            "side",
+            "modes",
+            "mass",
+            "copies",
+            "ncv",
+            "steps",
+            "repeats",
+            "cg_tol",
+            "correction_steps",
+            "correction_tol",
+        ):
             command.extend(["--" + name.replace("_", "-"), str(getattr(args, name))])
         with destination.with_suffix(".log").open("w") as log:
             try:

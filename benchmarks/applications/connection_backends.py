@@ -28,13 +28,13 @@ def initial(p, width=None):
     return rng.normal(size=shape) + 1j * rng.normal(size=shape)
 
 
-def warp_setup(p, ncv, backend="cudss", cg_tol=1e-13):
+def warp_setup(p, ncv, backend="cudss", cg_tol=1e-13, correction_steps=1, correction_tol=0.01):
     a, b = complex_matrix(p.a, True), complex_matrix(mass(p), True)
     shifted = complex_matrix(p.a - p.target * mass(p))
     if backend == "cudss":
         inverse = ComplexShiftInverse(shifted)
     else:
-        if backend not in ("cg", "cg-fsai"):
+        if backend not in ("cg", "cg-fsai", "cg-corrected"):
             raise ValueError("unknown inverse backend")
         size = 4 * (len(shifted.values) + p.n)
         rows = wp.zeros(size, dtype=wp.int32)
@@ -63,14 +63,25 @@ def warp_setup(p, ncv, backend="cudss", cg_tol=1e-13):
                 matrix, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
             )
         )
-        inverse = CGInverse(
-            matrix,
-            tol=cg_tol,
-            atol=0.0,
-            maxiter=10000,
-            preconditioner=preconditioner,
-            verify_residuals=True,
-        )
+        if backend == "cg-corrected":
+            from benchmarks.experimental.corrected_cg import CorrectedCGInverse
+
+            inverse = CorrectedCGInverse(
+                matrix,
+                tol=cg_tol,
+                correction_tol=correction_tol,
+                correction_steps=correction_steps,
+                preconditioner=preconditioner,
+            )
+        else:
+            inverse = CGInverse(
+                matrix,
+                tol=cg_tol,
+                atol=0.0,
+                maxiter=10000,
+                preconditioner=preconditioner,
+                verify_residuals=True,
+            )
     start = initial(p)
     start_device = wp.array(np.r_[start.real, start.imag], dtype=wp.float64)
     solver = ConnectionEigensolver(

@@ -51,6 +51,8 @@ def test_performance_ratio(ratio, regression):
         ("outer_cycles", 2),
         ("ncv", 32),
         ("cg_tol", 1e-11),
+        ("correction_steps", 2),
+        ("correction_tol", 0.1),
         ("numerical_contract_accepted", False),
         ("timing_uncontended", False),
     ],

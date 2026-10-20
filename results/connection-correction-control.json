@@ -1,0 +1,217 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "56f64c29ee41f6c6deda651b950bf61d10d815b1",
+  "git_dirty": true,
+  "implementation_sha256": {
+    "connection.py": "25322f9381ed44dce84c250d4877eebed57608b8d5a061e80c4d89cf35cef465",
+    "connection_backends.py": "9167d1aa3dc7b0300bef20d3feff1e2db9628e46c30158ebf6cce79d3bc2dffc",
+    "connection_compare.py": "5f1d63caa50e759af84d5e9783fbe4266e6f37c5c2cbb9c4b8e1ae20a712fc21",
+    "connection_cupy_repro.py": "a266187673402ec417866821a568c380906a017e02fd9c9e8ee5a590486c4382",
+    "connection_spectra.cpp": "dcea35c5014f322eb32b23e21e8a2c1851c26865ca4d84ece792a9557fc0f124",
+    "connection_warp.py": "edda432637f0938f70d5c99e6ba20db21ed4835867161b033eb3539f0371a750",
+    "corrected_cg.py": "4a787eb162468b28f9678a2337d036439a81d32a7b70a26da9bcf8c01d3176ac"
+  },
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "spectra_binary": null
+  },
+  "blas_threads": "4",
+  "fixture": "Periodic flat P1 U(1) connection, independent Fourier and triangle references",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08,
+    "subspace": 1e-08
+  },
+  "cases": [
+    {
+      "method": "warp-cg-corrected",
+      "n": 4096,
+      "k": 20,
+      "ncv": 64,
+      "real_n": 8192,
+      "real_ncv": 128,
+      "mass": "consistent",
+      "copies": 1,
+      "nnz": 20480,
+      "mass_nnz": 28672,
+      "shift": -0.1,
+      "matrix_sha256": "e201bd6037deaa379270f025ec0564783734a06ece391ba63da23dd29a4dc408",
+      "samples": [
+        0.8822226040065289,
+        0.8820631802082062,
+        0.8820262663066387
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.370859843118984e-10,
+          "max_absolute_residual": 8.324606589422314e-11,
+          "orthogonality": 4.442339739977549e-16,
+          "spectrum_error": 3.2193952350578856e-14,
+          "requested_subspace_error": 2.382494876265408e-11,
+          "complex_count": 20,
+          "physical_count": 10,
+          "real_count": 20,
+          "solver_status": 0,
+          "solver_full_count": false,
+          "cg_stats": [
+            26319,
+            97,
+            0,
+            298
+          ],
+          "cg_fresh_stats": [
+            26319,
+            97,
+            2,
+            298
+          ],
+          "cg_residual_maxima": [
+            1.8460792984766173e-13,
+            1.1778547341568904e-11
+          ],
+          "initial_cg_stats": [
+            26319,
+            97,
+            0,
+            298
+          ],
+          "correction_cg_stats": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "inner_solve_accepted": false
+        },
+        {
+          "accepted": true,
+          "residual": 6.370860268263906e-10,
+          "max_absolute_residual": 8.324528841349703e-11,
+          "orthogonality": 4.445620343650235e-16,
+          "spectrum_error": 3.243877328100151e-14,
+          "requested_subspace_error": 2.3824944312646434e-11,
+          "complex_count": 20,
+          "physical_count": 10,
+          "real_count": 20,
+          "solver_status": 0,
+          "solver_full_count": false,
+          "cg_stats": [
+            26319,
+            97,
+            0,
+            298
+          ],
+          "cg_fresh_stats": [
+            26319,
+            97,
+            2,
+            298
+          ],
+          "cg_residual_maxima": [
+            1.8460792984766173e-13,
+            1.1778547341568904e-11
+          ],
+          "initial_cg_stats": [
+            26319,
+            97,
+            0,
+            298
+          ],
+          "correction_cg_stats": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "inner_solve_accepted": false
+        },
+        {
+          "accepted": true,
+          "residual": 6.37086017161256e-10,
+          "max_absolute_residual": 8.324617864085132e-11,
+          "orthogonality": 4.446270841293799e-16,
+          "spectrum_error": 3.243877328100151e-14,
+          "requested_subspace_error": 2.382494610465173e-11,
+          "complex_count": 20,
+          "physical_count": 10,
+          "real_count": 20,
+          "solver_status": 0,
+          "solver_full_count": false,
+          "cg_stats": [
+            26319,
+            97,
+            0,
+            298
+          ],
+          "cg_fresh_stats": [
+            26319,
+            97,
+            2,
+            298
+          ],
+          "cg_residual_maxima": [
+            1.8460792984766173e-13,
+            1.1778547341568904e-11
+          ],
+          "initial_cg_stats": [
+            26319,
+            97,
+            0,
+            298
+          ],
+          "correction_cg_stats": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "inner_solve_accepted": false
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1332,
+          "MEMCPY": 1501,
+          "KERNEL": 17329,
+          "CONDITIONAL": 596
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1501
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "outer_cycles": 3,
+      "seed": 2026,
+      "cg_tol": 1e-11,
+      "correction_steps": 0,
+      "correction_tol": 0.01,
+      "setup_seconds": 0.16965046152472496,
+      "capture_seconds": 2.0951930098235607,
+      "device_only_graph": true,
+      "warmup_seconds": 0.981764268130064,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.8820631802082062,
+      "accepted": true,
+      "inner_solve_accepted": false,
+      "outcome": "passed",
+      "numerical_contract_failures": [
+        "inner_solve_accepted",
+        "solver_full_count"
+      ],
+      "numerical_contract_accepted": false
+    }
+  ],
+  "numerical_contract_accepted": false,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}
