@@ -148,3 +148,8 @@ fails the command. Missing/unsupported methods stay visible. Baseline comparison
 requires matching GPU/runtime and does not convert inconclusive timings into a
 pass. Fixture sizes are requested resolutions: torus/conformal/dynamics dimensions
 are rounded, and their actual dimensions are recorded.
+
+The [coupled damped and gyroscopic follow-up](DAMPED.md) adds nonproportional
+damping, native complex Spectra references, original quadratic checks and
+small pure-Warp GMRES coverage. It retains the rejected large-system profile
+and separates physical convergence from tighter transformed counts.
