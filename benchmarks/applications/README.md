@@ -16,7 +16,7 @@ implementation bugs and the remaining coverage requirements.
 | D / P0 | Sphere/disk/annulus/tori Hodge 1-Laplacians; disconnected and weak components, independent topology/subspace references, positive guard; [Krylov/CG profiles](HODGE_CG.md) | [#23](https://github.com/alecjacobson/warpack/issues/23) |
 | E / P2 | Complex Hermitian connection ring with nontrivial holonomy and known spectrum; standard mass | [#24](https://github.com/alecjacobson/warpack/issues/24) |
 | F / P1 skinning, P2 broader pencils | [Rig-constrained skinning modes](SKINNING.md) via physical-space KKT shift-invert; reciprocal spectral-conformal pencil with SPD regularized metric | [#25](https://github.com/alecjacobson/warpack/issues/25), [#55](https://github.com/alecjacobson/warpack/issues/55) |
-| G / P2 | Coupled SPD stiffness / indefinite geometric-stiffness pencil; analytic buckling factors | [#26](https://github.com/alecjacobson/warpack/issues/26) |
+| G / P2 | [Clamped tetrahedral stiffness / indefinite geometric stiffness; signed buckling factors](BUCKLING.md) | [#26](https://github.com/alecjacobson/warpack/issues/26) |
 | H / P3 | Damped coupled chain, standard first-order nonsymmetric linearization; analytic complex frequencies | [#27](https://github.com/alecjacobson/warpack/issues/27) |
 | I / P2 | [Large tall/wide POD and analytic string snapshots](POD.md); repeated leading clusters, rank deficiency, both singular subspaces and reconstruction energy | [#28](https://github.com/alecjacobson/warpack/issues/28) |
 

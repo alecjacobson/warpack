@@ -1,0 +1,866 @@
+{
+  "args": {
+    "side": 2,
+    "modes": 4,
+    "signs": "positive,negative",
+    "shift": 0.01,
+    "methods": "scipy,spectra,warp-cudss,warp-cg,cupy-reciprocal",
+    "ncv": 24,
+    "steps": 5,
+    "outer_tol": 1e-09,
+    "inner_tol": 1e-14,
+    "fsai_width": 32,
+    "cupy_steps": 400,
+    "cupy_tol": 1e-10,
+    "repeats": 3,
+    "out": "results/performance_followup/buckling-tet-small.json",
+    "diagnostic": false
+  },
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "/home/horde/projects/warpack-prestress-buckling/benchmarks/applications/buckling_compare.py": "9b6fd76fa851153eed48dfd380950728bf96e8ecbe8e3ad1b82135003a42ccc2",
+    "benchmarks/applications/prestress_buckling.py": "2832bddf66b4014caa5277d5e83464168df638e1dcf4cecf1283326e2f6a4984",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/runner.py": "45a4ba1321eca6cc7ca70c55db0b570a5e886704c83231b83b9a6c79b47f847b",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3"
+  },
+  "cases": [
+    {
+      "api_class": "G",
+      "requested_size": 162,
+      "problem": "prestress_buckling_positive",
+      "n": 162,
+      "columns": 162,
+      "nnz": 3748,
+      "mass_nnz": 1488,
+      "k": 4,
+      "ncv": 24,
+      "method": "scipy",
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "target": [
+        0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 24,
+      "implementation": "SciPy ARPACK explicit ncv=24",
+      "setup_seconds": 0.0015562884509563446,
+      "warmup_seconds": 0.003025192767381668,
+      "samples_seconds": [
+        0.0029689334332942963,
+        0.0031921006739139557,
+        0.003077831119298935
+      ],
+      "solve_seconds": 0.003077831119298935,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.4809553449067066e-12,
+          "max_absolute_residual": 1.084313194787967e-12,
+          "orthogonality": 2.6201263381153694e-14,
+          "spectrum_error": 7.121286175400591e-13,
+          "requested_subspace_error": 3.4783142764674265e-12
+        },
+        {
+          "accepted": true,
+          "residual": 2.4809553449067066e-12,
+          "max_absolute_residual": 1.084313194787967e-12,
+          "orthogonality": 2.6201263381153694e-14,
+          "spectrum_error": 7.121286175400591e-13,
+          "requested_subspace_error": 3.4783142764674265e-12
+        },
+        {
+          "accepted": true,
+          "residual": 2.4809553449067066e-12,
+          "max_absolute_residual": 1.084313194787967e-12,
+          "orthogonality": 2.6201263381153694e-14,
+          "spectrum_error": 7.121286175400591e-13,
+          "requested_subspace_error": 3.4783142764674265e-12
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "positive",
+      "geometric_nnz": 1488,
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 1.689721560271349e-14,
+      "reference_orthogonality": 2.4868995751603507e-14,
+      "transformed_selection_margin": 0.0008057845178894851,
+      "shifted_spd": true,
+      "sigma": 0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "api_class": "G",
+      "requested_size": 162,
+      "problem": "prestress_buckling_positive",
+      "n": 162,
+      "columns": 162,
+      "nnz": 3748,
+      "mass_nnz": 1488,
+      "k": 4,
+      "ncv": 24,
+      "method": "spectra",
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "target": [
+        0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.002603396773338318,
+      "warmup_seconds": 0.0021790824830532074,
+      "samples_seconds": [
+        0.004427555948495865,
+        0.0022212304174900055,
+        0.002244718372821808
+      ],
+      "solve_seconds": 0.002244718372821808,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.985556745215875e-12,
+          "max_absolute_residual": 8.627543124362091e-13,
+          "orthogonality": 1.965094753586527e-14,
+          "spectrum_error": 1.011901221837512e-12,
+          "requested_subspace_error": 2.9438667544857223e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.985556745215875e-12,
+          "max_absolute_residual": 8.627543124362091e-13,
+          "orthogonality": 1.965094753586527e-14,
+          "spectrum_error": 1.011901221837512e-12,
+          "requested_subspace_error": 2.9438667544857223e-12
+        },
+        {
+          "accepted": true,
+          "residual": 1.985556745215875e-12,
+          "max_absolute_residual": 8.627543124362091e-13,
+          "orthogonality": 1.965094753586527e-14,
+          "spectrum_error": 1.011901221837512e-12,
+          "requested_subspace_error": 2.9438667544857223e-12
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "positive",
+      "geometric_nnz": 1488,
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 1.689721560271349e-14,
+      "reference_orthogonality": 2.4868995751603507e-14,
+      "transformed_selection_margin": 0.0008057845178894851,
+      "shifted_spd": true,
+      "sigma": 0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-cudss",
+      "setup_seconds": 0.192388866096735,
+      "capture_seconds": 0.29459264129400253,
+      "warmup_seconds": 0.035196758806705475,
+      "samples_seconds": [
+        0.01620904728770256,
+        0.016215413808822632,
+        0.01621745154261589
+      ],
+      "solve_seconds": 0.016215413808822632,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.6720232229119332e-12,
+          "max_absolute_residual": 6.094291737923641e-13,
+          "orthogonality": 1.3766765505351941e-14,
+          "spectrum_error": 9.547918011776346e-15,
+          "requested_subspace_error": 3.866671131236852e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.7302613122857764e-12,
+          "max_absolute_residual": 8.804623696789804e-13,
+          "orthogonality": 2.930988785010413e-14,
+          "spectrum_error": 1.1435297153639112e-14,
+          "requested_subspace_error": 3.5994058711425878e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.589730575022633e-12,
+          "max_absolute_residual": 1.0946009723622474e-12,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 7.549516567451064e-15,
+          "requested_subspace_error": 2.429674954485029e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 750,
+          "KERNEL": 3456,
+          "MEMCPY": 926,
+          "CONDITIONAL": 87
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 558,
+          "HtoD (HOST PAGEABLE to DEVICE)": 368
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "positive",
+      "n": 162,
+      "k": 4,
+      "nnz": 3748,
+      "geometric_nnz": 1488,
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 1.689721560271349e-14,
+      "reference_orthogonality": 2.4868995751603507e-14,
+      "transformed_selection_margin": 0.0008057845178894851,
+      "shifted_spd": true,
+      "sigma": 0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-cg",
+      "setup_seconds": 0.10392892733216286,
+      "capture_seconds": 0.3171123005449772,
+      "warmup_seconds": 0.1059299185872078,
+      "samples_seconds": [
+        0.09201209247112274,
+        0.0920092985033989,
+        0.09201157093048096
+      ],
+      "solve_seconds": 0.09201157093048096,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.4764571510298064e-12,
+          "max_absolute_residual": 1.0498824032367793e-12,
+          "orthogonality": 1.176836406102666e-14,
+          "spectrum_error": 1.5432100042289676e-14,
+          "requested_subspace_error": 2.737687238888625e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            3299,
+            36,
+            0,
+            92
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.4764571510298064e-12,
+          "max_absolute_residual": 1.0498824032367793e-12,
+          "orthogonality": 1.176836406102666e-14,
+          "spectrum_error": 1.5432100042289676e-14,
+          "requested_subspace_error": 2.737687238888625e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            3299,
+            36,
+            0,
+            92
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.4764571510298064e-12,
+          "max_absolute_residual": 1.0498824032367793e-12,
+          "orthogonality": 1.176836406102666e-14,
+          "spectrum_error": 1.5432100042289676e-14,
+          "requested_subspace_error": 2.737687238888625e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            3299,
+            36,
+            0,
+            92
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 290,
+          "KERNEL": 4192,
+          "MEMCPY": 374,
+          "CONDITIONAL": 179
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 374
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "positive",
+      "n": 162,
+      "k": 4,
+      "nnz": 3748,
+      "geometric_nnz": 1488,
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 1.689721560271349e-14,
+      "reference_orthogonality": 2.4868995751603507e-14,
+      "transformed_selection_margin": 0.0008057845178894851,
+      "shifted_spd": true,
+      "sigma": 0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "cupy-reciprocal",
+      "setup_seconds": 0.01231689378619194,
+      "capture_seconds": 0.0,
+      "warmup_seconds": 0.3805576451122761,
+      "samples_seconds": [
+        0.13000314682722092,
+        0.1448548547923565,
+        0.129866361618042
+      ],
+      "solve_seconds": 0.13000314682722092,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.2997119290277655e-10,
+          "max_absolute_residual": 4.5174558538363385e-11,
+          "orthogonality": 1.2083025833356261e-14,
+          "spectrum_error": 1.709743457922741e-14,
+          "requested_subspace_error": 1.6868970044903716e-10,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            8.557792611180318e-12,
+            1.4088124995521828e-11,
+            2.793355685078246e-11,
+            8.604859569657738e-11
+          ],
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.2969996442494024e-10,
+          "max_absolute_residual": 4.4954345801428985e-11,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 5.783394295127713e-15,
+          "requested_subspace_error": 1.6792169333971989e-10,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            8.520424147440657e-12,
+            1.4096511999562344e-11,
+            2.8019636928093068e-11,
+            8.586902324148404e-11
+          ],
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.2980661307444992e-10,
+          "max_absolute_residual": 4.509345674641452e-11,
+          "orthogonality": 2.531308496145357e-14,
+          "spectrum_error": 7.327471962526033e-15,
+          "requested_subspace_error": 1.6809603709047882e-10,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            8.526635921774355e-12,
+            1.410280737200047e-11,
+            2.796366370717876e-11,
+            8.59396348660792e-11
+          ],
+          "native_stopping_passed": true
+        }
+      ],
+      "accepted": true,
+      "graph": null,
+      "sign": "positive",
+      "n": 162,
+      "k": 4,
+      "nnz": 3748,
+      "geometric_nnz": 1488,
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 1.689721560271349e-14,
+      "reference_orthogonality": 2.4868995751603507e-14,
+      "transformed_selection_margin": 0.0008057845178894851,
+      "shifted_spd": true,
+      "sigma": 0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "api_class": "G",
+      "requested_size": 162,
+      "problem": "prestress_buckling_negative",
+      "n": 162,
+      "columns": 162,
+      "nnz": 3748,
+      "mass_nnz": 1488,
+      "k": 4,
+      "ncv": 24,
+      "method": "scipy",
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 24,
+      "implementation": "SciPy ARPACK explicit ncv=24",
+      "setup_seconds": 0.0009496212005615234,
+      "warmup_seconds": 0.004190322011709213,
+      "samples_seconds": [
+        0.004217643290758133,
+        0.004150964319705963,
+        0.004178695380687714
+      ],
+      "solve_seconds": 0.004178695380687714,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.430190335164856e-11,
+          "max_absolute_residual": 4.412019014021773e-11,
+          "orthogonality": 8.659739592076221e-15,
+          "spectrum_error": 2.0438297937932443e-12,
+          "requested_subspace_error": 3.658796423214066e-11
+        },
+        {
+          "accepted": true,
+          "residual": 3.430190335164856e-11,
+          "max_absolute_residual": 4.412019014021773e-11,
+          "orthogonality": 8.659739592076221e-15,
+          "spectrum_error": 2.0438297937932443e-12,
+          "requested_subspace_error": 3.658796423214066e-11
+        },
+        {
+          "accepted": true,
+          "residual": 3.430190335164856e-11,
+          "max_absolute_residual": 4.412019014021773e-11,
+          "orthogonality": 8.659739592076221e-15,
+          "spectrum_error": 2.0438297937932443e-12,
+          "requested_subspace_error": 3.658796423214066e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "negative",
+      "geometric_nnz": 1488,
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 8.851743577275697e-15,
+      "reference_orthogonality": 1.7486012637846216e-15,
+      "transformed_selection_margin": 0.00024240554629662014,
+      "shifted_spd": true,
+      "sigma": -0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "api_class": "G",
+      "requested_size": 162,
+      "problem": "prestress_buckling_negative",
+      "n": 162,
+      "columns": 162,
+      "nnz": 3748,
+      "mass_nnz": 1488,
+      "k": 4,
+      "ncv": 24,
+      "method": "spectra",
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.0009809546172618866,
+      "warmup_seconds": 0.003246854990720749,
+      "samples_seconds": [
+        0.0032404400408267975,
+        0.003282349556684494,
+        0.003259573131799698
+      ],
+      "solve_seconds": 0.003259573131799698,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.3124999759328946e-11,
+          "max_absolute_residual": 3.96420014869836e-11,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 2.1617013709375318e-12,
+          "requested_subspace_error": 5.88912477251501e-11
+        },
+        {
+          "accepted": true,
+          "residual": 3.3124999759328946e-11,
+          "max_absolute_residual": 3.96420014869836e-11,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 2.1617013709375318e-12,
+          "requested_subspace_error": 5.88912477251501e-11
+        },
+        {
+          "accepted": true,
+          "residual": 3.3124999759328946e-11,
+          "max_absolute_residual": 3.96420014869836e-11,
+          "orthogonality": 3.552713678800501e-15,
+          "spectrum_error": 2.1617013709375318e-12,
+          "requested_subspace_error": 5.88912477251501e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "negative",
+      "geometric_nnz": 1488,
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 8.851743577275697e-15,
+      "reference_orthogonality": 1.7486012637846216e-15,
+      "transformed_selection_margin": 0.00024240554629662014,
+      "shifted_spd": true,
+      "sigma": -0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-cudss",
+      "setup_seconds": 0.01418369635939598,
+      "capture_seconds": 0.12463903427124023,
+      "warmup_seconds": 0.028178054839372635,
+      "samples_seconds": [
+        0.01624476909637451,
+        0.016249462962150574,
+        0.01619550585746765
+      ],
+      "solve_seconds": 0.01624476909637451,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.7452485059453067e-12,
+          "max_absolute_residual": 1.8129248102738416e-12,
+          "orthogonality": 1.2878587085651816e-14,
+          "spectrum_error": 1.9984014443252818e-15,
+          "requested_subspace_error": 3.0197790758329395e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.2051738569323442e-12,
+          "max_absolute_residual": 3.0134159056949272e-12,
+          "orthogonality": 1.2656542480726785e-14,
+          "spectrum_error": 3.885780586188048e-15,
+          "requested_subspace_error": 3.673770865238658e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.9056211570298172e-12,
+          "max_absolute_residual": 2.089481365707968e-12,
+          "orthogonality": 1.2434497875801753e-14,
+          "spectrum_error": 1.5004868377632104e-15,
+          "requested_subspace_error": 3.5153737706198767e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 750,
+          "KERNEL": 3456,
+          "MEMCPY": 926,
+          "CONDITIONAL": 87
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 558,
+          "HtoD (HOST PAGEABLE to DEVICE)": 368
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "negative",
+      "n": 162,
+      "k": 4,
+      "nnz": 3748,
+      "geometric_nnz": 1488,
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 8.851743577275697e-15,
+      "reference_orthogonality": 1.7486012637846216e-15,
+      "transformed_selection_margin": 0.00024240554629662014,
+      "shifted_spd": true,
+      "sigma": -0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-cg",
+      "setup_seconds": 0.07386980205774307,
+      "capture_seconds": 0.29716942831873894,
+      "warmup_seconds": 0.10324976220726967,
+      "samples_seconds": [
+        0.0900128223001957,
+        0.09001195430755615,
+        0.0900038629770279
+      ],
+      "solve_seconds": 0.09001195430755615,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.613847762521074e-12,
+          "max_absolute_residual": 2.5489887978125125e-12,
+          "orthogonality": 1.2656542480726785e-14,
+          "spectrum_error": 2.3314683517128287e-15,
+          "requested_subspace_error": 5.293244809855483e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            3243,
+            36,
+            0,
+            92
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.613847762521074e-12,
+          "max_absolute_residual": 2.5489887978125125e-12,
+          "orthogonality": 1.2656542480726785e-14,
+          "spectrum_error": 2.3314683517128287e-15,
+          "requested_subspace_error": 5.293244809855483e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            3243,
+            36,
+            0,
+            92
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.613847762521074e-12,
+          "max_absolute_residual": 2.5489887978125125e-12,
+          "orthogonality": 1.2656542480726785e-14,
+          "spectrum_error": 2.3314683517128287e-15,
+          "requested_subspace_error": 5.293244809855483e-12,
+          "physical_accepted": true,
+          "converged": 4,
+          "core_converged": 4,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            3243,
+            36,
+            0,
+            92
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 290,
+          "KERNEL": 4192,
+          "MEMCPY": 374,
+          "CONDITIONAL": 179
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 374
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "negative",
+      "n": 162,
+      "k": 4,
+      "nnz": 3748,
+      "geometric_nnz": 1488,
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 8.851743577275697e-15,
+      "reference_orthogonality": 1.7486012637846216e-15,
+      "transformed_selection_margin": 0.00024240554629662014,
+      "shifted_spd": true,
+      "sigma": -0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "cupy-reciprocal",
+      "setup_seconds": 0.010240864008665085,
+      "capture_seconds": 0.0,
+      "warmup_seconds": 0.2308075726032257,
+      "samples_seconds": [
+        0.2470480166375637,
+        0.24550669267773628,
+        0.23443713039159775
+      ],
+      "solve_seconds": 0.24550669267773628,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.4448300647704348e-10,
+          "max_absolute_residual": 1.5768097938462233e-10,
+          "orthogonality": 1.3733458814613186e-13,
+          "spectrum_error": 2.6675321560234853e-14,
+          "requested_subspace_error": 7.249258966518128e-10,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            2.8709964456094577e-11,
+            4.757469803909686e-11,
+            4.000641660316447e-11,
+            8.823453198550457e-11
+          ],
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.2689234833453327e-10,
+          "max_absolute_residual": 1.5059580665832684e-10,
+          "orthogonality": 2.4691380388379275e-14,
+          "spectrum_error": 2.7164137197233863e-14,
+          "requested_subspace_error": 3.86479948612119e-10,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            2.9185180920151675e-11,
+            3.085537613340839e-11,
+            8.359498302017815e-11,
+            7.414536290388447e-11
+          ],
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.4815022949147564e-10,
+          "max_absolute_residual": 1.508836363142696e-10,
+          "orthogonality": 8.727580087725524e-14,
+          "spectrum_error": 1.943450466143561e-14,
+          "requested_subspace_error": 8.09589623238081e-10,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            2.8999444343071268e-11,
+            4.4301703135870147e-11,
+            7.759208874744604e-11,
+            9.047406764435522e-11
+          ],
+          "native_stopping_passed": true
+        }
+      ],
+      "accepted": true,
+      "graph": null,
+      "sign": "negative",
+      "n": 162,
+      "k": 4,
+      "nnz": 3748,
+      "geometric_nnz": 1488,
+      "matrix_sha256": "1c51e21e0ba96fcca10a82054abd87e231ed845ed76a0a8b34d30b95663d1ce6",
+      "reference": "Independent dense symmetric reciprocal pencil Gx=mu Kx",
+      "reference_residual": 8.851743577275697e-15,
+      "reference_orthogonality": 1.7486012637846216e-15,
+      "transformed_selection_margin": 0.00024240554629662014,
+      "shifted_spd": true,
+      "sigma": -0.01,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    }
+  ],
+  "protocol": "Clamped P1 tetrahedral K SPD / G indefinite prescribed initial-stress pencil. Signed transformed buckling ordering, original equations, complete requested K-space and K-orthogonality. Independent reciprocal reference seed913; native seed2026, Warp seed42; no reference starts. Warm solve timings exclude fixture/reference/setup/capture. Warp physical and reciprocal-core counts plus inner CG convergence are mandatory. Native CuPy has no buckling API: explicit reciprocal LOBPCG with SPD K metric and supplied cuDSS K inverse is labeled separately. Its fresh absolute reciprocal residual is mandatory.",
+  "competing_gpu_processes": [],
+  "timing_eligible": true,
+  "numerical_contract_accepted": true,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

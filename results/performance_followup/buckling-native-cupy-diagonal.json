@@ -1,0 +1,107 @@
+{
+  "args": {
+    "side": 10,
+    "modes": 20,
+    "sign": -1,
+    "methods": "diagonal,none",
+    "steps": 400,
+    "tol": 1e-10,
+    "repeats": 3,
+    "out": "results/performance_followup/buckling-native-cupy-diagonal.json"
+  },
+  "n": 10890,
+  "k": 20,
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "native_only": true,
+  "source_sha256": {
+    "/home/horde/projects/warpack-prestress-buckling/benchmarks/upstream/cupy_buckling_probe.py": "cbaa68a83ee33f8ee4221ca15532e559d2a7b1bcef0b174cfaacca71b34ad008",
+    "benchmarks/applications/prestress_buckling.py": "2832bddf66b4014caa5277d5e83464168df638e1dcf4cecf1283326e2f6a4984",
+    "/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py": "820e931a55a82a1b135dc5bcc67f7755a5c1a887b81bdaac164c5befc84e43fd"
+  },
+  "rows": [
+    {
+      "method": "diagonal",
+      "trial": 0,
+      "outcome": "returned",
+      "max_native_absolute_residual": 0.00021975036331385434,
+      "history_length": 401,
+      "last_history_max": 0.00022665033381113472,
+      "physical_residual": 0.0002743054707235391,
+      "orthogonality": 7.067407696847994e-07,
+      "requested_subspace_error": 0.009430756109735905,
+      "spectrum_error": 1.005873249682679e-06,
+      "accepted": false
+    },
+    {
+      "method": "diagonal",
+      "trial": 1,
+      "outcome": "returned",
+      "max_native_absolute_residual": 0.00011644677197619363,
+      "history_length": 401,
+      "last_history_max": 0.00012182805927717666,
+      "physical_residual": 4.756553320307077e-05,
+      "orthogonality": 3.452345680443614e-05,
+      "requested_subspace_error": 0.0024183130494517587,
+      "spectrum_error": 3.44202863716032e-05,
+      "accepted": false
+    },
+    {
+      "method": "diagonal",
+      "trial": 2,
+      "outcome": "returned",
+      "max_native_absolute_residual": 0.00010819824049386759,
+      "history_length": 401,
+      "last_history_max": 0.00011279716691548965,
+      "physical_residual": 0.00028729800685131825,
+      "orthogonality": 1.9618123926201658e-05,
+      "requested_subspace_error": 0.01803145926323279,
+      "spectrum_error": 1.6385424735209948e-05,
+      "accepted": false
+    },
+    {
+      "method": "none",
+      "trial": 0,
+      "outcome": "returned",
+      "max_native_absolute_residual": 0.0011997959386771642,
+      "history_length": 401,
+      "last_history_max": 0.0012356142564861246,
+      "physical_residual": 0.0009155790418174203,
+      "orthogonality": 1.0660667586036158e-07,
+      "requested_subspace_error": 0.07763856291200691,
+      "spectrum_error": 2.6127411446941925e-05,
+      "accepted": false
+    },
+    {
+      "method": "none",
+      "trial": 1,
+      "outcome": "returned",
+      "max_native_absolute_residual": 0.0011278973635852406,
+      "history_length": 401,
+      "last_history_max": 0.0011516734080954433,
+      "physical_residual": 0.0010462293240787912,
+      "orthogonality": 9.369101755529741e-08,
+      "requested_subspace_error": 0.0841826825460171,
+      "spectrum_error": 2.9902241849325823e-05,
+      "accepted": false
+    },
+    {
+      "method": "none",
+      "trial": 2,
+      "outcome": "returned",
+      "max_native_absolute_residual": 0.0012972740733662165,
+      "history_length": 401,
+      "last_history_max": 0.0013505287553518697,
+      "physical_residual": 0.0008710780686394682,
+      "orthogonality": 4.0083907526522466e-08,
+      "requested_subspace_error": 0.08979355701163277,
+      "spectrum_error": 3.070435205847312e-05,
+      "accepted": false
+    }
+  ],
+  "accepted": false,
+  "diagnostic_only": true
+}

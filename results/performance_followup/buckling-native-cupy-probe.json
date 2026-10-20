@@ -1,0 +1,40 @@
+{
+  "args": {
+    "side": 10,
+    "modes": 20,
+    "sign": -1,
+    "methods": "superlu,diagonal,none",
+    "steps": 400,
+    "tol": 1e-10,
+    "repeats": 3,
+    "out": "results/performance_followup/buckling-native-cupy-probe.json"
+  },
+  "n": 10890,
+  "k": 20,
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "native_only": true,
+  "source_sha256": {
+    "/home/horde/projects/warpack-prestress-buckling/benchmarks/upstream/cupy_buckling_probe.py": "cbaa68a83ee33f8ee4221ca15532e559d2a7b1bcef0b174cfaacca71b34ad008",
+    "benchmarks/applications/prestress_buckling.py": "2832bddf66b4014caa5277d5e83464168df638e1dcf4cecf1283326e2f6a4984",
+    "/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py": "820e931a55a82a1b135dc5bcc67f7755a5c1a887b81bdaac164c5befc84e43fd"
+  },
+  "rows": [
+    {
+      "method": "superlu",
+      "trial": 0,
+      "outcome": "returned",
+      "max_native_absolute_residual": 760.7869677838859,
+      "history_length": 401,
+      "last_history_max": 757.1191680036088,
+      "physical_residual": 0.9941839187722784,
+      "orthogonality": 307.7543066802229,
+      "requested_subspace_error": 17.57006538098118,
+      "spectrum_error": 0.9962574071228424,
+      "accepted": false
+    }
+  ]
+}

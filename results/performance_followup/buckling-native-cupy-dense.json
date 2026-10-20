@@ -1,0 +1,63 @@
+{
+  "args": {
+    "side": 10,
+    "modes": 20,
+    "sign": -1,
+    "methods": "dense",
+    "steps": 400,
+    "tol": 1e-10,
+    "repeats": 3,
+    "out": "results/performance_followup/buckling-native-cupy-dense.json"
+  },
+  "n": 10890,
+  "k": 20,
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "native_only": true,
+  "source_sha256": {
+    "/home/horde/projects/warpack-prestress-buckling/benchmarks/upstream/cupy_buckling_probe.py": "b92eb7a59c49f80f88399a463cc588499151aa69ccda4317a518a02c50179367",
+    "benchmarks/applications/prestress_buckling.py": "2832bddf66b4014caa5277d5e83464168df638e1dcf4cecf1283326e2f6a4984",
+    "/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py": "820e931a55a82a1b135dc5bcc67f7755a5c1a887b81bdaac164c5befc84e43fd"
+  },
+  "rows": [
+    {
+      "method": "dense",
+      "trial": 0,
+      "outcome": "error",
+      "reason": "'NoneType' object has no attribute 'ndim'",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/horde/projects/warpack-prestress-buckling/benchmarks/upstream/cupy_buckling_probe.py\", line 95, in main\n    mu, v, history = cl.lobpcg(\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_lobpcg.py\", line 447, in lobpcg\n    activeBlockVectorAR = A(activeBlockVectorR)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 172, in __call__\n    return self*x\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 175, in __mul__\n    return self.dot(x)\n  File \"/home/horde/.local/lib/python3.10/site-packages/cupyx/scipy/sparse/linalg/_interface.py\", line 185, in dot\n    if x.ndim == 1 or x.ndim == 2 and x.shape[1] == 1:\nAttributeError: 'NoneType' object has no attribute 'ndim'\n",
+      "accepted": false
+    },
+    {
+      "method": "dense",
+      "trial": 1,
+      "outcome": "returned",
+      "max_native_absolute_residual": 740.9992948880516,
+      "history_length": 401,
+      "last_history_max": 737.3188597579608,
+      "physical_residual": 0.993648683639075,
+      "orthogonality": 299.73632340190795,
+      "requested_subspace_error": 17.340167885580666,
+      "spectrum_error": 0.9963947427700983,
+      "accepted": false
+    },
+    {
+      "method": "dense",
+      "trial": 2,
+      "outcome": "returned",
+      "max_native_absolute_residual": 943.1723504735655,
+      "history_length": 401,
+      "last_history_max": 939.1917454652888,
+      "physical_residual": 0.9945508234040696,
+      "orthogonality": 354.24015370873815,
+      "requested_subspace_error": 18.833813686393633,
+      "spectrum_error": 0.997012640682867,
+      "accepted": false
+    }
+  ],
+  "accepted": false,
+  "diagnostic_only": true
+}

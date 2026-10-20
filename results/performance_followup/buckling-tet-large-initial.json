@@ -1,0 +1,813 @@
+{
+  "args": {
+    "side": 10,
+    "modes": 20,
+    "signs": "positive,negative",
+    "shift": 0.01,
+    "methods": "scipy,spectra,warp-cudss,warp-cg,cupy-reciprocal",
+    "ncv": 64,
+    "steps": 8,
+    "outer_tol": 1e-09,
+    "inner_tol": 1e-14,
+    "fsai_width": 32,
+    "cupy_steps": 400,
+    "cupy_tol": 1e-10,
+    "repeats": 3,
+    "out": "results/performance_followup/buckling-tet-large-initial.json",
+    "diagnostic": false
+  },
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "source_sha256": {
+    "warpack/__init__.py": "d686429fb4f5d9d2d65a8dd751d1ec1ec94971b8b2e489f713e01699c47b59ac",
+    "warpack/arnoldi.py": "e632221c48583256c7eaf572aaec0cbdc0cd906d74bee8035b11356651432bb9",
+    "warpack/block.py": "328b01a45090a91276af24c09d2b2944369630fc42525169660b1a4d44fdcb5c",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/generalized.py": "63da931302057f47e46110123aa7525a033217cfdbe1072cb118346a39bb17f7",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/shift.py": "ff01a8247ef7bc1c82aabad730e2234dbf32853491338e35fa8372e16a024fab",
+    "warpack/solver.py": "aa6e9be30a12d323fd487ac25134004fb64c28b2e47751f2ab894418c1b50ac0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "fdebce41d1cc113743a937b911c3f8d818882d39c2a8a1272884acc2ef1a99a6",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb",
+    "/home/horde/projects/warpack-prestress-buckling/benchmarks/applications/buckling_compare.py": "9b6fd76fa851153eed48dfd380950728bf96e8ecbe8e3ad1b82135003a42ccc2",
+    "benchmarks/applications/prestress_buckling.py": "2832bddf66b4014caa5277d5e83464168df638e1dcf4cecf1283326e2f6a4984",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/runner.py": "45a4ba1321eca6cc7ca70c55db0b570a5e886704c83231b83b9a6c79b47f847b",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3"
+  },
+  "cases": [
+    {
+      "api_class": "G",
+      "requested_size": 10890,
+      "problem": "prestress_buckling_positive",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 20,
+      "ncv": 64,
+      "method": "scipy",
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "target": [
+        0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 64,
+      "implementation": "SciPy ARPACK explicit ncv=64",
+      "setup_seconds": 0.8394888490438461,
+      "warmup_seconds": 1.8170136585831642,
+      "samples_seconds": [
+        1.801997683942318,
+        1.8344110287725925,
+        1.869196429848671
+      ],
+      "solve_seconds": 1.8344110287725925,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 6.107459012463225e-10,
+          "max_absolute_residual": 2.754044388375565e-11,
+          "orthogonality": 1.3633538742396922e-13,
+          "spectrum_error": 3.6671667598864366e-11,
+          "requested_subspace_error": 4.937367150789436e-09
+        },
+        {
+          "accepted": true,
+          "residual": 6.107459012463225e-10,
+          "max_absolute_residual": 2.754044388375565e-11,
+          "orthogonality": 1.3633538742396922e-13,
+          "spectrum_error": 3.6671667598864366e-11,
+          "requested_subspace_error": 4.937367150789436e-09
+        },
+        {
+          "accepted": true,
+          "residual": 6.107459012463225e-10,
+          "max_absolute_residual": 2.754044388375565e-11,
+          "orthogonality": 1.3633538742396922e-13,
+          "spectrum_error": 3.6671667598864366e-11,
+          "requested_subspace_error": 4.937367150789436e-09
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "positive",
+      "geometric_nnz": 145224,
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 2.5543647590703207e-13,
+      "reference_orthogonality": 1.0857981180834031e-13,
+      "transformed_selection_margin": 2.4221043300576284e-05,
+      "shifted_spd": true,
+      "sigma": 0.01
+    },
+    {
+      "api_class": "G",
+      "requested_size": 10890,
+      "problem": "prestress_buckling_positive",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 20,
+      "ncv": 64,
+      "method": "spectra",
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "target": [
+        0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.8269811607897282,
+      "warmup_seconds": 2.3111294880509377,
+      "samples_seconds": [
+        2.303980525583029,
+        2.283757511526346,
+        2.273868452757597
+      ],
+      "solve_seconds": 2.283757511526346,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.5626464137089928e-09,
+          "max_absolute_residual": 6.943940041026497e-11,
+          "orthogonality": 1.3145040611561853e-13,
+          "spectrum_error": 3.813074693988072e-11,
+          "requested_subspace_error": 5.600082396699114e-09
+        },
+        {
+          "accepted": true,
+          "residual": 1.5626464137089928e-09,
+          "max_absolute_residual": 6.943940041026497e-11,
+          "orthogonality": 1.3145040611561853e-13,
+          "spectrum_error": 3.813074693988072e-11,
+          "requested_subspace_error": 5.600082396699114e-09
+        },
+        {
+          "accepted": true,
+          "residual": 1.5626464137089928e-09,
+          "max_absolute_residual": 6.943940041026497e-11,
+          "orthogonality": 1.3145040611561853e-13,
+          "spectrum_error": 3.813074693988072e-11,
+          "requested_subspace_error": 5.600082396699114e-09
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "positive",
+      "geometric_nnz": 145224,
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 2.5543647590703207e-13,
+      "reference_orthogonality": 1.0857981180834031e-13,
+      "transformed_selection_margin": 2.4221043300576284e-05,
+      "shifted_spd": true,
+      "sigma": 0.01
+    },
+    {
+      "method": "warp-cudss",
+      "setup_seconds": 0.23557083681225777,
+      "capture_seconds": 0.9754364937543869,
+      "warmup_seconds": 0.49315131083130836,
+      "samples_seconds": [
+        0.3864135779440403,
+        0.38647084683179855,
+        0.3864365629851818
+      ],
+      "solve_seconds": 0.3864365629851818,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 8.087294879263288e-12,
+          "max_absolute_residual": 4.989255536491655e-13,
+          "orthogonality": 1.1834977442504169e-13,
+          "spectrum_error": 9.262035582935368e-14,
+          "requested_subspace_error": 5.477509972537554e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 8.830790187910688e-12,
+          "max_absolute_residual": 5.269725628087585e-13,
+          "orthogonality": 7.549516567451064e-14,
+          "spectrum_error": 1.0422218643668657e-13,
+          "requested_subspace_error": 1.1250535235396313e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 8.464293763283837e-12,
+          "max_absolute_residual": 4.4673466315092725e-13,
+          "orthogonality": 7.006374647122726e-14,
+          "spectrum_error": 8.915090887740007e-14,
+          "requested_subspace_error": 8.71095080454218e-11,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 4237,
+          "KERNEL": 18514,
+          "MEMCPY": 3535,
+          "CONDITIONAL": 351
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2131,
+          "HtoD (HOST PAGEABLE to DEVICE)": 1404
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "positive",
+      "n": 10890,
+      "k": 20,
+      "nnz": 431294,
+      "geometric_nnz": 145224,
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 2.5543647590703207e-13,
+      "reference_orthogonality": 1.0857981180834031e-13,
+      "transformed_selection_margin": 2.4221043300576284e-05,
+      "shifted_spd": true,
+      "sigma": 0.01
+    },
+    {
+      "method": "warp-cg",
+      "setup_seconds": 0.15200352296233177,
+      "capture_seconds": 1.841461855918169,
+      "warmup_seconds": 2.179295413196087,
+      "samples_seconds": [
+        2.1094449311494827,
+        2.109288528561592,
+        2.10957408323884
+      ],
+      "solve_seconds": 2.1094449311494827,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.9833019188934684e-11,
+          "max_absolute_residual": 2.607155810685491e-12,
+          "orthogonality": 5.595524044110789e-14,
+          "spectrum_error": 1.0333400801698644e-13,
+          "requested_subspace_error": 1.1986051966827152e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            59407,
+            172,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.9833017514755372e-11,
+          "max_absolute_residual": 2.607154943323753e-12,
+          "orthogonality": 5.595524044110789e-14,
+          "spectrum_error": 1.0327849686575519e-13,
+          "requested_subspace_error": 1.1986051966827152e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            59407,
+            172,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.9833017514755372e-11,
+          "max_absolute_residual": 2.607154943323753e-12,
+          "orthogonality": 5.595524044110789e-14,
+          "spectrum_error": 1.0327849686575519e-13,
+          "requested_subspace_error": 1.1986051966827152e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            59407,
+            172,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1078,
+          "KERNEL": 18514,
+          "MEMCPY": 1429,
+          "CONDITIONAL": 702
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1429
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "positive",
+      "n": 10890,
+      "k": 20,
+      "nnz": 431294,
+      "geometric_nnz": 145224,
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 2.5543647590703207e-13,
+      "reference_orthogonality": 1.0857981180834031e-13,
+      "transformed_selection_margin": 2.4221043300576284e-05,
+      "shifted_spd": true,
+      "sigma": 0.01
+    },
+    {
+      "method": "cupy-reciprocal",
+      "setup_seconds": 0.08920997753739357,
+      "capture_seconds": 0.0,
+      "warmup_seconds": 1.326607946306467,
+      "samples_seconds": [
+        1.025979120284319,
+        0.9616380892693996,
+        0.9577283300459385
+      ],
+      "solve_seconds": 0.9616380892693996,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.795538135821096e-10,
+          "max_absolute_residual": 1.4258526651045322e-11,
+          "orthogonality": 7.038813976123492e-14,
+          "spectrum_error": 9.414691248821327e-14,
+          "requested_subspace_error": 8.495579039321223e-09,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            1.0437249292582546e-11,
+            3.404050991914842e-11,
+            3.82254205591254e-12,
+            9.325675921848205e-12,
+            1.8057345677853095e-11,
+            4.5885212225616496e-11,
+            4.015170221833079e-11,
+            4.116058753254146e-11,
+            2.6159613937148355e-11,
+            3.3683626948031125e-11,
+            1.5010788256613687e-11,
+            3.066402365902986e-11,
+            2.612742631348068e-11,
+            5.812183149632717e-11,
+            2.4076897207212018e-11,
+            3.8926213449882416e-11,
+            2.4926748200649807e-11,
+            2.2064014562961415e-11,
+            8.514470992405192e-11,
+            8.134385495484878e-11
+          ],
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 3.0986260858082855e-10,
+          "max_absolute_residual": 1.3586159866400827e-11,
+          "orthogonality": 7.283063041541027e-14,
+          "spectrum_error": 1.0133560657266116e-13,
+          "requested_subspace_error": 7.069503865126288e-09,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            9.489142466610808e-12,
+            3.644159856837344e-11,
+            2.3338688680487035e-11,
+            4.324131174777143e-11,
+            6.853965253273693e-11,
+            6.433148263329858e-11,
+            6.956050757937569e-11,
+            4.5517784002006664e-11,
+            5.3226711453859114e-11,
+            6.830712213676262e-11,
+            5.6455559945694294e-11,
+            5.862330479246558e-11,
+            5.30391459284556e-11,
+            5.512055959051165e-11,
+            4.2970043613327606e-11,
+            4.2911711159346034e-11,
+            3.973808127942771e-11,
+            3.1110122760024335e-11,
+            6.794722775192685e-11,
+            9.293788758631516e-11
+          ],
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.979203028085056e-10,
+          "max_absolute_residual": 1.3765357058967247e-11,
+          "orthogonality": 1.4499512701604544e-13,
+          "spectrum_error": 8.384959393481495e-14,
+          "requested_subspace_error": 7.052402310005198e-09,
+          "physical_accepted": true,
+          "native_absolute_residuals": [
+            1.3229515117959852e-11,
+            3.3810429966336186e-11,
+            3.8196952063583964e-12,
+            1.0781041089359466e-11,
+            1.947188718734754e-11,
+            4.931887830919724e-11,
+            3.961220857008501e-11,
+            4.10678982933262e-11,
+            4.264124677310776e-11,
+            9.751370748547031e-11,
+            1.785977669627471e-11,
+            4.05502292680221e-11,
+            3.86684463732326e-11,
+            4.476470596878531e-11,
+            2.0595077682997704e-11,
+            4.25689613758325e-11,
+            3.9879294254351436e-11,
+            3.1503912667663876e-11,
+            7.278600547263893e-11,
+            8.935600111275233e-11
+          ],
+          "native_stopping_passed": true
+        }
+      ],
+      "accepted": true,
+      "graph": null,
+      "sign": "positive",
+      "n": 10890,
+      "k": 20,
+      "nnz": 431294,
+      "geometric_nnz": 145224,
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 2.5543647590703207e-13,
+      "reference_orthogonality": 1.0857981180834031e-13,
+      "transformed_selection_margin": 2.4221043300576284e-05,
+      "shifted_spd": true,
+      "sigma": 0.01
+    },
+    {
+      "api_class": "G",
+      "requested_size": 10890,
+      "problem": "prestress_buckling_negative",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 20,
+      "ncv": 64,
+      "method": "scipy",
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "reference_ncv": 64,
+      "implementation": "SciPy ARPACK explicit ncv=64",
+      "setup_seconds": 0.8368916399776936,
+      "warmup_seconds": 3.545952133834362,
+      "samples_seconds": [
+        3.580756712704897,
+        3.609467715024948,
+        3.6338705122470856
+      ],
+      "solve_seconds": 3.609467715024948,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.630709281606098e-10,
+          "max_absolute_residual": 3.827703431991125e-11,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 2.3368456298183227e-11,
+          "requested_subspace_error": 3.0859126050356813e-09
+        },
+        {
+          "accepted": true,
+          "residual": 2.630709281606098e-10,
+          "max_absolute_residual": 3.827703431991125e-11,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 2.3368456298183227e-11,
+          "requested_subspace_error": 3.0859126050356813e-09
+        },
+        {
+          "accepted": true,
+          "residual": 2.630709281606098e-10,
+          "max_absolute_residual": 3.827703431991125e-11,
+          "orthogonality": 7.993605777301127e-15,
+          "spectrum_error": 2.3368456298183227e-11,
+          "requested_subspace_error": 3.0859126050356813e-09
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "negative",
+      "geometric_nnz": 145224,
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 1.3335797756296856e-13,
+      "reference_orthogonality": 6.772360450213455e-15,
+      "transformed_selection_margin": 4.5638924499602496e-06,
+      "shifted_spd": true,
+      "sigma": -0.01
+    },
+    {
+      "api_class": "G",
+      "requested_size": 10890,
+      "problem": "prestress_buckling_negative",
+      "n": 10890,
+      "columns": 10890,
+      "nnz": 431294,
+      "mass_nnz": 145224,
+      "k": 20,
+      "ncv": 64,
+      "method": "spectra",
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "notes": "Clamped tetrahedral linear elasticity, prescribed uniform indefinite initial-stress tangent; K SPD, G indefinite; K-orthonormal modes; transformed magnitude ordering; Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "target": [
+        -0.01,
+        0.0
+      ],
+      "seed": 2026,
+      "start": "Reference seed 2026; restored per trial (algorithms have different start spaces)",
+      "setup_seconds": 0.8523824363946915,
+      "warmup_seconds": 4.6318178959190845,
+      "samples_seconds": [
+        4.4999367743730545,
+        4.5487047880887985,
+        4.604387056082487
+      ],
+      "solve_seconds": 4.5487047880887985,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 3.6428803125231723e-10,
+          "max_absolute_residual": 2.3376339492592324e-11,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 1.8502956272630682e-11,
+          "requested_subspace_error": 3.411626519041624e-09
+        },
+        {
+          "accepted": true,
+          "residual": 3.6428803125231723e-10,
+          "max_absolute_residual": 2.3376339492592324e-11,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 1.8502956272630682e-11,
+          "requested_subspace_error": 3.411626519041624e-09
+        },
+        {
+          "accepted": true,
+          "residual": 3.6428803125231723e-10,
+          "max_absolute_residual": 2.3376339492592324e-11,
+          "orthogonality": 1.1546319456101628e-14,
+          "spectrum_error": 1.8502956272630682e-11,
+          "requested_subspace_error": 3.411626519041624e-09
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "outcome": "passed",
+      "contract_accepted": true,
+      "sign": "negative",
+      "geometric_nnz": 145224,
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 1.3335797756296856e-13,
+      "reference_orthogonality": 6.772360450213455e-15,
+      "transformed_selection_margin": 4.5638924499602496e-06,
+      "shifted_spd": true,
+      "sigma": -0.01
+    },
+    {
+      "method": "warp-cudss",
+      "setup_seconds": 0.0647205263376236,
+      "capture_seconds": 0.8892314024269581,
+      "warmup_seconds": 0.4823792614042759,
+      "samples_seconds": [
+        0.3861781693994999,
+        0.38593414425849915,
+        0.38640933111310005
+      ],
+      "solve_seconds": 0.3861781693994999,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.3508454087423736e-11,
+          "max_absolute_residual": 8.452408423783447e-13,
+          "orthogonality": 7.283063041541027e-14,
+          "spectrum_error": 2.1815882433884326e-14,
+          "requested_subspace_error": 8.728005855579513e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.5858517095334392e-11,
+          "max_absolute_residual": 8.577305532497803e-13,
+          "orthogonality": 8.659739592076221e-14,
+          "spectrum_error": 1.4932499681208355e-14,
+          "requested_subspace_error": 8.72575032610147e-10,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.9401401923406973e-11,
+          "max_absolute_residual": 7.824262071576271e-13,
+          "orthogonality": 8.237854842718662e-14,
+          "spectrum_error": 1.9817480989559044e-14,
+          "requested_subspace_error": 1.0092859594091864e-09,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 4237,
+          "KERNEL": 18514,
+          "MEMCPY": 3535,
+          "CONDITIONAL": 351
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2131,
+          "HtoD (HOST PAGEABLE to DEVICE)": 1404
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "negative",
+      "n": 10890,
+      "k": 20,
+      "nnz": 431294,
+      "geometric_nnz": 145224,
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 1.3335797756296856e-13,
+      "reference_orthogonality": 6.772360450213455e-15,
+      "transformed_selection_margin": 4.5638924499602496e-06,
+      "shifted_spd": true,
+      "sigma": -0.01
+    },
+    {
+      "method": "warp-cg",
+      "setup_seconds": 0.12834685668349266,
+      "capture_seconds": 1.893148060888052,
+      "warmup_seconds": 2.1939885914325714,
+      "samples_seconds": [
+        2.106410324573517,
+        2.1064418330788612,
+        2.1063844561576843
+      ],
+      "solve_seconds": 2.106410324573517,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 2.781544731814401e-11,
+          "max_absolute_residual": 3.0707205441599106e-12,
+          "orthogonality": 7.283063041541027e-14,
+          "spectrum_error": 1.787459069646502e-14,
+          "requested_subspace_error": 1.1147545332745957e-09,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            59350,
+            171,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.781544731814401e-11,
+          "max_absolute_residual": 3.0707205441599106e-12,
+          "orthogonality": 7.283063041541027e-14,
+          "spectrum_error": 1.787459069646502e-14,
+          "requested_subspace_error": 1.1147545332745957e-09,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            59350,
+            171,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        },
+        {
+          "accepted": true,
+          "residual": 2.7815446731322078e-11,
+          "max_absolute_residual": 3.0707205441599106e-12,
+          "orthogonality": 7.283063041541027e-14,
+          "spectrum_error": 1.7930101847696278e-14,
+          "requested_subspace_error": 1.1147545332745957e-09,
+          "physical_accepted": true,
+          "converged": 20,
+          "core_converged": 20,
+          "solver_status": 0,
+          "outer_stopping_accepted": true,
+          "cg_stats": [
+            59350,
+            171,
+            0,
+            351
+          ],
+          "inner_solve_accepted": true
+        }
+      ],
+      "accepted": true,
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1078,
+          "KERNEL": 18514,
+          "MEMCPY": 1429,
+          "CONDITIONAL": 702
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1429
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "sign": "negative",
+      "n": 10890,
+      "k": 20,
+      "nnz": 431294,
+      "geometric_nnz": 145224,
+      "matrix_sha256": "f4e9a436442cd3e321a091725cd06d6f11e3cc746ce80f4626c0d6278c402f4f",
+      "reference": "Independent ARPACK regular reciprocal pencil Gx=mu Kx, seed913, tol1e-12, expanded basis",
+      "reference_residual": 1.3335797756296856e-13,
+      "reference_orthogonality": 6.772360450213455e-15,
+      "transformed_selection_margin": 4.5638924499602496e-06,
+      "shifted_spd": true,
+      "sigma": -0.01
+    }
+  ],
+  "protocol": "Clamped P1 tetrahedral K SPD / G indefinite prescribed initial-stress pencil. Signed transformed buckling ordering, original equations, complete requested K-space and K-orthogonality. Independent reciprocal reference seed913; native seed2026, Warp seed42; no reference starts. Warm solve timings exclude fixture/reference/setup/capture. Warp physical and reciprocal-core counts plus inner CG convergence are mandatory. Native CuPy has no buckling API: explicit reciprocal LOBPCG with SPD K metric and supplied cuDSS K inverse is labeled separately. Its fresh absolute reciprocal residual is mandatory."
+}
