@@ -21,6 +21,9 @@ class StartedGeneral(GeneralEigensolver):
     """Benchmark-only start adapter; identical Warp initialization after copy."""
 
     def initialize(self, seed=42):
+        self.restart_index.fill_(-1)
+        self.residual_restarts.zero_()
+        self.residual_fallbacks.zero_()
         self.status.zero_()
         wp.copy(self.qrows[0], self.start_vector)
         self.length(0, self.norm)
