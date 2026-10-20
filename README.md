@@ -205,6 +205,14 @@ Sources: [current ARPACK + PARDISO](results/anvil_pardiso_noir_confirmed.json), 
 
 ## Validation and benchmarking
 
+The [complex connection comparison](benchmarks/applications/CONNECTION.md) adds
+positive lumped and complex consistent mass, repeated modes, independent
+Fourier/element-energy checks, and native-complex reference comparisons. Its
+generalized complex recovery is a benchmark adapter outside the installed API.
+At 16,384 complex unknowns and 20 modes, Warp+cuDSS passes in 0.330 s versus
+0.620 s SciPy and 0.746 s Spectra. The report separately labels modified-CuPy
+diagnostics and preserves native CuPy and strict inner-CG failures.
+
 Application comparison commands and the normal-POD driver fail when any requested method misses its recorded numerical contract. Use their explicit `--diagnostic` option for inventories containing known failures or unsupported interfaces; the JSON keeps those failures. See the [comparison process contract](benchmarks/COMPARISON_CONTRACTS.md).
 
 The [application coverage suite](benchmarks/applications/README.md) adds physics/geometry fixtures for nine API classes, independent spectrum and original-equation checks, and accuracy-gated ARPACK/Spectra/CuPy comparisons. [Coverage issues and priorities](https://github.com/alecjacobson/warpack/issues/18) track the remaining gaps. `GeneralizedKrylovSchur` adds mass-orthogonal restarted Krylov iteration for SPD-mass pencils; it supports nearest-shift solves and regular mass-inverse LM/LA/SA selection. Its required inverse has one RHS.

@@ -1,0 +1,71 @@
+{
+  "method": "warp-cudss",
+  "n": 144,
+  "k": 6,
+  "ncv": 32,
+  "real_n": 288,
+  "real_ncv": 64,
+  "mass": "consistent",
+  "copies": 1,
+  "nnz": 720,
+  "mass_nnz": 1008,
+  "shift": -0.1,
+  "matrix_sha256": "294300b163996ceb289d367a7c6c4d4e68078db4a18dc5e79fbaeaf144d22659",
+  "samples": [
+    0.1798296421766281,
+    0.18009574711322784
+  ],
+  "validation": [
+    {
+      "accepted": true,
+      "residual": 3.8473462730299804e-14,
+      "max_absolute_residual": 1.6229353423083383e-14,
+      "orthogonality": 2.220514481433704e-16,
+      "spectrum_error": 8.548717289613705e-15,
+      "requested_subspace_error": 6.5942521673571525e-15,
+      "complex_count": 6,
+      "physical_count": 6,
+      "real_count": 12,
+      "solver_status": 0,
+      "solver_full_count": true
+    },
+    {
+      "accepted": true,
+      "residual": 2.6181653245171252e-14,
+      "max_absolute_residual": 1.2306084811468559e-14,
+      "orthogonality": 4.449557262054371e-16,
+      "spectrum_error": 8.659739592076221e-15,
+      "requested_subspace_error": 8.854674343130284e-15,
+      "complex_count": 6,
+      "physical_count": 6,
+      "real_count": 12,
+      "solver_status": 0,
+      "solver_full_count": true
+    }
+  ],
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 6080,
+      "MEMCPY": 9047,
+      "KERNEL": 29683,
+      "CONDITIONAL": 750
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 6047,
+      "HtoD (HOST PAGEABLE to DEVICE)": 3000
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "outer_cycles": 15,
+  "seed": 2026,
+  "setup_seconds": 0.18564173579216003,
+  "capture_seconds": 2.548584446310997,
+  "device_only_graph": false,
+  "warmup_seconds": 0.43670088425278664,
+  "timing_uncontended": true,
+  "competing_processes": [],
+  "solve_seconds": 0.17996269464492798,
+  "accepted": true,
+  "inner_solve_accepted": true,
+  "outcome": "passed"
+}

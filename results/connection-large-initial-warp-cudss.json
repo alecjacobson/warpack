@@ -1,0 +1,85 @@
+{
+  "method": "warp-cudss",
+  "n": 4096,
+  "k": 20,
+  "ncv": 64,
+  "real_n": 8192,
+  "real_ncv": 128,
+  "mass": "consistent",
+  "copies": 1,
+  "nnz": 20480,
+  "mass_nnz": 28672,
+  "shift": -0.1,
+  "matrix_sha256": "e201bd6037deaa379270f025ec0564783734a06ece391ba63da23dd29a4dc408",
+  "samples": [
+    0.4949397146701813,
+    0.4948650747537613,
+    0.49492888525128365
+  ],
+  "validation": [
+    {
+      "accepted": true,
+      "residual": 1.3497924858147715e-13,
+      "max_absolute_residual": 2.7428537935815936e-14,
+      "orthogonality": 4.44092597968927e-16,
+      "spectrum_error": 3.4861002973229915e-14,
+      "requested_subspace_error": 5.2836581672394695e-14,
+      "complex_count": 20,
+      "physical_count": 20,
+      "real_count": 40,
+      "solver_status": 0,
+      "solver_full_count": true
+    },
+    {
+      "accepted": true,
+      "residual": 3.141984631447526e-13,
+      "max_absolute_residual": 1.7950090459805276e-14,
+      "orthogonality": 4.44093924961318e-16,
+      "spectrum_error": 3.170431048973355e-14,
+      "requested_subspace_error": 3.8707165661900374e-14,
+      "complex_count": 20,
+      "physical_count": 20,
+      "real_count": 40,
+      "solver_status": 0,
+      "solver_full_count": true
+    },
+    {
+      "accepted": true,
+      "residual": 1.7467249850612798e-13,
+      "max_absolute_residual": 1.8728491129903647e-14,
+      "orthogonality": 4.441154174672786e-16,
+      "spectrum_error": 3.207154188536753e-14,
+      "requested_subspace_error": 3.9309556241451545e-14,
+      "complex_count": 20,
+      "physical_count": 20,
+      "real_count": 40,
+      "solver_status": 0,
+      "solver_full_count": true
+    }
+  ],
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 5934,
+      "MEMCPY": 8702,
+      "KERNEL": 33556,
+      "CONDITIONAL": 723
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 5810,
+      "HtoD (HOST PAGEABLE to DEVICE)": 2892
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "outer_cycles": 8,
+  "seed": 2026,
+  "setup_seconds": 0.23233620822429657,
+  "capture_seconds": 2.5159065201878548,
+  "device_only_graph": false,
+  "warmup_seconds": 0.730640109628439,
+  "timing_uncontended": true,
+  "competing_processes": [],
+  "solve_seconds": 0.49492888525128365,
+  "accepted": true,
+  "inner_solve_accepted": true,
+  "outcome": "passed"
+}

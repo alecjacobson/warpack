@@ -1,0 +1,44 @@
+{
+  "tests": {
+    "pinned_warp_1_18": {
+      "passed": 39,
+      "seconds": 30.47
+    },
+    "stock_warp_1_15": {
+      "passed": 39,
+      "seconds": 31.17
+    }
+  },
+  "test_files": [
+    "tests/test_connection_baseline.py",
+    "tests/test_connection_fixture.py",
+    "tests/test_connection_reference.py",
+    "tests/test_connection_solver.py"
+  ],
+  "scope": "25 host reference/contract checks and14 GPU checks; no installed-core changes. Earlier full941 suite is not rerun or relabeled.",
+  "ruff": "check and format pass for all9 new Python modules/tests",
+  "spectra_commit": "db1d5cc3279752ca7ea3e33da44ba2a85e4e4a95",
+  "spectra_compile": "g++ -O3 -DNDEBUG -std=c++17 -shared -fPIC -I/usr/include/eigen3 -Ibuild/upstream-spectra/include benchmarks/applications/connection_spectra.cpp -o build/connection_spectra.so",
+  "spectra_source_sha256": "dcea35c5014f322eb32b23e21e8a2c1851c26865ca4d84ece792a9557fc0f124",
+  "spectra_binary_sha256": "c9c62010b1d6dc38a6018c8257613c3eafdf193ad35d6234043a824140f9a1a0",
+  "cupy_lobpcg_source_sha256": "820e931a55a82a1b135dc5bcc67f7755a5c1a887b81bdaac164c5befc84e43fd",
+  "baseline": "connection-16384-regression.json: accepted, comparable, no performance regression",
+  "issues": {
+    "coverage": 24,
+    "cupy_complex": 94,
+    "cg_fresh": 95,
+    "arpack_metric_recovery": 96,
+    "cupy_upstream": 10405
+  },
+  "source_hashes": {
+    "benchmarks/applications/connection.py": "25322f9381ed44dce84c250d4877eebed57608b8d5a061e80c4d89cf35cef465",
+    "benchmarks/applications/connection_warp.py": "edda432637f0938f70d5c99e6ba20db21ed4835867161b033eb3539f0371a750",
+    "benchmarks/applications/connection_backends.py": "1f99c28251b3f409149bd4dee74cd7d3d2d7a8327323b2dd17e626c9d227d2d9",
+    "benchmarks/applications/connection_compare.py": "79c32f6bb8abbaba189836342977a24792985c0905d2a7bd514a452b88d3c3bd",
+    "benchmarks/applications/connection_cupy_repro.py": "a266187673402ec417866821a568c380906a017e02fd9c9e8ee5a590486c4382",
+    "tests/test_connection_fixture.py": "e9a366b799e1c934970882210432cb711777207d9f4699dd7c7474002ddfe7c9",
+    "tests/test_connection_solver.py": "332424672c38b421c115cdcc3fadaa605ef3eb69b3e6a469dff335d4691bcc79",
+    "tests/test_connection_baseline.py": "316cf9404b8d072c7b6f561a59d4098fb54f09e811cded8b8830d35b9c2a9b8e",
+    "tests/test_connection_reference.py": "f00f9a6d13dc76e200a5ec46dab00184ca55f1221c81cc3308bfb556cc0e85d4"
+  }
+}

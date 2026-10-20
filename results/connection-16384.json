@@ -1,0 +1,309 @@
+{
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "e23b9a7cb3b2753dd620845601e98680da9af2fb",
+  "git_dirty": true,
+  "runtime_hashes": {
+    "warp_linear": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+    "spectra_binary": "c9c62010b1d6dc38a6018c8257613c3eafdf193ad35d6234043a824140f9a1a0"
+  },
+  "blas_threads": "4",
+  "fixture": "Periodic flat P1 U(1) connection, independent Fourier and triangle references",
+  "acceptance": {
+    "residual": 1e-08,
+    "orthogonality": 1e-08,
+    "spectrum": 1e-08,
+    "subspace": 1e-08
+  },
+  "cases": [
+    {
+      "method": "scipy",
+      "n": 16384,
+      "k": 20,
+      "ncv": 64,
+      "real_n": null,
+      "real_ncv": null,
+      "mass": "consistent",
+      "copies": 1,
+      "nnz": 81920,
+      "mass_nnz": 114688,
+      "shift": -0.1,
+      "matrix_sha256": "2b33309f5086f9e6e7cc65b4d750bc3fbaa9ebbbdaacd2188a7f3492567b9387",
+      "samples": [
+        0.5639313496649265,
+        0.6200500801205635,
+        0.6496826112270355
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.932663204109268e-13,
+          "max_absolute_residual": 4.0896435875859293e-14,
+          "orthogonality": 2.178082983273688e-14,
+          "spectrum_error": 2.993161274389422e-13,
+          "requested_subspace_error": 1.196882380745189e-13
+        },
+        {
+          "accepted": true,
+          "residual": 5.932663204109268e-13,
+          "max_absolute_residual": 4.0896435875859293e-14,
+          "orthogonality": 2.178082983273688e-14,
+          "spectrum_error": 2.993161274389422e-13,
+          "requested_subspace_error": 1.196882380745189e-13
+        },
+        {
+          "accepted": true,
+          "residual": 5.932663204109268e-13,
+          "max_absolute_residual": 4.0896435875859293e-14,
+          "orthogonality": 2.178082983273688e-14,
+          "spectrum_error": 2.993161274389422e-13,
+          "requested_subspace_error": 1.196882380745189e-13
+        }
+      ],
+      "graph": null,
+      "outer_cycles": 3,
+      "seed": 2026,
+      "cg_tol": 1e-13,
+      "setup_seconds": 0.24169526621699333,
+      "capture_seconds": null,
+      "warmup_seconds": 0.6033118329942226,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.6200500801205635,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "spectra",
+      "n": 16384,
+      "k": 20,
+      "ncv": 64,
+      "real_n": null,
+      "real_ncv": null,
+      "mass": "consistent",
+      "copies": 1,
+      "nnz": 81920,
+      "mass_nnz": 114688,
+      "shift": -0.1,
+      "matrix_sha256": "2b33309f5086f9e6e7cc65b4d750bc3fbaa9ebbbdaacd2188a7f3492567b9387",
+      "samples": [
+        0.7513542845845222,
+        0.7463667653501034,
+        0.737483911216259
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 7.447627583433889e-13,
+          "max_absolute_residual": 6.106204313153286e-14,
+          "orthogonality": 1.4876989060826803e-14,
+          "spectrum_error": 1.1755041384731157e-12,
+          "requested_subspace_error": 9.328618552274192e-14
+        },
+        {
+          "accepted": true,
+          "residual": 7.447627583433889e-13,
+          "max_absolute_residual": 6.106204313153286e-14,
+          "orthogonality": 1.4876989060826803e-14,
+          "spectrum_error": 1.1755041384731157e-12,
+          "requested_subspace_error": 9.328618552274192e-14
+        },
+        {
+          "accepted": true,
+          "residual": 7.447627583433889e-13,
+          "max_absolute_residual": 6.106204313153286e-14,
+          "orthogonality": 1.4876989060826803e-14,
+          "spectrum_error": 1.1755041384731157e-12,
+          "requested_subspace_error": 9.328618552274192e-14
+        }
+      ],
+      "graph": null,
+      "outer_cycles": 3,
+      "seed": 2026,
+      "cg_tol": 1e-13,
+      "setup_seconds": 0.25540491938591003,
+      "capture_seconds": null,
+      "warmup_seconds": 0.7240343615412712,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.7463667653501034,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "cupy-corrected",
+      "n": 16384,
+      "k": 20,
+      "ncv": 64,
+      "real_n": null,
+      "real_ncv": null,
+      "mass": "consistent",
+      "copies": 1,
+      "nnz": 81920,
+      "mass_nnz": 114688,
+      "shift": -0.1,
+      "matrix_sha256": "2b33309f5086f9e6e7cc65b4d750bc3fbaa9ebbbdaacd2188a7f3492567b9387",
+      "samples": [
+        0.4245370961725712,
+        0.4265846721827984,
+        0.4250684157013893
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.201407744480854e-10,
+          "max_absolute_residual": 1.1253834961038314e-11,
+          "orthogonality": 2.2204461731130076e-15,
+          "spectrum_error": 1.2047903701760856e-13,
+          "requested_subspace_error": 2.2714217845984243e-10,
+          "native_iterations": 26,
+          "native_history_max": 4.1460366720463825e-10,
+          "native_fresh_max": 4.1460224066508123e-10,
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.1984718362578833e-10,
+          "max_absolute_residual": 1.1223567227479393e-11,
+          "orthogonality": 1.9984036913264045e-15,
+          "spectrum_error": 1.2444869227354293e-13,
+          "requested_subspace_error": 2.2748964994537852e-10,
+          "native_iterations": 26,
+          "native_history_max": 4.135850825597703e-10,
+          "native_fresh_max": 4.135890674662033e-10,
+          "native_stopping_passed": true
+        },
+        {
+          "accepted": true,
+          "residual": 1.2002573534151333e-10,
+          "max_absolute_residual": 1.1236795494380031e-11,
+          "orthogonality": 1.6653734340324868e-15,
+          "spectrum_error": 1.2147145083159214e-13,
+          "requested_subspace_error": 2.2712170029440967e-10,
+          "native_iterations": 26,
+          "native_history_max": 4.141998908905937e-10,
+          "native_fresh_max": 4.1420524412857554e-10,
+          "native_stopping_passed": true
+        }
+      ],
+      "graph": null,
+      "outer_cycles": 3,
+      "seed": 2026,
+      "cg_tol": 1e-13,
+      "setup_seconds": 0.41730399057269096,
+      "capture_seconds": null,
+      "warmup_seconds": 0.7693407870829105,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.4250684157013893,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "warp-cudss",
+      "n": 16384,
+      "k": 20,
+      "ncv": 64,
+      "real_n": 32768,
+      "real_ncv": 128,
+      "mass": "consistent",
+      "copies": 1,
+      "nnz": 81920,
+      "mass_nnz": 114688,
+      "shift": -0.1,
+      "matrix_sha256": "2b33309f5086f9e6e7cc65b4d750bc3fbaa9ebbbdaacd2188a7f3492567b9387",
+      "samples": [
+        0.3296748995780945,
+        0.3296063020825386,
+        0.3291723504662514
+      ],
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 5.895718647409082e-13,
+          "max_absolute_residual": 2.1571485145300285e-14,
+          "orthogonality": 1.776361969205111e-15,
+          "spectrum_error": 1.1968510596642167e-13,
+          "requested_subspace_error": 8.836817421991554e-14,
+          "complex_count": 20,
+          "physical_count": 20,
+          "real_count": 40,
+          "solver_status": 0,
+          "solver_full_count": true
+        },
+        {
+          "accepted": true,
+          "residual": 4.942089294098068e-13,
+          "max_absolute_residual": 2.65476190555896e-14,
+          "orthogonality": 1.3322703076898798e-15,
+          "spectrum_error": 1.1968510596642167e-13,
+          "requested_subspace_error": 8.48014751774737e-14,
+          "complex_count": 20,
+          "physical_count": 20,
+          "real_count": 40,
+          "solver_status": 0,
+          "solver_full_count": true
+        },
+        {
+          "accepted": true,
+          "residual": 9.583340335634304e-13,
+          "max_absolute_residual": 2.7717840906693357e-14,
+          "orthogonality": 1.776357863700007e-15,
+          "spectrum_error": 1.1948662320362495e-13,
+          "requested_subspace_error": 9.654692887138974e-14,
+          "complex_count": 20,
+          "physical_count": 20,
+          "real_count": 40,
+          "solver_status": 0,
+          "solver_full_count": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 3716,
+          "MEMCPY": 3587,
+          "KERNEL": 15839,
+          "CONDITIONAL": 298
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 2395,
+          "HtoD (HOST PAGEABLE to DEVICE)": 1192
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "outer_cycles": 3,
+      "seed": 2026,
+      "cg_tol": 1e-13,
+      "setup_seconds": 0.38378072902560234,
+      "capture_seconds": 0.9698189608752728,
+      "device_only_graph": false,
+      "warmup_seconds": 0.42548537254333496,
+      "timing_uncontended": true,
+      "competing_processes": [],
+      "solve_seconds": 0.3296063020825386,
+      "accepted": true,
+      "inner_solve_accepted": true,
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    }
+  ],
+  "numerical_contract_accepted": true,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

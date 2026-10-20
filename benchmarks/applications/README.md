@@ -14,7 +14,7 @@ implementation bugs and the remaining coverage requirements.
 | B / P1 | [Coupled FEM pencils](INTERIOR.md), interior/near-eigenvalue shifts, consistent mass and repeated bands; complete nearest physical set | [#21](https://github.com/alecjacobson/warpack/issues/21) |
 | C / P2 | Indefinite tangent stiffness, SPD M; most-negative eigenvalues via a shift below the spectrum | [#22](https://github.com/alecjacobson/warpack/issues/22) |
 | D / P0 | Sphere/disk/annulus/tori Hodge 1-Laplacians; disconnected and weak components, independent topology/subspace references, positive guard; [Krylov/CG profiles](HODGE_CG.md) | [#23](https://github.com/alecjacobson/warpack/issues/23) |
-| E / P2 | Complex Hermitian connection ring with nontrivial holonomy and known spectrum; standard mass | [#24](https://github.com/alecjacobson/warpack/issues/24) |
+| E / P2 | [Complex connection pencils](CONNECTION.md): nontrivial holonomy, repeated modes, identity/lumped/complex consistent mass; independent Fourier and triangle-energy references | [#24](https://github.com/alecjacobson/warpack/issues/24) |
 | F / P1 skinning, P2 broader pencils | [Rig-constrained skinning modes](SKINNING.md) via physical-space KKT shift-invert; reciprocal spectral-conformal pencil with SPD regularized metric | [#25](https://github.com/alecjacobson/warpack/issues/25), [#55](https://github.com/alecjacobson/warpack/issues/55) |
 | G / P2 | [Clamped tetrahedral stiffness / indefinite geometric stiffness; signed buckling factors](BUCKLING.md) | [#26](https://github.com/alecjacobson/warpack/issues/26) |
 | H / P3 | Damped coupled chain, standard first-order nonsymmetric linearization; analytic complex frequencies | [#27](https://github.com/alecjacobson/warpack/issues/27) |
@@ -25,6 +25,12 @@ does not depend on trusting another iterative solver. The small conformal case
 uses dense LAPACK generalized `eigh` as an independent reference; larger cases
 use SciPy ARPACK. Fixture assembly and validation run on the host outside all
 solver timings. Production Warpack imports none of these reference libraries.
+
+The [expanded complex connection comparison](CONNECTION.md) keeps its generalized
+mass recovery outside the installed API. It includes a native-complex Spectra
+engine adapter, a timed ARPACK metric-Ritz adapter for repeated bases, and a
+clearly labeled CuPy helper-correction diagnostic. Unmodified CuPy LOBPCG
+failures and strict inner-CG residual misses remain recorded as rejected results.
 
 ## What “Warp” means here
 
