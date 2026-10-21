@@ -170,20 +170,30 @@ for the first 20 elastic modes. The longest rest extent is normalized to one
 metre, with illustrative material parameters `E = 100,000 Pa`, `ν = 0.3`,
 `ρ = 1,000 kg/m³`. Color follows instantaneous displacement.
 
-Recorded median warm solve times for this problem:
+Recorded setup costs and median warm solve times for this problem:
 
-| Solver | Solve (s) | Max original residual, all 26 modes |
-|---|---:|---:|
-| SciPy ARPACK + MKL PARDISO | 16.5791 | 4.011e-9 |
-| Spectra + MKL PARDISO | 9.9369 | 2.737e-8 |
-| CuPy eigsh + supplied cuDSS | 0.4587 | 2.852e-9 |
-| Warp + cuDSS | 0.4669 | 2.610e-9 |
-| CuPy LOBPCG + shared Warp FSAI/CG | 2.3881 | 1.762e-9 |
-| **Warp block + FSAI/CG** | **1.8669** | **1.957e-8** |
+| Solver | Setup / factorization (s) | Warm solve (s) | Max original residual, all 26 modes |
+|---|---:|---:|---:|
+| SciPy ARPACK + MKL PARDISO | 9.5567 | 16.5791 | 4.011e-9 |
+| Spectra + MKL PARDISO | 13.4716 | 9.9369 | 2.737e-8 |
+| CuPy eigsh + supplied cuDSS | 2.1534 (shared factor) | 0.4587 | 2.852e-9 |
+| Warp + cuDSS | 2.2063 | 0.4669 | 2.610e-9 |
+| CuPy LOBPCG + shared Warp FSAI/CG | 1.0734 shared FSAI + 0.1511 adapter† | 2.3881 | 1.762e-9 |
+| **Warp block + FSAI/CG** | **2.3932** | **1.8669** | **1.957e-8** |
+
+The direct-solver setup column measures sparse factorization/inverse construction.
+CuPy eigsh reused a supplied cuDSS factor from its original comparison; the Warp
+cuDSS row comes from a later recheck. Warp block setup includes 1.0734 s for FSAI
+construction and 1.3199 s for solver/workspaces, input upload and encountered JIT.
+†CuPy LOBPCG reused the shifted matrix and FSAI factors; 0.1511 s measures only
+its additional inner adapter setup/capture. **Its independent total setup was not
+measured.** Graph capture adds 0.7055 s for Warp + cuDSS and 0.9274 s for Warp
+block, outside their setup columns. Mesh assembly and warmup are excluded;
+these columns do not measure a complete cold application start.
 
 GPU: NVIDIA L40. CPU: Xeon Platinum 8362, four BLAS threads. These are separately
 recorded accepted configurations, **not a fresh simultaneous comparison of all
-backends**. Timings exclude assembly, setup, compilation and capture. The two
+backends**. Warm solve times exclude assembly, setup, compilation and capture. The two
 block rows share a Warp preconditioner and use different native stopping
 formulas; both pass the same independent physical gates. The pure-Warp setting
 uses width 24, FSAI32 and FP32 CG capped at 25 iterations, with FP64 outer work.
@@ -191,6 +201,7 @@ uses width 24, FSAI32 and FP32 CG capped at 25 iterations, with FP64 outer work.
 [Release timings, setup/memory costs and accuracy](results/release_v0_2_0/README.md)
 · [CPU factorization comparison](benchmarks/ANVIL_FACTORIZATION.md)
 · [cuDSS measurements](results/anvil_cudss_recheck.json)
+· [CuPy eigsh measurements](results/anvil_benchmarks.json)
 · [Rendering recipe and downloadable assets](docs/anvil.md)
 
 Anvil adapted from [“Blacksmith's Anvil”](https://sketchfab.com/3d-models/blacksmiths-anvil-4b11b76fe069496ebd8ccd98f7d37ade)
