@@ -161,6 +161,7 @@ def main():
             return out
 
     if args.backend != "assemble":
+        report["inverse_setup_seconds"] = time.perf_counter() - start
         report["factor_nnz_over_full_input_nnz"] = report["factor_nnz"] / matrix.nnz
         rng = np.random.default_rng(731)
         report["solve_checks"] = []

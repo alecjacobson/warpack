@@ -18,10 +18,14 @@ from warpack import BatchedCGPreconditioner
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
-    output = parser.parse_args().out
+    parser.add_argument("--repeats", type=int, default=1)
+    options = parser.parse_args()
+    if options.repeats < 1:
+        parser.error("repeats must be positive")
+    output = options.out
     profile_path = Path("results/release_v0_2_0/release-public.json")
     config = json.loads(profile_path.read_text())["args"]
-    config["repeats"] = 1  # One validation trial after warmup; not a new solve comparison.
+    config["repeats"] = options.repeats
     args = argparse.Namespace(**config)
     wp.init()
     a, _, shifted, constraints, sa, sb, k, check = prepare(args)
