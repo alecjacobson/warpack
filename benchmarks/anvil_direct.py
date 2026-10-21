@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import time
 from pathlib import Path
 
 import cupy as cp
@@ -13,7 +14,7 @@ import warp as wp
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import timed
 from benchmarks.experimental.compare_block import prepare
-from warpack import CuDSSInverse, KrylovSchur
+from warpack import CuDSSInverse, KrylovSchur, SymmetricEigensolver
 
 
 def main():
@@ -21,6 +22,7 @@ def main():
     parser.add_argument("--backend", choices=["warp", "cupy"], required=True)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--full-warmup", action="store_true", help="Control: force pre-#132 warmup")
     args = parser.parse_args()
     if args.repeats < 1:
         parser.error("repeats must be positive")
@@ -31,9 +33,12 @@ def main():
     reference = cached["vectors"], cached["values"]
     stream = cp.cuda.Stream.from_external(wp.get_stream())
 
+    phases = {}
+
     def setup():
-        inverse = CuDSSInverse(shifted, 1)
+        phases["factor_seconds"], inverse = timed(lambda: CuDSSInverse(shifted, 1))
         if args.backend == "warp":
+            workspace_start = time.perf_counter()
             solver = KrylovSchur(
                 inverse,
                 26,
@@ -42,7 +47,29 @@ def main():
                 tol=1e-12,
                 initial_vector=wp.array(initial.reshape(1, -1), dtype=wp.float64),
             )
-            graph = solver.capture(1, adaptive=False)
+            wp.synchronize()
+            phases["workspace_seconds"] = time.perf_counter() - workspace_start
+            if args.full_warmup:
+                solver._prepare_capture = lambda finalizer: SymmetricEigensolver._prepare_capture(
+                    solver, finalizer
+                )
+            prepare = getattr(solver, "_prepare_capture", None)
+            original = prepare if prepare is not None else solver.solve
+
+            def record_warmup(*a, **kw):
+                seconds, result = timed(lambda: original(*a, **kw))
+                phases["capture_preparation_seconds"] = seconds
+                return result
+
+            if prepare is not None:
+                solver._prepare_capture = record_warmup
+            else:
+                solver.solve = record_warmup
+            phases["capture_seconds"], graph = timed(lambda: solver.capture(1, adaptive=False))
+            if prepare is not None:
+                del solver._prepare_capture
+            else:
+                del solver.solve
 
             def solve():
                 wp.capture_launch(graph)
@@ -91,6 +118,8 @@ def main():
     report = dict(
         backend=args.backend,
         setup_seconds=setup_seconds,
+        setup_phases_seconds=phases,
+        full_warmup_control=args.full_warmup,
         warmup_seconds=warmup_seconds,
         warmup_quality=warmup_quality,
         rows=rows,
@@ -104,6 +133,7 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n")
     print("Setup", setup_seconds, "solve", [r["seconds"] for r in rows], "accepted", accepted)
+    del solve, quality  # Release graph/solver closures before their cuDSS resources.
     inverse.close()
     if not accepted:
         raise SystemExit(1)

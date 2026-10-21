@@ -1,0 +1,45 @@
+{
+  "base_commit": "735b1bc79ffaf1e7bba9ab0642c612399967ea21",
+  "full_suite": {
+    "passed": 1475,
+    "skipped": 1,
+    "seconds": 581.61,
+    "warp": "1.18.0+cu12 with pinned FSAI/CG overlay"
+  },
+  "stock_regression": {
+    "passed": 66,
+    "seconds": 21.35,
+    "warp": "1.15.0"
+  },
+  "capture_regression": {
+    "passed": 8,
+    "seconds": 3.67
+  },
+  "source_sha256_at_full_suite": {
+    "warpack/solver.py": "c28bdfff5268711a89ba95fa8ec36e9b5342f276bb2236058874d47de143ee83",
+    "tests/test_cudss_capture_setup.py": "8e527b7d3b3f6230fbc905a0b72d72be8373d77d7fd610008cc88ee6b201af6f",
+    "benchmarks/anvil_direct.py": "558aa25377819eef9be546bf7de0de10114e3393933c1775a5e6a39d6ca32ee7",
+    "benchmarks/anvil_showcase.py": "6d7504ed4615bb56f36b4af7553ce68e6a0a21b8e316c991fd0ae629a0b6417f",
+    "benchmarks/experimental/compare_block.py": "f7e3816ddaa07fb7546db265fd38642acf6d52cca1dba0a317741e1774b4f001",
+    "benchmarks/experimental/anvil_cupy_setup.py": "e1a607c8ba668b566715939537b459958bc9e064b7bd0541e195172b4b52160f"
+  },
+  "final_pinned_regression": {
+    "passed": 71,
+    "seconds": 21.18,
+    "warp": "1.18.0+cu12 with pinned FSAI/CG overlay"
+  },
+  "final_stock_regression": {
+    "passed": 71,
+    "seconds": 21.27,
+    "warp": "1.15.0"
+  },
+  "scope": "Full suite precedes the final scratch-buffer alias guard. Both final 71-test runs include all 13 capture-preparation cases plus symmetric/inverse/shift/cycle/multiplicity regression. The final guard uses eigensolver scratch instead of inverse.x/b, preserving aliased initial vectors.",
+  "final_source_sha256": {
+    "warpack/solver.py": "17f3f6482fd0b447bbbbb2875cb3c0191c8fabb5741ed7055c7c66852c65a465",
+    "tests/test_cudss_capture_setup.py": "dabc172c586c0a228d9ab35b23bc950c29e09933150c833fff207861d64c115c",
+    "benchmarks/anvil_direct.py": "558aa25377819eef9be546bf7de0de10114e3393933c1775a5e6a39d6ca32ee7",
+    "benchmarks/anvil_showcase.py": "6d7504ed4615bb56f36b4af7553ce68e6a0a21b8e316c991fd0ae629a0b6417f",
+    "benchmarks/experimental/compare_block.py": "f7e3816ddaa07fb7546db265fd38642acf6d52cca1dba0a317741e1774b4f001",
+    "benchmarks/experimental/anvil_cupy_setup.py": "e1a607c8ba668b566715939537b459958bc9e064b7bd0541e195172b4b52160f"
+  }
+}

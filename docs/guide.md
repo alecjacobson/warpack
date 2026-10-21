@@ -184,6 +184,12 @@ fixed outer capture for compatibility; opt-in `adaptive_capture=True` requires
 upstream preallocated loop storage, as in the pinned fast environment.
 `capture(..., adaptive=False)` explicitly requests a fixed budget.
 
+On CUDA drivers 12.3+, built-in `KrylovSchur` directly using `CuDSSInverse`
+prepares capture with one inverse application instead of a full eigensolve.
+Warp kernels load while the graph is recorded. Custom solvers/operators,
+finalizers and older drivers retain full warmup. Results are valid after
+launching the returned graph; capture itself is not a completed solve.
+
 Every replay initializes a new solve from current input values. Keep topology,
 array identities and resource lifetimes fixed. Matrix values, constraints and
 supplied starts can change; update the associated inverse factors when needed.

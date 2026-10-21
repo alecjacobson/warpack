@@ -1,0 +1,146 @@
+{
+  "rows": [
+    {
+      "method": "arpack",
+      "setup_median_seconds": 7.052031226456165,
+      "setup_samples_seconds": [
+        7.051786582916975,
+        7.0536978133022785,
+        7.052031226456165
+      ],
+      "solve_median_seconds": 11.839166063815355,
+      "solve_min_seconds": 11.429970651865005,
+      "solve_max_seconds": 12.024782035499811,
+      "solve_batch_medians_seconds": [
+        11.811182737350464,
+        11.732732698321342,
+        11.957992151379585
+      ],
+      "solve_batch_median_spread_fraction": 0.01907171009605207,
+      "max_original_residual": 3.975927431439015e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "spectra",
+      "setup_median_seconds": 7.064245354384184,
+      "setup_samples_seconds": [
+        7.089806724339724,
+        7.064245354384184,
+        7.054866332560778
+      ],
+      "solve_median_seconds": 6.993371766060591,
+      "solve_min_seconds": 6.762480717152357,
+      "solve_max_seconds": 7.272551454603672,
+      "solve_batch_medians_seconds": [
+        6.993371766060591,
+        6.90900606289506,
+        7.026121228933334
+      ],
+      "solve_batch_median_spread_fraction": 0.016746595198419784,
+      "max_original_residual": 3.2268284675695586e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "cupy-direct",
+      "setup_median_seconds": 2.115109421312809,
+      "setup_samples_seconds": [
+        2.1210223622620106,
+        2.115105766803026,
+        2.115109421312809
+      ],
+      "solve_median_seconds": 0.4592622257769108,
+      "solve_min_seconds": 0.45857878401875496,
+      "solve_max_seconds": 0.4601989574730396,
+      "solve_batch_medians_seconds": [
+        0.4591388702392578,
+        0.45939846336841583,
+        0.45959754660725594
+      ],
+      "solve_batch_median_spread_fraction": 0.000998428171994747,
+      "max_original_residual": 2.8412354889841924e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "warp-direct",
+      "setup_median_seconds": 2.3480316549539566,
+      "setup_samples_seconds": [
+        2.3480316549539566,
+        2.3477980867028236,
+        2.353008944541216
+      ],
+      "solve_median_seconds": 0.46628105640411377,
+      "solve_min_seconds": 0.46581366285681725,
+      "solve_max_seconds": 0.4667119197547436,
+      "solve_batch_medians_seconds": [
+        0.46645739302039146,
+        0.46619849652051926,
+        0.46628105640411377
+      ],
+      "solve_batch_median_spread_fraction": 0.0005552370106321213,
+      "max_original_residual": 2.8625767599763467e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "cupy-block",
+      "setup_median_seconds": 1.3652037270367146,
+      "setup_samples_seconds": [
+        1.4075468443334103,
+        1.3652037270367146,
+        1.3555630967020988
+      ],
+      "solve_median_seconds": 2.3754149675369263,
+      "solve_min_seconds": 2.3281371034681797,
+      "solve_max_seconds": 2.582290094345808,
+      "solve_batch_medians_seconds": [
+        2.398313231766224,
+        2.3754149675369263,
+        2.3657106794416904
+      ],
+      "solve_batch_median_spread_fraction": 0.013724992378211344,
+      "max_original_residual": 1.929483086455267e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "warp-block",
+      "setup_median_seconds": 2.1296370662748814,
+      "setup_samples_seconds": [
+        2.148580316454172,
+        2.128112740814686,
+        2.1296370662748814
+      ],
+      "solve_median_seconds": 1.8843173272907734,
+      "solve_min_seconds": 1.8765408247709274,
+      "solve_max_seconds": 1.9515904635190964,
+      "solve_batch_medians_seconds": [
+        1.8892281576991081,
+        1.883128385990858,
+        1.8843173272907734
+      ],
+      "solve_batch_median_spread_fraction": 0.00323712552015862,
+      "max_original_residual": 1.9141404208123147e-08,
+      "timed_solves": 15,
+      "accepted": true
+    }
+  ],
+  "rounds": 3,
+  "repeats": 5,
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "thread_environment": {
+    "OPENBLAS_NUM_THREADS": "4",
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "MKL_THREADING_LAYER": "GNU"
+  },
+  "protocol": "Serial fresh-process setup repetitions; one outer solve warmup then synchronized solves from identical starts. Setup includes factor/preconditioner construction, solver workspaces and graph capture where applicable. Assembled inputs, imports/runtime initialization, reference loading, outer warmup and validation excluded. Existing compilation caches. CPU libraries allocate iteration workspaces inside their timed solve calls.",
+  "source_sha256": "6d7504ed4615bb56f36b4af7553ce68e6a0a21b8e316c991fd0ae629a0b6417f"
+}

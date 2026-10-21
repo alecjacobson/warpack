@@ -175,24 +175,24 @@ Fresh measurements from 2026-10-21 on an NVIDIA L40 and Xeon Platinum 8362
 
 | Solver | Setup (s) | Warm solve (s) | Max original residual, all 26 modes |
 |---|---:|---:|---:|
-| SciPy ARPACK + MKL PARDISO | 7.1506 | 11.5887 | 3.995e-9 |
-| Spectra + MKL PARDISO | 7.0687 | 7.0833 | 3.538e-9 |
-| CuPy eigsh + cuDSS | 2.2091 | 0.4594 | 2.847e-9 |
-| Warp + cuDSS | 2.8123 | 0.4660 | 2.767e-9 |
-| CuPy LOBPCG + Warp FSAI/CG | 1.3895 | 2.3757 | 1.747e-9 |
-| **Warp block + FSAI/CG** | **2.1506** | **1.9400** | **1.934e-8** |
+| SciPy ARPACK + MKL PARDISO | 7.0520 | 11.8392 | 3.976e-9 |
+| Spectra + MKL PARDISO | 7.0642 | 6.9934 | 3.227e-9 |
+| CuPy eigsh + cuDSS | 2.1151 | 0.4593 | 2.841e-9 |
+| Warp + cuDSS | 2.3480 | 0.4663 | 2.863e-9 |
+| CuPy LOBPCG + Warp FSAI/CG | 1.3652 | 2.3754 | 1.929e-9 |
+| **Warp block + FSAI/CG** | **2.1296** | **1.8843** | **1.914e-8** |
 
 Setup is the median of three independent constructions, including factorization
 or preconditioning, workspaces and graph capture where applicable. Solve is the
 median of 15 warm runs. Mesh assembly, process startup and validation are
 excluded; compiled kernels are cached. All 90 timed solves passed the accuracy
-checks, with run-to-run solve medians varying by less than 4%.
+checks, with run-to-run solve medians varying by less than 2%.
 
 CuPy's cuDSS and Warp preconditioners are supplied by the benchmark. The pure-Warp
 block setting uses width 24, FSAI32 and FP32 CG capped at 25 iterations, with FP64
 outer work.
 
-[Timing samples, accuracy checks and reproduction](results/anvil_showcase_20261021/README.md)
+[Timing samples, accuracy checks and reproduction](results/anvil_showcase_132/README.md)
 · [Rendering recipe and downloadable assets](docs/anvil.md)
 
 Anvil adapted from [“Blacksmith's Anvil”](https://sketchfab.com/3d-models/blacksmiths-anvil-4b11b76fe069496ebd8ccd98f7d37ade)

@@ -456,6 +456,11 @@ class SymmetricEigensolver:
             device=self.device,
         )
 
+    def _prepare_capture(self, finalizer):
+        self.solve(1)
+        if finalizer is not None:
+            finalizer()
+
     def capture(self, max_iterations=100, adaptive=None, finalizer=None):
         """Capture a GPU-controlled convergence loop (CUDA 12.4+).
 
@@ -469,9 +474,7 @@ class SymmetricEigensolver:
             adaptive = not static_only
         if adaptive and static_only:
             raise ValueError("This inverse backend requires adaptive=False for the outer graph")
-        self.solve(1)
-        if finalizer is not None:
-            finalizer()
+        self._prepare_capture(finalizer)
         wp.synchronize_device(self.device)
 
         def body():
@@ -564,6 +567,28 @@ class KrylovSchur(SymmetricEigensolver):
         if iterations < 1:
             raise ValueError("Krylov iteration needs at least one restart cycle")
         return super().solve(iterations, seed)
+
+    def _prepare_capture(self, finalizer):
+        # CUDA >=12.3 can load Warp kernels during capture. The built-in cuDSS
+        # operator only needs one solve to prepare its vendor state, not an
+        # entire Krylov cycle (ncv inverse applications plus orthogonalization).
+        # Preserve full warmup for custom solvers/operators and callbacks that
+        # may inspect initialized eigenpairs while preparing their own kernels.
+        driver = wp.get_cuda_driver_version() if self.device.is_cuda else None
+        if (
+            type(self) is KrylovSchur
+            and type(self.op) is CuDSSInverse
+            and self.iter_op is self.op
+            and finalizer is None
+            and driver is not None
+            and driver >= (12, 3)
+        ):
+            # Use eigensolver scratch: callers may supply the inverse's own
+            # x/b arrays as starting vectors, which capture must not overwrite.
+            self.views[0].zero_()
+            self.op.apply(self.views[0], self.zviews[0])
+        else:
+            super()._prepare_capture(finalizer)
 
     def _update_loop(self, max_iterations):
         wp.launch(
