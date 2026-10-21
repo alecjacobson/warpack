@@ -1,0 +1,46 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.newton_ffrf",
+    "--boundary",
+    "free",
+    "--backend",
+    "cudss",
+    "--repeats",
+    "3",
+    "--reference",
+    "build/newton-free-reference.npz",
+    "--out",
+    "results/newton_ffrf/free-cudss-3.json"
+  ],
+  "pid": 244440,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792620912.5615566,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792620913.6651382,
+      "other": [],
+      "gpu": "5 %, 28 MiB, 2490 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792620914.7859435,
+      "other": [],
+      "gpu": "26 %, 856 MiB, 2490 MHz, 30",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

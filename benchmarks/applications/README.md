@@ -55,6 +55,9 @@ compares upstream block-Jacobi and FSAI on the natural displacement blocks,
 with per-trial inner iteration statistics and independent full-subspace gates.
 The [supported fast-block qualification](FAST_BLOCK.md) separately exercises the
 v0.2.0 public composition across those FEM families and mode counts.
+The [Newton FFRF comparison](NEWTON_FFRF.md) recreates its large procedural
+spring-lattice eigenproblem and a fixed-interface variant, timing the pinned
+upstream ARPACK helper against cuDSS and pure-Warp graph replay.
 
 B/G now use explicit matched general cuDSS factors without correction; the
 other application profiles retain their existing settings. See the

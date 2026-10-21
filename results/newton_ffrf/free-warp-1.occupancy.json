@@ -1,0 +1,46 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.newton_ffrf",
+    "--boundary",
+    "free",
+    "--backend",
+    "warp",
+    "--repeats",
+    "3",
+    "--reference",
+    "build/newton-free-reference.npz",
+    "--out",
+    "results/newton_ffrf/free-warp-1.json"
+  ],
+  "pid": 244482,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792620915.4690993,
+      "other": [],
+      "gpu": "17 %, 1 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792620916.5528991,
+      "other": [],
+      "gpu": "5 %, 500 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792620917.6294584,
+      "other": [],
+      "gpu": "83 %, 2412 MiB, 2490 MHz, 37",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

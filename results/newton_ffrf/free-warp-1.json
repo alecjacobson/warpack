@@ -1,0 +1,127 @@
+{
+  "shape": [
+    40,
+    20,
+    12
+  ],
+  "boundary": "free",
+  "n": 28800,
+  "nnz": 1132948,
+  "modes": 12,
+  "sigma": -466092106.1398647,
+  "backend": "warp",
+  "assembly_seconds": 0.07330931350588799,
+  "rows": [
+    {
+      "solve_seconds": 0.23031414672732353,
+      "quality": {
+        "accepted": true,
+        "relative_residual": 1.1638528058521707e-10,
+        "relative_eigenvalue_error": 2.1316282072803006e-14,
+        "mass_orthogonality": 6.661338147750939e-16,
+        "requested_subspace_error": 5.259233380220142e-11,
+        "rigid_overlap": 1.5265566588595902e-16,
+        "status": 0,
+        "converged": 12
+      },
+      "iterations": 21
+    },
+    {
+      "solve_seconds": 0.2305835708975792,
+      "quality": {
+        "accepted": true,
+        "relative_residual": 1.1056001962749993e-10,
+        "relative_eigenvalue_error": 2.609024107869118e-14,
+        "mass_orthogonality": 4.440892098500626e-16,
+        "requested_subspace_error": 4.8864195337313615e-11,
+        "rigid_overlap": 1.734723475976807e-16,
+        "status": 0,
+        "converged": 12
+      },
+      "iterations": 21
+    },
+    {
+      "solve_seconds": 0.230849027633667,
+      "quality": {
+        "accepted": true,
+        "relative_residual": 1.1372467538141105e-10,
+        "relative_eigenvalue_error": 2.1649348980190553e-14,
+        "mass_orthogonality": 8.881784197001252e-16,
+        "requested_subspace_error": 4.994709294774501e-11,
+        "rigid_overlap": 1.734723475976807e-16,
+        "status": 0,
+        "converged": 12
+      },
+      "iterations": 21
+    }
+  ],
+  "newton_commit": "360a9b29a469af04eae6909f6d1709460a8dc35e",
+  "newton_source_sha256": "85722355f33692b800e659070e9839c813246e3196c127b6b8af0f1d458d12d3",
+  "source_sha256": "993e03ff5a5d0bd09d2db155e8316a1dae7c07440a98fffb9abf47c21bd6c6cd",
+  "matrix_sha256": "0bd397606ec798ee03b097589930f0b36e991d18dffdf85c9bde7bd92499c876",
+  "versions": {
+    "warp": "1.18.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "4",
+    "OMP_NUM_THREADS": "4"
+  },
+  "git_head": "c829cde513766b0f45948282bba1d882ee3a0b5a",
+  "gpu": "NVIDIA L40",
+  "setup_seconds": 0.6575251370668411,
+  "factor_or_preconditioner_seconds": 0.16112596914172173,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 126,
+      "MEMCPY": 125,
+      "KERNEL": 736,
+      "CONDITIONAL": 15
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 125
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "warmup": {
+    "solve_seconds": 0.2471645139157772,
+    "quality": {
+      "accepted": true,
+      "relative_residual": 6.767864210210832e-11,
+      "relative_eigenvalue_error": 2.398081733190338e-14,
+      "mass_orthogonality": 7.771561172376096e-16,
+      "requested_subspace_error": 1.2887113822882428e-11,
+      "rigid_overlap": 1.1449174941446927e-16,
+      "status": 0,
+      "converged": 12
+    },
+    "iterations": 22
+  },
+  "accepted": true,
+  "settings": {
+    "shape": [
+      40,
+      20,
+      12
+    ],
+    "boundary": "free",
+    "backend": "warp",
+    "modes": 12,
+    "repeats": 3,
+    "steps": 200,
+    "cycles": 2,
+    "inner": 25,
+    "source": "build/newton-ffrf-source/modal_sparse.py",
+    "download_source": false,
+    "reference": "build/newton-free-reference.npz",
+    "out": "results/newton_ffrf/free-warp-1.json"
+  }
+}

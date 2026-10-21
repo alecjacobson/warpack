@@ -1,0 +1,46 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.newton_ffrf",
+    "--boundary",
+    "fixed",
+    "--backend",
+    "warp",
+    "--repeats",
+    "3",
+    "--reference",
+    "build/newton-fixed-reference.npz",
+    "--out",
+    "results/newton_ffrf/fixed-warp-1.json"
+  ],
+  "pid": 245216,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792621038.872844,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792621039.936473,
+      "other": [],
+      "gpu": "5 %, 21 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792621041.0349317,
+      "other": [],
+      "gpu": "100 %, 2378 MiB, 2490 MHz, 37",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
