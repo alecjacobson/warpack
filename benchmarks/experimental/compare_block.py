@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import time
 from pathlib import Path
 
 import numpy as np
@@ -550,6 +551,8 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
     import cupyx.scipy.sparse as cs
     import cupyx.scipy.sparse.linalg as cl
 
+    wp.synchronize()
+    setup_start = time.perf_counter()
     stream = cp.cuda.Stream.from_external(wp.get_stream())
     with stream:
         a = cs.csr_matrix(a)
@@ -581,6 +584,8 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
             return out[0] if one else out.T
 
         preconditioner = cl.LinearOperator(a.shape, matvec=apply, matmat=apply, dtype=cp.float64)
+        stream.synchronize()
+        reference_setup_seconds = time.perf_counter() - setup_start
         cupy_tol = args.cupy_tol
         if cupy_tol is None:
             cupy_tol = 1e-5 if args.case == "anvil" else 1e-10
@@ -651,6 +656,8 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
             if cg is not None and not padded
             else None,
             inner_adapter_setup_capture_seconds=adapter_setup_seconds,
+            reference_setup_seconds=reference_setup_seconds,
+            reference_setup_scope="CuPy matrix/start/constraint upload, LinearOperator, and inner adapter workspaces/capture. Excludes supplied FSAI/base CG construction, library imports, and outer eigensolve warmup.",
             inner_adapter_device_memory_delta_bytes=adapter_memory_bytes,
             memory_scope="Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
             setup_scope="Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",

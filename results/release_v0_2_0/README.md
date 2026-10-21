@@ -73,6 +73,35 @@ the standalone example needs neither it nor cuDSS. Reference generation is
 covered by the existing benchmark documentation. Never include reference setup
 in eigensolver replay times.
 
+### Independent CuPy setup follow-up (2026-10-21)
+
+The README now charges setup to each solver independently, including recorded
+graph capture: Warp block **3.3206 s** (2.3932 + 0.9274 from the release run),
+and CuPy LOBPCG **1.4052 s** from a new standalone setup measurement. CuPy builds
+fresh FSAI32 factors and base CG state in 1.0725 s; matrix/start/constraint upload,
+active-width workspaces, the LinearOperator and inner graph capture take another
+0.3327 s. No Warp eigensolver is constructed or run first. The setup uses the
+release settings, including a width-24 base CG and active widths 1–20 for CuPy.
+
+This excludes imports/runtime startup, mesh assembly/mass normalization, cached
+reference loading, host random-start generation and outer eigensolve warmup.
+Encountered JIT is included with existing disk caches. These are separately
+recorded observations, not a simultaneous cold-start comparison. One validation
+trial after warmup passes all physical and native stopping gates, with maximum
+original residual 1.6835e-9 and returned-pair residual 8.4173e-10. The README's
+release solve timings and residuals remain unchanged. No unrelated GPU process
+was sampled.
+
+[Raw setup and validation](cupy-independent-setup.json) ·
+[Occupancy](cupy-independent-setup.occupancy.json)
+
+```bash
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 PYTHONPATH="$PWD/build/warp-fsai:$PWD" \
+ python -m benchmarks.monitor_gpu --out build/cupy-setup.occupancy.json \
+ --log build/cupy-setup.log -- python -m benchmarks.experimental.anvil_cupy_setup \
+ --out build/cupy-setup.json
+```
+
 ## Test and package validation
 
 - Full local suite: **1,449 passed, 1 skipped in 547.63 s**. This run precedes

@@ -1,0 +1,363 @@
+{
+  "accepted": true,
+  "args": {
+    "case": "anvil",
+    "side": 6,
+    "modes": 6,
+    "width": 24,
+    "steps": 200,
+    "shift": 100.0,
+    "fsai_width": 32,
+    "fsai_layout": "columns",
+    "matrix_layout": "columns",
+    "preconditioner": "fsai",
+    "repeats": 1,
+    "tol": 1e-08,
+    "cupy": true,
+    "cupy_width": 20,
+    "cupy_tol": 1e-06,
+    "cupy_padding": false,
+    "profile": false,
+    "public_api": true,
+    "keep_graph": false,
+    "gram_chunk": 4096,
+    "symmetric_products": true,
+    "fused_updates": true,
+    "paired_rotation": true,
+    "reuse_x_image": true,
+    "active_search_bucket_size": 4,
+    "active_search_keep_history": true,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 25,
+    "batched_cg": true,
+    "active_cg_bucket_size": 4,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "build/release-public.json"
+  },
+  "n": 283857,
+  "k": 20,
+  "setup_seconds": 1.4052183851599693,
+  "factor_and_base_cg_setup_seconds": 1.072468489408493,
+  "cupy_setup": {
+    "width": 20,
+    "absolute_tolerance": 1e-06,
+    "padding_width": null,
+    "preallocated_active_widths": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "inner_adapter_setup_capture_seconds": 0.23514807224273682,
+    "reference_setup_seconds": 0.3327498957514763,
+    "reference_setup_scope": "CuPy matrix/start/constraint upload, LinearOperator, and inner adapter workspaces/capture. Excludes supplied FSAI/base CG construction, library imports, and outer eigensolve warmup.",
+    "inner_adapter_device_memory_delta_bytes": 3254779904,
+    "memory_scope": "Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
+    "setup_scope": "Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
+    "stopping": "CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes."
+  },
+  "setup_scope": "Independent FSAI construction, base CG and all active-width workspaces, FP32 matrix copy, CuPy matrix/start/constraint upload, LinearOperator, and inner adapter capture. Includes encountered JIT with existing disk caches. Excludes imports/runtime initialization, mesh assembly and mass normalization, reference loading, host random-start generation, and outer eigensolve warmup. No factor, CG state, or graph reused from a Warp eigensolve.",
+  "validation_rows": [
+    {
+      "method": "CuPy LOBPCG + same captured upstream Warp batched CG",
+      "seconds": 2.4389784410595894,
+      "residual_history_length": 52,
+      "last_history_absolute_residuals": [
+        2.1796100015040883e-07,
+        3.641450020240801e-08,
+        8.835658686084752e-08,
+        4.900052892561214e-08,
+        4.9919065462711894e-08,
+        1.0748177213318933e-07,
+        2.7958568070953188e-08,
+        3.810082900140803e-08,
+        2.4217471913424312e-08,
+        2.6757357467809147e-08,
+        3.956688866277288e-08,
+        4.799590733101371e-08,
+        5.1111054466718096e-08,
+        1.8630591097676956e-08,
+        9.096624213865669e-08,
+        7.495901616349804e-08,
+        3.354843239011057e-07,
+        3.0841684993016384e-07,
+        1.3237415986006866e-07,
+        9.73781830448459e-07
+      ],
+      "returned_absolute_residuals": [
+        2.1806890653763486e-07,
+        3.746772623926455e-08,
+        8.868086108180988e-08,
+        4.9576191354573337e-08,
+        5.055274472815145e-08,
+        1.0771721076810505e-07,
+        2.880994646613031e-08,
+        3.876522619402797e-08,
+        2.5306708536359903e-08,
+        2.7644989358988382e-08,
+        4.011760572430473e-08,
+        4.837361041262295e-08,
+        5.149630659640463e-08,
+        1.9517060841914586e-08,
+        9.111152386273509e-08,
+        7.514032460971435e-08,
+        3.3554062139461876e-07,
+        3.084578354910787e-07,
+        1.3244002560018997e-07,
+        9.73811961903371e-07
+      ],
+      "returned_k_absolute_tolerance_met": true,
+      "full_block_absolute_tolerance_met": true,
+      "quality": {
+        "eigenvalues": [
+          -4.765081637579045e-13,
+          -1.3677409615281299e-13,
+          2.170448010987576e-12,
+          4.927509089732768e-12,
+          8.01000318820789e-12,
+          1.0864539480537421e-11,
+          129.53656330771,
+          147.3767950101065,
+          184.81863173713805,
+          253.27406419088854,
+          560.2701334618839,
+          607.3935917630964,
+          792.1583656154211,
+          975.6634166175966,
+          1156.142649586065,
+          1289.471295637293,
+          1337.0504142419823,
+          1418.9213888704332,
+          1935.5568447575704,
+          1949.675387424445,
+          2241.017931913658,
+          2302.4355924284973,
+          2743.415889448918,
+          3047.7081815970064,
+          3191.8214932293936,
+          3316.495954617461
+        ],
+        "frequencies_hz": [
+          1.8114081483267235,
+          1.9321226223921564,
+          2.163679881981399,
+          2.5328851123632843,
+          3.767201649826056,
+          3.922430294288473,
+          4.479464902093056,
+          4.9713019473831555,
+          5.411601928159736,
+          5.7151281251339725,
+          5.819611897722984,
+          5.995139585859993,
+          7.002015968952542,
+          7.027506989896529,
+          7.5342980665951185,
+          7.636843253025143,
+          8.336158364950867,
+          8.78631607039955,
+          8.991650733723148,
+          9.165578209623032
+        ],
+        "original_residuals": [
+          1.4733684829601362e-09,
+          1.5870685676295975e-09,
+          1.2693247733916738e-09,
+          1.2749862129738272e-09,
+          1.2755530997615302e-09,
+          1.5384930103522519e-09,
+          1.683456742044825e-09,
+          2.5424049090419827e-10,
+          4.798672582961006e-10,
+          1.9572949470477604e-10,
+          9.024042683725718e-11,
+          1.7734990104914701e-10,
+          3.6356870265584605e-11,
+          3.973427189371423e-11,
+          2.1886733758485685e-11,
+          2.1437860712862825e-11,
+          3.000696836125208e-11,
+          3.4094092063759106e-11,
+          2.659989871756718e-11,
+          1.0012205615536944e-11,
+          4.065730355815368e-11,
+          3.2636120809614533e-11,
+          1.2230702308089122e-10,
+          1.0121039813594823e-10,
+          4.1493847348695197e-11,
+          2.936259806651292e-10
+        ],
+        "max_original_residual": 1.683456742044825e-09,
+        "max_elastic_residual": 1.683456742044825e-09,
+        "orthogonality_max_error": 7.771561172376096e-15,
+        "max_relative_elastic_eigenvalue_error": 6.472600233564663e-14,
+        "max_relative_elastic_frequency_error": 3.241851231905457e-14,
+        "minimum_elastic_mac": 0.9999999999999993,
+        "rigid_subspace_min_cosine": 0.9999999999999998,
+        "accepted": true,
+        "returned_eigenvalue_error": 3.2518432391270835e-12,
+        "returned_pair_residual": 8.417283858339301e-10,
+        "preconditioner_cg_stats": [
+          9850,
+          25,
+          394,
+          394
+        ],
+        "cg_iteration_accounting": "scheduled vector iterations, including masked RHSs; no padding",
+        "cg_stats_by_active_width": {
+          "1": [
+            300,
+            25,
+            12,
+            12
+          ],
+          "2": [
+            350,
+            25,
+            14,
+            14
+          ],
+          "3": [
+            450,
+            25,
+            18,
+            18
+          ],
+          "4": [
+            400,
+            25,
+            16,
+            16
+          ],
+          "5": [
+            375,
+            25,
+            15,
+            15
+          ],
+          "6": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "7": [
+            175,
+            25,
+            7,
+            7
+          ],
+          "8": [
+            400,
+            25,
+            16,
+            16
+          ],
+          "9": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "10": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "11": [
+            275,
+            25,
+            11,
+            11
+          ],
+          "12": [
+            300,
+            25,
+            12,
+            12
+          ],
+          "13": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "14": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "15": [
+            375,
+            25,
+            15,
+            15
+          ],
+          "16": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "17": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "18": [
+            450,
+            25,
+            18,
+            18
+          ],
+          "19": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "20": [
+            6000,
+            25,
+            240,
+            240
+          ]
+        }
+      }
+    }
+  ],
+  "gpu": "NVIDIA L40",
+  "versions": {
+    "warp": "1.18.0",
+    "cupy": "14.2.0"
+  },
+  "sources_sha256": {
+    "benchmarks/experimental/anvil_cupy_setup.py": "b1c4c8a69875a4aa90f5d3a87718c7addef893e1d4759319276fcdd49c00a2fe",
+    "benchmarks/experimental/compare_block.py": "f7e3816ddaa07fb7546db265fd38642acf6d52cca1dba0a317741e1774b4f001",
+    "benchmarks/experimental/batched_cg.py": "b52ef7f795036acc2aa1c7a4859ff6db25726aed4ce034a4f7070a51bd196bfc",
+    "results/release_v0_2_0/release-public.json": "f9b2411bc368bf7621de225c15b40fb32011325e10815512e9f9fa65653ace6e",
+    "anvil for export-ftetwild.mesh": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb"
+  }
+}
