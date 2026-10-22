@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from benchmarks.anvil_inputs import signature as input_signature
 from benchmarks.dependency_provenance import signature
 
 METHODS = ("arpack", "spectra", "cupy-direct", "warp-direct", "cupy-block", "warp-block")
@@ -120,11 +121,20 @@ def extract(method, data):
 def summarize(directory, rounds, repeats):
     rows = []
     dependency = None
+    common_inputs = None
     for method in METHODS:
         setups, solves, medians, residuals = [], [], [], []
+        method_inputs = None
         for trial in range(1, rounds + 1):
             path = directory / f"{method}-{trial}.json"
             raw = json.loads(path.read_text())
+            current_inputs = input_signature(raw.get("inputs"))
+            shared = input_signature(current_inputs, common_only=True)
+            if common_inputs is not None and common_inputs != shared:
+                raise RuntimeError(f"Mixed Anvil matrices/mesh/reference: {path}")
+            if method_inputs is not None and method_inputs != current_inputs:
+                raise RuntimeError(f"Changed Anvil method inputs: {path}")
+            common_inputs, method_inputs = shared, current_inputs
             current = signature(raw.get("dependency"))
             if dependency is not None and dependency != current:
                 raise RuntimeError(f"Mixed dependency overlays: {path}")
@@ -140,6 +150,7 @@ def summarize(directory, rounds, repeats):
         rows.append(
             dict(
                 method=method,
+                inputs=method_inputs,
                 setup_median_seconds=statistics.median(setups),
                 setup_samples_seconds=setups,
                 solve_median_seconds=statistics.median(solves),
@@ -154,6 +165,7 @@ def summarize(directory, rounds, repeats):
             )
         )
     summary = dict(
+        common_inputs=common_inputs,
         dependency=dependency,
         rows=rows,
         rounds=rounds,

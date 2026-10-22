@@ -1,0 +1,359 @@
+{
+  "inputs": {
+    "schema": 1,
+    "common": {
+      "fixture": {
+        "arrays": {
+          "columns": {
+            "dtype": "<i4",
+            "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+            "shape": [
+              1331499
+            ]
+          },
+          "mass": {
+            "dtype": "<f8",
+            "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+            "shape": [
+              94619
+            ]
+          },
+          "normalized": {
+            "dtype": "<f8",
+            "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+            "shape": [
+              1331499,
+              3,
+              3
+            ]
+          },
+          "offsets": {
+            "dtype": "<i4",
+            "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+            "shape": [
+              94620
+            ]
+          },
+          "positions": {
+            "dtype": "<f8",
+            "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+            "shape": [
+              94619,
+              3
+            ]
+          },
+          "rigid": {
+            "dtype": "<f8",
+            "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+            "shape": [
+              6,
+              283857
+            ]
+          },
+          "stiffness": {
+            "dtype": "<f8",
+            "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+            "shape": [
+              1331499,
+              3,
+              3
+            ]
+          }
+        },
+        "configuration": {
+          "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+          "energy": "stable Neo-Hookean rest Hessian",
+          "mass": "lumped per-vertex mass, repeated for xyz",
+          "material": {
+            "density": 1000.0,
+            "poisson": 0.3,
+            "young": 100000.0
+          },
+          "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+          "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+        },
+        "schema": 1
+      },
+      "reference": {
+        "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+        "values": {
+          "shape": [
+            26
+          ],
+          "dtype": "<f8",
+          "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+        },
+        "vectors": {
+          "shape": [
+            26,
+            283857
+          ],
+          "dtype": "<f8",
+          "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+        }
+      }
+    },
+    "method": {
+      "initial": {
+        "shape": [
+          283857
+        ],
+        "dtype": "<f8",
+        "sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f"
+      },
+      "shifted_matrix": {
+        "shape": [
+          283857,
+          283857
+        ],
+        "offsets": {
+          "shape": [
+            283858
+          ],
+          "dtype": "<i8",
+          "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+        },
+        "columns": {
+          "shape": [
+            11983107
+          ],
+          "dtype": "<i8",
+          "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+        },
+        "values": {
+          "shape": [
+            11983107
+          ],
+          "dtype": "<f8",
+          "sha256": "6d39ca3459d4d394aebefe6bcf5c0fbf8a96e8bd1a90caadf04e25c8a1dcef10"
+        }
+      },
+      "constraints": null
+    }
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "backend": "cupy",
+  "setup_seconds": 4.230148170143366,
+  "setup_phases_seconds": {
+    "factor_seconds": 4.2242521941661835
+  },
+  "full_warmup_control": false,
+  "warmup_seconds": 1.483758095651865,
+  "warmup_quality": {
+    "eigenvalues": [
+      -6.974211900231968e-12,
+      -2.646772831275325e-12,
+      -1.181464043128324e-12,
+      -4.549054920183475e-13,
+      2.222816007096746e-12,
+      4.706829332876296e-12,
+      129.53656330771366,
+      147.37679501009265,
+      184.81863173713774,
+      253.27406419091238,
+      560.2701334618865,
+      607.3935917630711,
+      792.1583656154437,
+      975.663416617577,
+      1156.1426495860796,
+      1289.4712956372787,
+      1337.0504142419954,
+      1418.9213888704376,
+      1935.5568447575897,
+      1949.6753874244578,
+      2241.0179319136328,
+      2302.4355924284428,
+      2743.4158894489783,
+      3047.7081815970428,
+      3191.8214932292753,
+      3316.495954617479
+    ],
+    "frequencies_hz": [
+      1.8114081483267492,
+      1.9321226223920656,
+      2.163679881981397,
+      2.5328851123634033,
+      3.767201649826065,
+      3.9224302942883917,
+      4.47946490209312,
+      4.971301947383106,
+      5.4116019281597705,
+      5.7151281251339405,
+      5.819611897723013,
+      5.995139585860002,
+      7.002015968952577,
+      7.027506989896551,
+      7.534298066595077,
+      7.636843253025052,
+      8.336158364950958,
+      8.786316070399604,
+      8.991650733722983,
+      9.165578209623057
+    ],
+    "original_residuals": [
+      2.6890220964581153e-09,
+      2.500260160268951e-09,
+      2.4210282508977703e-09,
+      2.8264639751274977e-09,
+      2.822362847942652e-09,
+      2.6563289011493097e-09,
+      2.4421659393771976e-10,
+      2.566637798476171e-10,
+      3.948896080747365e-11,
+      2.5940601002292794e-10,
+      2.344272543934426e-10,
+      1.6717584768514196e-10,
+      3.2464881028880436e-10,
+      1.4882183015592367e-10,
+      2.9916701517483465e-10,
+      8.844395580100348e-11,
+      1.7251912581936127e-10,
+      2.8894231850333e-10,
+      8.973233730952955e-11,
+      1.7514078980653955e-10,
+      1.4132955709275565e-11,
+      3.297883293309454e-10,
+      3.4904477907224034e-10,
+      8.334949833286129e-11,
+      2.4125275910366606e-10,
+      1.4250160941619395e-09
+    ],
+    "max_original_residual": 2.8264639751274977e-09,
+    "max_elastic_residual": 1.4250160941619395e-09,
+    "orthogonality_max_error": 1.6653345369377348e-15,
+    "max_relative_elastic_eigenvalue_error": 1.0236256287043943e-13,
+    "max_relative_elastic_frequency_error": 5.1181281435219717e-14,
+    "minimum_elastic_mac": 0.9999999999999993,
+    "rigid_subspace_min_cosine": 0.9999999999999987,
+    "accepted": true
+  },
+  "rows": [
+    {
+      "seconds": 1.1920680403709412,
+      "quality": {
+        "eigenvalues": [
+          -6.997766436851627e-13,
+          -2.3522235710637128e-14,
+          7.701915337503936e-13,
+          2.8091778153504437e-12,
+          5.223569991013706e-12,
+          5.304003898216172e-12,
+          129.53656330769806,
+          147.37679501010373,
+          184.81863173713538,
+          253.27406419089363,
+          560.2701334619071,
+          607.3935917630658,
+          792.1583656154436,
+          975.6634166176045,
+          1156.1426495860758,
+          1289.471295637302,
+          1337.0504142419945,
+          1418.9213888704471,
+          1935.5568447575424,
+          1949.6753874244605,
+          2241.0179319137,
+          2302.435592428501,
+          2743.415889448957,
+          3047.7081815970637,
+          3191.821493229318,
+          3316.4959546174982
+        ],
+        "frequencies_hz": [
+          1.8114081483266402,
+          1.9321226223921382,
+          2.1636798819813836,
+          2.5328851123633096,
+          3.767201649826134,
+          3.922430294288375,
+          4.47946490209312,
+          4.971301947383176,
+          5.411601928159761,
+          5.715128125133993,
+          5.819611897723012,
+          5.995139585860023,
+          7.002015968952493,
+          7.027506989896556,
+          7.5342980665951895,
+          7.636843253025148,
+          8.336158364950927,
+          8.786316070399632,
+          8.991650733723043,
+          9.165578209623082
+        ],
+        "original_residuals": [
+          2.6922388628396263e-09,
+          2.8154621568822494e-09,
+          2.8319724280251344e-09,
+          2.4194322879885146e-09,
+          2.4964814228509336e-09,
+          2.662884853286144e-09,
+          2.40783858866256e-10,
+          2.630521531623592e-10,
+          3.7512576693497474e-11,
+          2.5532742978401225e-10,
+          1.959677235112878e-10,
+          2.362998900972649e-10,
+          1.873382767011349e-10,
+          3.531546629727129e-10,
+          2.42895259924345e-10,
+          6.699734937999527e-11,
+          2.187187843441993e-10,
+          2.948815414421445e-10,
+          8.622951950106381e-11,
+          1.7802646429313268e-10,
+          1.4343657532578921e-11,
+          3.5059612423485335e-10,
+          3.435846971395734e-10,
+          8.265543261744821e-11,
+          1.6498382073824457e-10,
+          1.5334285205986895e-09
+        ],
+        "max_original_residual": 2.8319724280251344e-09,
+        "max_elastic_residual": 1.5334285205986895e-09,
+        "orthogonality_max_error": 1.9984014443252818e-15,
+        "max_relative_elastic_eigenvalue_error": 8.781864124784988e-14,
+        "max_relative_elastic_frequency_error": 4.39648317751562e-14,
+        "minimum_elastic_mac": 0.9999999999999993,
+        "rigid_subspace_min_cosine": 0.9999999999999996,
+        "accepted": true
+      }
+    }
+  ],
+  "accepted": true,
+  "setup_scope": "cuDSS factor construction plus outer operator/workspace/start setup and Warp graph capture; assembled input is ready. Excludes imports, assembly, outer warmup, validation. Existing JIT disk caches.",
+  "initial_sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f",
+  "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+  "source_sha256": "3de0e7194e670ab9c2ef8a6f1301954cf98032a88b8d15e8ede43e5497bb4598",
+  "versions": {
+    "warp": "1.18.0",
+    "cupy": "14.2.0"
+  }
+}

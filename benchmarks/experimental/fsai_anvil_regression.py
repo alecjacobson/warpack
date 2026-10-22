@@ -8,6 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from benchmarks.anvil_inputs import signature as input_signature
 from benchmarks.anvil_showcase import command, extract
 from benchmarks.dependency_provenance import signature
 from scripts.install_fsai_overlay import PROFILES
@@ -15,11 +16,16 @@ from scripts.install_fsai_overlay import PROFILES
 
 def summarize(directory, rounds=3, repeats=3):
     summaries, source, config, common = {}, None, None, None
+    inputs = None
     for profile, installer_profile in (("legacy", "v0.2.0"), ("fixed", "current")):
         rows, identity = [], None
         for trial in range(1, rounds + 1):
             path = directory / f"{profile}-{trial}.json"
             raw = json.loads(path.read_text())
+            current_inputs = input_signature(raw.get("inputs"))
+            if inputs is not None and inputs != current_inputs:
+                raise ValueError(f"Changed Anvil inputs: {path}")
+            inputs = current_inputs
             occupancy = json.loads(path.with_suffix(".occupancy.json").read_text())
             setup, samples, residual, accepted = extract("warp-block", raw)
             if not accepted or not occupancy["timing_eligible"] or len(samples) != repeats:
@@ -81,6 +87,7 @@ def summarize(directory, rounds=3, repeats=3):
         and ratios["setup_capture_memory_bytes"] < 1.0
     )
     return dict(
+        inputs=inputs,
         accepted=accepted,
         profiles=summaries,
         candidate_over_legacy=ratios,

@@ -22,7 +22,6 @@ from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
 from benchmarks.upstream.adapters import matrix
-from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh, rigid_body_basis
 from warpack import CGInverse, SparseOperator
 
 FEM_CASES = (
@@ -51,24 +50,21 @@ def memory_snapshot():
 
 def prepare(args, *, metadata=None):
     if args.case == "anvil":
-        reference = np.load("build/anvil_reference.npz")
-        x, t = read_mesh("anvil for export-ftetwild.mesh")
-        x = (x - x.mean(0)) / np.ptp(x, axis=0).max()
-        h, _, mass = assemble_rest(x, t)
-        a = mass_normalized(h, mass)
-        a.nnz_sync()
-        sa = sp.bsr_matrix(
-            (a.values.numpy()[: a.nnz], a.columns.numpy()[: a.nnz], a.offsets.numpy()),
-            shape=a.shape,
-        ).tocsr()
-        constraints = rigid_body_basis(wp.array(x, dtype=wp.vec3d), mass)
-        shifted = mass_normalized(h, mass, shift=args.shift)
+        from benchmarks import anvil_inputs
+
+        arrays, manifest = anvil_inputs.load()
+        reference, reference_identity = anvil_inputs.reference()
+        a, shifted = anvil_inputs.shifted_device(arrays, args.shift)
+        sa = anvil_inputs.host_matrix(arrays)
+        constraints = wp.array(arrays["rigid"], dtype=wp.float64, device=a.device)
+        if metadata is not None:
+            metadata.update(anvil_fixture=manifest, reference=reference_identity)
 
         def check(w, v):
             quality = validate(
                 sa,
                 np.concatenate([constraints.numpy(), v.T]),
-                (reference["vectors"], reference["values"]),
+                reference,
             )[0]
             # The shared Anvil validator recomputes Rayleigh quotients. Also
             # check the eigenvalues actually returned by the tested solver.
@@ -77,7 +73,7 @@ def prepare(args, *, metadata=None):
                 1, np.linalg.norm(av, axis=0) + abs(w) * np.linalg.norm(v, axis=0)
             )
             quality.update(
-                returned_eigenvalue_error=float(np.max(abs(w / reference["values"][6:] - 1))),
+                returned_eigenvalue_error=float(np.max(abs(w / reference[1][6:] - 1))),
                 returned_pair_residual=float(residual.max()),
             )
             quality["accepted"] &= (
@@ -273,6 +269,17 @@ def main():
     memory_after_preconditioner = memory_snapshot()
     print("Preconditioner ready", setup_seconds, flush=True)
     initial = np.random.default_rng(42).normal(size=(a.shape[0], args.width))
+    input_identity = None
+    if args.case == "anvil":
+        from benchmarks import anvil_inputs
+
+        input_identity = anvil_inputs.inputs(
+            fixture["anvil_fixture"],
+            fixture["reference"],
+            initial,
+            anvil_inputs.host_device_matrix(shifted),
+            constraints=constraints.numpy(),
+        )
 
     def create_solver():
         solver_type = BlockLOBPCG
@@ -365,6 +372,7 @@ def main():
         dot.unlink()
     warmup_seconds, _ = timed(lambda: wp.capture_launch(graph))
     report = dict(
+        inputs=input_identity,
         dependency=warp_dependencies(type(pre) if args.preconditioner == "fsai" else None),
         args=vars(args),
         n=a.shape[0],

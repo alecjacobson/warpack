@@ -10,6 +10,7 @@ import numpy as np
 import warp as wp
 import warp.optim.linear as linear
 
+from benchmarks import anvil_inputs
 from benchmarks.applications.compare import timed
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.compare_block import cupy_trials, prepare
@@ -29,9 +30,17 @@ def main():
     config["repeats"] = options.repeats
     args = argparse.Namespace(**config)
     wp.init()
-    a, _, shifted, constraints, sa, sb, k, check = prepare(args)
+    fixture = {}
+    a, _, shifted, constraints, sa, sb, k, check = prepare(args, metadata=fixture)
     shifted.nnz_sync()
     initial = np.random.default_rng(42).normal(size=(a.shape[0], args.width))
+    input_identity = anvil_inputs.inputs(
+        fixture["anvil_fixture"],
+        fixture["reference"],
+        initial,
+        anvil_inputs.host_device_matrix(shifted),
+        constraints=constraints.numpy(),
+    )
 
     def construct():
         pre = linear.FSAI(
@@ -59,6 +68,7 @@ def main():
         row["quality"]["accepted"] and row["full_block_absolute_tolerance_met"] for row in rows
     )
     report = dict(
+        inputs=input_identity,
         dependency=warp_dependencies(),
         accepted=bool(accepted),
         args=config,

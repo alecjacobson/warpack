@@ -197,7 +197,8 @@ The [current FSAI dependency](results/fsai_setup_regression/README.md) reduces
 setup cost and memory use in a separate matched Anvil comparison, with unchanged
 warm solve time.
 
-[Timing samples, accuracy checks and reproduction](results/anvil_showcase_132/README.md)
+[Timing samples and accuracy checks](results/anvil_showcase_132/README.md)
+· [Current comparison setup](results/anvil_inputs_142/README.md)
 · [Rendering recipe and downloadable assets](docs/anvil.md)
 
 Anvil adapted from [“Blacksmith's Anvil”](https://sketchfab.com/3d-models/blacksmiths-anvil-4b11b76fe069496ebd8ccd98f7d37ade)

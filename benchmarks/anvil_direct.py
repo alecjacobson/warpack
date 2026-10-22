@@ -11,6 +11,7 @@ import cupyx.scipy.sparse.linalg as csl
 import numpy as np
 import warp as wp
 
+from benchmarks import anvil_inputs
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import timed
 from benchmarks.dependency_provenance import warp_dependencies
@@ -27,11 +28,19 @@ def main():
     args = parser.parse_args()
     if args.repeats < 1:
         parser.error("repeats must be positive")
-    _, _, shifted, _, sa, _, _, _ = prepare(argparse.Namespace(case="anvil", shift=1.0))
+    fixture = {}
+    _, _, shifted, _, sa, _, _, _ = prepare(
+        argparse.Namespace(case="anvil", shift=1.0), metadata=fixture
+    )
     shifted.nnz_sync()
     initial = np.load("build/anvil_initial.npy")
-    cached = np.load("build/anvil_reference.npz")
-    reference = cached["vectors"], cached["values"]
+    reference, reference_identity = anvil_inputs.reference()
+    input_identity = anvil_inputs.inputs(
+        fixture["anvil_fixture"],
+        reference_identity,
+        initial,
+        anvil_inputs.host_device_matrix(shifted),
+    )
     stream = cp.cuda.Stream.from_external(wp.get_stream())
 
     phases = {}
@@ -117,6 +126,7 @@ def main():
         rows.append(dict(seconds=seconds, quality=quality()))
     accepted = warmup_quality["accepted"] and all(row["quality"]["accepted"] for row in rows)
     report = dict(
+        inputs=input_identity,
         dependency=warp_dependencies(),
         backend=args.backend,
         setup_seconds=setup_seconds,

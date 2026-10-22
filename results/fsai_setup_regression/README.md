@@ -139,7 +139,11 @@ PYTHONPATH="$PWD/build/warp-current:$PWD" python -m pytest -q
 
 The regression command requires a prepared Anvil reference; follow the
 [release comparison prerequisites](../release_v0_2_0/README.md#anvil-promotion-regression).
-It refuses to overwrite existing measurements. Occupancy failures require a new
+Prepare the verified shared Anvil fixture using the
+[current input protocol](../anvil_inputs_142/README.md) before new comparisons.
+Archived records in this directory predate that protocol: use source revision
+`b869575` to recheck their original gates; current gates correctly reject their
+missing input fingerprints. The runner refuses to overwrite existing measurements. Occupancy failures require a new
 run directory; do not silently discard slow trials. Use `--summarize-only` with
 an existing directory to recheck its gates.
 

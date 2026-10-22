@@ -9,7 +9,8 @@ from scripts.install_fsai_overlay import PROFILES
 
 
 @pytest.mark.parametrize(
-    "failure", [None, "contention", "source", "dependency", "accuracy", "slow_setup", "slow_replay"]
+    "failure",
+    [None, "contention", "source", "dependency", "accuracy", "inputs", "slow_setup", "slow_replay"],
 )
 def test_promotion_gates(tmp_path, failure):
     for profile, name in (("legacy", "v0.2.0"), ("fixed", "current")):
@@ -22,6 +23,14 @@ def test_promotion_gates(tmp_path, failure):
             for _ in range(3)
         ]
         raw = dict(
+            inputs=dict(
+                schema=1,
+                common=dict(
+                    fixture="changed" if fixed and failure == "inputs" else "shared",
+                    reference="same",
+                ),
+                method=dict(initial="same", matrix="same"),
+            ),
             dependency=dict(
                 warp_version="1.18.0",
                 manifest_status="verified",
@@ -48,7 +57,7 @@ def test_promotion_gates(tmp_path, failure):
             path.with_suffix(".occupancy.json").write_text(
                 json.dumps(dict(timing_eligible=not (fixed and failure == "contention")))
             )
-    if failure in ("contention", "source", "dependency", "accuracy"):
+    if failure in ("contention", "source", "dependency", "accuracy", "inputs"):
         with pytest.raises(ValueError):
             summarize(tmp_path)
     else:

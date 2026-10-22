@@ -71,7 +71,9 @@ and FSAI modules, in addition to the wheel version. Patched overlays can share
 the same wheel version while running different numerical code. The installer
 writes a checksum manifest, which the reporters check against the loaded files.
 Regression comparisons reject changed dependencies, stale manifests and older
-baselines without this provenance. Use the historical checkout to reproduce an
+baselines without this provenance. The [Anvil input protocol](../results/anvil_inputs_142/README.md)
+also requires a verified common assembled fixture, unchanged reference data and
+method-specific start/shifted-matrix identities. Use the historical checkout to reproduce an
 older report, or establish and review a new baseline; do not copy dependency
 metadata onto an old measurement.
 

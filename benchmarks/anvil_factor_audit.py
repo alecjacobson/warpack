@@ -18,13 +18,14 @@ import scipy
 import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 
+from benchmarks import anvil_inputs
 from benchmarks.dependency_provenance import warp_dependencies
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--backend", choices=["assemble", "eigen", "superlu", "pardiso"], required=True)
-    p.add_argument("--matrix", default="build/anvil-factor-audit/matrix.npz")
+    p.add_argument("--matrix", default=str(anvil_inputs.fixture_path().with_suffix(".shift1.npz")))
     p.add_argument("--library", default="build/anvil-factor-audit/eigen.so")
     p.add_argument("--arpack-repeats", type=int, default=0)
     p.add_argument("--spectra-repeats", type=int, default=0)
@@ -39,28 +40,25 @@ def main():
     ):
         p.error("--spectra-repeats requires an Eigen/PARDISO library with AUDIT_SPECTRA")
     mesh = Path("anvil for export-ftetwild.mesh")
+    arrays, manifest = anvil_inputs.load()
+    original = anvil_inputs.host_matrix(arrays)
+    expected = (original + sp.eye(original.shape[0], format="csr")).tocsc()
+    expected.sort_indices()
     if args.backend == "assemble":
-        import warp as wp
-
-        from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
-
-        x, t = read_mesh(mesh)
-        x = (x - x.mean(0)) / np.ptp(x, axis=0).max()
-        h, _, mass = assemble_rest(x, t)
-        a = mass_normalized(h, mass)
-        a.nnz_sync()
-        wp.synchronize()
-        n = a.shape[0]
-        sa = sp.bsr_matrix(
-            (a.values.numpy()[: a.nnz], a.columns.numpy()[: a.nnz], a.offsets.numpy()),
-            shape=(n, n),
-        ).tocsr()
-        sa.sort_indices()
-        matrix = (sa + sp.eye(n, format="csr")).tocsc()
-        matrix.sort_indices()
+        matrix = expected
         sp.save_npz(args.matrix, matrix)
     else:
         matrix = sp.load_npz(args.matrix)
+        if anvil_inputs.matrix_identity(matrix) != anvil_inputs.matrix_identity(expected):
+            raise ValueError(
+                "CPU matrix cache differs from verified Anvil fixture; rerun --backend assemble"
+            )
+    del expected, arrays
+    input_identity = None
+    if args.arpack_repeats or args.spectra_repeats:
+        reference, reference_identity = anvil_inputs.reference()
+        initial = np.load("build/anvil_initial.npy")
+        input_identity = anvil_inputs.inputs(manifest, reference_identity, initial, matrix)
     if (
         matrix.format != "csc"
         or matrix.shape[0] != matrix.shape[1]
@@ -70,6 +68,8 @@ def main():
     ):
         raise ValueError("expected a square FP64 CSC matrix with int32 indices")
     report = {
+        "inputs": input_identity,
+        "fixture": manifest,
         "dependency": warp_dependencies(),
         "backend": args.backend,
         "mesh_sha256": hashlib.sha256(mesh.read_bytes()).hexdigest(),
@@ -183,10 +183,6 @@ def main():
                 continue
             from benchmarks.anvil import validate
 
-            reference_file = np.load("build/anvil_reference.npz")
-            reference = (reference_file["vectors"], reference_file["values"])
-            initial = np.load("build/anvil_initial.npy")
-            original = matrix - sp.eye(matrix.shape[0], format="csc")
             calls = [0]
 
             def matvec(rhs):
