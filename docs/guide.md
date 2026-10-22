@@ -254,6 +254,9 @@ a rejected warm start, see the [bounded recovery example](completeness.md#opt-in
 The [coarse-to-fine example](../results/fem_hierarchy/README.md) transfers computed
 tetrahedral modes with the device initializer hook and includes the cost of
 building and solving the coarse problem. Such starts need not improve total time.
+The [100-mode FEM comparison](../results/fem_100_modes/README.md) records complete
+requested-space checks, native stopping differences and the remaining wide-block
+replay gap against CuPy.
 The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
 measures that tradeoff while holding final fine-grid accuracy fixed.
 

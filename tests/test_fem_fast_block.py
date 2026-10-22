@@ -12,8 +12,11 @@ from benchmarks.experimental.compare_block import FEM_CASES, prepare
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 
 
-@pytest.mark.parametrize("case", FEM_CASES)
-@pytest.mark.parametrize("modes", [3, 6])
+@pytest.mark.parametrize(
+    "case,modes",
+    [(case, modes) for case in FEM_CASES for modes in (3, 6)]
+    + [(case, 30) for case in FEM_CASES if case != "repeated_bending"],
+)
 def test_fast_fem_requested_space_and_replay(case, modes, tmp_path):
     if not (
         hasattr(linear, "FSAI")
