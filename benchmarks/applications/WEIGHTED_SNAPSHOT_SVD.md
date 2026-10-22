@@ -83,3 +83,38 @@ Compare `--reduction gram` with identical inputs and references, and repeat with
 `--backend cg`. The reporter checks all warmup/timed results, native counts,
 rank, graph stages, occupancy and source/dependency fingerprints before allowing
 a timing or regression claim.
+
+## Matched large-case follow-up
+
+All four fresh workers for the 10,890-DOF lumped-mass beam now have one checked
+warmup and three checked repeats, with no observed GPU contention. Both
+reductions use the same independently computed weighted-SVD reference and
+identical matrices/forces. L40 / driver 570.158.01, four CPU threads, pinned
+Warp FSAI overlay. Setup includes host assembly, device conversion, factors,
+workspaces and capture; independent references and validation are excluded.
+These are single setup observations with cached kernels, not cold-start medians.
+
+| Sparse backend / reduction | Assembly + setup + capture (s) | Response stage (s) | Reduction + physical modes (s) | Warm total (s) |
+|---|---:|---:|---:|---:|
+| cuDSS / Gram | 0.9516 | 0.00187 | 0.00171 | 0.00358 |
+| cuDSS / augmented SVD | 1.0672 | 0.00174 | 0.02754 | 0.02928 |
+| Pure Warp CG / Gram | 1.0673 | 0.03457 | 0.00171 | 0.03627 |
+| Pure Warp CG / augmented SVD | 1.2080 | 0.03450 | 0.02753 | 0.06203 |
+
+For Gram, the response stage includes mass application and Gram assembly;
+for SVD, weighting is included in the reduction stage. Totals are medians of
+complete workflows, not a sum of separately selected trial minima.
+[Raw workers and strict summaries](../../results/force_dual/weighted-svd/final)
+retain every warmup/timed result and stage cost. First complete-result costs,
+including the caller warmup/first graph launch, are available in the summaries.
+
+All 16 workflows pass physical covariance residuals, M-orthogonality, complete
+requested spectrum/subspace, positive rank, retained energy, source solves,
+native counts and graph gates. Worst original covariance residual is 1.80e-12.
+The augmented route's mass orthogonality is within 8.89e-16, versus 3.63e-10
+for Gram; both satisfy the 1e-8 physical gate. Augmented SVD remains much slower
+for this fixture: about 8.2× the direct workflow and 1.7× the CG workflow. Keep
+the Gram default for this well-resolved leading subspace. The SVD option is for
+conditioning/weak-mode requirements, and does not close the general POD
+throughput work under #31. Full-rank implicit priors and coupled-mass GPU
+whitening remain under #135.

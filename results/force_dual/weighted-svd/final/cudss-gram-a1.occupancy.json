@@ -1,0 +1,54 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.force_dual",
+    "--side",
+    "10",
+    "--columns",
+    "32",
+    "--modes",
+    "20",
+    "--mass",
+    "lumped",
+    "--backend",
+    "cudss",
+    "--reduction",
+    "gram",
+    "--reference-method",
+    "svd",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/force_dual/weighted-svd/final/cudss-gram-a1.json"
+  ],
+  "pid": 369230,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792712593.8644974,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 705 MHz, 37",
+      "error": null
+    },
+    {
+      "time": 1792712594.9600956,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 450 MHz, 36",
+      "error": null
+    },
+    {
+      "time": 1792712596.054019,
+      "other": [],
+      "gpu": "0 %, 32 MiB, 2490 MHz, 36",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

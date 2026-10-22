@@ -1,0 +1,60 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.force_dual",
+    "--side",
+    "10",
+    "--columns",
+    "32",
+    "--modes",
+    "20",
+    "--mass",
+    "lumped",
+    "--backend",
+    "cg",
+    "--reduction",
+    "gram",
+    "--reference-method",
+    "svd",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/force_dual/weighted-svd/final/cg-gram-a1.json"
+  ],
+  "pid": 369300,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792712602.9971352,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 36",
+      "error": null
+    },
+    {
+      "time": 1792712604.1211865,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 525 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792712605.2214854,
+      "other": [],
+      "gpu": "0 %, 352 MiB, 2490 MHz, 36",
+      "error": null
+    },
+    {
+      "time": 1792712606.3210306,
+      "other": [],
+      "gpu": "0 %, 1424 MiB, 2490 MHz, 37",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
