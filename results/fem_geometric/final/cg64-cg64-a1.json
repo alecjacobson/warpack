@@ -1,0 +1,226 @@
+{
+  "arguments": {
+    "coarse": 5,
+    "fine": 15,
+    "modes": 20,
+    "width": 24,
+    "mass": "consistent",
+    "profile": "cg64",
+    "coarse_tol": 0.001,
+    "steps": 300,
+    "repeats": 3,
+    "inner_cg": 25,
+    "out": "/home/horde/projects/warpack/results/fem_geometric/final/cg64-cg64-a1.json"
+  },
+  "setup": {
+    "fine_assembly_seconds": 0.686103280633688,
+    "fine_setup_seconds": 0.3799130991101265,
+    "fine_capture_seconds": 0.4568310044705868
+  },
+  "setup_total_seconds": 1.5228473842144012,
+  "setup_capture_device_free_memory_decrease_bytes": 1285554176,
+  "memory_scope": "Device/context free-memory decrease after setup and capture, not peak or live factor bytes; interpret only without competing GPU processes.",
+  "reference_seconds": 19.026610776782036,
+  "source_tolerance": null,
+  "source_count": null,
+  "n": 34560,
+  "warmup": {
+    "source_seconds": 0.0,
+    "fine_seconds": 0.5245269685983658,
+    "total_seconds": 0.5245269685983658,
+    "quality": {
+      "accepted": true,
+      "residual": 4.4057403682279095e-12,
+      "max_absolute_residual": 2.293616685467015e-13,
+      "orthogonality": 8.881784197001252e-16,
+      "spectrum_error": 1.1080025785759062e-13,
+      "requested_subspace_error": 3.1582121320668634e-12,
+      "status": 0,
+      "converged": 20,
+      "iterations": 26
+    },
+    "source_quality": null,
+    "correction_status": 0,
+    "cg_stats": [
+      14400,
+      25,
+      104,
+      624
+    ],
+    "accepted": true
+  },
+  "rows": [
+    {
+      "source_seconds": 0.0,
+      "fine_seconds": 0.5178109407424927,
+      "total_seconds": 0.5178109407424927,
+      "quality": {
+        "accepted": true,
+        "residual": 4.107149341084764e-12,
+        "max_absolute_residual": 2.2395800491903373e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 9.747758156208874e-14,
+        "requested_subspace_error": 2.941711167252953e-12,
+        "status": 0,
+        "converged": 20,
+        "iterations": 26
+      },
+      "source_quality": null,
+      "correction_status": 0,
+      "cg_stats": [
+        14400,
+        25,
+        102,
+        624
+      ],
+      "accepted": true
+    },
+    {
+      "source_seconds": 0.0,
+      "fine_seconds": 0.5175302810966969,
+      "total_seconds": 0.5175302810966969,
+      "quality": {
+        "accepted": true,
+        "residual": 5.966571474143409e-12,
+        "max_absolute_residual": 2.917336511254476e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.1668443988810395e-13,
+        "requested_subspace_error": 4.04038912768344e-12,
+        "status": 0,
+        "converged": 20,
+        "iterations": 26
+      },
+      "source_quality": null,
+      "correction_status": 0,
+      "cg_stats": [
+        14400,
+        25,
+        102,
+        624
+      ],
+      "accepted": true
+    },
+    {
+      "source_seconds": 0.0,
+      "fine_seconds": 0.5178573504090309,
+      "total_seconds": 0.5178573504090309,
+      "quality": {
+        "accepted": true,
+        "residual": 4.270296544841656e-12,
+        "max_absolute_residual": 2.1531821464693124e-13,
+        "orthogonality": 8.881784197001252e-16,
+        "spectrum_error": 1.0147438445073931e-13,
+        "requested_subspace_error": 2.9347798350709046e-12,
+        "status": 0,
+        "converged": 20,
+        "iterations": 26
+      },
+      "source_quality": null,
+      "correction_status": 0,
+      "cg_stats": [
+        14400,
+        25,
+        101,
+        624
+      ],
+      "accepted": true
+    }
+  ],
+  "graphs": {
+    "fine": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 110,
+        "MEMCPY": 52,
+        "KERNEL": 1717,
+        "CONDITIONAL": 19
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 52
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    }
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "environment": {
+    "gpu": "NVIDIA L40",
+    "platform": "Linux-5.15.0-113-generic-x86_64-with-glibc2.35",
+    "driver": "570.158.01"
+  },
+  "matrix_sha256": {
+    "fine": "105f0a08bc6e35d036cc3c1df5142fd37f31c6bdf734f28386f52372561b30b4"
+  },
+  "source_sha256": {
+    "/home/horde/projects/warpack/benchmarks/applications/fem_coarse_correction.py": "055a68f8d11a7df18b45ddb061678d6edf2db0c9a63d9e6c714e117ad9d958a1",
+    "benchmarks/experimental/coarse_correction.py": "00b1c4b266b5bb84d5cb192e5e0f66e44d28a47525d4969db643cb95c9aaa570",
+    "benchmarks/experimental/geometric_preconditioner.py": "d9aa48bf942861deeb20c82d2eefdc58d664686546e3a183b05dfdd8ce421b79",
+    "benchmarks/applications/fem_shapes.py": "bde03af61f00c91a429ae59b06465aee5a38d6ceaf71eda760b60d74ae9cc959",
+    "benchmarks/applications/fem_hierarchy.py": "2f91e8c802ae9d553d7804244a4406d4cedf644c1395a64a23d03112b94e6e9d",
+    "benchmarks/applications/fem_hierarchy_tuning.py": "fa1d0c977cb65d8b526c2837beea1e05a1bfd30b8eff01552b6f48118608f548",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/problems.py": "15e5d47aecf81b772f79aeba0dd8c445071b03c0317ff73cc94ced78986a9ab8",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "22de5741e7718a63bd5a184c5b33fa9d9fcc3f9195b7b8a05cae5c264a42d650",
+    "warpack/_block_search.py": "0a2f5e190cf36fa173ed47998774a7db9c984215897b5e34cb25d2eb52606fa2",
+    "warpack/_coalesced_fsai.py": "8ec706fef7c8bb20274e3b57d6dfda6db41c77c598de6661d4bcea696169bc6c",
+    "warpack/_coalesced_operator.py": "c12914049fb2dba837ce1526f20c1bdcc170d0680348e8256184f0e8e07686b3",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "38b5c7bb8320a682ee9aa6c64403dddc6adf78b20bbadf27232aacfde17f2f6c",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "9c13850750bf319944380c3f27ffd7cc76b3f118760dbfbd2626fc845495ba3f",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "61e59dba7f48126f13442e8e1c213962b578601cba5ce7abec680a9621b7867e",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "49c37bd1d8d91bb0495c02fdb6207010eb0fc641f1c2bf6941dcce668441f9c2",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "accepted": true,
+  "scope": "Warp-computed full-width coarse basis, pure-Warp fixed-linear FSAI and Galerkin correction. Setup includes assembly, source warmup, workspaces and capture; each warm workflow charges coarse solve, transfer/correction refresh and fine solve. Independent references excluded. No multiscale Lanczos recurrence or default policy change."
+}

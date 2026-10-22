@@ -80,6 +80,22 @@ def test_accounting_and_performance_regression():
         summarize(raw, occupancy, dict(reason="known CPU contention"))
 
 
+@pytest.mark.parametrize("profile", ["geometric", "geometric-inner-cg"])
+def test_geometric_hierarchy_charges_setup_without_source_eigensolve(profile):
+    raw, occupancy = fixture()
+    raw["arguments"]["profile"] = profile
+    raw["graphs"].pop("coarse")
+    raw["source_count"] = raw["source_tolerance"] = None
+    raw["setup"] = {k: v for k, v in raw["setup"].items() if k.startswith("fine_")}
+    raw["setup_total_seconds"] = 3.0
+    for row in [raw["warmup"], *raw["rows"]]:
+        row.update(source_quality=None, source_seconds=0.0, total_seconds=0.2)
+    assert summarize(raw, occupancy)["first_use_component_seconds"] == 3.2
+    raw["rows"][1]["source_seconds"] = 0.1
+    with pytest.raises(ValueError, match="unexpected coarse source"):
+        summarize(raw, occupancy)
+
+
 @pytest.mark.parametrize(
     "failure",
     [

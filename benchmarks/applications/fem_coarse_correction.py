@@ -9,13 +9,24 @@ import subprocess
 import time
 from pathlib import Path
 
+import numpy as np
+import scipy.sparse as sp
 import warp as wp
 
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.coarse_correction import CoarseCG, CoarseCorrection, FixedFSAI
+from benchmarks.experimental.geometric_preconditioner import build_hierarchy
+from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator
 
-from .fem_hierarchy import BeamTransfer, attach_reference, audit, beam_problem, matrix_hash
+from .fem_hierarchy import (
+    BeamTransfer,
+    attach_reference,
+    audit,
+    beam_problem,
+    matrix_hash,
+    transfer_stencil,
+)
 from .fem_hierarchy_tuning import source_usable
 from .fem_shapes import ShapeReplay, elapsed
 
@@ -29,6 +40,8 @@ PROFILES = (
     "cg64",
     "additive-inner-cg",
     "balanced-inner-cg",
+    "geometric",
+    "geometric-inner-cg",
 )
 
 
@@ -57,7 +70,8 @@ def main():
         parser.error("positive sizes, fine>coarse, integer refinement and width>=modes required")
     if args.profile in ("cg", "start-cg") and args.inner_cg != 25:
         parser.error("the existing bucketed CG baseline uses exactly 25 inner iterations")
-    uses_coarse = args.profile not in ("cg", "cg64", "fsai")
+    uses_geometry = args.profile.startswith("geometric")
+    uses_coarse = args.profile not in ("cg", "cg64", "fsai") and not uses_geometry
     uses_correction = args.profile in (
         "additive",
         "balanced",
@@ -79,7 +93,7 @@ def main():
     reference_seconds = time.perf_counter() - begin
     device = wp.get_device("cuda:0")
     memory_before = device.free_memory
-    coarse, transfer, correction = None, None, None
+    coarse, transfer, correction, hierarchy = None, None, None, None
     if uses_coarse:
         begin = time.perf_counter()
         coarse = ShapeReplay(
@@ -98,7 +112,25 @@ def main():
         setup["transfer_setup_seconds"] = time.perf_counter() - begin
 
     def factory(shifted, factor, width):
-        nonlocal correction
+        nonlocal correction, hierarchy
+        if uses_geometry:
+            transfers = []
+            for fine_side, coarse_side in ((args.fine, args.coarse), (args.coarse, 1)):
+                if fine_side == coarse_side:
+                    continue
+                ids, weights = transfer_stencil(coarse_side, fine_side)
+                n = ids.shape[0]
+                ids, weights = ids.ravel(), weights.ravel()
+                valid = (ids >= 0) & (weights != 0)
+                host = sp.csr_matrix(
+                    (weights[valid], (np.repeat(np.arange(n), 4)[valid], ids[valid])),
+                    shape=(n, 9 * coarse_side * (coarse_side + 1) ** 2),
+                )
+                transfers.append(matrix(host))
+            hierarchy = build_hierarchy(shifted, transfers, width, fine_factor=factor)
+            if args.profile.endswith("inner-cg"):
+                return CoarseCG(shifted, hierarchy, width, maxiter=args.inner_cg)
+            return hierarchy
         if args.profile == "cg64":
             return BatchedCGPreconditioner(
                 shifted,
@@ -156,7 +188,7 @@ def main():
         fine_seconds = elapsed(lambda: wp.capture_launch(fine.graph))
         quality = fine.quality(problems["fine"])
         source_quality = coarse.quality(problems["coarse"]) if coarse else None
-        status = int(correction.status.numpy()[0]) if correction else 0
+        status = int((correction or hierarchy).status.numpy()[0]) if correction or hierarchy else 0
         row = dict(
             source_seconds=source_seconds,
             fine_seconds=fine_seconds,
@@ -186,6 +218,7 @@ def main():
     files = [
         Path(__file__),
         Path("benchmarks/experimental/coarse_correction.py"),
+        Path("benchmarks/experimental/geometric_preconditioner.py"),
         Path("benchmarks/applications/fem_shapes.py"),
         Path("benchmarks/applications/fem_hierarchy.py"),
         Path("benchmarks/applications/fem_hierarchy_tuning.py"),
@@ -217,7 +250,14 @@ def main():
         matrix_sha256={k: matrix_hash(p) for k, p in problems.items()},
         source_sha256={str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
         accepted=all(r["accepted"] for r in [warmup] + rows),
-        scope="Warp-computed full-width coarse basis, pure-Warp fixed-linear FSAI and Galerkin correction. Setup includes assembly, source warmup, workspaces and capture; each warm workflow charges coarse solve, transfer/correction refresh and fine solve. Independent references excluded. No multiscale Lanczos recurrence or default policy change.",
+        scope=(
+            "Static geometric hierarchy, pure-Warp sparse Galerkin products and FSAI, "
+            "with a 36-DOF Warp Cholesky bottom solve. Transfer assembly, all factors "
+            "and capture charged to setup; no coarse eigenbasis/source solve. "
+            "Independent references excluded. No default policy change."
+            if uses_geometry
+            else "Warp-computed full-width coarse basis, pure-Warp fixed-linear FSAI and Galerkin correction. Setup includes assembly, source warmup, workspaces and capture; each warm workflow charges coarse solve, transfer/correction refresh and fine solve. Independent references excluded. No multiscale Lanczos recurrence or default policy change."
+        ),
     )
     args.out.write_text(json.dumps(report, indent=2) + "\n")
     if not report["accepted"]:

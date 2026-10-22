@@ -17,7 +17,9 @@ def summarize(raw, occupancy, exclusion=None):
     args = raw["arguments"]
     if len(raw["rows"]) != args["repeats"] or args["repeats"] < 3:
         raise ValueError("at least three complete measured repeats required")
-    coarse = args["profile"] not in ("cg", "cg64", "fsai")
+    coarse = args["profile"] not in ("cg", "cg64", "fsai") and not args["profile"].startswith(
+        "geometric"
+    )
     if set(raw["graphs"]) != ({"fine", "coarse"} if coarse else {"fine"}):
         raise ValueError("missing graph audit")
     for graph in raw["graphs"].values():
