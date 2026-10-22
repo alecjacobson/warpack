@@ -208,6 +208,12 @@ against released factors.
 
 `capture(..., finalizer=callback)` records device postprocessing during setup;
 the callback is not a host callback during replay. Preallocate its outputs.
+`BlockLOBPCG.capture(..., initializer=callback)` similarly records device input
+preparation before initialization and mass orthonormalization. For example,
+use it to prolongate a computed coarse basis into `initial_vectors`. Both
+callbacks execute eagerly for warmup and again to record operations; they must
+use preallocated device buffers and keep all referenced resources alive. This
+allows transfer and refinement in one graph without nesting a graph launch.
 Explicit `.numpy()` reads and caller synchronization belong outside the graph.
 The pure-Warp replay has no host numerical decisions. cuDSS currently includes
 small vendor HtoD metadata copies; [the audit](../benchmarks/applications/CUDSS_GRAPH.md)

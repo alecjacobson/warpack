@@ -686,11 +686,13 @@ class BlockLOBPCG:
         self.iterations.fill_(steps)
         return self
 
-    def capture(self, max_iterations=100, adaptive=None, finalizer=None):
-        """Capture the solve and optional device postprocessing once per replay.
+    def capture(self, max_iterations=100, adaptive=None, finalizer=None, *, initializer=None):
+        """Capture optional input preparation, the solve, and postprocessing.
 
-        The finalizer records device operations during setup, after JIT warmup;
-        it does not execute as a Python callback during graph replay.
+        Callbacks record preallocated device operations during setup and are
+        warmed eagerly before capture. They do not execute as Python callbacks
+        during replay. The initializer runs before initialization (including
+        mass orthonormalization); the finalizer runs after the solve.
         """
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
@@ -703,6 +705,8 @@ class BlockLOBPCG:
             adaptive = not static_only
         if adaptive and static_only:
             raise ValueError("This preconditioner requires adaptive=False for the outer graph")
+        if initializer is not None:
+            initializer()
         self.solve(1)
         if self._search is not None:
             self._search.warm()
@@ -726,6 +730,8 @@ class BlockLOBPCG:
             )
 
         with wp.ScopedCapture(device=self.device) as capture:
+            if initializer is not None:
+                initializer()
             self.initialize()
             self.running.fill_(1)
             if adaptive:
