@@ -82,6 +82,21 @@ cuDSS's vendor HtoD scalar metadata copies remain visible under
 is expected to have no host transfers at all. Both routes keep eigen-iteration
 arithmetic and physical residual computation in Warp.
 
+For a few dominant modes, `BlockLOBPCG` can instead minimize `-A` in the B
+metric. It accepts B through its `mass` argument even though B represents
+regularization here. Supply truncated FSAI/CG on B as the preconditioner,
+then negate the returned eigenvalues on device. This avoids treating every
+preconditioner application as a strict metric inverse. The
+[application composition](../experimental/spectral_surface_block.py) uses
+only public solver APIs; its capture finalizer recovers the positive values.
+It uses random starts, not independent-reference vectors.
+
+The [matched block comparison](../../results/spectral_surface_block/README.md)
+includes single and multiple dominant modes, complete repeated clusters and
+regularization controls. A successful truncated preconditioner is not a
+claim of a tightly converged inner inverse. Check original-pencil residuals,
+B-orthogonality and the entire requested subspace for either approach.
+
 ## Validation and comparison protocol
 
 Small tests use dense generalized LAPACK and independent energy expressions.
@@ -123,8 +138,19 @@ python -m benchmarks.monitor_gpu \
 python -m benchmarks.applications.spectral_surface_report build/surface-cg.json
 ```
 
-Use the current pinned FSAI installation. Other backends are `arpack` and
-`cudss`; `--copies 2 --modes 2` requests a complete repeated dominant cluster.
+Use the current pinned FSAI installation. Other backends are `arpack`,
+`cudss` and `block`; `--copies 2 --modes 2` requests a complete repeated
+dominant cluster. `block` defaults to width=max(4,2*k), 25 truncated inner
+steps and a 200-iteration adaptive outer cap. cuDSS's fixed cycle budget can
+be set with `--steps`; one cycle suffices for the default single-mode cases,
+but not all regularization controls. The native convergence count must pass.
+
+Optional `--reference-cache /path/to/cache` stores immutable CPU references
+with matrix, source, dependency and array checksums. Every load rechecks the
+original residual and B-orthogonality. These are validation data, never
+solver starts or factors. Populate them before monitored workers with
+`python -m benchmarks.applications.spectral_surface_reference --side 32
+--modes 1 --cache /path/to/cache` to avoid repeating the CPU reference solve.
 The reporter requires three complete uncontended trials and accurate full
 spectra. `--baseline prior.summary.json` additionally rejects incompatible
 configuration/provenance or a solve slowdown above 25%. Vendor graph copies

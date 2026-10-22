@@ -24,7 +24,7 @@ def summarize(raw, occupancy):
         if any(k.startswith("DtoH") for k in graph["memcpy_kinds"]):
             raise ValueError("graph readback")
         device_only = not any(k.startswith("HtoD") for k in graph["memcpy_kinds"])
-        if args["backend"] == "cg" and not device_only:
+        if args["backend"] in ("cg", "block") and not device_only:
             raise ValueError("host transfer in pure-Warp graph")
     elif graph is not None:
         raise ValueError("unexpected CPU graph audit")
@@ -68,6 +68,10 @@ def summarize(raw, occupancy):
                 not math.isfinite(v) or v < 0 for v in row["fresh_residual_maxima"]
             ):
                 raise ValueError("invalid fresh residual audit")
+        if args["backend"] == "block":
+            stats = row["preconditioner_stats"]
+            if len(stats) != 4 or any(v < 0 for v in stats) or not 0 <= stats[2] <= stats[3]:
+                raise ValueError("invalid truncated-preconditioner diagnostics")
     for key in (
         "assembly_seconds",
         "reference_and_copy_assembly_seconds",
@@ -102,6 +106,13 @@ def summarize(raw, occupancy):
             max_fresh_misses=max(r["fresh_cg_stats"][2] for r in raw["rows"]),
             max_scheduled_iterations=max(r["cg_stats"][0] for r in raw["rows"]),
             max_fresh_relative_residual=max(r["fresh_residual_maxima"][1] for r in raw["rows"]),
+        )
+    if args["backend"] == "block":
+        if raw["inner_role"] != "truncated preconditioner":
+            raise ValueError("incorrect inner-solve contract")
+        result["inner_diagnostics"] = dict(
+            max_scheduled_iterations=max(r["preconditioner_stats"][0] for r in raw["rows"]),
+            max_recursive_tolerance_misses=max(r["preconditioner_stats"][2] for r in raw["rows"]),
         )
     return result
 

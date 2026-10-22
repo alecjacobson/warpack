@@ -19,6 +19,7 @@ from warp.optim import linear
 
 from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
+from benchmarks.experimental.spectral_surface_block import SurfaceBlockSolver
 from benchmarks.upstream.adapters import matrix
 from warpack import CGInverse, CuDSSInverse, GeneralizedKrylovSchur, SparseOperator
 
@@ -27,9 +28,10 @@ from .fem_shapes import elapsed
 from .problems import Problem
 from .runner import accuracy
 from .spectral_surface import reconstruction_quality, surface_pencil
+from .spectral_surface_reference import reference
 
 
-def problem(pencil, modes=1, copies=1):
+def problem(pencil, modes=1, copies=1, reference_cache=None):
     """Independent disconnected copies give exact dominant repeated clusters."""
     if copies < 1 or modes < 1 or modes % copies:
         raise ValueError("request complete clusters: modes must be a positive multiple of copies")
@@ -38,23 +40,8 @@ def problem(pencil, modes=1, copies=1):
     per_copy = modes // copies
     if per_copy + 1 >= pencil.a.shape[0]:
         raise ValueError("reference needs a positive spectral guard")
-    if pencil.a.shape[0] <= 1024:
-        values, vectors = la.eigh(pencil.a.toarray(), pencil.b.toarray())
-        values, vectors = values[::-1], vectors[:, ::-1]
-        label = "Dense generalized LAPACK on one independent copy"
-    else:
-        values, vectors = sla.eigsh(
-            pencil.a,
-            M=pencil.b,
-            k=per_copy + 4,
-            which="LA",
-            tol=1e-13,
-            ncv=min(pencil.a.shape[0], max(64, 4 * (per_copy + 4))),
-            v0=np.random.default_rng(136).normal(size=pencil.a.shape[0]),
-        )
-        order = np.argsort(-values)
-        values, vectors = values[order], vectors[:, order]
-        label = "Independent ARPACK on one copy, four guard pairs, ncv=max(64,4*(k/copies+4)), tol=1e-13"
+    values, vectors, reference_record = reference(pencil, per_copy, reference_cache)
+    label = reference_record["identity"]["method"] + " on one independent copy"
     if values[per_copy - 1] - values[per_copy] < 1e-7 * max(1.0, values[0]):
         raise ValueError("requested boundary splits a near cluster; increase modes")
     expected = np.tile(values[:per_copy], copies)
@@ -72,6 +59,7 @@ def problem(pencil, modes=1, copies=1):
         requested_basis=basis[:, order],
         notes=label,
     )
+    p.reference_record = reference_record
     return p
 
 
@@ -135,14 +123,23 @@ def main():
     parser.add_argument("--modes", type=int, default=1)
     parser.add_argument("--copies", type=int, default=1)
     parser.add_argument("--ncv", type=int, default=32)
-    parser.add_argument("--steps", type=int, default=4)
-    parser.add_argument("--backend", choices=("arpack", "cudss", "cg"), required=True)
+    parser.add_argument("--steps", type=int)
+    parser.add_argument("--backend", choices=("arpack", "cudss", "cg", "block"), required=True)
+    parser.add_argument("--block-width", type=int)
+    parser.add_argument("--inner-steps", type=int, default=25)
     parser.add_argument("--alpha", type=float, default=100)
     parser.add_argument("--gamma", type=float, default=0.001)
     parser.add_argument("--anisotropy", type=float, default=10)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--reference-cache", type=Path)
     args = parser.parse_args()
+    if args.steps is None:
+        args.steps = 200 if args.backend == "block" else 4
+    if args.backend != "block" and (args.block_width is not None or args.inner_steps != 25):
+        parser.error("block-width and inner-steps configure only the block backend")
+    if args.backend == "block" and args.block_width is None:
+        args.block_width = max(4, 2 * args.modes)
     if args.repeats < 1 or args.steps < 1 or args.ncv <= args.modes:
         parser.error("positive repeats/steps and ncv>modes required")
     start = time.perf_counter()
@@ -151,7 +148,7 @@ def main():
     )
     assembly_seconds = time.perf_counter() - start
     start = time.perf_counter()
-    p = problem(pencil, args.modes, args.copies)
+    p = problem(pencil, args.modes, args.copies, args.reference_cache)
     reference_seconds = time.perf_counter() - start
     driver = None
     capture_seconds, memory = 0.0, None
@@ -159,7 +156,11 @@ def main():
         device = wp.get_device("cuda:0")
         before = device.free_memory
         start = time.perf_counter()
-        driver = SurfaceSolver(p, args.backend, ncv=args.ncv)
+        driver = (
+            SurfaceBlockSolver(p, args.block_width, inner_steps=args.inner_steps)
+            if args.backend == "block"
+            else SurfaceSolver(p, args.backend, ncv=args.ncv)
+        )
         wp.synchronize()
         setup_seconds = time.perf_counter() - start
         capture_seconds = elapsed(lambda: driver.capture(args.steps))
@@ -207,6 +208,8 @@ def main():
                 fresh_cg_stats=driver.inverse.fresh_stats.numpy().tolist(),
                 fresh_residual_maxima=driver.inverse.residual_maxima.numpy().tolist(),
             )
+        if args.backend == "block":
+            row["preconditioner_stats"] = driver.solver.preconditioner.stats.numpy().tolist()
         print(trial, row, flush=True)
         if trial:
             rows.append(row)
@@ -222,7 +225,9 @@ def main():
     sources = [
         Path(__file__),
         Path("benchmarks/applications/spectral_surface.py"),
+        Path("benchmarks/applications/spectral_surface_reference.py"),
         Path("benchmarks/applications/runner.py"),
+        Path("benchmarks/experimental/spectral_surface_block.py"),
         *sorted(Path("warpack").glob("*.py")),
     ]
     versions = {}
@@ -232,13 +237,18 @@ def main():
         except importlib.metadata.PackageNotFoundError:
             versions[name] = None
     report = dict(
-        arguments=vars(args) | dict(out=str(args.out)),
+        arguments=vars(args)
+        | dict(
+            out=str(args.out),
+            reference_cache=str(args.reference_cache) if args.reference_cache else None,
+        ),
         n=p.n,
         nnz_a=p.a.nnz,
         nnz_b=p.b.nnz,
         assembly_seconds=assembly_seconds,
         reference_and_copy_assembly_seconds=reference_seconds,
         reference=p.notes,
+        reference_record=p.reference_record,
         setup_seconds=setup_seconds,
         capture_seconds=capture_seconds,
         setup_capture_device_free_memory_decrease_bytes=memory,
@@ -266,6 +276,7 @@ def main():
         if graph is not None
         else None,
         accepted=all(r["quality"]["accepted"] for r in [warmup] + rows),
+        inner_role="truncated preconditioner" if args.backend == "block" else "metric inverse",
         scope="Independent sampled P1 reconstruction; PSD A, SPD nonmass regularization B, largest algebraic generalized modes. Setup/factorization and capture separate from solve; host assembly/reference excluded. Geometry quality is separate from eigensolver acceptance. cuDSS graph metadata copies remain visible (#29).",
     )
     args.out.write_text(json.dumps(report, indent=2) + "\n")

@@ -1,0 +1,64 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--alpha",
+    "10",
+    "--gamma",
+    "0",
+    "--steps",
+    "2",
+    "--backend",
+    "cudss",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/gradient-cudss-two.json"
+  ],
+  "pid": 342805,
+  "exit_code": 0,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792706927.3735788,
+      "other": [
+        "342405, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 3594 MiB, 2490 MHz, 49",
+      "error": null
+    },
+    {
+      "time": 1792706928.540082,
+      "other": [
+        "342405, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 3611 MiB, 2490 MHz, 50",
+      "error": null
+    },
+    {
+      "time": 1792706929.6136243,
+      "other": [
+        "342405, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 4117 MiB, 2490 MHz, 48",
+      "error": null
+    },
+    {
+      "time": 1792706930.7258062,
+      "other": [
+        "342405, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 3594 MiB, 2490 MHz, 50",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

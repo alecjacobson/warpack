@@ -1,0 +1,48 @@
+{
+  "command": [
+    "timeout",
+    "120",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "32",
+    "--modes",
+    "4",
+    "--backend",
+    "block",
+    "--reference-cache",
+    "/run/openclaw/horde/warpack-surface-references",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/final/large-four-block-a1.json"
+  ],
+  "pid": 347119,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792708217.104013,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 40",
+      "error": null
+    },
+    {
+      "time": 1792708218.2529268,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 645 MHz, 39",
+      "error": null
+    },
+    {
+      "time": 1792708219.3701012,
+      "other": [],
+      "gpu": "30 %, 1522 MiB, 2490 MHz, 40",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

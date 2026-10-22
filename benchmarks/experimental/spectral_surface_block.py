@@ -12,6 +12,12 @@ from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 
 
+@wp.kernel
+def positive_values(negative: wp.array[wp.float64], positive: wp.array[wp.float64]):
+    i = wp.tid()
+    positive[i] = -negative[i]
+
+
 class SurfaceBlockSolver:
     def __init__(self, p, width=None, *, inner_steps=25, tol=1e-11):
         width = max(4, 2 * p.k) if width is None else width
@@ -48,16 +54,25 @@ class SurfaceBlockSolver:
             paired_rotation=True,
         )
         self.graph = None
+        self.values = wp.empty(p.k, dtype=wp.float64, device=self.a.device)
+
+    def finalize(self):
+        wp.launch(
+            positive_values,
+            self.values.size,
+            [self.solver.eigenvalues, self.values],
+            device=self.a.device,
+        )
 
     def capture(self, steps=200):
-        self.graph = self.solver.capture(steps)
+        self.graph = self.solver.capture(steps, finalizer=self.finalize)
         return self.graph
 
     def solve(self):
         wp.capture_launch(self.graph)
 
     def output(self):
-        return -self.solver.eigenvalues.numpy(), self.solver.eigenvectors.numpy().T
+        return self.values.numpy(), self.solver.eigenvectors.numpy().T
 
     def close(self):
         pass

@@ -11,13 +11,13 @@ from benchmarks.applications.spectral_surface_compare import problem
 from benchmarks.experimental.spectral_surface_block import SurfaceBlockSolver
 
 
-@pytest.mark.parametrize("copies", [1, 2])
+@pytest.mark.parametrize("copies,width", [(1, 1), (1, 2), (1, 4), (2, 4)])
 @pytest.mark.parametrize("gamma", [0.0, 0.001])
-def test_dominant_block_complete_cluster_and_changed_replay(copies, gamma, tmp_path):
+def test_dominant_block_complete_cluster_and_changed_replay(copies, width, gamma, tmp_path):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     p = problem(surface_pencil(4, gamma=gamma), copies, copies)
-    driver = SurfaceBlockSolver(p)
+    driver = SurfaceBlockSolver(p, width)
     driver.capture()
     for eta in (10, 30):
         current = problem(surface_pencil(4, gamma=gamma, anisotropy=eta), copies, copies)
@@ -29,4 +29,5 @@ def test_dominant_block_complete_cluster_and_changed_replay(copies, gamma, tmp_p
         assert q["residual"] < 1e-11
         assert driver.solver.status.numpy()[0] == 0
         assert driver.solver.converged.numpy()[0] == copies
+        assert np.all(driver.values.numpy() > 0)
     audit(driver.graph, tmp_path / "surface-block.dot")

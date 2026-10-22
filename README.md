@@ -159,6 +159,7 @@ from the installed library.
 | [`python -m examples.block_reuse`](examples/block_reuse.py) | Consistent-mass elastic bar; reuse computed modes after changing stiffness; stock Warp |
 | [`python -m examples.anvil_block`](examples/anvil_block.py) | First 20 elastic Anvil modes with the fast pure-Warp configuration; requires the pinned overlay |
 | [Skinning modes](benchmarks/applications/SKINNING.md) | Rig constraints and the physical-space KKT formulation |
+| [Spectral surface reconstruction](benchmarks/applications/SPECTRAL_SURFACE.md) | Largest generalized modes with an SPD regularization metric; direct and pure-Warp block routes |
 | [Application guide](benchmarks/applications/README.md) | FEM, Hodge/nullspaces, conformal maps, connection modes, buckling and damped dynamics |
 
 ## Anvil showcase

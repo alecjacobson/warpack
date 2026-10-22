@@ -1,0 +1,50 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--alpha",
+    "10",
+    "--gamma",
+    "0",
+    "--backend",
+    "cudss",
+    "--steps",
+    "1",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/gradient-cudss.json"
+  ],
+  "pid": 342230,
+  "exit_code": 1,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792706754.0724168,
+      "other": [],
+      "gpu": "19 %, 1 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792706755.2344294,
+      "other": [],
+      "gpu": "0 %, 2 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792706756.3563795,
+      "other": [],
+      "gpu": "11 %, 542 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

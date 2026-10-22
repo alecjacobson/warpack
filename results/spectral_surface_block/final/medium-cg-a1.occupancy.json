@@ -1,0 +1,52 @@
+{
+  "command": [
+    "timeout",
+    "120",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--backend",
+    "cg",
+    "--reference-cache",
+    "/run/openclaw/horde/warpack-surface-references",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/final/medium-cg-a1.json"
+  ],
+  "pid": 346916,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792708184.3567033,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 42",
+      "error": null
+    },
+    {
+      "time": 1792708185.4564247,
+      "other": [],
+      "gpu": "10 %, 358 MiB, 2490 MHz, 42",
+      "error": null
+    },
+    {
+      "time": 1792708186.537128,
+      "other": [],
+      "gpu": "4 %, 1404 MiB, 2490 MHz, 42",
+      "error": null
+    },
+    {
+      "time": 1792708187.6947448,
+      "other": [],
+      "gpu": "0 %, 1404 MiB, 2490 MHz, 42",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

@@ -173,7 +173,9 @@ and set `mode="regular", which="LA"`. B must be SPD, but need not represent
 physical mass: it can be a regularization metric. Warpack preserves the B
 inner product; `B^-1 A` is generally not symmetric in the Euclidean metric.
 The [spectral surface reconstruction example](../benchmarks/applications/SPECTRAL_SURFACE.md)
-shows this composition with both cuDSS and pure-Warp inverses.
+shows this composition with both cuDSS and pure-Warp inverses. For a few
+dominant modes, it also demonstrates `BlockLOBPCG` on `-A` with metric B and
+truncated FSAI/CG preconditioning, recovering positive eigenvalues on device.
 
 ## Other problem families
 

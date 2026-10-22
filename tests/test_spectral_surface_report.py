@@ -32,6 +32,8 @@ def fixture(backend="cg"):
             fresh_cg_stats=[100, 10, 2, 10],
             fresh_residual_maxima=[1e-11, 5e-13],
         )
+    if backend == "block":
+        row["preconditioner_stats"] = [100, 25, 2, 10]
     graph = dict(node_types_including_conditional_body={"KERNEL": 10}, memcpy_kinds={})
     device_only = True
     if backend == "cudss":
@@ -57,11 +59,12 @@ def fixture(backend="cg"):
         versions={},
         n=100,
         dependency=dict(manifest_status="verified", warp_version="test", files={}),
+        inner_role="truncated preconditioner" if backend == "block" else "metric inverse",
     )
     return raw, dict(timing_eligible=True, exit_code=0)
 
 
-@pytest.mark.parametrize("backend", ["cg", "cudss", "arpack"])
+@pytest.mark.parametrize("backend", ["cg", "cudss", "arpack", "block"])
 def test_accounting_and_visible_vendor_graph_copies(backend):
     raw, occupancy = fixture(backend)
     summary = summarize(raw, occupancy)
@@ -72,6 +75,8 @@ def test_accounting_and_visible_vendor_graph_copies(backend):
     assert compare(summary, summary) == 1
     if backend == "cg":
         assert summary["inner_diagnostics"]["max_fresh_misses"] == 2
+    if backend == "block":
+        assert summary["inner_diagnostics"]["max_recursive_tolerance_misses"] == 2
     slower = copy.deepcopy(summary)
     slower["solve_seconds"] *= 1.3
     with pytest.raises(ValueError, match="regression"):
@@ -101,8 +106,9 @@ def test_accounting_and_visible_vendor_graph_copies(backend):
         "dependency",
     ],
 )
-def test_bad_run_rejected(failure):
-    raw, occupancy = fixture()
+@pytest.mark.parametrize("backend", ["cg", "block"])
+def test_bad_run_rejected(failure, backend):
+    raw, occupancy = fixture(backend)
     row = raw["rows"][1]
     if failure == "native":
         row["quality"]["status"] = 1
@@ -130,5 +136,18 @@ def test_bad_run_rejected(failure):
         raw["capture_seconds"] = 0
     else:
         raw["dependency"]["manifest_status"] = "mismatch"
+    with pytest.raises(ValueError):
+        summarize(raw, occupancy)
+
+
+@pytest.mark.parametrize("failure", ["role", "negative", "impossible-count"])
+def test_truncated_preconditioner_contract(failure):
+    raw, occupancy = fixture("block")
+    if failure == "role":
+        raw["inner_role"] = "metric inverse"
+    elif failure == "negative":
+        raw["rows"][0]["preconditioner_stats"][0] = -1
+    else:
+        raw["rows"][0]["preconditioner_stats"][2] = 11
     with pytest.raises(ValueError):
         summarize(raw, occupancy)

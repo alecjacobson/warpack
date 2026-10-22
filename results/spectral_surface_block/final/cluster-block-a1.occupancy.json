@@ -1,0 +1,50 @@
+{
+  "command": [
+    "timeout",
+    "120",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--modes",
+    "2",
+    "--copies",
+    "2",
+    "--backend",
+    "block",
+    "--reference-cache",
+    "/run/openclaw/horde/warpack-surface-references",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/final/cluster-block-a1.json"
+  ],
+  "pid": 349154,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792708524.7465634,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 225 MHz, 33",
+      "error": null
+    },
+    {
+      "time": 1792708525.927125,
+      "other": [],
+      "gpu": "7 %, 358 MiB, 2490 MHz, 34",
+      "error": null
+    },
+    {
+      "time": 1792708527.0458808,
+      "other": [],
+      "gpu": "70 %, 1392 MiB, 2490 MHz, 35",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

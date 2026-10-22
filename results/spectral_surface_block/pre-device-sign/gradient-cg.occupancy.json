@@ -1,0 +1,54 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--alpha",
+    "10",
+    "--gamma",
+    "0",
+    "--backend",
+    "cg",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/gradient-cg.json"
+  ],
+  "pid": 342262,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792706757.0203283,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792706758.1815503,
+      "other": [],
+      "gpu": "0 %, 366 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792706759.2976887,
+      "other": [],
+      "gpu": "58 %, 1404 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792706760.4163144,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

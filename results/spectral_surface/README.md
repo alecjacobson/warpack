@@ -1,5 +1,10 @@
 # Dominant generalized spectral reconstruction coverage
 
+The [follow-up block comparison](../spectral_surface_block/README.md) adds a
+faster pure-Warp route and tighter validated fixed budgets for cuDSS. The
+four-cycle cuDSS numbers below preserve the initial coverage experiment;
+they are not the best current timings for the simple dominant cases.
+
 [#136](https://github.com/alecjacobson/warpack/issues/136) now has procedural
 point/tet fixtures, independent energy tests, complete repeated-cluster checks,
 and ARPACK / Warp-cuDSS / pure-Warp comparisons. No external meshes or paper

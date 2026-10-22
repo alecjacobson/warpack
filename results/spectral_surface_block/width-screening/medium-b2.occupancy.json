@@ -1,0 +1,52 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--backend",
+    "block",
+    "--block-width",
+    "2",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface_block/width-screening/medium-b2.json"
+  ],
+  "pid": 343718,
+  "exit_code": 0,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792707120.149292,
+      "other": [
+        "343283, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "0 %, 1670 MiB, 2475 MHz, 46",
+      "error": null
+    },
+    {
+      "time": 1792707121.2803738,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 45",
+      "error": null
+    },
+    {
+      "time": 1792707122.3842535,
+      "other": [],
+      "gpu": "11 %, 468 MiB, 2490 MHz, 44",
+      "error": null
+    },
+    {
+      "time": 1792707123.5069168,
+      "other": [],
+      "gpu": "24 %, 1392 MiB, 2490 MHz, 44",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
