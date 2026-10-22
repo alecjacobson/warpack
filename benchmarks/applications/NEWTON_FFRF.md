@@ -102,7 +102,10 @@ Tests also reject exact eigenpairs from the wrong requested spectrum.
 
 Warp's successful convergence count is **not** an inertia certificate.
 Benchmark comparison establishes coverage for these fixtures; the production
-Warp solvers do not perform Newton's second-factorization completeness check.
+These measured solve paths do not automatically perform a second-factorization
+completeness check. An optional [`LowestModeCertificate`](../../docs/completeness.md)
+stage is now available; its [separate overhead benchmark](../../results/completeness/README.md)
+uses these same procedural cases and includes its extra cuDSS factorization.
 This optional capability is tracked in [#133](https://github.com/alecjacobson/warpack/issues/133).
 GPU graphs have no host callback nodes. The pure-Warp graph contains only
 device-to-device copies; cuDSS retains its known captured host-to-device

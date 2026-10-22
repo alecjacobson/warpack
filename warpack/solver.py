@@ -164,6 +164,16 @@ class CuDSSInverse:
             self.solver.solve(x=self._correction, b=self._residual)
             wp.launch(K.add_correction, y.shape, [y, self._correction], device=self.device)
 
+    def inertia(self):
+        """Explicit, synchronizing host factor metadata; never called by solve/capture.
+
+        Only qualified symmetric-indefinite factors can return available
+        inertia. See InertiaResult and LowestModeCertificate for limitations.
+        """
+        from .cudss_diagnostics import query_inertia
+
+        return query_inertia(self)
+
     def close(self):
         self.solver.release()
 

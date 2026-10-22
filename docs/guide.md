@@ -57,7 +57,9 @@ shows this after changing stiffness.
 An exact previous invariant space can omit newly lower modes after crossings,
 even with zero residuals. Perturbation helps exploration but is not a proof of
 requested-spectrum completeness. Validate complete clusters and subspaces
-when repeated modes matter.
+when repeated modes matter. The optional
+[`LowestModeCertificate`](completeness.md) checks coverage below a supplied gap
+using an extra cuDSS factorization and capturable Warp verification.
 
 `constraints` excludes a **known invariant space**, such as the six rigid
 motions of a connected free body. Supply its basis as device rows. Optional

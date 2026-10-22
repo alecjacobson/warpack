@@ -4,12 +4,14 @@ from .arnoldi import ComplexCSR, GeneralEigensolver
 from .batched_cg import BatchedCGPreconditioner
 from .batched_sparse import BatchedSparseOperator
 from .block import BlockLOBPCG
+from .completeness import LowestModeCertificate
 from .constrained import ConstrainedKrylovSchur, saddle_point_matrix
 from .constraints import (
     MassOrthogonalComplementInverse,
     OrthogonalComplementOperator,
     independent_constraints,
 )
+from .cudss_diagnostics import InertiaResult
 from .generalized import CGInverse, GeneralizedEigensolver
 from .generalized_krylov import GeneralizedKrylovSchur
 from .hermitian import HermitianCSR, HermitianEigensolver
@@ -46,6 +48,8 @@ __all__ = [
     "HermitianCSR",
     "HermitianEigensolver",
     "KrylovSchur",
+    "LowestModeCertificate",
+    "InertiaResult",
     "NormalSVD",
     "NumericalNullspaceDiagnostics",
     "OrthogonalComplementOperator",

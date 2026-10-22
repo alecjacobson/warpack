@@ -1,0 +1,62 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "8-11",
+    "python",
+    "-m",
+    "benchmarks.applications.completeness",
+    "--boundary",
+    "fixed",
+    "--backend",
+    "cudss",
+    "--reference",
+    "build/newton-fixed-reference.npz",
+    "--cpu-report",
+    "results/newton_ffrf/fixed-newton-1.json",
+    "--out",
+    "results/completeness/fixed-cudss.json"
+  ],
+  "pid": 262722,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792631424.6935067,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 255 MHz, 33",
+      "error": null
+    },
+    {
+      "time": 1792631425.8730457,
+      "other": [],
+      "gpu": "5 %, 576 MiB, 2490 MHz, 34",
+      "error": null
+    },
+    {
+      "time": 1792631426.9724774,
+      "other": [],
+      "gpu": "5 %, 892 MiB, 2490 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792631428.0697966,
+      "other": [],
+      "gpu": "44 %, 1116 MiB, 2490 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792631429.164199,
+      "other": [],
+      "gpu": "0 %, 1564 MiB, 2490 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792631430.2762508,
+      "other": [],
+      "gpu": "0 %, 1212 MiB, 2490 MHz, 35",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

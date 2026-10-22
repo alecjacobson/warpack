@@ -29,9 +29,11 @@ medians. GPU first-launch cost is included there; warm solves exclude it.
 All times exclude common geometry/matrix assembly and external validation.
 This is a cached-JIT measurement, not cold installation/startup time.
 
-The certificate is a capability difference, so the total column is **not** an
-equal-service speedup claim. Warp results are independently checked against
-Newton's certified reference; Warp does not generate an inertia certificate.
+The certificate is a service difference in these recorded runs, so the total
+column is **not** an equal-service speedup claim. Warp results here are independently
+checked against Newton's certified reference and do not generate their own inertia
+certificate. The subsequently added optional [certificate stage](../completeness/README.md)
+is measured separately; its cost is not included in this table.
 Even excluding Newton's certificate, its setup plus solve takes about 21.94 s
 free-free and 18.89 s fixed-interface. These compare with first-use Warp totals
 of 0.78–1.09 s. Static constraint solves, constraint elimination, modal recovery
@@ -82,8 +84,9 @@ identical mass entries.
 Graph DOT audits find no host callbacks. Pure-Warp graphs have no HtoD
 transfers. cuDSS graphs contain the existing vendor metadata HtoD nodes;
 these remain tracked by [#29](https://github.com/alecjacobson/warpack/issues/29).
-Optional production completeness certification is tracked by
-[#133](https://github.com/alecjacobson/warpack/issues/133).
+Optional production completeness certification from
+[#133](https://github.com/alecjacobson/warpack/issues/133) is documented in the
+[API guide](../../docs/completeness.md).
 
 Raw JSON, logs and occupancy records are stored alongside this report. The
 JSON records matrix/source hashes, exact native settings, individual
