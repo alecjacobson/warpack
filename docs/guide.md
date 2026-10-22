@@ -233,6 +233,14 @@ a rejected warm start, see the [bounded recovery example](completeness.md#opt-in
 The [coarse-to-fine example](../results/fem_hierarchy/README.md) transfers computed
 tetrahedral modes with the device initializer hook and includes the cost of
 building and solving the coarse problem. Such starts need not improve total time.
+The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
+measures that tradeoff while holding final fine-grid accuracy fixed.
+
+For force-aware ROMs, the [low-rank covariance example](../results/force_dual/README.md)
+solves sparse stiffness responses with cuDSS or pure-Warp CG, forms a small
+symmetric Gram problem and lifts its dominant modes into physical coordinates.
+It accepts singular force covariances without inverting them; physical stiffness
+and mass remain SPD. This is an application recipe outside the solver core.
 
 ## Limitations
 

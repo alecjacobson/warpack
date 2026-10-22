@@ -1,0 +1,125 @@
+{
+  "arguments": {
+    "side": 10,
+    "columns": 32,
+    "modes": 20,
+    "mass": "lumped",
+    "backend": "cudss",
+    "repeats": 3,
+    "out": "results/force_dual/lumped-cudss.json"
+  },
+  "n": 10890,
+  "assembly_seconds": 0.1827043704688549,
+  "reference_seconds": 1.1569494679570198,
+  "setup_seconds": 0.5689663216471672,
+  "capture_seconds": 0.21200591325759888,
+  "warmup": {
+    "response_seconds": 0.0019659027457237244,
+    "modes_seconds": 0.004298269748687744,
+    "total_seconds": 0.0062641724944114685,
+    "quality": {
+      "accepted": true,
+      "status": 0,
+      "converged": 20,
+      "positive": 20,
+      "cg_stats": null,
+      "source_residual": 3.8238075015249084e-13,
+      "residual": 1.830100541589148e-12,
+      "orthogonality": 3.59260707988307e-10,
+      "spectrum_error": 7.151082182681425e-13,
+      "subspace_error": 3.205908542994226e-10,
+      "energy_error": 6.225146482407813e-16,
+      "retained_energy": 0.9999946875897395
+    }
+  },
+  "rows": [
+    {
+      "response_seconds": 0.0018489807844161987,
+      "modes_seconds": 0.001714073121547699,
+      "total_seconds": 0.0035630539059638977,
+      "quality": {
+        "accepted": true,
+        "status": 0,
+        "converged": 20,
+        "positive": 20,
+        "cg_stats": null,
+        "source_residual": 3.78159152557452e-13,
+        "residual": 1.4221082232890983e-12,
+        "orthogonality": 3.645819340869494e-10,
+        "spectrum_error": 7.153249834146319e-13,
+        "subspace_error": 3.406098160363429e-10,
+        "energy_error": 1.0375244137346355e-15,
+        "retained_energy": 0.99999468758974
+      }
+    },
+    {
+      "response_seconds": 0.0018493793904781342,
+      "modes_seconds": 0.001712009310722351,
+      "total_seconds": 0.0035613887012004852,
+      "quality": {
+        "accepted": true,
+        "status": 0,
+        "converged": 20,
+        "positive": 20,
+        "cg_stats": null,
+        "source_residual": 3.808479717314161e-13,
+        "residual": 1.2151364805140268e-12,
+        "orthogonality": 3.543515654513829e-10,
+        "spectrum_error": 7.151082182681425e-13,
+        "subspace_error": 3.1400332559044796e-10,
+        "energy_error": 1.0375244137346355e-15,
+        "retained_energy": 0.99999468758974
+      }
+    },
+    {
+      "response_seconds": 0.0018551945686340332,
+      "modes_seconds": 0.001712806522846222,
+      "total_seconds": 0.003568001091480255,
+      "quality": {
+        "accepted": true,
+        "status": 0,
+        "converged": 20,
+        "positive": 20,
+        "cg_stats": null,
+        "source_residual": 3.817223528926081e-13,
+        "residual": 8.174797229320965e-13,
+        "orthogonality": 3.5794013586443185e-10,
+        "spectrum_error": 7.14674687975164e-13,
+        "subspace_error": 3.631640748620209e-10,
+        "energy_error": 1.4525341792284897e-15,
+        "retained_energy": 0.9999946875897403
+      }
+    }
+  ],
+  "graphs": {
+    "response": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 7,
+        "MEMCPY": 5,
+        "KERNEL": 12
+      },
+      "memcpy_kinds": {
+        "HtoD (HOST PAGEABLE to DEVICE)": 2,
+        "DtoD (DEVICE to DEVICE)": 3
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    },
+    "modes": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 9,
+        "KERNEL": 582,
+        "MEMCPY": 35,
+        "CONDITIONAL": 32
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 35
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    }
+  },
+  "matrix_sha256": "609718f1f2150217e2b621b7d23533ded6629de7cd425992bbff476f4af395b2",
+  "forces_sha256": "5a2c437a73aa720947adf9deea4db04fb0ebc02f6f5675ec01eb82142f8eaeef",
+  "source_sha256": "57c018359efc12185a94348f17fa2f5e2ddb5c168c19f09d9c31688fc7cc53c0",
+  "git_head": "b316ce2c10b6ce437390e188f9bc429b40fc776d",
+  "accepted": true
+}

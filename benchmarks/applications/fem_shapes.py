@@ -76,7 +76,17 @@ def union_pattern(matrices):
 class ShapeReplay:
     """Benchmark-only fixed-address driver for existing public APIs."""
 
-    def __init__(self, states, width, *, perturbation=0.0, refit=True, steps=200):
+    def __init__(
+        self,
+        states,
+        width,
+        *,
+        perturbation=0.0,
+        refit=True,
+        steps=200,
+        start_rows=None,
+        tol=1e-11,
+    ):
         self.states, self.width = states, width
         p = states[0][1]
         self.k, self.n, self.refit = p.k, p.n, refit
@@ -104,7 +114,10 @@ class ShapeReplay:
             fsai_layout="columns",
             matrix_layout="columns",
         )
-        self.random = wp.array(np.random.default_rng(128).normal(size=(p.k, p.n)), dtype=wp.float64)
+        start_rows = p.k if start_rows is None else start_rows
+        self.random = wp.array(
+            np.random.default_rng(128).normal(size=(start_rows, p.n)), dtype=wp.float64
+        )
         self.starts = wp.clone(self.random)
         self.solver = BlockLOBPCG(
             BatchedSparseOperator(self.a),
@@ -114,7 +127,7 @@ class ShapeReplay:
             preconditioner=self.pre,
             initial_vectors=self.starts,
             initial_perturbation=perturbation,
-            tol=1e-11,
+            tol=tol,
             reuse_operator_images=True,
             search_bucket_size=4,
             keep_history=True,
@@ -125,7 +138,7 @@ class ShapeReplay:
         )
         wp.synchronize()
         start = time.perf_counter()
-        self.graph = self.solver.capture(steps)
+        self.graph = self.solver.capture(steps) if steps is not None else None
         self.capture_seconds = time.perf_counter() - start
 
     def update(self, p, *, factor=True):
@@ -138,6 +151,10 @@ class ShapeReplay:
             self.factor.update()
 
     def solve(self, warm=False):
+        if self.graph is None:
+            raise ValueError("capture a graph before solve")
+        if warm and self.starts.shape != self.solver.eigenvectors.shape:
+            raise ValueError("warm solve requires one start row per requested mode")
         wp.copy(self.starts, self.solver.eigenvectors if warm else self.random)
         wp.capture_launch(self.graph)
 
