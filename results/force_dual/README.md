@@ -22,6 +22,10 @@ FP64. Supplied force values may change between replays; H/M/factor topology and
 storage are fixed. Both graphs can be launched consecutively without host
 numerical decisions.
 
+The [weighted snapshot SVD follow-up](../../benchmarks/applications/WEIGHTED_SNAPSHOT_SVD.md)
+adds a diagonal-mass alternative that avoids normal-matrix conditioning, with
+independent weighted-SVD references and first-replay regression tests.
+
 ## Matched results
 
 L40, Xeon Platinum 8362, four CPU threads on cores 8–11; 2026-10-22. A generated

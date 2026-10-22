@@ -262,6 +262,8 @@ solves sparse stiffness responses with cuDSS or pure-Warp CG, forms a small
 symmetric Gram problem and lifts its dominant modes into physical coordinates.
 It accepts singular force covariances without inverting them; physical stiffness
 and mass remain SPD. This is an application recipe outside the solver core.
+For diagonal mass, the [weighted snapshot SVD recipe](../benchmarks/applications/WEIGHTED_SNAPSHOT_SVD.md)
+avoids forming the Gram matrix and tests weak positive singular directions.
 
 ## Limitations
 

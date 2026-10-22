@@ -118,6 +118,32 @@ def test_helper_change_rejects_identical_driver_configuration():
         compare(changed, baseline)
 
 
+@pytest.mark.parametrize("failure", [None, "missing-lift", "host", "copy", "mass", "rank"])
+def test_weighted_svd_stage_contract(failure):
+    raw, occupancy = fixture("forces")
+    raw["arguments"].update(reduction="svd", mass="lumped", backend="cudss")
+    graph = raw["graphs"].pop("modes")
+    raw["graphs"].update(
+        {name: copy.deepcopy(graph) for name in ("weighting", "svd", "physical_lift")}
+    )
+    raw["graphs"]["response"]["memcpy_kinds"]["HtoD"] = 1
+    if failure == "missing-lift":
+        raw["graphs"].pop("physical_lift")
+    elif failure == "host":
+        raw["graphs"]["weighting"]["node_types_including_conditional_body"]["HOST"] = 1
+    elif failure == "copy":
+        raw["graphs"]["svd"]["memcpy_kinds"]["HtoD"] = 1
+    elif failure == "mass":
+        raw["arguments"]["mass"] = "consistent"
+    elif failure == "rank":
+        raw["rows"][0]["quality"]["positive"] = 3
+    if failure is None:
+        assert summarize(raw, occupancy, "forces")["total_seconds"] == 0.3
+    else:
+        with pytest.raises(ValueError):
+            summarize(raw, occupancy, "forces")
+
+
 def test_changed_overlay_rejected_even_with_same_wheel_version():
     raw, occ = fixture("forces")
     baseline = copy.deepcopy(summarize(raw, occ, "forces")) | {"environment": {"gpu": "same"}}

@@ -33,6 +33,7 @@ from warpack.linalg_tiles import gram_tiled, rotate_tiled
 from .fem_hierarchy import beam_problem, matrix_hash
 from .fem_shapes import elapsed
 from .weighted_snapshot_reference import weighted_reference
+from .weighted_snapshot_svd import LumpedSnapshotSVD
 
 
 def localized_forces(side, columns):
@@ -94,7 +95,7 @@ class SnapshotROM:
     application with independent validation, not a replacement for PartialSVD.
     """
 
-    def __init__(self, h, mass, forces, k, backend="cudss"):
+    def __init__(self, h, mass, forces, k, backend="cudss", *, diagonal_mass=None):
         self.h, self.mass, self.forces = h, BatchedSparseOperator(mass), forces
         self.r, self.n = forces.shape
         if not 1 <= k < self.r or self.n != h.shape[0]:
@@ -109,6 +110,7 @@ class SnapshotROM:
         if backend not in ("cudss", "cg"):
             raise ValueError("backend must be cudss or cg")
         self.backend, self.k = backend, k
+        self.reduction = "gram" if diagonal_mass is None else "svd"
         self.factor = None
         if backend == "cudss":
             self.inverse = CuDSSInverse(h, self.r, mtype="spd")
@@ -124,19 +126,33 @@ class SnapshotROM:
                 fsai_layout="columns",
                 matrix_layout="columns",
             )
-        self.g, self.mg = wp.empty_like(forces), wp.empty_like(forces)
-        self.gram = wp.empty((self.r, self.r), dtype=wp.float64, device=h.device)
-        with wp.ScopedDevice(h.device):
-            self.small = matrix(np.ones((self.r, self.r)))
-        self.vectors = wp.empty((k, self.n), dtype=wp.float64, device=h.device)
-        self.positive = wp.zeros(1, dtype=wp.int32, device=h.device)
-        self.solver = KrylovSchur(SparseOperator(self.small), k, ncv=self.r, which="LA", tol=1e-12)
+        self.g = wp.empty_like(forces)
+        self.svd = None
+        if diagonal_mass is None:
+            self.mg = wp.empty_like(forces)
+            self.gram = wp.empty((self.r, self.r), dtype=wp.float64, device=h.device)
+            with wp.ScopedDevice(h.device):
+                self.small = matrix(np.ones((self.r, self.r)))
+            self.vectors = wp.empty((k, self.n), dtype=wp.float64, device=h.device)
+            self.positive = wp.zeros(1, dtype=wp.int32, device=h.device)
+            self.solver = KrylovSchur(
+                SparseOperator(self.small), k, ncv=self.r, which="LA", tol=1e-12
+            )
+        else:
+            # The caller explicitly supplies the diagonal of the physical mass.
+            # A coupled mass is not supported by this application composition.
+            self.svd = LumpedSnapshotSVD(self.g, diagonal_mass, k, tol=1e-12)
+            self.vectors, self.positive = self.svd.modes, self.svd.positive
+            self.solver = None
         self.response_graph = self.mode_graph = None
+        self.mode_graphs = ()
 
     def response(self):
         if self.backend == "cg":
             self.inverse.reset_stats()
         self.inverse.apply(self.forces, self.g)
+        if self.svd is not None:
+            return
         self.mass.apply(self.g, self.mg)
         self.gram.zero_()
         wp.launch_tiled(
@@ -170,10 +186,27 @@ class SnapshotROM:
         with wp.ScopedCapture(device=self.h.device) as cap:
             self.response()
         self.response_graph = cap.graph
-        self.mode_graph = self.solver.capture(10, finalizer=self.lift)
+        if self.svd is None:
+            self.mode_graph = self.solver.capture(10, finalizer=self.lift)
+            self.mode_graphs = (self.mode_graph,)
+        else:
+            # Finish the response graph's first upload/launch during setup too.
+            # The following SVD composition initializes its own graphs separately.
+            wp.capture_launch(self.response_graph)
+            wp.synchronize_device(self.h.device)
+            self.mode_graphs = self.svd.capture()
+
+    def solve_modes(self):
+        for graph in self.mode_graphs:
+            wp.capture_launch(graph)
+
+    def audit_graphs(self):
+        names = ("modes",) if self.svd is None else ("weighting", "svd", "physical_lift")
+        return {"response": self.response_graph} | dict(zip(names, self.mode_graphs))
 
     def quality(self, h, mass, forces, ref):
-        values, u, g = self.solver.eigenvalues.numpy(), self.vectors.numpy().T, self.g.numpy().T
+        values = (self.solver.eigenvalues if self.svd is None else self.svd.values).numpy()
+        u, g = self.vectors.numpy().T, self.g.numpy().T
         source_residual = float(
             np.max(
                 np.linalg.norm(h @ g - forces, axis=0)
@@ -198,7 +231,17 @@ class SnapshotROM:
             subspace = float(np.sqrt(max(0, np.sum(remainder * (mass @ remainder)))))
         actual_energy = float(np.sum((u.T @ (mass @ ref["snapshots"])) ** 2))
         energy_error = abs(actual_energy - float(sum(ref["values"]))) / max(1, ref["energy"])
-        status, count = int(self.solver.status.numpy()[0]), int(self.solver.converged.numpy()[0])
+        if self.svd is None:
+            status, count = (
+                int(self.solver.status.numpy()[0]),
+                int(self.solver.converged.numpy()[0]),
+            )
+        else:
+            status = int(self.svd.status.numpy()[0])
+            count = min(
+                int(self.svd.solver.count_left.numpy()[0]),
+                int(self.svd.solver.count_right.numpy()[0]),
+            )
         positive = int(self.positive.numpy()[0])
         cg_stats = self.inverse.stats.numpy().tolist() if self.backend == "cg" else None
         accepted = (
@@ -229,6 +272,9 @@ class SnapshotROM:
 
     def close(self):
         self.response_graph = self.mode_graph = None
+        self.mode_graphs = ()
+        if self.svd is not None:
+            self.svd.graphs = None
         if self.backend == "cudss":
             self.inverse.close()
 
@@ -242,10 +288,13 @@ def main():
     parser.add_argument("--backend", choices=("cudss", "cg"), required=True)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--reference-method", choices=("gram", "svd"), default="gram")
+    parser.add_argument("--reduction", choices=("gram", "svd"), default="gram")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if min(args.side, args.modes, args.repeats) < 1 or args.columns <= args.modes:
         parser.error("positive sizes and columns>modes required")
+    if args.reduction == "svd" and args.mass != "lumped":
+        parser.error("the GPU weighted-SVD composition currently requires lumped mass")
     begin = time.perf_counter()
     p = beam_problem(args.side, args.modes, args.mass == "consistent")
     forces = localized_forces(args.side, args.columns)
@@ -260,6 +309,9 @@ def main():
         wp.array(forces.T.copy(), dtype=wp.float64),
         args.modes,
         args.backend,
+        diagonal_mass=wp.array(p.b.diagonal(), dtype=wp.float64)
+        if args.reduction == "svd"
+        else None,
     )
     wp.synchronize()
     setup_seconds = time.perf_counter() - begin
@@ -267,7 +319,7 @@ def main():
     rows = []
     for trial in range(args.repeats + 1):
         response_seconds = elapsed(lambda: wp.capture_launch(driver.response_graph))
-        modes_seconds = elapsed(lambda: wp.capture_launch(driver.mode_graph))
+        modes_seconds = elapsed(driver.solve_modes)
         q = driver.quality(p.a, p.b, forces, ref)
         row = dict(
             response_seconds=response_seconds,
@@ -282,13 +334,13 @@ def main():
             warmup = row
     args.out.parent.mkdir(parents=True, exist_ok=True)
     graphs = {}
-    for name, graph in (("response", driver.response_graph), ("modes", driver.mode_graph)):
+    for name, graph in driver.audit_graphs().items():
         path = args.out.with_suffix(f".{name}.dot")
         wp.capture_debug_dot_print(graph, str(path))
         graphs[name] = graph_summary(path)
         path.unlink()
         assert "HOST" not in graphs[name]["node_types_including_conditional_body"]
-        if name == "modes" or args.backend == "cg":
+        if name != "response" or args.backend == "cg":
             assert not any(k.startswith(("HtoD", "DtoH")) for k in graphs[name]["memcpy_kinds"])
     report = dict(
         dependency=warp_dependencies(),
@@ -298,6 +350,12 @@ def main():
         reference_seconds=reference_seconds,
         setup_seconds=setup_seconds,
         capture_seconds=capture_seconds,
+        response_stage="sparse responses and Gram"
+        if args.reduction == "gram"
+        else "sparse responses",
+        modes_stage="Gram eigensolve and lift"
+        if args.reduction == "gram"
+        else "weighting, augmented SVD and physical recovery",
         warmup=warmup,
         rows=rows,
         graphs=graphs,

@@ -80,6 +80,10 @@ def summarize(raw, occupancy, kind):
                 ):
                     raise ValueError("invalid coarse physical checks")
     expected_graphs = {"response", "modes"} if kind == "forces" else {"fine"}
+    if kind == "forces" and args.get("reduction", "gram") == "svd":
+        if args["mass"] != "lumped":
+            raise ValueError("weighted-SVD composition requires lumped mass")
+        expected_graphs = {"response", "weighting", "svd", "physical_lift"}
     if kind == "hierarchy" and args["profile"] != "random":
         expected_graphs.add("coarse")
     if set(raw["graphs"]) != expected_graphs:

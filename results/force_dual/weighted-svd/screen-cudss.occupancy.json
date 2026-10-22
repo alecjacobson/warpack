@@ -1,0 +1,68 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "python",
+    "-m",
+    "benchmarks.applications.force_dual",
+    "--side",
+    "10",
+    "--columns",
+    "32",
+    "--modes",
+    "20",
+    "--mass",
+    "lumped",
+    "--backend",
+    "cudss",
+    "--reference-method",
+    "svd",
+    "--reduction",
+    "svd",
+    "--repeats",
+    "1",
+    "--out",
+    "results/force_dual/weighted-svd/screen-cudss.json"
+  ],
+  "pid": 362898,
+  "exit_code": 0,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792711535.449616,
+      "other": [
+        "362412, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 4984 MiB, 2490 MHz, 56",
+      "error": null
+    },
+    {
+      "time": 1792711536.533379,
+      "other": [
+        "362412, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 4984 MiB, 2490 MHz, 56",
+      "error": null
+    },
+    {
+      "time": 1792711537.6579766,
+      "other": [
+        "362412, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 5332 MiB, 2490 MHz, 56",
+      "error": null
+    },
+    {
+      "time": 1792711538.738642,
+      "other": [
+        "362412, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 5633 MiB, 2490 MHz, 55",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
