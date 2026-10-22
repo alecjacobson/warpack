@@ -92,6 +92,21 @@ is checked against that identity at working-precision accuracy.
 
 ### Remaining work
 
+The [column-layout follow-up](columns/) keeps RHS columns adjacent throughout
+restriction, coarse solves, prolongation and FSAI application. It reuses the
+existing Warp sparse kernels and transposes only at the hierarchy boundary.
+Fresh uncontended medians are **0.33585 s** for the existing baseline,
+**0.36256 s** for the preceding bucketed geometric route, and **0.35963 s** for
+the column hierarchy. Their assembly/setup/capture totals are 1.5694, 2.8373
+and 2.8854 s. All 12 solves pass, with matching input/source identities.
+The small observed layout difference is not enough to claim a robust speedup;
+the hierarchy remains about 7% slower than the existing baseline.
+
+Column-specific checks cover FP64/FP32 dense identities, in-place applications,
+strided bottom-factor failure/recovery, active-width packing and both mass
+variants through captured FEM solves. The [29-test targeted run](columns/tests.log)
+passes. This path remains experimental, with no default change.
+
 Four new tests verify the additive SPD identity and independent dense
 Galerkin matrices across three levels, exact in-place application, changed
 bottom-factor graph replay, rejection of an indefinite bottom and recovery,

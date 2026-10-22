@@ -30,7 +30,8 @@ def dense(a):
 
 
 @pytest.mark.parametrize("dtype", [wp.float64, wp.float32])
-def test_three_level_spd_identity_and_aliasing(tmp_path, dtype):
+@pytest.mark.parametrize("columns", [False, True])
+def test_three_level_spd_identity_and_aliasing(tmp_path, dtype, columns):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     rng = np.random.default_rng(13403)
@@ -39,7 +40,9 @@ def test_three_level_spd_identity_and_aliasing(tmp_path, dtype):
     h = h @ h.T + np.eye(n)
     p, q = rng.normal(size=(n, 9)), rng.normal(size=(9, 4))
     a = matrix(h)
-    hierarchy = build_hierarchy(a, [matrix(p), matrix(q)], n, coarse_rows=8, dtype=dtype)
+    hierarchy = build_hierarchy(
+        a, [matrix(p), matrix(q)], n, coarse_rows=8, dtype=dtype, columns=columns
+    )
     h1, h2 = p.T @ h @ p, q.T @ (p.T @ h @ p) @ q
     np.testing.assert_allclose(dense(hierarchy.coarse.matrix), h1, rtol=2e-13, atol=2e-12)
     np.testing.assert_allclose(dense(hierarchy.coarse.coarse.matrix), h2, rtol=2e-13, atol=2e-11)
@@ -64,34 +67,37 @@ def test_three_level_spd_identity_and_aliasing(tmp_path, dtype):
     audit(capture.graph, tmp_path / "hierarchy.dot")
 
 
-def test_bottom_refactor_rejects_indefinite_and_recovers(tmp_path):
+@pytest.mark.parametrize("columns", [False, True])
+def test_bottom_refactor_rejects_indefinite_and_recovers(tmp_path, columns):
     rng = np.random.default_rng(64)
     h = rng.normal(size=(11, 11))
     h = h @ h.T + np.eye(11)
     a = matrix(h)
     bottom = DenseBottom(a, 3)
     rhs = rng.normal(size=(3, 11))
-    x = wp.array(rhs, dtype=wp.float64)
-    bottom.apply(x, x)
+    x = wp.array(rhs.T.copy() if columns else rhs, dtype=wp.float64)
+    apply = bottom.apply_columns if columns else bottom.apply
+    apply(x, x)
     with wp.ScopedCapture() as capture:
         bottom.update()
-        bottom.apply(x, x)
+        apply(x, x)
     for scale in (1.0, -1.0, 0.7):
         a.values.assign((scale * h).ravel())
-        x.assign(rhs)
+        x.assign(rhs.T.copy() if columns else rhs)
         wp.capture_launch(capture.graph)
         if scale < 0:
             assert bottom.status.numpy()[0] != 0
             assert np.isnan(x.numpy()).all()
         else:
             assert bottom.status.numpy()[0] == 0
-            np.testing.assert_allclose(x.numpy(), np.linalg.solve(scale * h, rhs.T).T, atol=1e-13)
+            result = x.numpy().T if columns else x.numpy()
+            np.testing.assert_allclose(result, np.linalg.solve(scale * h, rhs.T).T, atol=1e-13)
     audit(capture.graph, tmp_path / "bottom.dot")
 
 
 @pytest.mark.parametrize("consistent", [False, True])
-@pytest.mark.parametrize("bucketed", [False, True])
-def test_warp_galerkin_metric_and_generalized_fem(consistent, bucketed, tmp_path):
+@pytest.mark.parametrize("bucketed,columns", [(False, False), (True, False), (True, True)])
+def test_warp_galerkin_metric_and_generalized_fem(consistent, bucketed, columns, tmp_path):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     p = beam_problem(2, 6, consistent)
@@ -113,6 +119,7 @@ def test_warp_galerkin_metric_and_generalized_fem(consistent, bucketed, tmp_path
             width,
             fine_factor=factor,
             dtype=wp.float32 if bucketed else wp.float64,
+            columns=columns,
         )
         if bucketed:
             return GeometricCG(shifted, hierarchy)
@@ -138,7 +145,8 @@ def test_warp_galerkin_metric_and_generalized_fem(consistent, bucketed, tmp_path
     audit(fine.graph, tmp_path / "fem.dot")
 
 
-def test_shared_width_cg_changed_matrix_zero_scaled_and_alias_rhs(tmp_path):
+@pytest.mark.parametrize("columns", [False, True])
+def test_shared_width_cg_changed_matrix_zero_scaled_and_alias_rhs(tmp_path, columns):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     rng = np.random.default_rng(13432)
@@ -146,7 +154,9 @@ def test_shared_width_cg_changed_matrix_zero_scaled_and_alias_rhs(tmp_path):
     a = rng.normal(size=(n, n))
     a = a @ a.T + 3 * np.eye(n)
     source = matrix(a)
-    hierarchy = build_hierarchy(source, [matrix(rng.normal(size=(n, 4)))], 7, dtype=wp.float32)
+    hierarchy = build_hierarchy(
+        source, [matrix(rng.normal(size=(n, 4)))], 7, dtype=wp.float32, columns=columns
+    )
     cg = GeometricCG(source, hierarchy, tol=1e-5, maxiter=60)
     states = [cg, cg.for_width(3), cg.for_width(1)]
     assert all(s.operator.matrix is cg.operator.matrix for s in states)

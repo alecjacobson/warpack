@@ -45,6 +45,7 @@ PROFILES = (
     "geometric-inner-cg",
     "geometric-fp32-cg",
     "geometric-fp32-bucketed",
+    "geometric-fp32-columns",
 )
 
 
@@ -136,6 +137,7 @@ def main():
                 width,
                 fine_factor=factor,
                 dtype=wp.float32 if "fp32" in args.profile else wp.float64,
+                columns=args.profile.endswith("columns"),
             )
             if "fp32" in args.profile:
                 return GeometricCG(shifted, hierarchy, maxiter=args.inner_cg)
@@ -175,7 +177,9 @@ def main():
         steps=None,
         start_rows=args.width,
         preconditioner_factory=factory if args.profile not in ("cg", "start-cg") else None,
-        preconditioner_bucket_size=4 if args.profile == "geometric-fp32-bucketed" else None,
+        preconditioner_bucket_size=(
+            4 if args.profile in ("geometric-fp32-bucketed", "geometric-fp32-columns") else None
+        ),
     )
     wp.synchronize()
     setup["fine_setup_seconds"] = time.perf_counter() - begin

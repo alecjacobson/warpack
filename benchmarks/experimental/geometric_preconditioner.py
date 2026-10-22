@@ -15,8 +15,31 @@ from warp.optim import linear
 
 from benchmarks.experimental.coarse_correction import FixedFSAI
 from warpack import kernels as K
+from warpack._coalesced_fsai import (
+    csr_eight_rhs,
+    csr_eight_rhs_padded,
+    transpose_axpby,
+    transpose_rows,
+)
 from warpack.batched_cg import axpby
 from warpack.batched_sparse import csr_block_product
+
+
+def column_product(matrix, x, y):
+    """Use existing Warp sparse kernels with adjacent RHS columns, including padding."""
+    if matrix.row_counts is None:
+        kernel = csr_eight_rhs
+        args = [matrix.offsets, matrix.columns, matrix.values, x, y]
+    else:
+        kernel = csr_eight_rhs_padded
+        args = [matrix.offsets, matrix.row_counts, matrix.columns, matrix.values, x, y]
+    wp.launch_tiled(
+        kernel,
+        dim=((x.shape[1] + 7) // 8, matrix.nrow),
+        inputs=args,
+        block_dim=32,
+        device=matrix.device,
+    )
 
 
 @wp.kernel
@@ -114,17 +137,28 @@ class DenseBottom:
         result.width = width
         return result
 
+    def apply_columns(self, x, y):
+        check_rows(x, y, self.n, self.width, self.device, self.dtype)
+        # Strided views change metadata only; adjacent RHSs remain coalesced.
+        wp.launch(
+            dense_solve,
+            self.width,
+            [self.lower, self.status, x.transpose(), y.transpose()],
+            device=self.device,
+        )
+
 
 class AdditiveLevel:
     """B = S + P B_coarse P.T; no approximate coarse eigenvectors or dense lift."""
 
-    def __init__(self, matrix, transfer, transpose, smoother, coarse, width):
+    def __init__(self, matrix, transfer, transpose, smoother, coarse, width, *, columns=False):
         check_matrix(matrix)
         check_matrix(transfer, square=False)
         check_matrix(transpose, square=False)
         self.matrix, self.transfer, self.transpose = matrix, transfer, transpose
         self.n, self.width, self.device = matrix.shape[0], width, matrix.device
         self.dtype = coarse.dtype
+        self.columns = columns
         if (
             transfer.shape != (self.n, coarse.n)
             or transpose.shape != (coarse.n, self.n)
@@ -138,18 +172,61 @@ class AdditiveLevel:
             raise ValueError("incompatible transfer, smoother or coarse level")
         self.smoother, self.coarse = smoother, coarse
         self.status = coarse.status
-        self.rhs = wp.empty((width, self.n), dtype=self.dtype, device=self.device)
-        self.restricted = wp.empty((width, coarse.n), dtype=self.dtype, device=self.device)
+        self.rhs = wp.empty(
+            (self.n, width) if columns else (width, self.n),
+            dtype=self.dtype,
+            device=self.device,
+        )
+        self.restricted = wp.empty(
+            (coarse.n, width) if columns else (width, coarse.n),
+            dtype=self.dtype,
+            device=self.device,
+        )
         self.solved = wp.empty_like(self.restricted)
         self.correction = wp.empty_like(self.rhs)
 
     def apply(self, x, y):
         check_rows(x, y, self.width, self.n, self.device, self.dtype)
+        if self.columns:
+            wp.launch_tiled(
+                transpose_rows,
+                dim=((self.width + 31) // 32, (self.n + 31) // 32),
+                inputs=[x, self.rhs],
+                block_dim=128,
+                device=self.device,
+            )
+            result = self.smoother.application.second
+            self.apply_columns(self.rhs, result)
+            wp.launch_tiled(
+                transpose_axpby,
+                dim=((self.n + 31) // 32, (self.width + 31) // 32),
+                inputs=[result, y, y, wp.float64(1), wp.float64(0)],
+                block_dim=128,
+                device=self.device,
+            )
+            return
         wp.copy(self.rhs, x)  # Preserve the original RHS for exact in-place application.
         csr_block_product(self.transpose, self.rhs, self.restricted)
         self.coarse.apply(self.restricted, self.solved)
         csr_block_product(self.transfer, self.solved, self.correction)
         self.smoother.apply(self.rhs, y)
+        wp.launch(
+            axpby,
+            y.size,
+            [self.correction.flatten(), y.flatten(), y.flatten(), wp.float64(1), wp.float64(1)],
+            device=self.device,
+        )
+
+    def apply_columns(self, x, y):
+        if not self.columns:
+            raise ValueError("column application requires a column-layout hierarchy")
+        check_rows(x, y, self.n, self.width, self.device, self.dtype)
+        column_product(self.transpose, x, self.restricted)
+        self.coarse.apply_columns(self.restricted, self.solved)
+        column_product(self.transfer, self.solved, self.correction)
+        scratch = self.smoother.application.first
+        column_product(self.smoother.factor.G, x, scratch)
+        column_product(self.smoother.factor.GT, scratch, y)
         wp.launch(
             axpby,
             y.size,
@@ -165,11 +242,12 @@ class AdditiveLevel:
             FixedFSAI(self.smoother.factor, width, self.dtype),
             self.coarse.for_width(width),
             width,
+            columns=self.columns,
         )
 
 
 def build_hierarchy(
-    matrix, transfers, width, *, fine_factor=None, coarse_rows=32, dtype=wp.float64
+    matrix, transfers, width, *, fine_factor=None, coarse_rows=32, dtype=wp.float64, columns=False
 ):
     """Construct static Galerkin levels entirely with Warp numerical operations.
 
@@ -194,11 +272,13 @@ def build_hierarchy(
     # Sparse accumulation orders can differ; explicitly retain symmetry.
     ws.bsr_axpy(ws.bsr_transposed(coarse_matrix), coarse_matrix, alpha=0.5, beta=0.5)
     coarse = build_hierarchy(
-        coarse_matrix, transfers[1:], width, coarse_rows=coarse_rows, dtype=dtype
+        coarse_matrix, transfers[1:], width, coarse_rows=coarse_rows, dtype=dtype, columns=columns
     )
     factor = (
         fine_factor
         if fine_factor is not None
         else linear.FSAI(matrix, max_row_size=coarse_rows, max_step_size=3, factor_dtype=wp.float32)
     )
-    return AdditiveLevel(matrix, p, pt, FixedFSAI(factor, width, dtype), coarse, width)
+    return AdditiveLevel(
+        matrix, p, pt, FixedFSAI(factor, width, dtype), coarse, width, columns=columns
+    )
