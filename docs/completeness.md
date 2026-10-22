@@ -103,3 +103,64 @@ device diagnostics but always reports `COUNT_UNAVAILABLE` and never certifies.
 Modes computed entirely with Warp can optionally use cuDSS just for the separate
 certificate. `NumericalNullspaceDiagnostics` retains its existing contract: it
 does not certify an unknown nullity or topological Betti number.
+
+## Opt-in recovery after a rejected warm start
+
+A known failure case is two independent elastic members exchanging lengths:
+the old lowest modes can remain exact eigenvectors but move above the requested
+range. An unperturbed full starting block can converge to that wrong invariant
+space. The certificate rejects it; seeded exploration recovers the correct
+modes in the [regression fixture](../tests/test_fem_shapes.py). A perturbation is
+not a general completeness guarantee.
+
+The checkout example [`examples/certified_recovery.py`](../examples/certified_recovery.py)
+composes existing APIs into a bounded retry policy. Prepare a finite list of
+candidate solves, for example an ordinary warm start, a perturbed warm start,
+and a cold start. They may use different starting block widths or iteration
+budgets but must target the same k physical eigenpairs of the same K/M pencil.
+Keep all solver resources alive, preferably through `Attempt.owner`:
+
+```python
+from examples.certified_recovery import Attempt, recover
+
+# warm/retry are prebuilt BlockLOBPCG instances for the same K, M and k.
+# Their graphs and initial-vector buffers are already prepared.
+# retry can use initial_perturbation=1e-3 or fresh random starts.
+attempts = [
+    Attempt("warm", warm_graph, warm.eigenvalues, warm.eigenvectors,
+            warm.status, warm.converged, owner=warm),
+    Attempt("perturbed", retry_graph, retry.eigenvalues, retry.eigenvectors,
+            retry.status, retry.converged, owner=retry),
+]
+certificate = LowestModeCertificate(
+    K, wp.zeros_like(warm.eigenvectors), wp.zeros_like(warm.eigenvalues),
+    mass=M, upper_bound=upper_bound, nullspace=rigid_modes,
+)
+report = recover(attempts, certificate)
+if not report["accepted"]:
+    raise RuntimeError(report)  # Do not consume rejected modes as a valid ROM.
+# Accepted physical outputs now reside in certificate.values/vectors.
+```
+
+This **policy driver is not graph capturable**: it reads flags/native status on
+the host between attempts. Each eigensolve and each fresh verification is a
+captured device computation. There is no CPU numerical solve and no core solver
+API change. The example is provided in the source checkout, not the wheel.
+
+K, M, nullspace and the gap must remain fixed throughout a call. Output storage
+must be independent of all candidate inputs/workspaces. The single inertia
+factorization is paid when constructing the certificate; retries reuse that
+count, with no further factorization or query. Report that setup and every
+candidate's setup/capture cost separately. `check_capture_seconds` measures
+verification warmup/capture, and each recorded attempt's `seconds` includes its
+solve, output copies, verification and explicit status readback.
+
+Unavailable/inconclusive inertia or a count incompatible with k+nullity stops
+before any attempt. Changing a random seed cannot fix a wrong output capacity
+or a boundary through a repeated cluster. Invalid data/bases/native status and a supplied nullspace that fails its zero-mode
+residual check stop the sequence; changing the candidate start cannot fix that
+fixed constraint basis. Only unresolved separation, residual failure or native iteration
+exhaustion permits another supplied attempt. The list bounds the work; exhausting
+it returns `accepted=False`. Acceptance requires **both** a zero certificate flag
+and successful native status/count; the certificate's mathematical diagnostics
+alone do not override a native solver failure. No graph is run after success.

@@ -109,3 +109,11 @@ about 3.5x lower setup time and 7.5x lower device-memory increase. Specify
 `--fsai-width 32` to try that profile; verify accuracy on the actual matrix.
 The historical commands above use 64 and are unchanged. The released Anvil
 configuration already uses 32.
+
+## Shape updates and fixed-support refits
+
+The [shape-family qualification](../../results/fem_shapes/README.md) changes both
+K and M at fixed topology, compares cold/computed/perturbed starts and retained
+versus refitted FSAI, and includes explicit crossing/repeated-cluster regressions.
+Its 34,560-DOF cases use factor row cap 32; all setup, source-solve and changed-state
+costs are separate. This extends the material-only reuse coverage.

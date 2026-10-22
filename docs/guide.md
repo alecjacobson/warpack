@@ -219,7 +219,11 @@ A successful residual count is not a global requested-spectrum certificate.
 
 The [FEM reuse example and measured comparison](../results/fem_public_starts/README.md)
 show computed starts for related material configurations, including the setup
-costs and the fixed-address replay contract.
+costs and the fixed-address replay contract. The
+[shape-change qualification](../results/fem_shapes/README.md) additionally updates
+K and M together, exercises upstream FSAI refits at fixed storage addresses, and
+checks mode crossings and complete repeated clusters. For an opt-in response to
+a rejected warm start, see the [bounded recovery example](completeness.md#opt-in-recovery-after-a-rejected-warm-start).
 
 ## Limitations
 
