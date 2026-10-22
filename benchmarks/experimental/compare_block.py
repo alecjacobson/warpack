@@ -190,6 +190,11 @@ def main():
     p.add_argument(
         "--cupy-padding", action="store_true", help="reproduce biased padded-CG diagnostics"
     )
+    p.add_argument(
+        "--cupy-partitioned",
+        action="store_true",
+        help="exact RHS coverage in power-of-two CG chunks with linear workspace storage",
+    )
     p.add_argument("--profile", action="store_true")
     p.add_argument(
         "--public-api", action="store_true", help="Use only installed solver constructors"
@@ -219,6 +224,10 @@ def main():
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
     args = p.parse_args()
+    if args.cupy_partitioned and (
+        args.cupy_padding or not args.cupy or not args.batched_cg or not args.inner_cg
+    ):
+        p.error("--cupy-partitioned needs --cupy --batched-cg and excludes --cupy-padding")
     if args.active_search_keep_history and not args.active_search_bucket_size:
         p.error("--active-search-keep-history requires active search")
     if args.active_search_bucket_size < 0:
@@ -553,15 +562,26 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
         start = cp.asarray(initial[:, :width])
         y = None if constraints is None else cp.asarray(constraints).T
         adapter, adapter_setup_seconds, adapter_memory_bytes = None, 0.0, 0
+        adapter_pool_bytes = None
         padded = getattr(args, "cupy_padding", False)
+        partitioned = getattr(args, "cupy_partitioned", False)
         if cg is not None:
-            from benchmarks.experimental.batched_cg import CapturedActiveCG, CapturedPaddedCG
+            from benchmarks.experimental.batched_cg import (
+                CapturedActiveCG,
+                CapturedPaddedCG,
+                CapturedPartitionedCG,
+            )
 
             memory_before = cp.cuda.runtime.memGetInfo()[0]
+            pool_before = memory_snapshot()["warp_pool_used_bytes"]
+            active_adapter = CapturedPartitionedCG if partitioned else CapturedActiveCG
             adapter_setup_seconds, adapter = timed(
-                lambda: CapturedPaddedCG(cg) if padded else CapturedActiveCG(cg, max_width=width)
+                lambda: CapturedPaddedCG(cg) if padded else active_adapter(cg, max_width=width)
             )
             adapter_memory_bytes = memory_before - cp.cuda.runtime.memGetInfo()[0]
+            pool_after = memory_snapshot()["warp_pool_used_bytes"]
+            if pool_before is not None and pool_after is not None:
+                adapter_pool_bytes = pool_after - pool_before
 
         def apply(x):
             one = x.ndim == 1
@@ -615,6 +635,7 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
                 quality["cg_iteration_accounting"] = (
                     "scheduled vector iterations, including masked RHSs"
                     + (" and padded zero RHSs" if padded else "; no padding")
+                    + ("; independently stopped power-of-two chunks" if partitioned else "")
                 )
                 if not padded:
                     quality["cg_stats_by_active_width"] = {
@@ -625,6 +646,7 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
                 dict(
                     method=(
                         "CuPy LOBPCG + same captured upstream Warp batched CG"
+                        + (" (power-of-two chunks)" if partitioned else "")
                         if cg is not None
                         else "CuPy LOBPCG + same upstream Warp preconditioner"
                     ),
@@ -644,13 +666,19 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
             width=width,
             absolute_tolerance=cupy_tol,
             padding_width=cg.width if cg is not None and padded else None,
-            preallocated_active_widths=list(range(1, width + 1))
+            preallocated_active_widths=list(adapter.adapters)
             if cg is not None and not padded
             else None,
+            active_partition="power-of-two exact chunks" if partitioned else "whole active block",
+            preallocated_rhs_slots=sum(adapter.adapters)
+            if cg is not None and not padded
+            else (cg.width if cg is not None else 0),
             inner_adapter_setup_capture_seconds=adapter_setup_seconds,
             reference_setup_seconds=reference_setup_seconds,
             reference_setup_scope="CuPy matrix/start/constraint upload, LinearOperator, and inner adapter workspaces/capture. Excludes supplied FSAI/base CG construction, library imports, and outer eigensolve warmup.",
             inner_adapter_device_memory_delta_bytes=adapter_memory_bytes,
+            inner_adapter_warp_pool_used_delta_bytes=adapter_pool_bytes,
+            pool_memory_scope="Process-local Warp pool used-memory delta during adapter construction; excludes graph/driver and non-pool allocations. Not peak memory.",
             memory_scope="Device free-memory decrease during adapter setup, including graph/runtime allocations; not a peak measurement.",
             setup_scope="Extra inner adapter workspace/capture only. Shifted matrix and FSAI factors are shared with the completed Warp trial; active-width CG states are preallocated before timing. This is not independent end-to-end CuPy setup.",
             stopping="CuPy uses absolute residual tolerance and converges its entire starting block; independent original-problem gates check the first k modes. Warp uses normalized stopping on k modes.",

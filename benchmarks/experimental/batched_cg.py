@@ -84,3 +84,52 @@ class CapturedActiveCG:
         if width not in self.adapters:
             raise ValueError("active block width was not preallocated")
         self.adapters[width].apply(x, y)
+
+
+class CapturedPartitionedCG(CapturedActiveCG):
+    """Exact RHS coverage using power-of-two chunks and linear workspace storage.
+
+    A width-104 call runs 64, 32 and 8 independent RHSs. No padded zero RHSs
+    are computed. Each chunk stops independently using unchanged upstream CG;
+    this can reduce scheduled masked work compared with one global active block.
+    At most floor(log2(max_width))+1 graphs are launched per call. All numerical
+    work remains Warp; host chunk selection is for the CuPy benchmark adapter.
+    """
+
+    def __init__(self, inverse, max_width=None):
+        self.width = inverse.width if max_width is None else max_width
+        if not isinstance(self.width, int) or not 1 <= self.width <= inverse.width:
+            raise ValueError("require integer 1 <= max_width <= inverse.width")
+        self.n, self.device = inverse.n, inverse.device
+        self.adapters = {}
+        for exponent in range(self.width.bit_length()):
+            width = 1 << exponent
+            item = CapturedPaddedCG(inverse if width == inverse.width else inverse.for_width(width))
+            # Finish lazy graph uploads during setup, not while a preceding
+            # chunk is pending on the #61 driver stack.
+            wp.capture_launch(item.graph)
+            wp.synchronize_device(self.device)
+            self.adapters[width] = item
+        self.stats = wp.zeros(4, dtype=wp.int32, device=self.device)
+        # Preserve the entire input before any output, including shifted aliases.
+        self.rhs = wp.empty((self.width, self.n), dtype=wp.float64, device=self.device)
+
+    def apply(self, x, y):
+        if (
+            x.shape != y.shape
+            or x.ndim != 2
+            or x.shape[1] != self.n
+            or not 1 <= x.shape[0] <= self.width
+            or x.dtype != wp.float64
+            or y.dtype != wp.float64
+            or x.device != self.device
+            or y.device != self.device
+        ):
+            raise ValueError("expected matching FP64 (active_width,n) arrays on the inverse device")
+        wp.copy(self.rhs[: x.shape[0]], x)
+        offset, remaining = 0, x.shape[0]
+        for width, adapter in reversed(self.adapters.items()):
+            if remaining >= width:
+                adapter.apply(self.rhs[offset : offset + width], y[offset : offset + width])
+                offset += width
+                remaining -= width

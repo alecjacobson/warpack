@@ -243,13 +243,24 @@ def test_batched_cg_adaptive_hodge_nullspace_and_positive_guards(case, tmp_path)
 
 
 @pytest.mark.parametrize("dtype,tolerance", [(wp.float64, 1e-11), (wp.float32, 1e-5)])
-@pytest.mark.parametrize("active_widths", [False, True])
+@pytest.mark.parametrize("active_widths", [False, True, "partitioned"])
 def test_captured_cg_matches_changing_active_rhs_blocks(dtype, tolerance, active_widths):
-    from benchmarks.experimental.batched_cg import CapturedActiveCG, CapturedPaddedCG
+    from benchmarks.experimental.batched_cg import (
+        CapturedActiveCG,
+        CapturedPaddedCG,
+        CapturedPartitionedCG,
+    )
 
     a = sp.diags([-np.ones(36), np.full(37, 4.0), -np.ones(36)], [-1, 0, 1], format="csr")
     inverse = BatchedCGInverse(matrix(a), 5, tol=tolerance * 0.1, maxiter=30, working_dtype=dtype)
-    adapter = CapturedActiveCG(inverse) if active_widths else CapturedPaddedCG(inverse)
+    constructor = (
+        CapturedPartitionedCG
+        if active_widths == "partitioned"
+        else CapturedActiveCG
+        if active_widths
+        else CapturedPaddedCG
+    )
+    adapter = constructor(inverse)
     if active_widths:
         adapter.reset_stats()
         for item in adapter.adapters.values():
