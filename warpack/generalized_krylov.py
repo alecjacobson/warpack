@@ -103,6 +103,9 @@ class GeneralizedKrylovSchur(KrylovSchur):
     stiffness operators must be real symmetric; positive definiteness of M is
     a caller precondition. Repeated eigenvalues need sufficiently rich starting
     spaces/restarts; residual convergence alone is not a completeness proof.
+    Default capture uses a fixed outer budget if the original operator, mass,
+    or inverse advertises ``requires_static_outer_capture``. Explicit adaptive
+    capture rejects such compositions before warmup or graph construction.
     """
 
     def __init__(
@@ -136,6 +139,14 @@ class GeneralizedKrylovSchur(KrylovSchur):
         if mode == "cayley":
             rhs_operator = _CayleyRHS(operator, mass, target)
         iteration = _Composition(rhs_operator, inverse)
+        # The original operator also participates in finalization, and mass
+        # products in metric orthogonalization, beyond the iteration product.
+        # Preserve every operand's restriction, including implicit operators
+        # that contain sparse solves and the two operands of the Cayley RHS.
+        iteration.requires_static_outer_capture = any(
+            getattr(op, "requires_static_outer_capture", False)
+            for op in (operator, mass, inverse)
+        )
         super().__init__(iteration, k, ncv=ncv, which=which, tol=tol, initial_vector=initial_vector)
         self.metric_vector = wp.empty((1, self.n), dtype=wp.float64, device=self.device)
         self.bx = wp.empty_like(self.eigenvectors)
