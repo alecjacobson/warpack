@@ -65,25 +65,41 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 taskset -c 8-11 python -m pytest -q \
 Without the explicit downloaded candidate, its tests skip. The source loader
 rejects a different checksum. The candidate removes `apply_lanes`; the benchmark
 adapter explicitly removes that option. Updating all production recipes and
-installer provenance, broader upstream regression tests, matched setup/refit/
-solve timing, and smaller-device qualification remain before changing the pin.
+installer provenance, broader setup/refit/solve performance, and smaller-device qualification remain before changing the pin.
 The [packed-workspace patch](fsai-packed-current.patch) preserves the candidate's
-refit and deferred-update behavior in those same tests; its memory/timing on this
-revision still needs separate measurement. Regularized refits are not enabled. Numerical testing during GPU contention
+refit and deferred-update behavior in those same tests; memory/timing measurements for this
+revision appear below. Regularized refits are not enabled. Numerical testing during GPU contention
 makes no timing claim.
 
 Packed candidate SHA256: `aa4f526521c35f87ddfc1610f18bbda395784b636a4a8c844bce8f40ef4ab8b2`.
 
-## Procedural FEM comparison attempt
+## Procedural FEM comparison
 
-Four fresh workers also solve the same 10,890-DOF consistent-mass beam as the
-[original-pin memory experiment](../fsai_packed/README.md), requesting 20 modes
-with row widths 32/64, current/packed setup, one warmup and three repeats.
-All four pass native counts/status and physical residual, spectrum,
-orthogonality and requested-subspace checks. Only `fem-current32` is
-uncontended; a foreign GPU process appeared during the other three workers.
-The raw JSON/log/occupancy files are retained, but do not form a matched timing
-comparison. This does not justify changing the dependency pin.
+Four uncontended fresh workers solve the same 10,890-DOF consistent-mass beam
+as the [original-pin memory experiment](../fsai_packed/README.md), requesting
+20 modes at factor widths 32/64, current/packed setup, one warmup and three
+repeats. All pass native counts/status and physical residual, spectrum,
+orthogonality and requested-subspace checks. Warm times are medians; assembly,
+factor/solver setup and capture are single observations, including JIT/context
+work. Independent reference work is outside these timings.
+
+| Width / implementation | Assembly + setup + capture (s) | Warm workflow (s) |
+|---|---:|---:|
+| 32 / current | 1.2700 | 0.1984 |
+| 32 / packed | 1.2652 | 0.1987 |
+| 64 / current | 1.8051 | 0.1936 |
+| 64 / packed | 1.8536 | 0.1923 |
+
+Earlier contended attempts remain under `screening/` and are excluded. These
+are procedural beam comparisons, not an updated Anvil timing table. The
+candidate is still not the shipped dependency.
+
+Four separate uncontended memory workers reproduce the original revision's
+setup/context decreases: width 32, 1730→906 MiB; width 64, 13844→7136 MiB.
+Build local bytes/thread decrease 9128→5160 and 67368→35112. Register count is
+60 for both current variants (48 in the older revision). Live pool storage
+returns after factor release; the context memory remains allocated. Raw
+`memory-*.json` files retain snapshots and exact base/candidate source hashes.
 
 ```bash
 python -m benchmarks.monitor_gpu --out build/current32.occupancy.json \
@@ -100,3 +116,31 @@ python -m benchmarks.monitor_gpu --out build/current-memory.occupancy.json \
   --log build/current-memory.log -- python -m benchmarks.experimental.fsai_packed_storage \
   --current --width 32 --gpu packed --out build/current-memory.json
 ```
+
+## Unchanged upstream suite
+
+All **85 upstream FSAI tests pass on CPU/GPU for each variant**: the unmodified
+candidate and the packed-workspace candidate. Logs are retained as
+`upstream-suite-current.log` and `upstream-suite-packed.log`. The isolated runner
+verifies the original test file checksum
+`f2082cfb751d4cb672894baab1f3575f02f47e8f9f940b5424990fbb827d6478`, changes
+only process-local import bindings, and runs every test without selection or
+rewriting. No installed source is replaced.
+
+Coverage includes adaptive supports, direct block selection versus scalar
+expansion, FP16/FP32/FP64 inputs/factors, aliasing, scaling, pivot guards,
+regularized and strict refits, rollback, deferred patterns, graph updates,
+conditional CG/CR loops, concurrent streams and unrelated stream capture.
+Passing dependency tests does not add public FP16/FP32 eigensolver support.
+
+```bash
+export PYTHONPATH="$PWD/build/warp-fsai:$PWD"
+python -m benchmarks.experimental.fsai_current_suite --download
+python -m benchmarks.experimental.fsai_current_suite --packed
+```
+
+`--cache PATH` selects an optional kernel-cache location. These suite runtimes
+include compilation and are not performance measurements. Remaining promotion
+work is migrating installation and affected recipes, qualifying the full Anvil
+workflow with the new pin, and smaller-memory GPU coverage; regularization
+remains opt-in. Neither the dependency nor the Anvil table is silently changed.

@@ -86,5 +86,6 @@ python -m benchmarks.monitor_gpu --out build/packed-fem.occupancy.json \
   --row-size 32 --out build/packed-fem.json
 ```
 
-Next: complete the current-revision port comparison and test smaller-memory
-GPUs. This experiment does not close #131 or alter the released Anvil recipe.
+The [current-revision port](../fsai_current/README.md) now also has uncontended
+memory/FEM comparisons and passes all 85 upstream tests in each variant.
+Smaller-memory GPUs and broader application qualification remain. This experiment does not close #131 or alter the released Anvil recipe.

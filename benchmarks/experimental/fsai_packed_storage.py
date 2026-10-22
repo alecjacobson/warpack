@@ -109,7 +109,8 @@ def main():
         parameters = (wp.float64, args.width, 3)
         if args.current:
             parameters = (wp.float64,) + parameters
-        _, kernel = module._build_kernels(*parameters)
+        built = module._build_kernels(*parameters)
+        kernel = built if args.current else built[1]
         report = dict(
             width=args.width,
             variant=args.gpu,
