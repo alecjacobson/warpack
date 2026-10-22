@@ -8,6 +8,24 @@ from warp.optim import linear
 from benchmarks.applications.fem_shapes import ShapeReplay, shape_family
 
 
+def test_inner_work_reports_all_buckets_after_changed_replay():
+    if not hasattr(linear, "FSAI"):
+        pytest.skip("pinned upstream FSAI required")
+    states = shape_family(2, 6, True)
+    driver = ShapeReplay(states, 12, refit=True)
+    for _, p, _ in states:
+        driver.update(p)
+        driver.solve()
+        assert driver.quality(p)["accepted"]
+        wrapper = driver.solver.preconditioner
+        assert wrapper is not driver.pre
+        assert np.count_nonzero(wrapper.usage.numpy()[:-1]) > 1
+        reported = driver.cg_statistics()
+        assert reported == wrapper.stats.numpy().tolist()
+        assert reported[0] > driver.pre.stats.numpy()[0]
+        assert reported[3] > driver.pre.stats.numpy()[3]
+
+
 @pytest.mark.parametrize("consistent", [False, True])
 @pytest.mark.parametrize("refit", [False, True])
 @pytest.mark.parametrize("perturbation", [0.0, 1e-3])

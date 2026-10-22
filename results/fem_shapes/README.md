@@ -1,5 +1,11 @@
 # Geometry changes, mass updates and captured FEM reuse
 
+**Inner-work metadata correction ([#143](https://github.com/alecjacobson/warpack/issues/143)):**
+the archived `cg_stats` arrays read the last full-width CG bucket, not aggregate
+work across all buckets. Do not use those arrays as total inner-iteration counts.
+Measured times, outer iterations and independent accuracy checks are unaffected.
+The current driver reads the outer solver's aggregate; historical raw files are preserved.
+
 This increment of [#128](https://github.com/alecjacobson/warpack/issues/128)
 qualifies changes to both stiffness **and mass**, upstream FSAI refits, and warm
 starts. All eight large configurations pass 20 modes at every geometry state:

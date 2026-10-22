@@ -86,6 +86,7 @@ class ShapeReplay:
         steps=200,
         start_rows=None,
         tol=1e-11,
+        preconditioner_factory=None,
     ):
         self.states, self.width = states, width
         p = states[0][1]
@@ -103,15 +104,19 @@ class ShapeReplay:
             factor_dtype=wp.float32,
             reuse_pattern=refit,
         )
-        self.pre = BatchedCGPreconditioner(
-            self.shifted,
-            width,
-            tol=0.01,
-            maxiter=25,
-            preconditioner=self.factor,
-            working_dtype=wp.float32,
-            fsai_layout="columns",
-            matrix_layout="columns",
+        self.pre = (
+            BatchedCGPreconditioner(
+                self.shifted,
+                width,
+                tol=0.01,
+                maxiter=25,
+                preconditioner=self.factor,
+                working_dtype=wp.float32,
+                fsai_layout="columns",
+                matrix_layout="columns",
+            )
+            if preconditioner_factory is None
+            else preconditioner_factory(self.shifted, self.factor, width)
         )
         start_rows = p.k if start_rows is None else start_rows
         self.random = wp.array(
@@ -130,7 +135,7 @@ class ShapeReplay:
             reuse_operator_images=True,
             search_bucket_size=4,
             keep_history=True,
-            preconditioner_bucket_size=4,
+            preconditioner_bucket_size=4 if preconditioner_factory is None else 0,
             symmetric_products=True,
             fused_updates=True,
             paired_rotation=True,
@@ -166,6 +171,15 @@ class ShapeReplay:
         )
         q["accepted"] &= q["status"] == 0 and q["converged"] == p.k
         return q
+
+    def cg_statistics(self):
+        """Scheduled vector iterations, max batch iterations, misses, RHS calls.
+
+        Read the solver's wrapper: the original full-width state's statistics
+        are reset on each bucket call and do not aggregate the entire solve.
+        """
+        pre = self.solver.preconditioner
+        return pre.stats.numpy().tolist() if hasattr(pre, "stats") else None
 
 
 def elapsed(fn):
@@ -214,7 +228,7 @@ def main():
                 solve_seconds=solve_seconds,
                 guard=guard,
                 quality=q,
-                cg_stats=driver.pre.stats.numpy().tolist(),
+                cg_stats=driver.cg_statistics(),
             )
             sequence.append(row)
             print(trial, parameter, q, flush=True)

@@ -1,5 +1,11 @@
 # Coarse-to-fine FEM starts
 
+**Inner-work metadata correction ([#143](https://github.com/alecjacobson/warpack/issues/143)):**
+the archived `cg_stats` arrays read the last full-width CG bucket, not aggregate
+work across all buckets. Do not use those arrays as total inner-iteration counts.
+Measured times, outer iterations and independent accuracy checks are unaffected.
+The current driver reads the outer solver's aggregate; historical raw files are preserved.
+
 Measured 2026-10-22, L40 / Xeon Platinum 8362, four CPU threads pinned to cores
 8–11; see [environment](environment.json). Uses the pinned Warp/FSAI environment
 from the [installation guide](../../docs/installation.md#fast-block-solves).

@@ -206,7 +206,7 @@ def main():
                 total_seconds=coarse_seconds + transfer_seconds + solve_seconds,
                 quality=quality,
                 coarse_quality=coarse_quality,
-                cg_stats=fine.pre.stats.numpy().tolist(),
+                cg_stats=fine.cg_statistics(),
             )
             sequence.append(row)
             print(trial, strategy, row, flush=True)

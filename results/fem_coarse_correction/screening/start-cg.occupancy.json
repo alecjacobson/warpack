@@ -1,0 +1,54 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.fem_coarse_correction",
+    "--coarse",
+    "2",
+    "--fine",
+    "6",
+    "--modes",
+    "6",
+    "--width",
+    "8",
+    "--profile",
+    "start-cg",
+    "--repeats",
+    "1",
+    "--out",
+    "/home/horde/projects/warpack/results/fem_coarse_correction/screening/start-cg.json"
+  ],
+  "pid": 329491,
+  "exit_code": 0,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792704215.0362341,
+      "other": [
+        "328220, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "99 %, 690 MiB, 2490 MHz, 40",
+      "error": null
+    },
+    {
+      "time": 1792704216.1264608,
+      "other": [
+        "328220, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "87 %, 785 MiB, 2490 MHz, 39",
+      "error": null
+    },
+    {
+      "time": 1792704217.2413204,
+      "other": [
+        "328220, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "91 %, 2081 MiB, 2490 MHz, 39",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
