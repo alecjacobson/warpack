@@ -1,7 +1,6 @@
 """Accuracy-gated experimental block-method comparisons; no production CuPy use."""
 
 import argparse
-import hashlib
 import importlib.metadata
 import json
 import time
@@ -21,6 +20,7 @@ from benchmarks.applications.runner import accuracy
 from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
+from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import CGInverse, SparseOperator
 
@@ -406,24 +406,7 @@ def main():
             name: importlib.metadata.version(name)
             for name in ["warp-lang", "numpy", "scipy", "cupy-cuda12x"]
         },
-        source_sha256={
-            path: hashlib.sha256(Path(path).read_bytes()).hexdigest()
-            for path in (
-                "benchmarks/experimental/block_lobpcg.py",
-                *map(str, sorted(Path("warpack").glob("*.py"))),
-                "benchmarks/experimental/block_kernels.py",
-                "benchmarks/experimental/block_updates.py",
-                "benchmarks/experimental/compare_block.py",
-                "benchmarks/applications/fem_cases.py",
-                "benchmarks/applications/runner.py",
-                "benchmarks/experimental/batched_cg.py",
-                "benchmarks/experimental/coalesced_fsai.py",
-                "benchmarks/experimental/coalesced_operator.py",
-                "benchmarks/experimental/active_cg.py",
-                "benchmarks/experimental/cached_x_image.py",
-                "benchmarks/experimental/active_search.py",
-            )
-        },
+        source_sha256=source_manifest(__file__),
     )
     for _ in range(args.repeats):
         seconds, _ = timed(lambda: wp.capture_launch(graph))

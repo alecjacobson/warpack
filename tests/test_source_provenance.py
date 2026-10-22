@@ -61,3 +61,18 @@ def test_external_entrypoint_rejected(tmp_path):
     external.write_text("value = 1\n")
     with pytest.raises(ValueError, match="inside the repository"):
         source_manifest(external, root=root)
+
+
+def test_wide_block_manifest_covers_previously_omitted_inputs_and_validation():
+    manifest = source_manifest("benchmarks/experimental/compare_block.py")
+    assert {
+        "benchmarks/experimental/compare_block.py",
+        "benchmarks/applications/hodge.py",
+        "benchmarks/applications/problems.py",
+        "benchmarks/upstream/adapters.py",
+        "benchmarks/anvil.py",
+        "benchmarks/anvil_inputs.py",
+        "benchmarks/applications/fem_cases.py",
+        "benchmarks/experimental/batched_cg.py",
+        "warpack/batched_cg.py",
+    } <= set(manifest)

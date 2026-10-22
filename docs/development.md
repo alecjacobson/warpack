@@ -79,14 +79,25 @@ method-specific start/shifted-matrix identities. Use the historical checkout to 
 older report, or establish and review a new baseline; do not copy dependency
 metadata onto an old measurement.
 
-Force-ROM and shape-change workers now use
+Force-ROM, shape-change and wide block-comparison workers now use
 [`source_manifest`](../benchmarks/source_provenance.py) to fingerprint local
 static imports, package initializers and the full Warpack source package.
 Paths are repository-relative; imported modules are parsed without execution.
 Dependency manifests separately cover patched third-party numerical code.
 Their older single-driver fingerprints do not establish identical helper/core
 sources; preserve those raw records and establish a new reviewed baseline.
-See [#145](https://github.com/alecjacobson/warpack/issues/145).
+See [#145](https://github.com/alecjacobson/warpack/issues/145) and
+[#149](https://github.com/alecjacobson/warpack/issues/149).
+
+An inventory of the older workers still finds narrower source scopes: single
+driver hashes in Anvil direct/showcase, Newton FFRF, completeness and FSAI memory
+probes; selected-file lists in the coarse/hierarchy, spectral-surface, bending,
+damped/buckling, upstream conformance and experimental tuning workers. These
+records fingerprint only their explicitly listed sources, not every imported
+fixture, adapter or validation helper. Keep them as historical evidence. Before
+using one for a new automatic cross-version regression gate, migrate its worker
+to the transitive manifest and establish a reviewed baseline; never fill missing
+source hashes into an old result after the fact.
 
 Graph DOT audits check callback nodes and transfer directions; they are not
 complete API traces. The cuDSS vendor metadata exception remains explicit.

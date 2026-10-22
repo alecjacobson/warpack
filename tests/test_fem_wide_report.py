@@ -5,6 +5,7 @@ import copy
 import pytest
 
 from benchmarks.applications.fem_wide_report import FIELDS, compare, summarize
+from benchmarks.source_provenance import source_manifest
 
 
 def fixture():
@@ -156,3 +157,18 @@ def test_incompatible_baselines_rejected(key):
         changed[key]["warp_version"] = "other"
     with pytest.raises(ValueError, match="incompatible"):
         compare(changed, result)
+
+
+@pytest.mark.parametrize("helper", ["hodge", "adapters", "anvil_inputs"])
+def test_imported_fixture_adapter_or_validation_edit_rejects_baseline(helper, tmp_path):
+    (tmp_path / "worker.py").write_text("import hodge, adapters, anvil_inputs\n")
+    for name in ("hodge", "adapters", "anvil_inputs"):
+        (tmp_path / (name + ".py")).write_text("# original\n")
+    raw, occ = fixture()
+    raw["source_sha256"] = source_manifest("worker.py", root=tmp_path)
+    baseline = summarize(raw, occ) | dict(environment={"gpu": "same"})
+    (tmp_path / (helper + ".py")).write_text("# changed helper, unchanged worker\n")
+    raw["source_sha256"] = source_manifest("worker.py", root=tmp_path)
+    current = summarize(raw, occ) | dict(environment={"gpu": "same"})
+    with pytest.raises(ValueError, match="source_sha256"):
+        compare(current, baseline)

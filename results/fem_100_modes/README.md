@@ -86,4 +86,5 @@ accuracy failures, non-device graphs and invalid timings. Twenty-eight CPU
 reporter tests cover these gates and incompatible/performance-regressed
 baselines. Regression comparisons require identical source, dependency,
 configuration and environment records. Historical worker source hashes use a
-manual list; the incomplete transitive scope is tracked separately in #149.
+manual list; that scope limitation is preserved. #149 migrates subsequent workers to
+transitive manifests; those runs establish separate baselines.
