@@ -18,6 +18,7 @@ import warp as wp
 from warp.optim import linear
 
 from benchmarks.audit_profile import graph_summary
+from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.upstream.adapters import matrix
 from warpack import (
     BatchedCGPreconditioner,
@@ -106,9 +107,7 @@ class SnapshotROM:
         if backend == "cudss":
             self.inverse = CuDSSInverse(h, self.r, mtype="spd")
         else:
-            self.factor = linear.FSAI(
-                h, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-            )
+            self.factor = linear.FSAI(h, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
             self.inverse = BatchedCGPreconditioner(
                 h,
                 self.r,
@@ -285,6 +284,7 @@ def main():
         if name == "modes" or args.backend == "cg":
             assert not any(k.startswith(("HtoD", "DtoH")) for k in graphs[name]["memcpy_kinds"])
     report = dict(
+        dependency=warp_dependencies(),
         arguments=vars(args) | {"out": str(args.out)},
         n=p.n,
         assembly_seconds=assembly_seconds,

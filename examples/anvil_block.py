@@ -14,6 +14,7 @@ import numpy as np
 import warp as wp
 from warp.optim import linear
 
+from benchmarks.dependency_provenance import warp_dependencies
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh, rigid_body_basis
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 
@@ -54,9 +55,7 @@ def main():
         wp.synchronize()
         assembly_seconds = time.perf_counter() - start
         factor_seconds, factor = timed(
-            lambda: linear.FSAI(
-                shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-            )
+            lambda: linear.FSAI(shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
         )
         # The same seed/layout as the comparison harness. This is setup only.
         initial = np.random.default_rng(42).normal(size=(a.shape[0], 24))
@@ -108,6 +107,7 @@ def main():
             if row["status"] != 0 or row["converged"] != 20 or not row["max_residual"] <= 1e-8:
                 raise RuntimeError(f"Incomplete or invalid solve: {row}")
         report = dict(
+            dependency=warp_dependencies(type(factor)),
             mesh=args.mesh,
             dofs=a.shape[0],
             assembly_and_io_seconds=assembly_seconds,

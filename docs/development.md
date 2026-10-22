@@ -65,6 +65,15 @@ spectrum/subspaces and full counts. Native stopping conventions differ between
 libraries, so equal tolerance arguments do not necessarily mean equal accuracy.
 Restore starts for each timed trial. Retain failed and timed-out samples.
 
+The Anvil and ROM follow-up reporters record hashes of the loaded Warp linear
+and FSAI modules, in addition to the wheel version. Patched overlays can share
+the same wheel version while running different numerical code. The installer
+writes a checksum manifest, which the reporters check against the loaded files.
+Regression comparisons reject changed dependencies, stale manifests and older
+baselines without this provenance. Use the historical checkout to reproduce an
+older report, or establish and review a new baseline; do not copy dependency
+metadata onto an old measurement.
+
 Graph DOT audits check callback nodes and transfer directions; they are not
 complete API traces. The cuDSS vendor metadata exception remains explicit.
 Application setup, host file I/O and independent references stay outside the

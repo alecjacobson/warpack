@@ -13,6 +13,7 @@ import warp as wp
 
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import timed
+from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.compare_block import prepare
 from warpack import CuDSSInverse, KrylovSchur, SymmetricEigensolver
 
@@ -116,6 +117,7 @@ def main():
         rows.append(dict(seconds=seconds, quality=quality()))
     accepted = warmup_quality["accepted"] and all(row["quality"]["accepted"] for row in rows)
     report = dict(
+        dependency=warp_dependencies(),
         backend=args.backend,
         setup_seconds=setup_seconds,
         setup_phases_seconds=phases,

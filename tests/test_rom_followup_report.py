@@ -34,6 +34,9 @@ def fixture(kind):
         source_quality=dict(status=0, converged=8, residual=1e-4, orthogonality=1e-14),
     )
     raw = dict(
+        dependency=dict(
+            warp_version="test", files={"linear": {"sha256": "same"}}, manifest_status="absent"
+        ),
         accepted=True,
         arguments=args,
         setup={"assembly": 1, "solver": 2},
@@ -102,4 +105,13 @@ def test_force_identity_required_for_timing_comparison():
     raw["forces_sha256"] = "different forces"
     changed = summarize(raw, occ, "forces") | {"environment": baseline["environment"]}
     with pytest.raises(ValueError, match="forces_sha256"):
+        compare(changed, baseline)
+
+
+def test_changed_overlay_rejected_even_with_same_wheel_version():
+    raw, occ = fixture("forces")
+    baseline = copy.deepcopy(summarize(raw, occ, "forces")) | {"environment": {"gpu": "same"}}
+    raw["dependency"]["files"]["linear"]["sha256"] = "different implementation"
+    changed = summarize(raw, occ, "forces") | {"environment": baseline["environment"]}
+    with pytest.raises(ValueError, match="incompatible loaded dependencies"):
         compare(changed, baseline)

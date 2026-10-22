@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from benchmarks.dependency_provenance import signature
+
 METHODS = ("arpack", "spectra", "cupy-direct", "warp-direct", "cupy-block", "warp-block")
 
 
@@ -117,11 +119,17 @@ def extract(method, data):
 
 def summarize(directory, rounds, repeats):
     rows = []
+    dependency = None
     for method in METHODS:
         setups, solves, medians, residuals = [], [], [], []
         for trial in range(1, rounds + 1):
             path = directory / f"{method}-{trial}.json"
-            setup, samples, residual, accepted = extract(method, json.loads(path.read_text()))
+            raw = json.loads(path.read_text())
+            current = signature(raw.get("dependency"))
+            if dependency is not None and dependency != current:
+                raise RuntimeError(f"Mixed dependency overlays: {path}")
+            dependency = current
+            setup, samples, residual, accepted = extract(method, raw)
             occupancy = json.loads(path.with_suffix(".occupancy.json").read_text())
             if not accepted or not occupancy["timing_eligible"] or len(samples) != repeats:
                 raise RuntimeError(f"Unqualified measurement: {path}")
@@ -146,6 +154,7 @@ def summarize(directory, rounds, repeats):
             )
         )
     summary = dict(
+        dependency=dependency,
         rows=rows,
         rounds=rounds,
         repeats=repeats,

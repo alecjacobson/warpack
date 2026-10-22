@@ -11,6 +11,7 @@ import warp as wp
 import warp.optim.linear as linear
 
 from benchmarks.applications.compare import timed
+from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.compare_block import cupy_trials, prepare
 from warpack import BatchedCGPreconditioner
 
@@ -37,7 +38,6 @@ def main():
             shifted,
             max_row_size=args.fsai_width,
             max_step_size=3,
-            apply_lanes=8,
             factor_dtype=wp.float32,
         )
         cg = BatchedCGPreconditioner(
@@ -59,6 +59,7 @@ def main():
         row["quality"]["accepted"] and row["full_block_absolute_tolerance_met"] for row in rows
     )
     report = dict(
+        dependency=warp_dependencies(),
         accepted=bool(accepted),
         args=config,
         n=a.shape[0],

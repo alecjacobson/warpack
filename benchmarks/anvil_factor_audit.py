@@ -18,6 +18,8 @@ import scipy
 import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 
+from benchmarks.dependency_provenance import warp_dependencies
+
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -68,6 +70,7 @@ def main():
     ):
         raise ValueError("expected a square FP64 CSC matrix with int32 indices")
     report = {
+        "dependency": warp_dependencies(),
         "backend": args.backend,
         "mesh_sha256": hashlib.sha256(mesh.read_bytes()).hexdigest(),
         "matrix_sha256": hashlib.sha256(

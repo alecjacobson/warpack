@@ -1,7 +1,6 @@
 {
   "gpu": "NVIDIA L40, 49140 MiB, 570.158.01",
   "cpu": "Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz",
-  "fsai_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
   "cpu_affinity": [
     8,
     9,
@@ -10,7 +9,6 @@
   ],
   "openblas_threads": 4,
   "omp_threads": 4,
-  "fsai_source_sha256": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
   "warp_wheel": {
     "archive_info": {
       "hash": "sha256=6dda3c163dde4edaa7d46ade9fff3ddb1126ee7b147d9d890cd38cc70dafd656",
@@ -19,5 +17,18 @@
       }
     },
     "url": "https://github.com/NVIDIA/warp/releases/download/v1.18.0/warp_lang-1.18.0%2Bcu12-py3-none-manylinux_2_28_x86_64.whl"
-  }
+  },
+  "base_runtime_overlay_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+  "base_runtime_overlay_fsai_source_sha256": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+  "selected_fsai_modules": {
+    "current": {
+      "revision": "429dccd0a133973c0809bdd974d81fcfc744919f",
+      "sha256": "584e0fb277ae78d0f6e382b551898831680275396aacbcfb10e948961e141c8c"
+    },
+    "packed": {
+      "base_revision": "429dccd0a133973c0809bdd974d81fcfc744919f",
+      "sha256": "aa4f526521c35f87ddfc1610f18bbda395784b636a4a8c844bce8f40ef4ab8b2"
+    }
+  },
+  "provenance_note": "The base overlay supplies the unchanged linear modules. Workers substitute the selected FSAI module; each raw report records its actual fsai.py hash. These historical records predate loaded-module manifest auditing."
 }

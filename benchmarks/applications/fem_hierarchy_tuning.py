@@ -10,6 +10,8 @@ from pathlib import Path
 
 import warp as wp
 
+from benchmarks.dependency_provenance import warp_dependencies
+
 from .fem_hierarchy import BeamTransfer, attach_reference, audit, beam_problem, matrix_hash
 from .fem_shapes import ShapeReplay, elapsed
 
@@ -129,6 +131,7 @@ def main():
         Path("warpack/block.py"),
     ]
     report = dict(
+        dependency=warp_dependencies(type(fine.factor)),
         arguments=vars(args) | {"out": str(args.out)},
         setup=setup,
         reference_seconds=reference_seconds,

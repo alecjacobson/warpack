@@ -19,6 +19,7 @@ from benchmarks.applications.fem_cases import make_fem_case
 from benchmarks.applications.hodge import make_hodge_case
 from benchmarks.applications.runner import accuracy
 from benchmarks.audit_profile import graph_summary
+from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
 from benchmarks.upstream.adapters import matrix
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh, rigid_body_basis
@@ -263,7 +264,6 @@ def main():
                 shifted,
                 max_row_size=args.fsai_width,
                 max_step_size=3,
-                apply_lanes=8,
                 factor_dtype=wp.float32,
             )
             if args.preconditioner == "fsai"
@@ -365,6 +365,7 @@ def main():
         dot.unlink()
     warmup_seconds, _ = timed(lambda: wp.capture_launch(graph))
     report = dict(
+        dependency=warp_dependencies(type(pre) if args.preconditioner == "fsai" else None),
         args=vars(args),
         n=a.shape[0],
         k=k,

@@ -6,6 +6,8 @@ import math
 import statistics
 from pathlib import Path
 
+from benchmarks.dependency_provenance import signature
+
 
 def quality(q, k, fields, positive=False):
     if not q["accepted"] or q["status"] != 0 or q["converged"] != k:
@@ -92,6 +94,7 @@ def summarize(raw, occupancy, kind):
             if copy.startswith("DtoH") or (copy.startswith("HtoD") and not vendor):
                 raise ValueError("unexpected host transfer")
     return dict(
+        dependency=raw.get("dependency"),
         arguments=args,
         setup_seconds=sum(setup.values()),
         first_use_seconds=sum(setup.values()) + raw["warmup"]["total_seconds"],
@@ -109,6 +112,8 @@ def summarize(raw, occupancy, kind):
 def compare(current, baseline, limit=1.25):
     if not math.isfinite(limit) or limit < 1:
         raise ValueError("invalid regression limit")
+    if signature(current.get("dependency")) != signature(baseline.get("dependency")):
+        raise ValueError("incompatible loaded dependencies")
     # Exact source identity is deliberate: revised implementations need an
     # explicitly reviewed baseline, not silent mixing of benchmark definitions.
     for key in ("source_sha256", "matrix_sha256", "forces_sha256", "environment"):
