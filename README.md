@@ -218,7 +218,6 @@ replay checks and the code review. This is not full upstream conformance.
 
 ## Current limitations
 
-warpack is an evolving library, not a drop-in SciPy/Spectra API replacement.
 The primary supported precision is FP64; FP32 inner CG does not imply a general
 FP32 eigensolver API. Complex SVD and public left/infinite eigenmodes are not
 supported. General nonsymmetric solves have a known
