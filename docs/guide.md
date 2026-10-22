@@ -168,6 +168,13 @@ corrections. `GMRESInverse.stats` includes fresh inner failures. Check inner
 and outer diagnostics together for inverse-based solves. This contract differs
 from deliberately truncated CG inside preconditioned block iteration.
 
+For largest generalized modes of `A x = lambda B x`, supply an inverse of B
+and set `mode="regular", which="LA"`. B must be SPD, but need not represent
+physical mass: it can be a regularization metric. Warpack preserves the B
+inner product; `B^-1 A` is generally not symmetric in the Euclidean metric.
+The [spectral surface reconstruction example](../benchmarks/applications/SPECTRAL_SURFACE.md)
+shows this composition with both cuDSS and pure-Warp inverses.
+
 ## Other problem families
 
 - `HermitianEigensolver` handles complex Hermitian standard problems.

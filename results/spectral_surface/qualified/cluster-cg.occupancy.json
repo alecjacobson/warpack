@@ -1,0 +1,62 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--modes",
+    "2",
+    "--copies",
+    "2",
+    "--backend",
+    "cg",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface/qualified/cluster-cg.json"
+  ],
+  "pid": 338866,
+  "exit_code": 0,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792706041.7620723,
+      "other": [
+        "338628, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "49 %, 10324 MiB, 2490 MHz, 42",
+      "error": null
+    },
+    {
+      "time": 1792706042.9317045,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 41",
+      "error": null
+    },
+    {
+      "time": 1792706044.0244336,
+      "other": [],
+      "gpu": "5 %, 1334 MiB, 2490 MHz, 41",
+      "error": null
+    },
+    {
+      "time": 1792706045.1265492,
+      "other": [],
+      "gpu": "100 %, 1404 MiB, 2490 MHz, 42",
+      "error": null
+    },
+    {
+      "time": 1792706046.2204463,
+      "other": [],
+      "gpu": "93 %, 1404 MiB, 2490 MHz, 42",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

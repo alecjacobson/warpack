@@ -1,0 +1,56 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.spectral_surface_compare",
+    "--side",
+    "16",
+    "--alpha",
+    "1000",
+    "--gamma",
+    "0.01",
+    "--anisotropy",
+    "30",
+    "--backend",
+    "arpack",
+    "--repeats",
+    "3",
+    "--out",
+    "/home/horde/projects/warpack/results/spectral_surface/qualified/strong-arpack.json"
+  ],
+  "pid": 338999,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792706055.9957993,
+      "other": [],
+      "gpu": "11 %, 1 MiB, 2490 MHz, 39",
+      "error": null
+    },
+    {
+      "time": 1792706057.0754154,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 39",
+      "error": null
+    },
+    {
+      "time": 1792706058.1540835,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 480 MHz, 38",
+      "error": null
+    },
+    {
+      "time": 1792706059.249708,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 300 MHz, 37",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

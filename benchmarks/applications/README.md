@@ -19,6 +19,7 @@ implementation bugs and the remaining coverage requirements.
 | G / P2 | [Clamped tetrahedral stiffness / indefinite geometric stiffness; signed buckling factors](BUCKLING.md) | [#26](https://github.com/alecjacobson/warpack/issues/26) |
 | H / P3 | Damped coupled chain, standard first-order nonsymmetric linearization; analytic complex frequencies | [#27](https://github.com/alecjacobson/warpack/issues/27) |
 | I / P2 | [Large tall/wide POD and analytic string snapshots](POD.md); repeated leading clusters, rank deficiency, both singular subspaces and reconstruction energy | [#28](https://github.com/alecjacobson/warpack/issues/28) |
+| Dominant generalized / P2 | [Spectral surface reconstruction](SPECTRAL_SURFACE.md): PSD alignment A, SPD nonmass regularization B; largest modes and complete repeated clusters | [#136](https://github.com/alecjacobson/warpack/issues/136) |
 
 The FEM bar, ring and load-factor pencil have analytic spectra, so comparison
 does not depend on trusting another iterative solver. The original regularized conformal case

@@ -114,7 +114,7 @@ linear equality constraints use `ConstrainedKrylovSchur`. See
 |---|---|---|
 | Lowest symmetric FEM modes | `BlockLOBPCG` | Symmetric K, SPD M; optional preconditioner and known invariant constraints |
 | Standard symmetric eigenpairs | `KrylovSchur` | LM / LA / SA / SM / BE selection |
-| Generalized or interior symmetric modes | `GeneralizedKrylovSchur` | SPD mass; supply a mass inverse or shifted inverse |
+| Generalized or interior symmetric modes | `GeneralizedKrylovSchur` | SPD metric (e.g. mass); supply a metric inverse or shifted inverse |
 | Symmetric block inverse iteration | `SymmetricEigensolver`, `GeneralizedEigensolver` | Supply an iteration operator that amplifies the desired modes |
 | Equality-constrained / skinning modes | `ConstrainedKrylovSchur` | SPD physical mass, independent constraints, KKT inverse |
 | Complex Hermitian eigenpairs | `HermitianEigensolver` | Complex FP64 data |
