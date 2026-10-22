@@ -1,0 +1,98 @@
+{
+  "signature": {
+    "source_sha256": {
+      "fem_hierarchy.py": "4b41a8c232c0986efc463c988c0ece56085fd0f81ce2f3dad2486acac57fa7cf",
+      "fem_shapes.py": "f9fd549af168dd7f5a178cb89d332774337ab2589b180f0a681be112f8bc9d78",
+      "fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+      "block.py": "9c13850750bf319944380c3f27ffd7cc76b3f118760dbfbd2626fc845495ba3f"
+    },
+    "matrix_sha256": {
+      "fine": "105f0a08bc6e35d036cc3c1df5142fd37f31c6bdf734f28386f52372561b30b4",
+      "coarse": "daa619e095eedd7f23883ac89c3ce7c2274f69809e41fced52028e96469b5871"
+    },
+    "warp": "1.18.0",
+    "versions": {
+      "numpy": "2.2.6",
+      "scipy": "1.15.0"
+    },
+    "dimensions": {
+      "fine": 34560,
+      "coarse": 1620
+    },
+    "configuration": {
+      "coarse": 5,
+      "fine": 15,
+      "modes": 50,
+      "width": 56,
+      "mass": "consistent",
+      "repeats": 3
+    }
+  },
+  "rows": [
+    {
+      "strategy": "random",
+      "setup_assembly_seconds": 4.256867475807667,
+      "first_use_component_seconds": 5.420971430838108,
+      "total_seconds": 1.1072692461311817,
+      "coarse_seconds": 0.0,
+      "refine_seconds": 1.1072121821343899,
+      "iterations": [
+        25,
+        25
+      ],
+      "residual": 7.977610310164154e-12,
+      "subspace_error": 8.112713308396123e-12
+    },
+    {
+      "strategy": "coarse",
+      "setup_assembly_seconds": 5.981328092515469,
+      "first_use_component_seconds": 7.568069968372583,
+      "total_seconds": 1.5011188499629498,
+      "coarse_seconds": 0.5148921646177769,
+      "refine_seconds": 0.989207599312067,
+      "iterations": [
+        23,
+        23
+      ],
+      "residual": 9.452976007367085e-12,
+      "subspace_error": 9.948044111992887e-12
+    },
+    {
+      "strategy": "retained",
+      "setup_assembly_seconds": null,
+      "first_use_component_seconds": null,
+      "total_seconds": 0.0520658940076828,
+      "coarse_seconds": 0.0,
+      "refine_seconds": 0.052005186676979065,
+      "iterations": [
+        1,
+        1
+      ],
+      "residual": 7.9055135757311e-12,
+      "subspace_error": 8.096205145611555e-12
+    }
+  ],
+  "environment": {
+    "gpu": "NVIDIA L40, 49140 MiB, 570.158.01",
+    "cpu": "Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz",
+    "fsai_revision": "04427b997fe7ff07bc6ed1dde5ca9813496c6b55",
+    "cpu_affinity": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "openblas_threads": 4,
+    "omp_threads": 4,
+    "fsai_source_sha256": "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07",
+    "warp_wheel": {
+      "archive_info": {
+        "hash": "sha256=6dda3c163dde4edaa7d46ade9fff3ddb1126ee7b147d9d890cd38cc70dafd656",
+        "hashes": {
+          "sha256": "6dda3c163dde4edaa7d46ade9fff3ddb1126ee7b147d9d890cd38cc70dafd656"
+        }
+      },
+      "url": "https://github.com/NVIDIA/warp/releases/download/v1.18.0/warp_lang-1.18.0%2Bcu12-py3-none-manylinux_2_28_x86_64.whl"
+    }
+  }
+}

@@ -117,3 +117,15 @@ K and M at fixed topology, compares cold/computed/perturbed starts and retained
 versus refitted FSAI, and includes explicit crossing/repeated-cluster regressions.
 Its 34,560-DOF cases use factor row cap 32; all setup, source-solve and changed-state
 costs are separate. This extends the material-only reuse coverage.
+
+## Coarse-to-fine starts
+
+The [nested P1 beam comparison](../../results/fem_hierarchy/README.md) adds
+computed 1,620-DOF coarse bases, Warp barycentric transfer, and fine-mass
+refinement on 34,560 DOFs for 20/50 modes. It checks Galerkin identities against
+independent assembly and the full requested fine subspace. Transfer can run in
+the same graph as refinement through `BlockLOBPCG.capture(initializer=...)`.
+Fine iterations decrease modestly, but recomputing the coarse solution costs
+more than the saved refinement time in these cases. This is a starting-basis
+baseline; multilevel preconditioning remains work under
+[#134](https://github.com/alecjacobson/warpack/issues/134).

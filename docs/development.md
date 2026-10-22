@@ -39,6 +39,7 @@ the library. Solver arithmetic remains Warp, plus optional cuDSS sparse solves.
 | Upstream CuPy and Spectra | [Pinned sources, fixtures and adapters](../benchmarks/upstream/README.md) | [CuPy refresh](../benchmarks/upstream/CUPY_REFRESH.md), [Spectra refresh](../benchmarks/upstream/SPECTRA_REFRESH.md), [generalized follow-up](../benchmarks/upstream/SPECTRA_REGULAR.md) |
 | Optional FEM completeness | [API and limitations](completeness.md) | [Newton cases and overhead](../results/completeness/README.md) |
 | Shape/mass updates and FSAI refits | [Replay contract and commands](../results/fem_shapes/README.md) | [Eight monitored configurations](../results/fem_shapes/summary.json) |
+| Coarse-to-fine FEM starts | [Nested P1 beam protocol and results](../results/fem_hierarchy/README.md) | [20 modes](../results/fem_hierarchy/consistent-20.summary.json), [50 modes](../results/fem_hierarchy/consistent-50.summary.json) |
 | Fast public FEM path | [Families, configurations and gates](../benchmarks/applications/FAST_BLOCK.md) | [FEM qualification](../results/fem_fast_block_v020/README.md) |
 | Fast public Anvil path | [Release comparison command](../results/release_v0_2_0/README.md#anvil-promotion-regression) | [Every accepted/rejected release trial](../results/release_v0_2_0/README.md) |
 | CPU Anvil factors | [PARDISO / SuperLU / Eigen audit](../benchmarks/ANVIL_FACTORIZATION.md) | [ARPACK](../results/anvil_pardiso_noir_confirmed.json), [Spectra](../results/anvil_pardiso_spectra_confirmed.json) |

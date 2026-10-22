@@ -230,6 +230,9 @@ costs and the fixed-address replay contract. The
 K and M together, exercises upstream FSAI refits at fixed storage addresses, and
 checks mode crossings and complete repeated clusters. For an opt-in response to
 a rejected warm start, see the [bounded recovery example](completeness.md#opt-in-recovery-after-a-rejected-warm-start).
+The [coarse-to-fine example](../results/fem_hierarchy/README.md) transfers computed
+tetrahedral modes with the device initializer hook and includes the cost of
+building and solving the coarse problem. Such starts need not improve total time.
 
 ## Limitations
 
