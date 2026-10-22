@@ -54,3 +54,24 @@ Use each occupancy JSON's exact command for reproduction. The
 adapter in its configuration. Different source/configuration records require
 separate reviewed baselines. The larger Warp/CuPy replay gap remains #147;
 shrinking the comparator's workspace does not fix that separate solver issue.
+
+## Fresh paired follow-up
+
+Both [final/exact-a1](final/exact-a1.json) and
+[final/partitioned-a1](final/partitioned-a1.json) are accepted and uncontended.
+Their complete transitive source manifests are identical; configurations differ
+only in the adapter option and output path. The same original-problem and native
+stopping gates pass for every measured solve.
+
+| Adapter | Adapter construction/capture (s) | Adapter Warp-pool delta (GiB) | CuPy replay median (s) | Warp control replay median (s) |
+|---|---:|---:|---:|---:|
+| Whole active block, all widths | 0.7982 | 9.713 | 3.5871 | 3.7068 |
+| Power-of-two exact chunks | 0.0488 | 0.256 | 3.6247 | 3.7142 |
+
+The construction column measures only the extra adapter, with supplied factors
+and base CG already built; it is not total solver setup. Pool deltas exactly
+match the earlier screening observations. The 1% replay difference does not
+establish a speed improvement, especially with CuPy trials spanning
+2.8706–3.6723 s for partitioning. This closes the adapter-storage gap with an
+opt-in low-memory route while leaving both the default comparator and #147's
+outer-solver performance investigation unchanged.
