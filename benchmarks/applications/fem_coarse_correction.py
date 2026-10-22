@@ -15,6 +15,7 @@ import warp as wp
 
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.coarse_correction import CoarseCG, CoarseCorrection, FixedFSAI
+from benchmarks.experimental.geometric_cg import GeometricCG
 from benchmarks.experimental.geometric_preconditioner import build_hierarchy
 from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator
@@ -42,6 +43,8 @@ PROFILES = (
     "balanced-inner-cg",
     "geometric",
     "geometric-inner-cg",
+    "geometric-fp32-cg",
+    "geometric-fp32-bucketed",
 )
 
 
@@ -127,7 +130,15 @@ def main():
                     shape=(n, 9 * coarse_side * (coarse_side + 1) ** 2),
                 )
                 transfers.append(matrix(host))
-            hierarchy = build_hierarchy(shifted, transfers, width, fine_factor=factor)
+            hierarchy = build_hierarchy(
+                shifted,
+                transfers,
+                width,
+                fine_factor=factor,
+                dtype=wp.float32 if "fp32" in args.profile else wp.float64,
+            )
+            if "fp32" in args.profile:
+                return GeometricCG(shifted, hierarchy, maxiter=args.inner_cg)
             if args.profile.endswith("inner-cg"):
                 return CoarseCG(shifted, hierarchy, width, maxiter=args.inner_cg)
             return hierarchy
@@ -164,6 +175,7 @@ def main():
         steps=None,
         start_rows=args.width,
         preconditioner_factory=factory if args.profile not in ("cg", "start-cg") else None,
+        preconditioner_bucket_size=4 if args.profile == "geometric-fp32-bucketed" else None,
     )
     wp.synchronize()
     setup["fine_setup_seconds"] = time.perf_counter() - begin
@@ -219,6 +231,7 @@ def main():
         Path(__file__),
         Path("benchmarks/experimental/coarse_correction.py"),
         Path("benchmarks/experimental/geometric_preconditioner.py"),
+        Path("benchmarks/experimental/geometric_cg.py"),
         Path("benchmarks/applications/fem_shapes.py"),
         Path("benchmarks/applications/fem_hierarchy.py"),
         Path("benchmarks/applications/fem_hierarchy_tuning.py"),

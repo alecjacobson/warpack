@@ -47,12 +47,10 @@ def _reject_invalid(y: wp.array2d[wp.float64], status: wp.array[wp.int32]):
 class FixedFSAI:
     """Use upstream FSAI factors as one fixed-linear FP64 block application."""
 
-    def __init__(self, factor, width):
+    def __init__(self, factor, width, dtype=wp.float64):
         self.n, self.device = factor.shape[0], factor.device
         self.factor = factor
-        self.application = CoalescedFactorApplication(
-            factor, width, self.n, self.device, wp.float64
-        )
+        self.application = CoalescedFactorApplication(factor, width, self.n, self.device, dtype)
 
     def apply(self, x, y):
         self.application.matvec(x.flatten(), y.flatten(), y.flatten(), 1.0, 0.0)

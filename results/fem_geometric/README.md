@@ -60,6 +60,38 @@ it; acceptance still requires independently correct outer modes.
 
 ## Tests and next steps
 
+### Mixed precision and active-width follow-up
+
+The [fresh mixed-precision workers](mixed/) keep the same three-level
+operators/factors but use FP32 inner application and the public active-CG
+buckets. `GeometricCG` is a benchmark subclass of `BatchedCGPreconditioner`:
+it substitutes the hierarchy's linear application while retaining public
+matrix refresh, conversion, statistics and upstream Warp CG recurrence.
+Width variants share coarse operators/factors and own distinct workspaces.
+There is no new custom CG implementation.
+
+| Profile | Setup including assembly/capture (s) | Warm solve median (s) | Scheduled inner vector iterations |
+|---|---:|---:|---|
+| Fresh FP32 bucketed FSAI/CG25 baseline | 1.5218 | 0.33602 | 6,472–6,620 |
+| Geometric FP32 CG25, full width | 4.0798 | 0.41822 | 7,272–7,464 |
+| Geometric FP32 CG25, buckets of 4 | 3.4193 | 0.36925 | 4,528–4,628 |
+
+All three workers are uncontended. All 12 solves pass original/native checks,
+with maximum residual `9.21e-12` and subspace error `6.66e-12`. The bucketed
+hierarchy improves on the earlier FP64 hierarchy, but remains about 10% slower
+than the fresh existing baseline. Setup includes compilation of the new
+working-precision kernels; these individual setup measurements are not stable
+cold-process medians. The new profiles do not change recommendations.
+
+[59 focused regression tests pass](mixed/tests.log), including shrinking and
+growing active widths, non-leading packed RHSs, zero and scaled RHSs, in-place
+application, changed fine matrix values, shared-factor storage, fresh linear
+residuals, and both mass variants through captured eigen-solves. The generic
+FP64 additive identity remains independently checked, and the FP32 application
+is checked against that identity at working-precision accuracy.
+
+### Remaining work
+
 Four new tests verify the additive SPD identity and independent dense
 Galerkin matrices across three levels, exact in-place application, changed
 bottom-factor graph replay, rejection of an indefinite bottom and recovery,
@@ -73,7 +105,7 @@ levels when the fine matrix changes. Transfers, factors and workspaces stay
 alive with the hierarchy. An SPD fixed preconditioner can remain mathematically
 valid for another SPD fine matrix without remaining effective.
 
-Next work under #134 is to reduce transfer/application overhead and qualify
+Next work under #134 is to reduce transfer/application overhead in these
 mixed-precision active-width hierarchies, before extending to irregular meshes
 or stronger contrast. This experiment establishes neither a multiscale Lanczos
 implementation nor a general multigrid performance claim. No installed core

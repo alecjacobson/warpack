@@ -87,6 +87,7 @@ class ShapeReplay:
         start_rows=None,
         tol=1e-11,
         preconditioner_factory=None,
+        preconditioner_bucket_size=None,
     ):
         self.states, self.width = states, width
         p = states[0][1]
@@ -135,7 +136,9 @@ class ShapeReplay:
             reuse_operator_images=True,
             search_bucket_size=4,
             keep_history=True,
-            preconditioner_bucket_size=4 if preconditioner_factory is None else 0,
+            preconditioner_bucket_size=(4 if preconditioner_factory is None else 0)
+            if preconditioner_bucket_size is None
+            else preconditioner_bucket_size,
             symmetric_products=True,
             fused_updates=True,
             paired_rotation=True,
