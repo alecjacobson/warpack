@@ -131,7 +131,6 @@ def main():
                     shifted,
                     max_row_size=width,
                     max_step_size=3,
-                    apply_lanes=8,
                     factor_dtype=wp.float32 if name.endswith("f") else wp.float64,
                 )
             options = dict(tol=args.tol, maxiter=10000, preconditioner=pre)

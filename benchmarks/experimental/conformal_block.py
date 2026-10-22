@@ -43,7 +43,7 @@ class ConformalBlockEigensolver(ConformalEigensolver):
         stiffness, mass = case.reduced
         shifted = matrix(stiffness - case.shift * mass)
         preconditioner = linear.FSAI(
-            shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
+            shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32
         )
         inverse = BatchedCGInverse(
             shifted,

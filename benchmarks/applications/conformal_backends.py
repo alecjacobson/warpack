@@ -127,9 +127,7 @@ def cupy_cg_reciprocal(case, inner_steps=25, working_dtype=wp.float32, tolerance
     with stream:
         mass, metric = cs.csr_matrix(scale * p.a), cs.csr_matrix(p.b)
         shifted = matrix(p.b)
-        factor = linear.FSAI(
-            shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-        )
+        factor = linear.FSAI(shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
         inverse = BatchedCGInverse(
             shifted,
             case.k,

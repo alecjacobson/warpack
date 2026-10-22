@@ -54,8 +54,13 @@ def test_last_checksum_failure_never_partially_overwrites(monkeypatch, tmp_path)
     assert manifest.read_text() == '"previous profile"\n'
 
 
-def test_verified_profile_records_exact_provenance(monkeypatch, tmp_path):
+@pytest.mark.parametrize("explicit", [True, False], ids=["explicit", "default-current"])
+def test_verified_profile_records_exact_provenance(monkeypatch, tmp_path, explicit):
     root, payloads, hashes = fixture(monkeypatch, tmp_path)
+    profile = "test" if explicit else "current"
+    if not explicit:
+        monkeypatch.setattr(installer, "PROFILES", {"current": installer.PROFILES["test"]})
+        monkeypatch.setattr(sys, "argv", ["install", str(root)])
     monkeypatch.setattr(
         installer,
         "urlopen",
@@ -64,7 +69,7 @@ def test_verified_profile_records_exact_provenance(monkeypatch, tmp_path):
     installer.main()
     assert all((root / name).read_bytes() == data for name, data in payloads.items())
     assert json.loads((root / "warpack-fsai-overlay.json").read_text()) == dict(
-        profile="test", revision="immutable-revision", sha256=hashes
+        profile=profile, revision="immutable-revision", sha256=hashes
     )
 
 

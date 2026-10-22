@@ -42,8 +42,8 @@ by Warp's array interface; NumPy/SciPy/CuPy do not compute library eigenpairs.
 
 ## Fast block solves
 
-`BatchedCGPreconditioner` and the tuned Anvil example require the upstream
-batched-CG/FSAI implementation pinned for v0.2.0. In particular, stock Warp 1.15
+`BatchedCGPreconditioner` and the tuned Anvil example require the pinned upstream
+batched-CG/FSAI implementation. In particular, stock Warp 1.15
 has `batch_offsets` but lacks the required `max_batch_length`; the adapter
 rejects that configuration during setup. Installing a warpack extra does not
 install the overlay.
@@ -58,15 +58,29 @@ PYTHONPATH="$PWD/build/warp-fsai:$PWD" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 
   python -m examples.anvil_block --out build/anvil-block.json
 ```
 
-The installer verifies the target version and all three file checksums before
-writing unmodified upstream modules from revision
-`04427b997fe7ff07bc6ed1dde5ca9813496c6b55`. The separate target and per-command
+The current checkout defaults to the qualified `current` profile: upstream
+revision `f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf`. It includes corrected
+captured refits, deferred factors, packed Cholesky workspace and scalar-view
+BSR entry access. The installer verifies the target version and all three file
+checksums before writing upstream modules, then records an installation manifest.
+The separate target and per-command
 `PYTHONPATH` leave the default Warp installation unchanged. Reuse that
 `PYTHONPATH` for fast-path scripts and the full pinned test suite.
 
-See the [release guide](releases/v0.2.0.md) for the exact public configuration,
-resource ownership and recorded memory costs. FSAI construction is setup work;
-its application and the eigensolver replay run on device.
+The [qualification report](../results/fsai_setup_regression/README.md) records
+accuracy, setup/capture time, warm replay and memory comparisons. Use this
+checkout for the newer deferred/padded-factor integration. The released wheel
+and [v0.2.0 guide](releases/v0.2.0.md) retain their original dependency profile.
+To install the dependency used by those historical measurements with this
+checkout's installer, pass `--profile v0.2.0`, which pins revision
+`04427b997fe7ff07bc6ed1dde5ca9813496c6b55`; use a separate target when comparing.
+Full timing reproduction also requires the recorded source revision and settings.
+The `packed` profile preserves the intermediate, slower setup implementation
+for diagnosis and is not recommended for normal use.
+
+FSAI construction is setup work; application and eigensolver replay run on
+device. Keep factors consistent when matrix values change, as described in
+the [user guide](guide.md#generalized-low-modes).
 
 ## Check the environment
 

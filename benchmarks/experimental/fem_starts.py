@@ -33,9 +33,7 @@ def fsai(host, width):
         wp.array(blocks.data, dtype=wp.mat33d),
     )
     device.nnz_sync()
-    return linear.FSAI(
-        device, max_row_size=width, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-    ), device
+    return linear.FSAI(device, max_row_size=width, max_step_size=3, factor_dtype=wp.float32), device
 
 
 def preconditioner(host, args):

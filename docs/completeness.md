@@ -19,7 +19,11 @@ from warpack import LowestModeCertificate
 # values: FP64 device array (k,); vectors: FP64 device array (k,n).
 # upper_bound lies strictly between the last included eigenvalue and the next.
 certificate = LowestModeCertificate(
-    K, vectors, values, mass=M, upper_bound=upper_bound,
+    K,
+    vectors,
+    values,
+    mass=M,
+    upper_bound=upper_bound,
     nullspace=rigid_modes,  # optional (q,n), zero modes omitted by the solver
 )
 certificate.run()  # warm the Warp verification kernels
@@ -127,14 +131,32 @@ from examples.certified_recovery import Attempt, recover
 # Their graphs and initial-vector buffers are already prepared.
 # retry can use initial_perturbation=1e-3 or fresh random starts.
 attempts = [
-    Attempt("warm", warm_graph, warm.eigenvalues, warm.eigenvectors,
-            warm.status, warm.converged, owner=warm),
-    Attempt("perturbed", retry_graph, retry.eigenvalues, retry.eigenvectors,
-            retry.status, retry.converged, owner=retry),
+    Attempt(
+        "warm",
+        warm_graph,
+        warm.eigenvalues,
+        warm.eigenvectors,
+        warm.status,
+        warm.converged,
+        owner=warm,
+    ),
+    Attempt(
+        "perturbed",
+        retry_graph,
+        retry.eigenvalues,
+        retry.eigenvectors,
+        retry.status,
+        retry.converged,
+        owner=retry,
+    ),
 ]
 certificate = LowestModeCertificate(
-    K, wp.zeros_like(warm.eigenvectors), wp.zeros_like(warm.eigenvalues),
-    mass=M, upper_bound=upper_bound, nullspace=rigid_modes,
+    K,
+    wp.zeros_like(warm.eigenvectors),
+    wp.zeros_like(warm.eigenvalues),
+    mass=M,
+    upper_bound=upper_bound,
+    nullspace=rigid_modes,
 )
 report = recover(attempts, certificate)
 if not report["accepted"]:

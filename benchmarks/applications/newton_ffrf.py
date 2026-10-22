@@ -235,9 +235,7 @@ def gpu_solver(
         # This is a preconditioning shift, not a changed physical eigenproblem.
         shifted = ws.bsr_copy(a)
         ws.bsr_axpy(ws.bsr_diag(wp.float64(0.01), a.shape[0]), shifted)
-        fsai = linear.FSAI(
-            shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-        )
+        fsai = linear.FSAI(shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
         wp.synchronize()
         factor_seconds = time.perf_counter() - start
         width = max(16, count + 4)

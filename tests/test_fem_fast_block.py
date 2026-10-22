@@ -28,9 +28,7 @@ def test_fast_fem_requested_space_and_replay(case, modes, tmp_path):
     metadata = {}
     a, mass, shifted, constraints, _, _, k, check = prepare(args, metadata=metadata)
     width = 4 * ((k + 7) // 4)
-    pre = linear.FSAI(
-        shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-    )
+    pre = linear.FSAI(shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
     cg = BatchedCGPreconditioner(
         shifted,
         width,

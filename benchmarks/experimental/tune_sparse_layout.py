@@ -30,9 +30,7 @@ def main():
     before = other_gpu_processes()
     _, _, shifted, _, _, _, _, _ = prepare(argparse.Namespace(case="anvil", shift=10000))
     shifted.nnz_sync()
-    pre = linear.FSAI(
-        shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-    )
+    pre = linear.FSAI(shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
     a = ws.bsr_copy(shifted, scalar_type=wp.float32)
     source = np.random.default_rng(42).normal(size=(24, a.shape[0])).astype(np.float32)
     x = wp.array(source, dtype=wp.float32)

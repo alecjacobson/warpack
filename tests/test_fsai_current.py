@@ -1,5 +1,7 @@
 """Candidate dependency qualification; never silently replaces the release pin."""
 
+import hashlib
+import inspect
 from pathlib import Path
 
 import numpy as np
@@ -13,20 +15,34 @@ from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner
 
 
-@pytest.fixture(params=[False, True], ids=["current", "current-packed"])
+@pytest.fixture(params=["current", "current-packed", "installed"])
 def candidate_class(request):
-    if not Path("build/current_fsai.py").exists() or not hasattr(linear, "FSAI"):
-        pytest.skip("explicit current-FSAI candidate and pinned batched CG required")
-    return load(packed=request.param).FSAI
+    if not hasattr(linear, "FSAI"):
+        pytest.skip("pinned FSAI and batched CG required")
+    if request.param == "installed":
+        from scripts.install_fsai_overlay import PROFILES
+
+        actual = hashlib.sha256(Path(inspect.getfile(linear.FSAI)).read_bytes()).hexdigest()
+        if actual != PROFILES["current"][1]:
+            pytest.skip("installed current profile required")
+        return linear.FSAI
+    if not Path("build/current_fsai.py").exists():
+        pytest.skip("explicit historical candidate source required")
+    return load(packed=request.param == "current-packed").FSAI
 
 
 def test_pinned_refit_failure_and_candidate_growth_order_fix(candidate_class):
     current = candidate_class
     b = np.sqrt(0.0179)
     a = matrix(np.array([[1, b, 0], [b, 1, 0.99], [0, 0.99, 1.0]]))
-    old = linear.FSAI(a, max_row_size=3, pivot_floor=0.01, reuse_pattern=True)
-    with pytest.raises(ValueError, match="SPD local supports"):
-        old.update()
+    from benchmarks.experimental.fsai_packed_storage import BASE_SHA256
+
+    # The explicit historical negative control applies only to the old pin.
+    # The corrected behavior below is required under either installed profile.
+    if hashlib.sha256(Path(inspect.getfile(linear.FSAI)).read_bytes()).hexdigest() == BASE_SHA256:
+        old = linear.FSAI(a, max_row_size=3, pivot_floor=0.01, reuse_pattern=True)
+        with pytest.raises(ValueError, match="SPD local supports"):
+            old.update()
     new = current(a, max_row_size=3, pivot_floor=0.01, reuse_pattern=True)
     before = new.G.values.numpy().copy()
     new.update()
@@ -118,7 +134,7 @@ def test_captured_refit_and_fem_eigensolve(
     current = candidate_class
 
     def constructor(a, **options):
-        options.pop("apply_lanes")  # Removed by the candidate dependency.
+        options.pop("apply_lanes", None)  # Removed by the candidate dependency.
         return current(a, defer_pattern=deferred, **options)
 
     monkeypatch.setattr(linear, "FSAI", constructor)

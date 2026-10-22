@@ -1,0 +1,118 @@
+--- a/warp/_src/optim/fsai.py
++++ b/warp/_src/optim/fsai.py
+@@ -30,14 +30,14 @@
+     """Create scalar-entry access and diagonal scaling that read BSR blocks in place."""
+     block_size = 1 if block_type == dtype else block_type._shape_[0]
+ 
+-    if block_type == dtype:
++    if block_size == 1:
+ 
+         @wp.func
+         def entry(
+             offsets: wp.array[int],
+             row_counts: wp.array[int],
+             columns: wp.array[int],
+-            values: wp.array[block_type],
++            values: wp.array(dtype=dtype, ndim=1 if block_type == dtype or block_type._shape_ == (1, 1) else 3),
+             r: int,
+             c: int,
+         ):
+@@ -54,7 +54,7 @@
+             offsets: wp.array[int],
+             row_counts: wp.array[int],
+             columns: wp.array[int],
+-            values: wp.array[block_type],
++            values: wp.array(dtype=dtype, ndim=1 if block_type == dtype or block_type._shape_ == (1, 1) else 3),
+             r: int,
+             c: int,
+         ):
+@@ -63,7 +63,7 @@
+             )
+             result = dtype(0)
+             if slot >= 0:
+-                result = dtype(values[slot][r % wp.static(block_size), c % wp.static(block_size)])
++                result = values[slot, r % wp.static(block_size), c % wp.static(block_size)]
+             return result
+ 
+     @wp.kernel(enable_backward=False, module="unique")
+@@ -71,7 +71,7 @@
+         offsets: wp.array[int],
+         row_counts: wp.array[int],
+         columns: wp.array[int],
+-        values: wp.array[block_type],
++        values: wp.array(dtype=dtype, ndim=1 if block_type == dtype or block_type._shape_ == (1, 1) else 3),
+         scale: wp.array[dtype],
+         status: wp.array[int],
+         counter: int,
+@@ -101,7 +101,7 @@
+         offsets: wp.array[int],
+         row_counts: wp.array[int],
+         columns: wp.array[int],
+-        values: wp.array[block_type],
++        values: wp.array(dtype=dtype, ndim=1 if block_type == dtype or block_type._shape_ == (1, 1) else 3),
+         scale: wp.array[dtype],
+         tolerance: dtype,
+         pivot_floor: dtype,
+@@ -408,7 +408,7 @@
+         wp.launch(
+             diagonal,
+             n,
+-            [A.offsets, A.row_counts, A.columns, A.values, scale, status, 0],
++            [A.offsets, A.row_counts, A.columns, A.values.view(A.scalar_type), scale, status, 0],
+             device=device,
+         )
+         cols = wp.empty(n * max_row_size, dtype=int, device=device)
+@@ -420,7 +420,7 @@
+                 A.offsets,
+                 A.row_counts,
+                 A.columns,
+-                A.values,
++                A.values.view(A.scalar_type),
+                 scale,
+                 dtype(kap_tolerance),
+                 dtype(pivot_floor),
+@@ -791,7 +791,7 @@
+         offsets: wp.array[int],
+         row_counts: wp.array[int],
+         columns: wp.array[int],
+-        values: wp.array[block_type],
++        values: wp.array(dtype=dtype, ndim=1 if block_type == dtype or block_type._shape_ == (1, 1) else 3),
+         goff: wp.array[int],
+         gcol: wp.array[int],
+         gcount: wp.array[int],
+@@ -960,7 +960,7 @@
+         wp.launch(
+             self.diagonal,
+             self.n,
+-            [A.offsets, None, A.columns, A.values, self.scale, self.status, 1],
++            [A.offsets, None, A.columns, A.values.view(A.scalar_type), self.scale, self.status, 1],
+             device=A.device,
+         )
+ 
+@@ -997,7 +997,7 @@
+                 A.offsets,
+                 None,
+                 A.columns,
+-                A.values,
++                A.values.view(A.scalar_type),
+                 owner.G.offsets,
+                 owner.G.columns,
+                 None,
+@@ -1086,7 +1086,7 @@
+                     A.offsets,
+                     None,
+                     A.columns,
+-                    A.values,
++                    A.values.view(A.scalar_type),
+                     self.scale,
+                     A.scalar_type(self.tolerance),
+                     A.scalar_type(self.floor),
+@@ -1110,7 +1110,7 @@
+                 A.offsets,
+                 None,
+                 A.columns,
+-                A.values,
++                A.values.view(A.scalar_type),
+                 owner.G.offsets,
+                 self.support_columns,
+                 self.support_counts[1:],

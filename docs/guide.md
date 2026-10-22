@@ -80,9 +80,21 @@ RHS calls. Unfinished truncated preconditioner solves are distinct from failed
 outer eigensolves. The [Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
 provides a tested configuration and the required runtime.
 
+The current pinned FSAI supports `reuse_pattern=True` and captured `update()`.
+After changing matrix values at stable storage addresses, enqueue the update
+before the solve on the same stream. Check `update_status` after replay:
+a failed refit preserves the preceding factor, which is not a valid replacement
+for a successful update of the changed problem. Fixed topology and factor
+storage are required for replay. `defer_pattern=True` selects supports on its
+first update; Warpack accepts the resulting padded factors, but initializer
+warmup can trigger that first selection before capture. Regularized refits are
+an explicit upstream option, not enabled by Warpack's examples.
+
 Upstream FSAI setup can consume much more device memory than its stored factors.
-See the [row-size memory/time comparison](../results/fsai_memory/README.md) before
-using a large factor-row cap on a smaller GPU.
+The [current dependency qualification](../results/fsai_setup_regression/README.md)
+reduces this cost with packed workspace and scalar BSR entry access. The older
+[row-size comparison](../results/fsai_memory/README.md) remains useful context;
+neither report qualifies smaller-memory GPUs or makes a peak-memory guarantee.
 
 ## Standard symmetric eigenpairs
 

@@ -47,7 +47,6 @@ def warp_setup(p, method, ncv, outer_tol, inner_tol, fsai_width):
             shifted,
             max_row_size=fsai_width,
             max_step_size=3,
-            apply_lanes=8,
             factor_dtype=wp.float32,
         )
         inverse = CGInverse(shifted, tol=inner_tol, atol=0.0, maxiter=10000, preconditioner=pre)

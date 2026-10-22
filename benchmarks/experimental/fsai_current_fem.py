@@ -22,7 +22,7 @@ def main():
     original = linear.FSAI
 
     def factor(a, **kwargs):
-        kwargs.pop("apply_lanes")
+        kwargs.pop("apply_lanes", None)
         kwargs["max_row_size"] = args.row_size
         return module.FSAI(a, **kwargs)
 

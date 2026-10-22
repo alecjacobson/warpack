@@ -100,7 +100,6 @@ class ShapeReplay:
             self.shifted,
             max_row_size=32,
             max_step_size=3,
-            apply_lanes=8,
             factor_dtype=wp.float32,
             reuse_pattern=refit,
         )

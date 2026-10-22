@@ -26,7 +26,7 @@ def main():
     h, _, mass = assemble_rest(x, t)
     a = mass_normalized(h, mass, shift=100)
     a.nnz_sync()
-    pre = linear.FSAI(a, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32)
+    pre = linear.FSAI(a, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
     wp.synchronize()
     factors = []
     for factor in (pre.G, pre.GT):

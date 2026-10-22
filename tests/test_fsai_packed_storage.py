@@ -1,6 +1,9 @@
 """Experimental upstream storage patch preserves adaptive supports and refits."""
 
+import hashlib
+import inspect
 import os
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -8,7 +11,7 @@ import scipy.sparse as sp
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.experimental.fsai_packed_storage import load_candidate, patched_source
+from benchmarks.experimental.fsai_packed_storage import BASE_SHA256, load_candidate, patched_source
 from benchmarks.upstream.adapters import matrix
 
 
@@ -22,6 +25,8 @@ def test_patch_rejects_unpinned_source():
 def test_gpu_support_factor_and_refit_equivalence(width, permuted, tmp_path):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
+    if hashlib.sha256(Path(inspect.getfile(linear.FSAI)).read_bytes()).hexdigest() != BASE_SHA256:
+        pytest.skip("historical patch comparison requires the v0.2.0 overlay profile")
     if width == 64 and os.environ.get("WARPACK_FSAI_LARGE_MEMORY") != "1":
         pytest.skip("set WARPACK_FSAI_LARGE_MEMORY=1 for the ~14 GiB context comparison")
     candidate = load_candidate(tmp_path)

@@ -152,7 +152,7 @@ def run(
                 row["cg_preconditioner"] = {
                     "cg": "upstream diagonal",
                     "cg-bj": "upstream block_jacobi_sequential",
-                    "cg-fsai": "upstream FSAI max_row_size=32 max_step_size=3 apply_lanes=8 factor_dtype=float32",
+                    "cg-fsai": "upstream FSAI max_row_size=32 max_step_size=3 factor_dtype=float32",
                 }[selected]
                 row["cg_block_size"] = p.block_size if selected != "cg" else 1
                 row["cg_tolerance"] = cg_tol

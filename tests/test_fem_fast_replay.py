@@ -40,9 +40,7 @@ def test_public_fast_fem_material_update_and_computed_start_replay(mass_type):
 
     update(p.a)
     width = 12
-    factor = linear.FSAI(
-        shifted, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-    )
+    factor = linear.FSAI(shifted, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
     pre = BatchedCGPreconditioner(
         shifted,
         width,

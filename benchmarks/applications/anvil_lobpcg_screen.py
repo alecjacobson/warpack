@@ -51,9 +51,7 @@ def main():
     shifted.nnz_sync()
     wp.synchronize()
     begin = time.perf_counter()
-    pre = linear.FSAI(
-        shifted, max_row_size=args.width, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-    )
+    pre = linear.FSAI(shifted, max_row_size=args.width, max_step_size=3, factor_dtype=wp.float32)
     wp.synchronize()
     setup = time.perf_counter() - begin
     calls = [0]

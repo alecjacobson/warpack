@@ -59,9 +59,7 @@ def warp_setup(p, ncv, backend="cudss", cg_tol=1e-13, correction_steps=1, correc
         preconditioner = (
             "diag"
             if backend == "cg"
-            else linear.FSAI(
-                matrix, max_row_size=32, max_step_size=3, apply_lanes=8, factor_dtype=wp.float32
-            )
+            else linear.FSAI(matrix, max_row_size=32, max_step_size=3, factor_dtype=wp.float32)
         )
         if backend == "cg-corrected":
             from benchmarks.experimental.corrected_cg import CorrectedCGInverse

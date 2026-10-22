@@ -193,6 +193,10 @@ CuPy's cuDSS and Warp preconditioners are supplied by the benchmark. The pure-Wa
 block setting uses width 24, FSAI32 and FP32 CG capped at 25 iterations, with FP64
 outer work.
 
+The [current FSAI dependency](results/fsai_setup_regression/README.md) reduces
+setup cost and memory use in a separate matched Anvil comparison, with unchanged
+warm solve time.
+
 [Timing samples, accuracy checks and reproduction](results/anvil_showcase_132/README.md)
 · [Rendering recipe and downloadable assets](docs/anvil.md)
 

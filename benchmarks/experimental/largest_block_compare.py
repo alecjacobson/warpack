@@ -99,7 +99,6 @@ def main():
                     shifted,
                     max_row_size=args.fsai_width,
                     max_step_size=3,
-                    apply_lanes=8,
                     factor_dtype=wp.float32,
                 )
                 pre = factor

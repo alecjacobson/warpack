@@ -1,8 +1,11 @@
 # FSAI dependency update qualification
 
-Tracked in [#139](https://github.com/alecjacobson/warpack/issues/139). The shipped
-fast-path pin remains `04427b997fe7ff07bc6ed1dde5ca9813496c6b55`. This report
-qualifies an isolated candidate, not a dependency upgrade or new performance claim.
+Tracked in [#139](https://github.com/alecjacobson/warpack/issues/139). This report
+records the initial isolated qualification while the fast-path pin was
+`04427b997fe7ff07bc6ed1dde5ca9813496c6b55`. The subsequent
+[promotion report](../fsai_setup_regression/README.md) covers the final dependency,
+its setup fix and the full Anvil regression. Measurements below retain their
+original candidate sources.
 
 Candidate: [alecjacobson/warp at 429dccd](https://github.com/alecjacobson/warp/blob/429dccd0a133973c0809bdd974d81fcfc744919f/warp/_src/optim/fsai.py),
 FSAI module SHA256 `584e0fb277ae78d0f6e382b551898831680275396aacbcfb10e948961e141c8c`.
@@ -65,7 +68,9 @@ OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 taskset -c 8-11 python -m pytest -q \
 Without the explicit downloaded candidate, its tests skip. The source loader
 rejects a different checksum. The candidate removes `apply_lanes`; the benchmark
 adapter explicitly removes that option. Updating all production recipes and
-installer provenance, broader setup/refit/solve performance, and smaller-device qualification remain before changing the pin.
+installer provenance and broader setup/refit/solve performance were still pending
+at this stage; the promotion report records their completion. Smaller-device
+qualification remains open.
 The [packed-workspace patch](fsai-packed-current.patch) preserves the candidate's
 refit and deferred-update behavior in those same tests; memory/timing measurements for this
 revision appear below. Regularized refits are not enabled. Numerical testing during GPU contention
@@ -92,7 +97,7 @@ work. Independent reference work is outside these timings.
 
 Earlier contended attempts remain under `screening/` and are excluded. These
 are procedural beam comparisons, not an updated Anvil timing table. The
-candidate is still not the shipped dependency.
+candidate measured here is not the final promoted dependency.
 
 Four separate uncontended memory workers reproduce the original revision's
 setup/context decreases: width 32, 1730→906 MiB; width 64, 13844→7136 MiB.
@@ -140,7 +145,8 @@ python -m benchmarks.experimental.fsai_current_suite --packed
 ```
 
 `--cache PATH` selects an optional kernel-cache location. These suite runtimes
-include compilation and are not performance measurements. Remaining promotion
-work is migrating installation and affected recipes, qualifying the full Anvil
-workflow with the new pin, and smaller-memory GPU coverage; regularization
-remains opt-in. Neither the dependency nor the Anvil table is silently changed.
+include compilation and are not performance measurements. Installation/recipe
+migration and full Anvil qualification subsequently completed in the
+[promotion report](../fsai_setup_regression/README.md). Smaller-memory GPU
+coverage remains open, and regularization remains opt-in. The dated Anvil
+comparison table keeps the dependency that produced its measurements.

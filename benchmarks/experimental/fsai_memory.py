@@ -29,6 +29,11 @@ def main():
     parser.add_argument("--width", type=int, choices=[16, 32, 64], required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
+    digest = hashlib.sha256(Path(inspect.getfile(linear.FSAI)).read_bytes()).hexdigest()
+    if digest != "35c0f0cba8318fe74fa6b4b471679fe56a17c22f40331d3c89a2053bf62d9d07":
+        parser.error(
+            "historical experiment requires installer --profile v0.2.0; use fsai_packed_storage --current for the newer revision"
+        )
     wp.init()
     device = wp.get_device("cuda:0")
     n = 96
