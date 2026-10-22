@@ -171,7 +171,8 @@ metre, with illustrative material parameters `E = 100,000 Pa`, `ν = 0.3`,
 `ρ = 1,000 kg/m³`. Color follows instantaneous displacement.
 
 Fresh measurements from 2026-10-21 on an NVIDIA L40 and Xeon Platinum 8362
-(four pinned CPU cores):
+(four pinned CPU cores), using the [v0.2.0 overlay](docs/releases/v0.2.0.md)
+for the FSAI rows:
 
 | Solver | Setup (s) | Warm solve (s) | Max original residual, all 26 modes |
 |---|---:|---:|---:|
