@@ -1,5 +1,11 @@
 # Geometry changes, mass updates and captured FEM reuse
 
+**Source-provenance scope ([#145](https://github.com/alecjacobson/warpack/issues/145)):**
+the archived source fingerprint covers only the driver. It does not certify
+unchanged helper/core code. New workers fingerprint transitive local imports
+and all Warpack source files. Historical raw timings and accuracy are preserved;
+new regression baselines must use the complete manifest.
+
 **Inner-work metadata correction ([#143](https://github.com/alecjacobson/warpack/issues/143)):**
 the archived `cg_stats` arrays read the last full-width CG bucket, not aggregate
 work across all buckets. Do not use those arrays as total inner-iteration counts.

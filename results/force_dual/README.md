@@ -62,6 +62,39 @@ explicitly. All physical numerical response/reduction/lift work stays on device.
 
 ## Limits and reproduction
 
+An optional `--reference-method svd` now independently checks the modes with
+the SVD of mass-weighted responses, avoiding a Gram eigenproblem in the
+reference. Diagonal mass needs only row scaling; small coupled mass uses a
+CPU dense Cholesky factor, capped at 2,048 variables. That cap prevents silent
+large dense mass construction. This is validation code, not a new GPU weighted
+SVD API. Singular-value rank uses relative cutoff 1e-12, explicitly distinct
+from the existing covariance-eigenvalue cutoff 1e-12. Tests recover a known
+snapshot singular direction of size 1e-8 that the latter policy excludes.
+The runtime Gram path and its documented cutoff are unchanged.
+
+Eight local-force/replay cases now use this independent weighted-SVD reference
+and still compare against a full dense covariance pencil. Together with six
+new CPU reference tests and the existing modal/rank tests, all 17 pass. Full-rank
+implicit priors and a GPU weighted-SVD alternative remain open under #135.
+
+The [10,890-variable / 32-force / 20-mode CG validation](svd-reference/)
+also passes all four workflows against the weighted-SVD reference. Worst
+source residual is `7.37e-13`, covariance residual `1.98e-12`, M-orthogonality
+error `3.59e-10`, and complete-subspace error `1.74e-10`. All positive/native
+counts pass. Another GPU process was present, so its raw timings are excluded
+from performance conclusions. This uses the current FSAI overlay and does not
+replace the earlier dependency-specific timing table.
+
+The [combined 89-test regression run](svd-reference/tests.log) and
+[31-test source/report follow-up](svd-reference/source-tests.log) include
+the independent reference and #145 fingerprint changes. No installed solver
+arithmetic changed.
+
+The archived measurements above used a single-driver source fingerprint.
+Under [#145](https://github.com/alecjacobson/warpack/issues/145), new workers
+record transitive local imports and the full Warpack source package. Do not
+treat the historical fingerprint as proof of identical helper/core sources.
+
 `SnapshotROM` in
 [`force_dual.py`](../../benchmarks/applications/force_dual.py) is a checkout-only
 application driver. It is not a new public covariance API. The Gram formulation

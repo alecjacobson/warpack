@@ -17,6 +17,7 @@ import warp as wp
 from warp.optim import linear
 
 from benchmarks.audit_profile import graph_summary
+from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 
@@ -266,7 +267,7 @@ def main():
         matrix_sha256=matrix_hashes,
         warp=wp.__version__,
         versions={name: importlib.metadata.version(name) for name in ("numpy", "scipy")},
-        source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        source_sha256=source_manifest(__file__),
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         accepted=all(r["quality"]["accepted"] for seq in [warmup] + rows for r in seq),
     )

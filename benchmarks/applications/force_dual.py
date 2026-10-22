@@ -19,6 +19,7 @@ from warp.optim import linear
 
 from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
+from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import (
     BatchedCGPreconditioner,
@@ -31,6 +32,7 @@ from warpack.linalg_tiles import gram_tiled, rotate_tiled
 
 from .fem_hierarchy import beam_problem, matrix_hash
 from .fem_shapes import elapsed
+from .weighted_snapshot_reference import weighted_reference
 
 
 def localized_forces(side, columns):
@@ -45,8 +47,12 @@ def localized_forces(side, columns):
     return f
 
 
-def reference(h, mass, forces, k):
+def reference(h, mass, forces, k, method="gram"):
+    if method not in ("gram", "svd"):
+        raise ValueError("reference method must be gram or svd")
     snapshots = sla.splu(h.tocsc()).solve(forces)
+    if method == "svd":
+        return weighted_reference(snapshots, mass, k) | dict(snapshots=snapshots)
     gram = snapshots.T @ (mass @ snapshots)
     values, vectors = la.eigh(gram)
     order = np.argsort(-values)
@@ -235,6 +241,7 @@ def main():
     parser.add_argument("--mass", choices=("consistent", "lumped"), default="consistent")
     parser.add_argument("--backend", choices=("cudss", "cg"), required=True)
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--reference-method", choices=("gram", "svd"), default="gram")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if min(args.side, args.modes, args.repeats) < 1 or args.columns <= args.modes:
@@ -244,7 +251,7 @@ def main():
     forces = localized_forces(args.side, args.columns)
     assembly_seconds = time.perf_counter() - begin
     begin = time.perf_counter()
-    ref = reference(p.a, p.b, forces, args.modes)
+    ref = reference(p.a, p.b, forces, args.modes, args.reference_method)
     reference_seconds = time.perf_counter() - begin
     begin = time.perf_counter()
     driver = SnapshotROM(
@@ -296,7 +303,7 @@ def main():
         graphs=graphs,
         matrix_sha256=matrix_hash(p),
         forces_sha256=hashlib.sha256(forces.tobytes()).hexdigest(),
-        source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        source_sha256=source_manifest(__file__),
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         accepted=all(r["quality"]["accepted"] for r in [warmup] + rows),
     )

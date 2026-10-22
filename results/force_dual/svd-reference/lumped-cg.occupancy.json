@@ -1,0 +1,66 @@
+{
+  "command": [
+    "timeout",
+    "180",
+    "taskset",
+    "-c",
+    "8-11",
+    "python",
+    "-m",
+    "benchmarks.applications.force_dual",
+    "--mass",
+    "lumped",
+    "--backend",
+    "cg",
+    "--side",
+    "10",
+    "--columns",
+    "32",
+    "--modes",
+    "20",
+    "--reference-method",
+    "svd",
+    "--repeats",
+    "3",
+    "--out",
+    "results/force_dual/svd-reference/lumped-cg.json"
+  ],
+  "pid": 354555,
+  "exit_code": 0,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792709910.0002108,
+      "other": [
+        "354537, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 4664 MiB, 2490 MHz, 34",
+      "error": null
+    },
+    {
+      "time": 1792709911.134566,
+      "other": [
+        "354537, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "99 %, 4664 MiB, 2490 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792709912.2370353,
+      "other": [
+        "354537, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "97 %, 5017 MiB, 2490 MHz, 36",
+      "error": null
+    },
+    {
+      "time": 1792709913.373238,
+      "other": [
+        "354537, /opt/geospsr-runtime/venv/bin/python"
+      ],
+      "gpu": "100 %, 6083 MiB, 2490 MHz, 38",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

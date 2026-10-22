@@ -28,7 +28,7 @@ def test_local_forces_and_changed_covariance_replay(backend, consistent, depende
         driver.capture()
         for scale in (np.ones(12), np.linspace(0.3, 2.0, 12)):
             current = forces * scale
-            ref = reference(p.a, p.b, current, 4)
+            ref = reference(p.a, p.b, current, 4, method="svd")
             device.assign(current.T.copy())
             wp.capture_launch(driver.response_graph)
             wp.capture_launch(driver.mode_graph)

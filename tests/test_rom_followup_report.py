@@ -108,6 +108,16 @@ def test_force_identity_required_for_timing_comparison():
         compare(changed, baseline)
 
 
+def test_helper_change_rejects_identical_driver_configuration():
+    raw, occ = fixture("forces")
+    raw["source_sha256"] = {"driver.py": "same", "reference.py": "old"}
+    baseline = copy.deepcopy(summarize(raw, occ, "forces")) | {"environment": {"gpu": "same"}}
+    raw["source_sha256"]["reference.py"] = "changed"
+    changed = summarize(raw, occ, "forces") | {"environment": baseline["environment"]}
+    with pytest.raises(ValueError, match="source_sha256"):
+        compare(changed, baseline)
+
+
 def test_changed_overlay_rejected_even_with_same_wheel_version():
     raw, occ = fixture("forces")
     baseline = copy.deepcopy(summarize(raw, occ, "forces")) | {"environment": {"gpu": "same"}}

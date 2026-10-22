@@ -42,12 +42,12 @@ the library. Solver arithmetic remains Warp, plus optional cuDSS sparse solves.
 | Coarse-to-fine FEM starts | [Nested P1 beam protocol and results](../results/fem_hierarchy/README.md) | [20 modes](../results/fem_hierarchy/consistent-20.summary.json), [50 modes](../results/fem_hierarchy/consistent-50.summary.json) |
 | Coarse accuracy and full-width starts | [Seven monitored profiles](../results/fem_hierarchy_tuning/README.md) | [20-mode full loose](../results/fem_hierarchy_tuning/full-loose.summary.json), [50-mode control](../results/fem_hierarchy_tuning/k50-full-loose.summary.json) |
 | Low-rank force-covariance ROM | [Procedural forces, equations and limits](../results/force_dual/README.md) | [cuDSS](../results/force_dual/consistent-cudss.summary.json), [pure Warp](../results/force_dual/consistent-cg.summary.json) |
-| Dominant generalized reconstruction | [Procedural pencil and API](../benchmarks/applications/SPECTRAL_SURFACE.md) | [ARPACK, cuDSS and pure-Warp comparison](../results/spectral_surface/README.md) |
+| Dominant generalized reconstruction | [Procedural pencil and API](../benchmarks/applications/SPECTRAL_SURFACE.md) | [Initial coverage](../results/spectral_surface/README.md), [matched block follow-up](../results/spectral_surface_block/README.md) |
 | Experimental FSAI workspace | [Packed-storage patch and memory evidence](../results/fsai_packed/README.md) | Four uncontended FEM comparisons, original and packed widths 32/64 |
 | Candidate FSAI updates | [Dependency qualification and reproduction](../results/fsai_current/README.md) | Captured refits, deferred factors and changing FEM matrices |
 | Current FSAI dependency | [Setup fix, installation and regression protocol](../results/fsai_setup_regression/README.md) | [Three fresh Anvil comparisons](../results/fsai_setup_regression/anvil/summary.json), full library and upstream tests |
 | Fast public FEM path | [Families, configurations and gates](../benchmarks/applications/FAST_BLOCK.md) | [FEM qualification](../results/fem_fast_block_v020/README.md) |
-| Coarse FEM correction | [Experimental driver](../benchmarks/applications/fem_coarse_correction.py) | [Matched comparison and negative result](../results/fem_coarse_correction/README.md) |
+| Coarse FEM correction | [Experimental driver](../benchmarks/applications/fem_coarse_correction.py) | [Rank-24 correction](../results/fem_coarse_correction/README.md), [geometric/mixed-precision hierarchy](../results/fem_geometric/README.md) |
 | Fast public Anvil path | [Release comparison command](../results/release_v0_2_0/README.md#anvil-promotion-regression) | [Every accepted/rejected release trial](../results/release_v0_2_0/README.md) |
 | CPU Anvil factors | [PARDISO / SuperLU / Eigen audit](../benchmarks/ANVIL_FACTORIZATION.md) | [ARPACK](../results/anvil_pardiso_noir_confirmed.json), [Spectra](../results/anvil_pardiso_spectra_confirmed.json) |
 
@@ -78,6 +78,15 @@ also requires a verified common assembled fixture, unchanged reference data and
 method-specific start/shifted-matrix identities. Use the historical checkout to reproduce an
 older report, or establish and review a new baseline; do not copy dependency
 metadata onto an old measurement.
+
+Force-ROM and shape-change workers now use
+[`source_manifest`](../benchmarks/source_provenance.py) to fingerprint local
+static imports, package initializers and the full Warpack source package.
+Paths are repository-relative; imported modules are parsed without execution.
+Dependency manifests separately cover patched third-party numerical code.
+Their older single-driver fingerprints do not establish identical helper/core
+sources; preserve those raw records and establish a new reviewed baseline.
+See [#145](https://github.com/alecjacobson/warpack/issues/145).
 
 Graph DOT audits check callback nodes and transfer directions; they are not
 complete API traces. The cuDSS vendor metadata exception remains explicit.

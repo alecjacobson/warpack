@@ -26,6 +26,15 @@ def test_archived_batch_and_baseline_gate():
         compare(incompatible, summary)
 
 
+def test_transitive_source_map_rejects_core_change():
+    baseline = summarize(RESULTS)
+    baseline["signature"]["source_sha256"] = {"driver.py": "same", "warpack/block.py": "old"}
+    changed = copy.deepcopy(baseline)
+    changed["signature"]["source_sha256"]["warpack/block.py"] = "new"
+    with pytest.raises(ValueError, match="signature"):
+        compare(changed, baseline)
+
+
 @pytest.mark.parametrize("failure", ["contention", "native_count", "matrix", "nan_time"])
 def test_reject_invalid_batch(tmp_path, failure):
     for p in RESULTS.glob("*.json"):
