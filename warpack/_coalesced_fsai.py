@@ -49,6 +49,26 @@ def multiply(a: Any, b: Any):
 
 
 @wp.kernel(module="unique")
+def csr_eight_rhs_padded(
+    offsets: wp.array[wp.int32],
+    counts: wp.array[wp.int32],
+    columns: wp.array[wp.int32],
+    values: wp.array(dtype=Any),
+    x: wp.array2d(dtype=Any),
+    y: wp.array2d(dtype=Any),
+):
+    group, row, lane = wp.tid()
+    rhs, slot = group * 8 + lane % 8, lane // 8
+    value = x.dtype(0.0)
+    if rhs < x.shape[1]:
+        for e in range(offsets[row] + slot, offsets[row] + counts[row], 4):
+            value += x.dtype(values[e]) * x[columns[e], rhs]
+    totals = wp.tile_sum(wp.tile_reshape(wp.tile(value), shape=(4, 8)), axis=0)
+    if rhs < x.shape[1] and slot == 0:
+        y[row, rhs] = wp.tile_extract(totals, lane % 8)
+
+
+@wp.kernel(module="unique")
 def transpose_axpby(
     source: wp.array2d(dtype=Any),
     y: wp.array2d(dtype=Any),
@@ -81,8 +101,6 @@ class CoalescedFactorApplication:
         for factor in (preconditioner.G, preconditioner.GT):
             if factor.block_shape != (1, 1) or factor.shape != (n, n) or factor.device != device:
                 raise ValueError("require scalar FSAI factors on the working device")
-            if factor.row_counts is not None:
-                raise ValueError("require compressed FSAI factors")
         self.first = wp.empty((n, width), dtype=dtype, device=device)
         self.second = wp.empty_like(self.first)
 
@@ -99,6 +117,22 @@ class CoalescedFactorApplication:
             (self.preconditioner.G, self.first, self.second),
             (self.preconditioner.GT, self.second, self.first),
         ):
+            if factor.row_counts is not None:
+                wp.launch_tiled(
+                    csr_eight_rhs_padded,
+                    dim=((self.width + 7) // 8, self.n),
+                    inputs=[
+                        factor.offsets,
+                        factor.row_counts,
+                        factor.columns,
+                        factor.values,
+                        source,
+                        result,
+                    ],
+                    block_dim=32,
+                    device=self.device,
+                )
+                continue
             wp.launch_tiled(
                 csr_eight_rhs,
                 dim=((self.width + 7) // 8, self.n),

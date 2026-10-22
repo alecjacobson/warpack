@@ -1,0 +1,130 @@
+{
+  "arguments": {
+    "coarse": 5,
+    "fine": 10,
+    "modes": 20,
+    "width": 24,
+    "mass": "consistent",
+    "profile": "random",
+    "repeats": 3,
+    "out": "results/fsai_current/fem-packed32.json",
+    "factor_variant": "current-packed",
+    "factor_rows": 32
+  },
+  "setup": {
+    "fine_assembly_seconds": 0.17943120375275612,
+    "fine_setup_seconds": 0.9987434111535549,
+    "fine_capture_seconds": 0.5181057937443256
+  },
+  "reference_seconds": 2.5911092571914196,
+  "source_tolerance": null,
+  "source_count": null,
+  "warmup": {
+    "source_seconds": 0.0023443996906280518,
+    "fine_seconds": 0.4186725355684757,
+    "total_seconds": 0.4210169352591038,
+    "quality": {
+      "accepted": true,
+      "residual": 8.742088445981294e-12,
+      "max_absolute_residual": 1.3282604183206814e-12,
+      "orthogonality": 4.440892098500626e-16,
+      "spectrum_error": 1.1372847108503947e-13,
+      "requested_subspace_error": 5.5845304344557945e-12,
+      "status": 0,
+      "converged": 20,
+      "iterations": 25
+    },
+    "source_quality": null,
+    "accepted": true
+  },
+  "rows": [
+    {
+      "source_seconds": 0.000611867755651474,
+      "fine_seconds": 0.42293068766593933,
+      "total_seconds": 0.4235425554215908,
+      "quality": {
+        "accepted": true,
+        "residual": 2.82400729848016e-12,
+        "max_absolute_residual": 3.5965848355079544e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.099120794378905e-13,
+        "requested_subspace_error": 1.872625997423443e-12,
+        "status": 0,
+        "converged": 20,
+        "iterations": 26
+      },
+      "source_quality": null,
+      "accepted": true
+    },
+    {
+      "source_seconds": 0.0021830089390277863,
+      "fine_seconds": 0.4268544130027294,
+      "total_seconds": 0.4290374219417572,
+      "quality": {
+        "accepted": true,
+        "residual": 4.028057160338502e-12,
+        "max_absolute_residual": 5.720923409481549e-13,
+        "orthogonality": 4.440892098500626e-16,
+        "spectrum_error": 1.1245171460672054e-13,
+        "requested_subspace_error": 3.368788976538705e-12,
+        "status": 0,
+        "converged": 20,
+        "iterations": 26
+      },
+      "source_quality": null,
+      "accepted": true
+    },
+    {
+      "source_seconds": 0.0017073117196559906,
+      "fine_seconds": 0.4227997660636902,
+      "total_seconds": 0.4245070777833462,
+      "quality": {
+        "accepted": true,
+        "residual": 4.689625987457256e-12,
+        "max_absolute_residual": 6.739331315230856e-13,
+        "orthogonality": 6.661338147750939e-16,
+        "spectrum_error": 1.2284617767477357e-13,
+        "requested_subspace_error": 3.8887770053192865e-12,
+        "status": 0,
+        "converged": 20,
+        "iterations": 26
+      },
+      "source_quality": null,
+      "accepted": true
+    }
+  ],
+  "graphs": {
+    "fine": {
+      "node_types_including_conditional_body": {
+        "MEMSET": 139,
+        "KERNEL": 1922,
+        "MEMCPY": 61,
+        "CONDITIONAL": 30
+      },
+      "memcpy_kinds": {
+        "DtoD (DEVICE to DEVICE)": 61
+      },
+      "method": "CUDA graph DOT inspection; not a CUDA API trace"
+    }
+  },
+  "n": 10890,
+  "matrix_sha256": {
+    "fine": "36fe4abd94098e42882f55f14adcae897408d4a8b010136c80cc41b26e427e99"
+  },
+  "source_sha256": {
+    "fem_hierarchy_tuning.py": "4cb10ffb32b808cd765ea1fa336ded2b729222e7625804ef2d9e7af30947cb38",
+    "fem_hierarchy.py": "4b41a8c232c0986efc463c988c0ece56085fd0f81ce2f3dad2486acac57fa7cf",
+    "fem_shapes.py": "f98c5753aeebc18d065db795d663239835ff12ec7f18d3450580cac1bee3c178",
+    "fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "block.py": "9c13850750bf319944380c3f27ffd7cc76b3f118760dbfbd2626fc845495ba3f",
+    "fsai.py": "aa4f526521c35f87ddfc1610f18bbda395784b636a4a8c844bce8f40ef4ab8b2",
+    "fsai_current_fem.py": "30bd39ba5d2ba8c4887e57fd1218334ee9caa0c7f17c5a04af2db4352ca8c0da",
+    "batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "_coalesced_fsai.py": "8ec706fef7c8bb20274e3b57d6dfda6db41c77c598de6661d4bcea696169bc6c",
+    "fsai_current.py": "e38d19bd27586538c19c26a1a90314bfa2a7a9847e6b2b0135d7b0d5b61d80b0"
+  },
+  "git_head": "96b08b6b73b2ad371b9e0b1bfa1a82399961761e",
+  "warp": "1.18.0",
+  "accepted": true,
+  "base_fsai_sha256": "584e0fb277ae78d0f6e382b551898831680275396aacbcfb10e948961e141c8c"
+}

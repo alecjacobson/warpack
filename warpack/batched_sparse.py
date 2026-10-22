@@ -26,7 +26,36 @@ def csr_four_rhs(
         y[rhs, row] = wp.tile_extract(totals, lane // 8)
 
 
+@wp.kernel(module="unique")
+def csr_four_rhs_padded(
+    offsets: wp.array[wp.int32],
+    counts: wp.array[wp.int32],
+    columns: wp.array[wp.int32],
+    values: wp.array(dtype=Any),
+    x: wp.array2d(dtype=Any),
+    y: wp.array2d(dtype=Any),
+):
+    group, row, lane = wp.tid()
+    rhs, slot = group * 4 + lane // 8, lane % 8
+    value = x.dtype(0.0)
+    if rhs < x.shape[0]:
+        for e in range(offsets[row] + slot, offsets[row] + counts[row], 8):
+            value += x.dtype(values[e]) * x[rhs, columns[e]]
+    totals = wp.tile_sum(wp.tile_reshape(wp.tile(value), shape=(4, 8)), axis=1)
+    if rhs < x.shape[0] and slot == 0:
+        y[rhs, row] = wp.tile_extract(totals, lane // 8)
+
+
 def csr_block_product(matrix, x, y):
+    if matrix.row_counts is not None:
+        wp.launch_tiled(
+            csr_four_rhs_padded,
+            dim=((x.shape[0] + 3) // 4, matrix.nrow),
+            inputs=[matrix.offsets, matrix.row_counts, matrix.columns, matrix.values, x, y],
+            block_dim=32,
+            device=matrix.device,
+        )
+        return
     wp.launch_tiled(
         csr_four_rhs,
         dim=((x.shape[0] + 3) // 4, matrix.nrow),
