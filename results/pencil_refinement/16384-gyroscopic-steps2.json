@@ -1,0 +1,348 @@
+{
+  "protocol": "Accuracy-only control of existing cuDSS residual corrections for issue #123.\n\nNo kinematic reconstruction, quotient update or eigenvector polishing is used.\nOnly the fixed correction count inside each shifted sparse solve changes. The\ncorrection products/updates already run in Warp; cuDSS only applies its factors.\n",
+  "args": {
+    "nodes": 16384,
+    "k": 20,
+    "ncv": 64,
+    "kind": "gyroscopic",
+    "refinement_steps": 2,
+    "repeats": 3,
+    "cycles": 2,
+    "tol": 1e-09,
+    "out": "results/pencil_refinement/16384-gyroscopic-steps2.json"
+  },
+  "inputs": {
+    "operator": {
+      "shape": [
+        65536,
+        65536
+      ],
+      "offsets": {
+        "shape": [
+          65537
+        ],
+        "dtype": "<i8",
+        "sha256": "b1794d8c2c47ea8bba2d112d1193bbc5520f603c6a62c15cf9bb7549d63f90cb"
+      },
+      "columns": {
+        "shape": [
+          425968
+        ],
+        "dtype": "<i8",
+        "sha256": "de69c51b9db8cb12540415f2d480ad596519170bf91e9bf27caac3c882cc4134"
+      },
+      "values": {
+        "shape": [
+          425968
+        ],
+        "dtype": "<f8",
+        "sha256": "17995e5ab22aa2e46c83cbbc67c395f3fbad2ece9aa404f1404b1d189164ae04"
+      }
+    },
+    "mass": {
+      "shape": [
+        65536,
+        65536
+      ],
+      "offsets": {
+        "shape": [
+          65537
+        ],
+        "dtype": "<i8",
+        "sha256": "54269c24e3765903fb624c1b1cffe5ee7504b9ac42555ce085aa50e822ddc336"
+      },
+      "columns": {
+        "shape": [
+          229368
+        ],
+        "dtype": "<i8",
+        "sha256": "90c33ace5d760aea01b0fa435f4256d97e3761f05fc78844358cf30bca76a6fa"
+      },
+      "values": {
+        "shape": [
+          229368
+        ],
+        "dtype": "<f8",
+        "sha256": "df8138aff21bb065129a175b84774529e88b00d38347aac6e54cd58e58dd373a"
+      }
+    },
+    "start": {
+      "shape": [
+        65536
+      ],
+      "dtype": "<c16",
+      "sha256": "5894f1d57adec7cfdc7674dd24fa52c296fbb7d1fa80a6405e66469615b56783"
+    },
+    "reference_values": {
+      "shape": [
+        20
+      ],
+      "dtype": "<c16",
+      "sha256": "0851e92d7bd89ab9e98c081a1b8424abb4b97aba1ea1f5eae373b804377e2433"
+    },
+    "stored_coefficient_reference_values": {
+      "shape": [
+        20
+      ],
+      "dtype": "<c16",
+      "sha256": "ae37228a8abf9530eedab44154b6e28e5fbe342db03b7c6f9a0855ca01cb68fc"
+    }
+  },
+  "reference_coefficient_effect": {
+    "residual": 8.336802283105813e-13,
+    "quadratic_residual": 1.6329248943052206e-12,
+    "velocity_relation": 6.149673123216967e-15,
+    "spectrum_error": 3.205068278113566e-10,
+    "norm_error": 1.1102230246251565e-16,
+    "subspace_error": 3.461723924940721e-12,
+    "minimum_vector_singular_value": 0.12300882245730595,
+    "independent_vectors": true,
+    "accepted": true
+  },
+  "reference_scope": "The original analytic fixture reference remains the acceptance gate. A separate constant-block modal reference uses the actual stored CSR coefficients and wider-precision symbol assembly. It diagnoses physical assembly roundoff without replacing the primary gate or native residual.",
+  "source_sha256": {
+    "benchmarks/anvil_inputs.py": "00c5eb4a1cb36337984761d93da1c367b1c1761003bd94780dd8b6186ef29e9c",
+    "benchmarks/applications/__init__.py": "a517d73e69ebb3dc905b95b63eac4e34625df802a48ed523516f1c030f388b0d",
+    "benchmarks/applications/damped.py": "600934f22b83b208edc212e169530b2b3e3415f713bced17aade7d9c0955a50e",
+    "benchmarks/applications/damped_backends.py": "4cc8eea822e0c6859c002e5f274660c334d1de3b8da3b0c3155efe7d46b0f5d3",
+    "benchmarks/applications/damped_pencil.py": "74e8fb3f59fbb577a5e2ce6e6fb842b77d53051fa44bdaaf7469be3f797615d2",
+    "benchmarks/audit_profile.py": "e718c8c407aca6ea39faf38681cb63f25243f2acf261648ddd387ff0913760ee",
+    "benchmarks/compare.py": "70218c8e5dcb12c1bac86de5757aa4407a1dfc791f54c48fb1fb3e267b95fc4f",
+    "benchmarks/dependency_provenance.py": "390309b2bf1d6dc5eec41960047eb5ae79a89aeee50c164df9811ecaf4f50e6e",
+    "benchmarks/experimental/damped_coordinates.py": "f64db1d261d3724a38cc1ab9656ff07d8c62f4bc0032798dfe53ec04f2ff25da",
+    "benchmarks/experimental/pencil_assembled_reference.py": "316cc50cccd86e87aaa73a0376b89b7bc879a224700423b142812460784af9f8",
+    "benchmarks/experimental/pencil_polish.py": "3731d186e5915d1e373f94eeae348e59c54101c11f82ddfc7b925277771e48ea",
+    "benchmarks/experimental/pencil_refinement.py": "d2411a84dabb6263da2d2d16878ffd17564c41399a4665962c8a9972586af82c",
+    "benchmarks/source_provenance.py": "3267e866bbbc1c32957ad350e2889285e9703fd8279ddc884d9728bb71c41062",
+    "benchmarks/upstream/__init__.py": "efeb32afe41f0a6d8385b636de39cd4e9c6e8c8d7f2d45c84028391895705377",
+    "benchmarks/upstream/adapters.py": "d3f2f4eb10cf88d5067595b6db4badc3881cb6006b517dce0ba4e9f06abd245c",
+    "examples/__init__.py": "225a557796620a17a0f23488f0edce3b4019dfd97b5bb905371a483c7f87a6ec",
+    "examples/problems/__init__.py": "408f45e3a66bdebbe67e7e38ae9edb17b6e57b01abdcc7589b814984f4e64a43",
+    "examples/problems/elasticity.py": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "b2cc3e17c9355eff9d3524e17fb9cd93016aaebf2a4a5c33672380c2a539b1d0",
+    "warpack/_block_search.py": "3e5004a0bc110c35fbe4bd73ee29538789469d617a6f83b0780f4b3f73719448",
+    "warpack/_block_whitening.py": "805c27508747521ca0b7de2886b371422d321c27f5e0e4453b27ba650123f3a9",
+    "warpack/_coalesced_fsai.py": "d1267039b1b3f15a63ee4c4f6e6c0db6483d403b9cff0e7549dad7628703409c",
+    "warpack/_coalesced_operator.py": "bb6b34a7aa62dd19502ae5c28861785ab6230d17b1b05faac4e20be4d869d132",
+    "warpack/_compact_jacobi.py": "7da52eb930ab36f68d50c4a25fb8c45fa4a0142880523d9a563244409b4b3cfe",
+    "warpack/_first_whitening.py": "53cc5d906a781ccb180106fd09e2619704a269e6da2da1efe443994f7845e5ad",
+    "warpack/_projected_cholesky.py": "8b9ea32c35bac2d7c942ca7d201770cf43ad02982d59a658d4eab2352721fd88",
+    "warpack/_scratch.py": "153c260b5a6b84d1f4346ba5ebd6805e7a6c06261f35cd755cfee994f9cb1e50",
+    "warpack/_triangular.py": "67076818b6cc1286173dded6ce5287a6b10e4850aa04a067f479c32aab0898ed",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "d492a54956d7043ca39477663e60d11bbf32ddcdbb143c04419f1a42e3659871",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "5d24f17ce1297123f3bd35cf9a8b72c6707a259f3a1b9be8237889dae17aa1d8",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "db470884bc318522654eb558088c44c19f861d9cfdf52d76c91e8f771f4dcb0a",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "706be371520d56cb3e96064c0163be2ff7a5c718b99881c89542eac491d2f5f5",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "f31c8d065bf69e9429b5ab47702e1dda0596191f407107d5890a45f7c1b8861b",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "58f62d156207f0778123891f82a66c8d253bc722aafa2c6817fb7c4ec5406ca0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 3176,
+      "KERNEL": 8244,
+      "MEMCPY": 2328
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 1302,
+      "HtoD (HOST PAGEABLE to DEVICE)": 1026
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "trial": "first",
+      "count": 20,
+      "status": 0,
+      "native_residual": 6.5984303180857e-10,
+      "quality": {
+        "residual": 6.598430318103704e-10,
+        "quadratic_residual": 1.3108678135245488e-09,
+        "velocity_relation": 1.3339191059533243e-11,
+        "spectrum_error": 4.115071148512484e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 1.2196990383673364e-10,
+        "minimum_vector_singular_value": 0.12300882245993158,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "quality_stored_coefficient_reference": {
+        "residual": 6.598430318103704e-10,
+        "quadratic_residual": 1.3108678135245488e-09,
+        "velocity_relation": 1.3339191059533243e-11,
+        "spectrum_error": 1.7877711065947233e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 1.2190573662818072e-10,
+        "minimum_vector_singular_value": 0.12300882245993158,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "extended": {
+        "residual": 6.598427017123874e-10,
+        "first_block": 6.676002330847118e-12,
+        "second_block": 6.598340042242795e-10,
+        "mantissa_bits": 63
+      },
+      "accepted": true
+    },
+    {
+      "trial": 1,
+      "count": 19,
+      "status": 0,
+      "native_residual": 1.932775821170384e-09,
+      "quality": {
+        "residual": 1.9327758211705243e-09,
+        "quadratic_residual": 3.8094950355776165e-09,
+        "velocity_relation": 1.3632332330999999e-11,
+        "spectrum_error": 4.490287239540675e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 1.1556891717254774e-10,
+        "minimum_vector_singular_value": 0.1230088224600507,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "quality_stored_coefficient_reference": {
+        "residual": 1.9327758211705243e-09,
+        "quadratic_residual": 3.8094950355776165e-09,
+        "velocity_relation": 1.3632332330999999e-11,
+        "spectrum_error": 1.7568701882268937e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 1.1545423527001991e-10,
+        "minimum_vector_singular_value": 0.1230088224600507,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "extended": {
+        "residual": 1.9327757010505193e-09,
+        "first_block": 6.916421621102762e-12,
+        "second_block": 1.932763325832546e-09,
+        "mantissa_bits": 63
+      },
+      "accepted": false
+    },
+    {
+      "trial": 2,
+      "count": 18,
+      "status": 0,
+      "native_residual": 1.6305092309338088e-09,
+      "quality": {
+        "residual": 1.6305092309333952e-09,
+        "quadratic_residual": 3.258515622733189e-09,
+        "velocity_relation": 1.4526307949404096e-11,
+        "spectrum_error": 3.305311356272928e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 1.1641517435102979e-10,
+        "minimum_vector_singular_value": 0.12300882246012917,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "quality_stored_coefficient_reference": {
+        "residual": 1.6305092309333952e-09,
+        "quadratic_residual": 3.258515622733189e-09,
+        "velocity_relation": 1.4526307949404096e-11,
+        "spectrum_error": 2.1098478182703474e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 1.1638258511243453e-10,
+        "minimum_vector_singular_value": 0.12300882246012917,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "extended": {
+        "residual": 1.6305094877780804e-09,
+        "first_block": 7.369984104008154e-12,
+        "second_block": 1.6304944424293283e-09,
+        "mantissa_bits": 63
+      },
+      "accepted": false
+    },
+    {
+      "trial": 3,
+      "count": 19,
+      "status": 0,
+      "native_residual": 1.6666371015735929e-09,
+      "quality": {
+        "residual": 1.6666371015741033e-09,
+        "quadratic_residual": 3.284936193314509e-09,
+        "velocity_relation": 1.1836303504853579e-11,
+        "spectrum_error": 3.693356145745073e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 8.326734711606739e-11,
+        "minimum_vector_singular_value": 0.12300882245984272,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "quality_stored_coefficient_reference": {
+        "residual": 1.6666371015741033e-09,
+        "quadratic_residual": 3.284936193314509e-09,
+        "velocity_relation": 1.1836303504853579e-11,
+        "spectrum_error": 1.2455322277639005e-10,
+        "norm_error": 4.440892098500626e-16,
+        "subspace_error": 8.321938097045353e-11,
+        "minimum_vector_singular_value": 0.12300882245984272,
+        "independent_vectors": true,
+        "accepted": true
+      },
+      "extended": {
+        "residual": 1.6666371205064735e-09,
+        "first_block": 6.005198743632829e-12,
+        "second_block": 1.6666263015559786e-09,
+        "mantissa_bits": 63
+      },
+      "accepted": false
+    }
+  ],
+  "accepted": false,
+  "timing_scope": "No timings claimed; this is an accuracy diagnostic."
+}

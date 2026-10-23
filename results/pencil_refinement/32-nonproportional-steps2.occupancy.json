@@ -1,0 +1,42 @@
+{
+  "command": [
+    "timeout",
+    "600",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.pencil_refinement",
+    "--nodes",
+    "32",
+    "--k",
+    "8",
+    "--ncv",
+    "32",
+    "--kind",
+    "nonproportional",
+    "--refinement-steps",
+    "2",
+    "--out",
+    "results/pencil_refinement/32-nonproportional-steps2.json"
+  ],
+  "pid": 513156,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792766362.0754092,
+      "other": [],
+      "gpu": "17 %, 1 MiB, 2490 MHz, 35",
+      "error": null
+    },
+    {
+      "time": 1792766363.2068763,
+      "other": [],
+      "gpu": "5 %, 468 MiB, 2490 MHz, 35",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
