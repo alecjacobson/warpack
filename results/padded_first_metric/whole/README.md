@@ -38,3 +38,8 @@ add24 accepted outputs, for **48** total. These are prototype controls on
 healthy SPD problems; #176 tracks a separately discovered failed-normalization
 routing guard before promotion. The outer failure flag is not cleared by that
 edge case, and none of these healthy controls exercises it.
+
+The subsequently fixed [#176 guard](../README.md) rejects an already-failed
+normalization before attempting the certificate. These healthy SPD controls
+retain their original source identities; no performance claim is made for the
+invalid-input routing fix.

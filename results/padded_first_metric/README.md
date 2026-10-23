@@ -5,8 +5,8 @@ to normalized search metrics with **exact zero padding**. Production dispatch
 is unchanged. Component and small complete-solve tests pass. Subsequent [primary controls](whole/README.md)
 and [broader families](families/README.md) qualify **48 complete outputs** with
 roughly3.4–5.9% measured replay reductions on the wide FEM cases. The small
-Anvil path remains unchanged. A separate failed-normalization routing review
-finding (#176) must be resolved before core promotion.
+Anvil path remains unchanged. The separate failed-normalization routing finding (#176) is now fixed before
+core promotion.
 
 ## What is certified
 
@@ -70,4 +70,10 @@ The [retained #176 reproducer](validation/status-reproducer.log) confirms that
 a negative original Gram diagonal can normalize into apparent zero padding:
 outer failure remains1, but the original prototype records a fast-path use.
 Healthy changed-input replay recovers. This is a routing/diagnostic defect,
-not a falsely successful eigensolve; the strict regression tracks the fix.
+not a falsely successful eigensolve. The fix gates the device attempt on the
+retained outer status. Both negative-mass scaling failure and a pre-existing
+failure now take canonical fallback; valid changed-input replay recovers on the
+same graph. The strict-xfail marker is removed. **74 pinned tests pass**; stock
+**51 pass with23 expected upstream-feature skips**.
+[Fixed pinned checks](validation/status-pinned-tests.log),
+[stock checks](validation/status-stock-tests.log).

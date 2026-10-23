@@ -31,3 +31,8 @@ observations, not a significance claim. Adjacent reports retain all samples,
 commands, quality gates and source/reference provenance. Together these qualify
 **48** complete outputs; failed-normalization routing (#176) is a separate
 review finding to resolve before core promotion.
+
+The subsequently fixed [#176 guard](../README.md) rejects an already-failed
+normalization before attempting the certificate. These healthy SPD controls
+retain their original source identities; no performance claim is made for the
+invalid-input routing fix.

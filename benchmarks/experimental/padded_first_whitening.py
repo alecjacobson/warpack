@@ -13,10 +13,14 @@ from warpack.block import rotate
 
 
 @wp.kernel(enable_backward=False)
-def select_attempt(candidate: wp.array[wp.int32], flags: wp.array[wp.int32]):
-    flags[0] = candidate[0]
+def select_attempt(
+    candidate: wp.array[wp.int32], outer_status: wp.array[wp.int32], flags: wp.array[wp.int32]
+):
+    # Failed scaling can turn a negative diagonal into apparent zero padding.
+    # Preserve canonical error routing rather than certifying that masked input.
+    flags[0] = int(candidate[0] != 0 and outer_status[0] == 0)
     flags[1] = 0
-    flags[2] = 1 - candidate[0]
+    flags[2] = 1 - flags[0]
 
 
 class PaddedFirstWhitening(FirstWhitening):
@@ -35,7 +39,12 @@ class PaddedFirstWhitening(FirstWhitening):
 
     def prepare_candidate(self, owner):
         self.certificate.prepare()
-        wp.launch(select_attempt, 1, [self.certificate.candidate, self.flags], device=owner.device)
+        wp.launch(
+            select_attempt,
+            1,
+            [self.certificate.candidate, owner.status, self.flags],
+            device=owner.device,
+        )
 
     def attempt(self, owner):
         self.certificate.attempt()
