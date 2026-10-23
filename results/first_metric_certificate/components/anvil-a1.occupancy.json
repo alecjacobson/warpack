@@ -1,0 +1,36 @@
+{
+  "command": [
+    "timeout",
+    "900",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.profile_first_metric",
+    "--sample-report",
+    "results/first_metric_certificate/samples/anvil-a1.json",
+    "--minimum",
+    "32",
+    "--out",
+    "results/first_metric_certificate/components/anvil-a1.json"
+  ],
+  "pid": 475469,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792747345.6606796,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792747346.800408,
+      "other": [],
+      "gpu": "10 %, 472 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
