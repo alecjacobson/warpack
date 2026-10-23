@@ -1,5 +1,7 @@
 """Optional step profiling must not put event records in conditional children."""
 
+import sys
+
 import numpy as np
 import pytest
 import scipy.sparse as sp
@@ -111,3 +113,36 @@ def test_branch_index_contract_precedes_instrumentation(active):
     with pytest.raises(ValueError, match="branch index"):
         capture_profile(solver, None if active else 0)
     assert all(getattr(obj, name) == method for obj, name, method in original)
+
+
+@pytest.mark.parametrize("reuse", [False, True])
+def test_cli_profile_allows_active_search_only_with_image_reuse(monkeypatch, tmp_path, reuse):
+    from benchmarks.experimental import compare_block
+
+    class Prepared(Exception):
+        pass
+
+    def prepare(args, **kwargs):
+        assert args.profile and args.active_search_bucket_size == 4 and args.reuse_x_image
+        raise Prepared()
+
+    monkeypatch.setattr(compare_block, "prepare", prepare)
+    monkeypatch.setattr(compare_block, "other_gpu_processes", lambda: [])
+    args = [
+        "compare",
+        "--profile",
+        "--active-search-bucket-size",
+        "4",
+        "--out",
+        str(tmp_path / "result.json"),
+    ]
+    if reuse:
+        args.append("--reuse-x-image")
+    monkeypatch.setattr(sys, "argv", args)
+    if reuse:
+        with pytest.raises(Prepared):
+            compare_block.main()
+    else:
+        with pytest.raises(SystemExit) as caught:
+            compare_block.main()
+        assert caught.value.code == 2

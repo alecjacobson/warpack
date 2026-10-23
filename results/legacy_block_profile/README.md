@@ -24,3 +24,9 @@ The [fresh profile](200-a2.json) passes complete uninstrumented solves before/af
 | 50 | 29.135 | 2.561 | 5.580 | 5.708 |
 
 Nested spans overlap and must not be added. These two-sample checkpoint medians are diagnostics, not complete-workflow speed claims. QR may still take its full fallback, as its variable checkpoint-40 span illustrates. The paired rotation costs about 5.6 ms at checkpoint 50 and 18.1 ms at checkpoint 1; it is a concrete remaining kernel target alongside projected eigensolves. All first-profile omissions and the failed reproductions remain archived.
+
+## CLI completion
+
+The active-search CLI combination is now enabled through the tested selected-branch route, while still requiring image reuse. [The fresh CLI run](cli-a2.json) passes its first captured solve, three measured solves, all five continued diagnostic steps and final post-profile physical/native checks. Sources/dependencies and occupancy are verified. The original full graph has no HOST or host/device-copy nodes. The earlier argument-guard rejection stays archived separately.
+
+All seventeen profile/CLI regressions pass ([final log](final-tests.log)). Stock Warp previously passed eight numerical profiling tests with seven FSAI skips; the two added CLI argument-contract checks also pass separately ([log](cli-guard-tests.log)). No core numerical code changed. This completes #185; the remaining paired-rotation kernel work is tracked in #186.

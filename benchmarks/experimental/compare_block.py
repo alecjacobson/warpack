@@ -258,8 +258,8 @@ def main():
         p.error("--active-search-keep-history requires active search")
     if args.active_search_bucket_size < 0:
         p.error("active-search-bucket-size must be nonnegative")
-    if args.active_search_bucket_size and (not args.reuse_x_image or args.profile):
-        p.error("active search requires --reuse-x-image and does not support --profile")
+    if args.active_search_bucket_size and not args.reuse_x_image:
+        p.error("active search requires --reuse-x-image")
     if args.cupy and args.inner_cg and not args.batched_cg:
         p.error("CuPy iterative comparison requires --batched-cg")
     if args.inner_cg < 0 or args.repeats < 1:
