@@ -7,13 +7,18 @@ from pathlib import Path
 
 import warpack
 from benchmarks.experimental import compare_block
-from benchmarks.experimental.parallel_cholesky import CooperativeCholeskyBlock
+from benchmarks.experimental.parallel_cholesky import (
+    CooperativeCholeskyBlock,
+    SerialCholeskyBlock,
+)
 from benchmarks.source_provenance import source_manifest
 
 
 def main():
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--cholesky-backend", choices=("serial", "cooperative"), required=True)
+    parser.add_argument(
+        "--cholesky-backend", choices=("serial", "cooperative", "default"), required=True
+    )
     choice, remainder = parser.parse_known_args()
     destination_parser = argparse.ArgumentParser(add_help=False)
     destination_parser.add_argument("--out", type=Path, required=True)
@@ -29,6 +34,8 @@ def main():
     try:
         if choice.cholesky_backend == "cooperative":
             warpack.BlockLOBPCG = CooperativeCholeskyBlock
+        elif choice.cholesky_backend == "serial":
+            warpack.BlockLOBPCG = SerialCholeskyBlock
         compare_block.source_manifest = lambda *_: source_manifest(__file__)
         sys.argv = [sys.argv[0]] + remainder
         compare_block.main()
@@ -44,7 +51,7 @@ def main():
         report = json.loads(destination.out.read_text())
         report["args"]["cholesky_backend"] = choice.cholesky_backend
         report["cholesky_scope"] = (
-            "Only BlockLOBPCG's small Cholesky factors: cooperative shared lower triangle at dimensions<=128 when device shared memory suffices, otherwise the existing serial kernel. No triangular solve, matrix product, projected eigenmethod, iteration, or stopping change."
+            "Only BlockLOBPCG projected Cholesky: serial forces the old kernel; cooperative forces dimensions 1..128 when CUDA shared memory suffices; default uses production guarded wide-block dispatch. No triangular solve, matrix product, projected eigenmethod, iteration, or stopping change."
         )
         destination.out.write_text(json.dumps(report, indent=2) + "\n")
     if error is not None:

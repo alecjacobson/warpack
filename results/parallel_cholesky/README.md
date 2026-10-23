@@ -10,7 +10,8 @@ The candidate computes independent entries of each column cooperatively in
 Warp, storing the packed lower triangle in shared memory. Each entry retains
 the serial kernel's subtraction order, invalid/nonpositive pivot flag and
 diagonal containment. It uses no vendor dense solver or host numerical work.
-This commit qualifies the benchmark prototype; production dispatch is unchanged.
+The initial prototype qualification is preserved in commit `93b11e1`.
+The production change below retains a narrower dispatch than that prototype.
 
 ## Isolated factorization
 
@@ -93,3 +94,54 @@ The worker records warmup duration but does not independently validate warmup.
 34 outer iterations), not the repeated performance comparison. Its original
 residual is 6.80e-12 and reference subspace error is 1.63e-11.
 Contended attempts are retained and excluded from timing conclusions.
+
+## Production dispatch
+
+`BlockLOBPCG` uses the cooperative factor only on CUDA for block widths 48–128
+when the packed lower triangle plus 1024 bytes of shared-memory headroom fits.
+All other widths and devices retain the serial kernel. In particular, the
+width-24 Anvil path is unchanged. The optimization changes neither the public
+API nor capture/replay synchronization. Device status remains sticky until the
+solver explicitly resets it; nonpositive/nonfinite pivots retain the previous
+error flag and 1e-30 diagonal containment.
+
+The explicit `serial` benchmark backend now forces the old kernel even when
+the public default changes. `cooperative` retains the wider prototype coverage,
+and `default` tests production dispatch. Run the
+`benchmarks.experimental.compare_parallel_cholesky` module with
+`--cholesky-backend serial` or `--cholesky-backend default` and `--public-api`;
+each occupancy record contains the complete case configuration.
+Configure the pinned overlay and, for Anvil, the verified
+fixture as described in [the input protocol](../anvil_inputs_142/README.md).
+
+The production-focused suite passes 41 tests: factors, changed/strided inputs,
+late pivots, containment, sticky status, capacity and non-CUDA fallbacks,
+explicit serial controls, complete coupled/free/heterogeneous FEM graph replay,
+and profiler preservation. Stock Warp 1.15 passes 34 of these with six
+upstream-FSAI-dependent FEM cases skipped (the overlay-only profiler test is
+not part of that stock invocation).
+
+The complete pinned-overlay suite passes **1,987 tests, five skipped**, in
+709.59 seconds. This is correctness validation under shared GPU occupancy, not
+a performance sample. Logs: [full suite](full-suite.log),
+[focused production tests](focused-tests.log), [stock compatibility](stock-tests.log).
+The six CPU reciprocal-conditioning tests were added afterward and validated
+separately; they are not included in that full-suite count.
+
+Fresh production controls all pass, with matching source/dependency/input
+identities and uncontended external occupancy:
+
+| Problem | Dispatch | Construction + capture (s) | Warp warm median (s) | CuPy warm median (s) |
+| --- | --- | ---: | ---: | ---: |
+| 100-mode FEM | Forced serial | 4.6442 | 3.6341 | 3.7632 |
+| 100-mode FEM | Public default | 4.2703 | 3.2328 | 3.8528 |
+| Anvil | Forced serial | 1.5898 | 1.6158 | 2.3654 |
+| Anvil | Public default (same serial kernel) | 1.6195 | 1.6256 | 2.3699 |
+
+The production wide-block median improves by **11.0%**. Anvil differs by 0.6%,
+within the observed run variation. All 24 measured Warp/CuPy solves pass;
+the default wide case's worst original residual is 8.74e-12 and Anvil's is
+2.00e-8. Setup has the same single-construction scope as the prototype table;
+CuPy adapter/upload costs remain separately recorded, not independent setup.
+[Summary and individual samples](production/summary.json), plus each worker's
+raw JSON, graph audit and external occupancy, are in `production/`.

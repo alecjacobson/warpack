@@ -47,6 +47,7 @@ the library. Solver arithmetic remains Warp, plus optional cuDSS sparse solves.
 | Candidate FSAI updates | [Dependency qualification and reproduction](../results/fsai_current/README.md) | Captured refits, deferred factors and changing FEM matrices |
 | Current FSAI dependency | [Setup fix, installation and regression protocol](../results/fsai_setup_regression/README.md) | [Three fresh Anvil comparisons](../results/fsai_setup_regression/anvil/summary.json), full library and upstream tests |
 | Fast public FEM path | [Families, configurations and gates](../benchmarks/applications/FAST_BLOCK.md) | [FEM qualification](../results/fem_fast_block_v020/README.md) |
+| Wide-block factorization | [Cooperative Cholesky controls and fallback](../results/parallel_cholesky/README.md) | Matched 100-mode FEM and 20-mode Anvil comparisons; explicit serial control |
 | Coarse FEM correction | [Experimental driver](../benchmarks/applications/fem_coarse_correction.py) | [Rank-24 correction](../results/fem_coarse_correction/README.md), [geometric/mixed-precision hierarchy](../results/fem_geometric/README.md) |
 | Fast public Anvil path | [Release comparison command](../results/release_v0_2_0/README.md#anvil-promotion-regression) | [Every accepted/rejected release trial](../results/release_v0_2_0/README.md) |
 | CPU Anvil factors | [PARDISO / SuperLU / Eigen audit](../benchmarks/ANVIL_FACTORIZATION.md) | [ARPACK](../results/anvil_pardiso_noir_confirmed.json), [Spectra](../results/anvil_pardiso_spectra_confirmed.json) |

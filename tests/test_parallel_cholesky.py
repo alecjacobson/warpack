@@ -13,9 +13,11 @@ from warp.optim import linear
 from benchmarks.experimental import profile_active_block
 from benchmarks.experimental.parallel_cholesky import (
     CooperativeCholeskyBlock,
-    packed_cholesky_kernel,
+    SerialCholeskyBlock,
 )
+from warpack import BlockLOBPCG
 from warpack import kernels as K
+from warpack._projected_cholesky import packed_cholesky_kernel
 
 
 @pytest.mark.parametrize("n", [1, 3, 7, 24, 64, 104, 128])
@@ -77,12 +79,17 @@ def test_packed_cholesky_status_and_recovery(bad):
 
 
 @pytest.mark.parametrize("case", ["clamped_consistent", "free", "heterogeneous"])
-def test_cooperative_factor_in_active_fem_replay(case, monkeypatch):
+@pytest.mark.parametrize("backend", ["prototype", "default"])
+def test_cooperative_factor_in_active_fem_replay(case, backend, monkeypatch):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     config = json.loads(Path("results/cg_partitioned/final/exact-a1.json").read_text())["args"]
-    config.update(case=case, side=2, modes=6, width=16)
-    monkeypatch.setattr(profile_active_block, "BlockLOBPCG", CooperativeCholeskyBlock)
+    config.update(case=case, side=3, modes=6, width=48)
+    monkeypatch.setattr(
+        profile_active_block,
+        "BlockLOBPCG",
+        CooperativeCholeskyBlock if backend == "prototype" else BlockLOBPCG,
+    )
     solver, check, _, _ = profile_active_block.create_solver(SimpleNamespace(**config))
     graph = solver.capture(300)
     for _ in range(2):
@@ -121,3 +128,59 @@ def test_late_pivot_preserves_serial_containment_and_sticky_status(pivot):
     wp.capture_launch(capture.graph)
     assert flag.numpy()[0] == serial_flag.numpy()[0] == 1
     np.testing.assert_array_equal(np.tril(result.numpy()), np.eye(n))
+
+
+@pytest.mark.parametrize(
+    "size,cuda,shared,expected",
+    [
+        (4, True, 100000, "serial"),
+        (24, True, 100000, "serial"),
+        (47, True, 100000, "serial"),
+        (48, True, 100000, "cooperative"),
+        (104, True, 49152, "cooperative"),
+        (128, True, 100000, "cooperative"),
+        (128, True, 49152, "serial"),
+        (129, True, 100000, "serial"),
+        (104, True, 44711, "serial"),
+        (104, True, 44712, "cooperative"),
+        (104, False, None, "serial"),
+    ],
+)
+def test_production_factor_dispatch_and_capacity_fallback(
+    size, cuda, shared, expected, monkeypatch
+):
+    # Static launch metadata can be tested without allocating a large eigensolver
+    # or requiring the test GPU to have the simulated capacity.
+    device = SimpleNamespace(is_cuda=cuda)
+    if shared is not None:
+        device.max_shared_memory_per_block = shared
+    owner = SimpleNamespace(device=device)
+    arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+    calls = []
+    monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+    monkeypatch.setattr(wp, "launch_tiled", lambda *a, **kw: calls.append(("cooperative", a, kw)))
+    BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+    assert len(calls) == 1 and calls[0][0] == expected
+    assert calls[0][2]["device"] is device
+    if expected == "cooperative":
+        assert calls[0][1][0] is packed_cholesky_kernel(size)
+        assert calls[0][2]["inputs"] is arguments
+        assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+    else:
+        assert calls[0][1] == (K.cholesky, 1, arguments)
+    # Other operations must continue through the original launch path.
+    calls.clear()
+    BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+    assert calls[0][0] == "serial" and calls[0][1] == (K.triangular, 3, arguments)
+
+
+def test_explicit_serial_benchmark_does_not_follow_new_default(monkeypatch):
+    owner = SimpleNamespace(
+        device=SimpleNamespace(is_cuda=True, max_shared_memory_per_block=100000)
+    )
+    arguments = [SimpleNamespace(shape=(104, 104)), object(), object()]
+    calls = []
+    monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(a))
+    monkeypatch.setattr(wp, "launch_tiled", lambda *a, **kw: pytest.fail("serial control changed"))
+    SerialCholeskyBlock.launch(owner, K.cholesky, 1, arguments)
+    assert calls == [(K.cholesky, 1, arguments)]

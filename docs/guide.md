@@ -257,6 +257,9 @@ building and solving the coarse problem. Such starts need not improve total time
 The [100-mode FEM comparison](../results/fem_100_modes/README.md) records complete
 requested-space checks, native stopping differences and the remaining wide-block
 replay gap against CuPy.
+The [projected-factor follow-up](../results/parallel_cholesky/README.md) measures
+a faster pure-Warp Cholesky path for wide blocks, while retaining the existing
+small-block path used by Anvil. CuPy's iteration variability remains explicit.
 The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
 measures that tradeoff while holding final fine-grid accuracy fixed.
 

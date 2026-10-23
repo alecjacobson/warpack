@@ -92,7 +92,7 @@ def main():
         source_sha256=source_manifest(__file__),
         dependency=warp_dependencies(),
         accepted=all(r["accepted"] for r in rows),
-        protocol="Isolated factorization; three warm captured batches of100 repeated factorizations of identical SPD input. Setup/capture excluded. Status, positive diagonal and independent reconstructed matrix equation checked after every batch. External occupancy is required; not an end-to-end eigen timing.",
+        protocol="Isolated factorization; warm captured batches of repeated factorizations of identical SPD input, with batch and repeat counts recorded in arguments. Setup/capture excluded. Status, positive diagonal and independent reconstructed matrix equation checked after every batch. External occupancy is required; not an end-to-end eigen timing.",
     )
     args.out.write_text(json.dumps(report, indent=2) + "\n")
     if not report["accepted"]:

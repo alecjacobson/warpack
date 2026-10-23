@@ -463,6 +463,27 @@ class BlockLOBPCG:
             )
 
     def launch(self, kernel, shape, args):
+        if kernel is K.cholesky:
+            size = args[0].shape[0]
+            # Tiny factors are not a meaningful whole-solve cost (including
+            # Anvil's width 24). Keep their existing path, and only specialize
+            # qualified wide blocks when the packed factor fits on device.
+            required_shared = 8 * (size * (size + 1) // 2 + 1)
+            if (
+                self.device.is_cuda
+                and 48 <= size <= 128
+                and required_shared + 1024 <= self.device.max_shared_memory_per_block
+            ):
+                from ._projected_cholesky import packed_cholesky_kernel
+
+                wp.launch_tiled(
+                    packed_cholesky_kernel(size),
+                    dim=1,
+                    inputs=args,
+                    block_dim=128,
+                    device=self.device,
+                )
+                return
         wp.launch(kernel, shape, args, device=self.device)
 
     def gram(self, x, y, out, symmetric=False):

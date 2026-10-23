@@ -1,0 +1,115 @@
+{
+  "wide": {
+    "profiles": {
+      "serial": {
+        "path": "wide-serial-a1.json",
+        "setup_and_capture_seconds": 4.644187904894352,
+        "cupy_adapter_and_upload_seconds": 0.08784964680671692,
+        "methods": {
+          "Warp": {
+            "median_seconds": 3.6341347619891167,
+            "seconds": [
+              3.636532660573721,
+              3.6341347619891167,
+              3.5667897686362267
+            ],
+            "worst_original_residual": 9.765803588655854e-12
+          },
+          "CuPy": {
+            "median_seconds": 3.763188298791647,
+            "seconds": [
+              3.763188298791647,
+              2.6319195739924908,
+              4.039378121495247
+            ],
+            "worst_original_residual": 7.328008659258807e-11
+          }
+        }
+      },
+      "default": {
+        "path": "wide-default-a1.json",
+        "setup_and_capture_seconds": 4.2703000120818615,
+        "cupy_adapter_and_upload_seconds": 0.08410100638866425,
+        "methods": {
+          "Warp": {
+            "median_seconds": 3.232806719839573,
+            "seconds": [
+              3.232806719839573,
+              3.235386796295643,
+              3.1191348768770695
+            ],
+            "worst_original_residual": 8.739325891981867e-12
+          },
+          "CuPy": {
+            "median_seconds": 3.8527574203908443,
+            "seconds": [
+              3.562077671289444,
+              3.8527574203908443,
+              3.9852851666510105
+            ],
+            "worst_original_residual": 7.31483748937105e-11
+          }
+        }
+      }
+    },
+    "default_over_serial": 0.8895670996168893,
+    "accepted": true
+  },
+  "anvil": {
+    "profiles": {
+      "serial": {
+        "path": "anvil-serial-a1.json",
+        "setup_and_capture_seconds": 1.5897878967225552,
+        "cupy_adapter_and_upload_seconds": 0.2504750192165375,
+        "methods": {
+          "Warp": {
+            "median_seconds": 1.6157969683408737,
+            "seconds": [
+              1.6644785962998867,
+              1.6110698319971561,
+              1.6157969683408737
+            ],
+            "worst_original_residual": 1.8006805400538254e-08
+          },
+          "CuPy": {
+            "median_seconds": 2.365417804569006,
+            "seconds": [
+              2.3628660067915916,
+              2.4305421710014343,
+              2.365417804569006
+            ],
+            "worst_original_residual": 1.6824046825337333e-09
+          }
+        }
+      },
+      "default": {
+        "path": "anvil-default-a1.json",
+        "setup_and_capture_seconds": 1.619532261043787,
+        "cupy_adapter_and_upload_seconds": 0.24726460129022598,
+        "methods": {
+          "Warp": {
+            "median_seconds": 1.6256268806755543,
+            "seconds": [
+              1.622068002820015,
+              1.6256268806755543,
+              1.6286980174481869
+            ],
+            "worst_original_residual": 1.998916885684278e-08
+          },
+          "CuPy": {
+            "median_seconds": 2.369948096573353,
+            "seconds": [
+              2.3515969775617123,
+              2.3829989284276962,
+              2.369948096573353
+            ],
+            "worst_original_residual": 1.6706765072358199e-09
+          }
+        }
+      }
+    },
+    "default_over_serial": 1.0060836308814058,
+    "accepted": true
+  },
+  "scope": "One construction/capture per worker, three measured solves per method. Warmup duration recorded but not independently validated. Identical source/dependency/input/configuration except Cholesky backend. Independent physical and native acceptance, external occupancy and device-only graph gates pass. Wide median requires at least 5% improvement; unchanged Anvil path no more than 5% regression. CuPy supplies a matched replay reference, not independent setup timing."
+}

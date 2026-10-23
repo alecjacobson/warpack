@@ -172,7 +172,7 @@ for the first 20 elastic modes. The longest rest extent is normalized to one
 metre, with illustrative material parameters `E = 100,000 Pa`, `ν = 0.3`,
 `ρ = 1,000 kg/m³`. Color follows instantaneous displacement.
 
-Fresh measurements from 2026-10-21 on an NVIDIA L40 and Xeon Platinum 8362
+Measurements from 2026-10-21 on an NVIDIA L40 and Xeon Platinum 8362
 (four pinned CPU cores), using the [v0.2.0 overlay](docs/releases/v0.2.0.md)
 for the FSAI rows:
 
@@ -214,10 +214,10 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [v0.2.0 validation report](results/release_v0_2_0/README.md) records 1,449
-full-suite passes, followed by 197 final focused and 202 stock-Warp passes;
-skips and the scope of each run are explicit. It also includes clean-wheel
-replay checks and the code review. This is not full upstream conformance.
+The [current full-suite validation](results/parallel_cholesky/README.md#production-dispatch)
+records 1,987 passes and five skips, with separate focused and stock-Warp checks.
+The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
+replay checks and the release review. This is not full upstream conformance.
 
 [Run tests and comparisons](docs/development.md)
 · [CuPy coverage](benchmarks/upstream/CUPY_REFRESH.md)
