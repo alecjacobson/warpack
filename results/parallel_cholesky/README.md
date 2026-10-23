@@ -150,3 +150,9 @@ the default wide case's worst original residual is 8.74e-12 and Anvil's is
 CuPy adapter/upload costs remain separately recorded, not independent setup.
 [Summary and individual samples](production/summary.json), plus each worker's
 raw JSON, graph audit and external occupancy, are in `production/`.
+
+The subsequent [exact-input qualification](../procedural_inputs/README.md)
+closes #156 with new procedural controls: all actual matrix, reference and
+starting-vector identities match across serial/default/repeat workers.
+Production improves the new wide median by 14.2%, with 1.7% repeat variation.
+The historical tables above retain their original provenance scope.

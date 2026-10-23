@@ -58,3 +58,41 @@ occupancy and validated summary records:
 [repeat](controls/wide-repeat-a1.json), and
 [environment](controls/environment.json).
 No exact-input equivalence is retroactively claimed for older procedural records.
+
+## Starting-width controls (#147)
+
+The following workers use the same exact operators, reference and 104-column
+starting pool as the production control above. Each narrower block is a
+verified prefix. Source and dependency identities match; only the explicitly
+recorded width/tolerance options change. Three repeats per method pass in each
+accepted worker, with no competing GPU process recorded.
+
+| Warp / CuPy starting width | Warp setup + capture (s) | Warp warm median (s) | CuPy warm median (s) |
+| --- | ---: | ---: | ---: |
+| 104 / 104 (production control) | 4.2403 | 3.1820 | 3.6316 |
+| 104 / 100 | 4.2643 | 3.2363 | 2.6073 |
+| 100 / 100 (common pool prefix) | 4.4335 | 4.1283 | 2.8901 |
+
+CuPy benefits from avoiding four extra requested columns on this fixture. Warp
+benefits from retaining them: width 100 needs 52–56 outer iterations versus
+34–36 at width 104, making its solve about 28% slower despite smaller projected
+matrices. This does not support changing Warp's recommended width to 100.
+The narrower CuPy control remains faster than Warp's width 104 solve, so #147
+stays open. CuPy histories span 154–185 across the narrower workers and its
+medians differ by about 11%; all sample times remain in the raw records.
+
+Worst normalized physical residuals are 6.14e-12/2.45e-11 (Warp/CuPy) for the
+104/100 worker and 7.49e-12/2.45e-11 for 100/100. All native and complete requested
+subspace gates pass. Setup has the same scope as above; additional CuPy
+adapter/upload times are 0.1077/0.0972 s, not independent setup.
+
+A separate 100-column CuPy run requests absolute 1e-11. All physical checks pass,
+but two of three returned blocks miss that native tolerance (max residuals
+1.178e-11 and 1.221e-11). The worker and regression summary are rejected and no
+timing claim uses it. This adds a tighter-tolerance instance of #69; the native
+1e-10 controls remain valid.
+
+[Controlled differences](controls/width-comparison.json),
+[104/100 raw](controls/cupy100-a1.json),
+[100/100 raw](controls/both100-a1.json),
+[rejected tighter run](controls/cupy100-tight-a1.json).
