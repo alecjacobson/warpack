@@ -1,0 +1,218 @@
+{
+  "side": 3,
+  "gpu": "NVIDIA L40",
+  "warp": "1.18.0",
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0",
+    "nvidia-cudss-cu12": "0.8.0.10"
+  },
+  "git_head": "a6f291d39ccb791b039601c56c0e959b1f9cbae4",
+  "matrix_hash": "96abc5fca4a42eb0d0f426d41d26c33c9f53bb80a99c4957f85ff202d6c2a17f",
+  "numerical_source_hash": "7dde707df12d521d3faacb442a07fb9053212692b6a29962f0dca47232444773",
+  "reference_cache": "build/skinning-audit/reference-96abc5fca4a42eb0-shift-0.1-k4.npz",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz",
+  "cpu_contention": "Not isolated; this driver does not sample CPU contention",
+  "blas_threads": "4",
+  "other_gpu_processes": [],
+  "reference": "dense nullspace elimination + LAPACK eigh",
+  "reference_check": {
+    "equilibrium_residual": 2.612841430453664e-14,
+    "constraint_residual": 1.2366942375040222e-16,
+    "raw_rig_constraint_max": 6.765421556309548e-17,
+    "eigenvalue_error": 0.0,
+    "mass_orthogonality": 1.2329651303663619e-15,
+    "subspace_error": 1.1102230246251565e-15,
+    "accepted": true
+  },
+  "raw_constraint_rows": 24,
+  "independent_constraints": 14,
+  "protocol": "Shared heterogeneous tet weight stiffness, lumped mass, rank-reduced Appendix B.1 constraints; sequential methods; one warmup and repeated synchronized solves, all independently checked. Assembly, reference and validation excluded. GPU setup includes uploads/KKT assembly/factors; CPU setup includes KKT factors. Spectra compilation excluded. Fixed Warp replay includes physical residuals and multipliers; CPU/CuPy physical checks are outside solve. No speedups from rejected trials.",
+  "cases": [
+    {
+      "method": "warp-cudss",
+      "n": 160,
+      "constraints": 14,
+      "nnz": 1638,
+      "kkt_nnz": 5382,
+      "k": 4,
+      "ncv": 24,
+      "shift": -0.1,
+      "seed": 2026,
+      "tolerance": 1e-09,
+      "acceptance_tolerance": 1e-07,
+      "steps": 8,
+      "factor": "cuDSS general + matching + one Warp residual correction",
+      "cooperative_refinement": true,
+      "setup_seconds": 0.18387263640761375,
+      "graph_audit": {
+        "node_types_including_conditional_body": {
+          "MEMSET": 1303,
+          "KERNEL": 5229,
+          "MEMCPY": 1869,
+          "CONDITIONAL": 135
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1297,
+          "HtoD (HOST PAGEABLE to DEVICE)": 572
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "capture_warmup_seconds": 0.48166652396321297,
+      "samples": [
+        0.025432664901018143
+      ],
+      "solve_seconds": 0.025432664901018143,
+      "checks": [
+        {
+          "equilibrium_residual": 6.285334819136671e-15,
+          "constraint_residual": 8.094090932471633e-17,
+          "raw_rig_constraint_max": 1.1102230246251565e-16,
+          "eigenvalue_error": 1.3328106416975807e-14,
+          "mass_orthogonality": 1.0231385269971678e-14,
+          "subspace_error": 4.440892098500626e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 4.532807786442403e-15,
+          "constraint_residual": 6.639633710898777e-17,
+          "raw_rig_constraint_max": 7.632783294297951e-17,
+          "eigenvalue_error": 1.3446054261373823e-14,
+          "mass_orthogonality": 1.0229233228785501e-14,
+          "subspace_error": 3.9968028886505635e-15,
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "cudss_dependency": {
+        "runtime_version": [
+          0,
+          8,
+          0
+        ],
+        "library": {
+          "path": "/home/horde/.local/lib/python3.10/site-packages/nvidia/cu12/lib/libcudss.so.0",
+          "sha256": "0740250950abbbbc7690c4edb1506f8432558658764d6c1f7cba29615acb3dfc"
+        },
+        "binding_files": {
+          "__init__.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/__init__.py",
+            "sha256": "9e018695bbab19c9e3af14f9aa38b3a10f3d30f033124356ef352faf79e8d206"
+          },
+          "_bindings.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/_bindings.py",
+            "sha256": "747914f904e4c4fb491189932ba9035a0214eeaf41e88e243ee2f7eaafa66e84"
+          },
+          "_csr.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/_csr.py",
+            "sha256": "c111cbbc8a40f995b1c83b4652abb1b069d990d4284a327ab06763c98d6a3280"
+          },
+          "solver.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/solver.py",
+            "sha256": "aa0880400d0653ccca4b3ce8f5ddb69119f50cf19ec08c7044f945a1884064de"
+          }
+        },
+        "installed_package_version": "0.8.0.10",
+        "environment_at_reporting": {
+          "CUDSS_LIBRARY_PATH": null,
+          "CUDSS_JIT_CACHE_DIR": null,
+          "CUDSS_JIT_DISABLE": null
+        },
+        "scope": "Already-loaded symbol resolved after measurement; no backend preload. Package metadata and current override are context only, not the loaded binary identity. JIT settings describe the reporting environment; keep them fixed throughout each worker."
+      },
+      "outcome": "passed",
+      "strict_converged": 4,
+      "device_equilibrium_residual": 4.49412069677953e-15,
+      "device_constraint_residual": 5.0356154872418545e-17,
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    },
+    {
+      "method": "cupy-cudss",
+      "n": 160,
+      "constraints": 14,
+      "nnz": 1638,
+      "kkt_nnz": 5382,
+      "k": 4,
+      "ncv": 24,
+      "shift": -0.1,
+      "seed": 2026,
+      "tolerance": 1e-11,
+      "acceptance_tolerance": 1e-07,
+      "steps": null,
+      "factor": "cuDSS general + matching + one Warp residual correction",
+      "cooperative_refinement": true,
+      "note": "CuPy eigsh on explicit mass-scaled KKT inverse; cuDSS supplied by our adapter, NOT native CuPy factorization",
+      "setup_seconds": 0.01761046051979065,
+      "capture_warmup_seconds": 0.3530328720808029,
+      "samples": [
+        0.027009550482034683
+      ],
+      "solve_seconds": 0.027009550482034683,
+      "checks": [
+        {
+          "equilibrium_residual": 1.7585261526821426e-12,
+          "constraint_residual": 7.94348886616161e-15,
+          "raw_rig_constraint_max": 7.979727989493313e-15,
+          "eigenvalue_error": 1.2713374233945865e-14,
+          "mass_orthogonality": 3.7845275478872384e-15,
+          "subspace_error": 1.3322676295501878e-15,
+          "accepted": true
+        },
+        {
+          "equilibrium_residual": 1.7554230208010916e-12,
+          "constraint_residual": 7.830366963978058e-15,
+          "raw_rig_constraint_max": 7.875644580934704e-15,
+          "eigenvalue_error": 1.190617586988581e-14,
+          "mass_orthogonality": 6.184606851200697e-15,
+          "subspace_error": 1.9984014443252818e-15,
+          "accepted": true
+        }
+      ],
+      "accepted": true,
+      "cudss_dependency": {
+        "runtime_version": [
+          0,
+          8,
+          0
+        ],
+        "library": {
+          "path": "/home/horde/.local/lib/python3.10/site-packages/nvidia/cu12/lib/libcudss.so.0",
+          "sha256": "0740250950abbbbc7690c4edb1506f8432558658764d6c1f7cba29615acb3dfc"
+        },
+        "binding_files": {
+          "__init__.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/__init__.py",
+            "sha256": "9e018695bbab19c9e3af14f9aa38b3a10f3d30f033124356ef352faf79e8d206"
+          },
+          "_bindings.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/_bindings.py",
+            "sha256": "747914f904e4c4fb491189932ba9035a0214eeaf41e88e243ee2f7eaafa66e84"
+          },
+          "_csr.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/_csr.py",
+            "sha256": "c111cbbc8a40f995b1c83b4652abb1b069d990d4284a327ab06763c98d6a3280"
+          },
+          "solver.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/solver.py",
+            "sha256": "aa0880400d0653ccca4b3ce8f5ddb69119f50cf19ec08c7044f945a1884064de"
+          }
+        },
+        "installed_package_version": "0.8.0.10",
+        "environment_at_reporting": {
+          "CUDSS_LIBRARY_PATH": null,
+          "CUDSS_JIT_CACHE_DIR": null,
+          "CUDSS_JIT_DISABLE": null
+        },
+        "scope": "Already-loaded symbol resolved after measurement; no backend preload. Package metadata and current override are context only, not the loaded binary identity. JIT settings describe the reporting environment; keep them fixed throughout each worker."
+      },
+      "outcome": "passed",
+      "numerical_contract_failures": [],
+      "numerical_contract_accepted": true
+    }
+  ],
+  "numerical_contract_accepted": true,
+  "diagnostic": false,
+  "process_acceptance_policy": "Every requested row must pass its recorded physical and stopping gates; unsupported/error/timeout rows are rejected. Diagnostic mode preserves these failures without failing the numerical process gate. Graph, timing and baseline-regression results remain separate."
+}

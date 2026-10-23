@@ -1,0 +1,449 @@
+.FFFFFFFFF..F.FFF                                                        [100%]
+=================================== FAILURES ===================================
+_ test_constructor_failure_unwinds_returned_resources[False-cudssConfigCreate] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4daaf3f40>
+failed = 'cudssConfigCreate', write_failed_output = False
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCreate'} == {}
+E         
+E         Left contains 1 more item:
+E         {1: 'cudssCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+__ test_constructor_failure_unwinds_returned_resources[False-cudssDataCreate] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab938b0>
+failed = 'cudssDataCreate', write_failed_output = False
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ConfigCreate'} == {}
+E         
+E         Left contains 2 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+__ test_constructor_failure_unwinds_returned_resources[False-cudssSetStream] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab195a0>
+failed = 'cudssSetStream', write_failed_output = False
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ssDataCreate'} == {}
+E         
+E         Left contains 3 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate', 3: 'cudssDataCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+__ test_constructor_failure_unwinds_returned_resources[False-cudssConfigSet] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab91c60>
+failed = 'cudssConfigSet', write_failed_output = False
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ssDataCreate'} == {}
+E         
+E         Left contains 3 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate', 3: 'cudssDataCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+____ test_constructor_failure_unwinds_returned_resources[True-cudssCreate] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab1b4c0>
+failed = 'cudssCreate', write_failed_output = True
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCreate'} == {}
+E         
+E         Left contains 1 more item:
+E         {1: 'cudssCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+_ test_constructor_failure_unwinds_returned_resources[True-cudssConfigCreate] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab90d00>
+failed = 'cudssConfigCreate', write_failed_output = True
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ConfigCreate'} == {}
+E         
+E         Left contains 2 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+__ test_constructor_failure_unwinds_returned_resources[True-cudssDataCreate] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab33100>
+failed = 'cudssDataCreate', write_failed_output = True
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ssDataCreate'} == {}
+E         
+E         Left contains 3 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate', 3: 'cudssDataCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+___ test_constructor_failure_unwinds_returned_resources[True-cudssSetStream] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab9ec50>
+failed = 'cudssSetStream', write_failed_output = True
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ssDataCreate'} == {}
+E         
+E         Left contains 3 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate', 3: 'cudssDataCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+___ test_constructor_failure_unwinds_returned_resources[True-cudssConfigSet] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab68c70>
+failed = 'cudssConfigSet', write_failed_output = True
+
+    @pytest.mark.parametrize(
+        "failed",
+        [
+            "cudssCreate",
+            "cudssConfigCreate",
+            "cudssDataCreate",
+            "cudssSetStream",
+            "cudssConfigSet",
+        ],
+    )
+    @pytest.mark.parametrize("write_failed_output", [False, True])
+    def test_constructor_failure_unwinds_returned_resources(
+        monkeypatch, failed, write_failed_output
+    ):
+        resources = NativeResources(failed, write_failed_output)
+        install(monkeypatch, resources)
+        with pytest.raises(CudssError):
+            implementation.CudssSolver(reordering="amd")
+        gc.collect()
+>       assert resources.live == {}
+E       AssertionError: assert {1: 'cudssCre...ssDataCreate'} == {}
+E         
+E         Left contains 3 more items:
+E         {1: 'cudssCreate', 2: 'cudssConfigCreate', 3: 'cudssDataCreate'}
+E         Use -v to get more diff
+
+tests/test_construction_failure.py:69: AssertionError
+___ test_invalid_options_are_rejected_before_any_native_allocation[kwargs2] ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4dab7f850>
+kwargs = {'reordering': 'invalid'}
+
+    @pytest.mark.parametrize(
+        "kwargs", [{"mtype": "invalid"}, {"view": "invalid"}, {"reordering": "invalid"}]
+    )
+    def test_invalid_options_are_rejected_before_any_native_allocation(monkeypatch, kwargs):
+        resources = NativeResources()
+        install(monkeypatch, resources)
+        with pytest.raises(ValueError):
+>           implementation.CudssSolver(**kwargs)
+
+tests/test_construction_failure.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <warp_cudss.solver.CudssSolver object at 0x7fa4dab7f1f0>
+mtype = 'general', view = 'full', reordering = 'invalid', ir_steps = 0
+device = None
+
+    def __init__(
+        self,
+        mtype: str = "general",
+        view: str = "full",
+        reordering: str = "default",
+        ir_steps: int = 0,
+        device=None,
+    ):
+        if mtype not in MTYPE:
+            raise ValueError(f"Unknown mtype {mtype!r}, expected one of {sorted(MTYPE)}")
+        if view not in MVIEW:
+            raise ValueError(f"Unknown view {view!r}, expected one of {sorted(MVIEW)}")
+    
+        self.device = wp.get_device(device)
+        if not self.device.is_cuda:
+            raise ValueError("warp_cudss.CudssSolver requires a CUDA device")
+    
+        self.mtype = mtype
+        self.view = view
+    
+        self._lib = get_library()
+    
+        handle = cudssHandle_t()
+        _check(self._lib.cudssCreate(ctypes.byref(handle)), "cudssCreate")
+        self._handle = handle
+    
+        config = cudssConfig_t()
+        _check(self._lib.cudssConfigCreate(ctypes.byref(config)), "cudssConfigCreate")
+        self._config = config
+    
+        data = cudssData_t()
+        _check(self._lib.cudssDataCreate(handle, ctypes.byref(data)), "cudssDataCreate")
+        self._data = data
+    
+        stream = wp.get_stream(self.device)
+        _check(self._lib.cudssSetStream(handle, ctypes.c_void_p(stream.cuda_stream)), "cudssSetStream")
+    
+        if reordering != "default":
+>           alg = ctypes.c_int(REORDERING_ALG[reordering])
+E           KeyError: 'invalid'
+
+warp_cudss/solver.py:118: KeyError
+_ test_release_attempts_all_resources_after_native_cleanup_error[cudssDataDestroy] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa57e10a020>
+failed = 'cudssDataDestroy'
+
+    @pytest.mark.parametrize(
+        "failed", ["cudssDataDestroy", "cudssConfigDestroy", "cudssDestroy"]
+    )
+    def test_release_attempts_all_resources_after_native_cleanup_error(monkeypatch, failed):
+        resources = NativeResources(failed)
+        install(monkeypatch, resources)
+        solver = implementation.CudssSolver()
+        with pytest.raises(CudssError):
+            solver.release()
+>       assert not resources.live
+E       AssertionError: assert not {1: 'cudssCreate', 2: 'cudssConfigCreate'}
+E        +  where {1: 'cudssCreate', 2: 'cudssConfigCreate'} = <tests.test_construction_failure.NativeResources object at 0x7fa57e10a680>.live
+
+tests/test_construction_failure.py:103: AssertionError
+_ test_release_attempts_all_resources_after_native_cleanup_error[cudssConfigDestroy] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4da5d8c70>
+failed = 'cudssConfigDestroy'
+
+    @pytest.mark.parametrize(
+        "failed", ["cudssDataDestroy", "cudssConfigDestroy", "cudssDestroy"]
+    )
+    def test_release_attempts_all_resources_after_native_cleanup_error(monkeypatch, failed):
+        resources = NativeResources(failed)
+        install(monkeypatch, resources)
+        solver = implementation.CudssSolver()
+        with pytest.raises(CudssError):
+            solver.release()
+>       assert not resources.live
+E       AssertionError: assert not {1: 'cudssCreate'}
+E        +  where {1: 'cudssCreate'} = <tests.test_construction_failure.NativeResources object at 0x7fa4da5d8ac0>.live
+
+tests/test_construction_failure.py:103: AssertionError
+_ test_release_attempts_all_resources_after_native_cleanup_error[cudssDestroy] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa57e0d1bd0>
+failed = 'cudssDestroy'
+
+    @pytest.mark.parametrize(
+        "failed", ["cudssDataDestroy", "cudssConfigDestroy", "cudssDestroy"]
+    )
+    def test_release_attempts_all_resources_after_native_cleanup_error(monkeypatch, failed):
+        resources = NativeResources(failed)
+        install(monkeypatch, resources)
+        solver = implementation.CudssSolver()
+        with pytest.raises(CudssError):
+            solver.release()
+        assert not resources.live
+        calls = resources.calls.copy()
+>       solver.release()
+
+tests/test_construction_failure.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:295: in release
+    _check(self._lib.cudssDataDestroy(self._handle, self._data), "cudssDataDestroy")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (c_void_p(1), c_void_p(3))
+
+    def call(*args):
+        self.calls.append(name)
+        failed = name == self.fail
+        if name in ("cudssCreate", "cudssConfigCreate", "cudssDataCreate"):
+            if not failed or self.write_failed_output:
+                pointer = args[1] if name == "cudssDataCreate" else args[0]
+                ct.cast(pointer, ct.POINTER(ct.c_void_p))[0] = self.next_id
+                self.live[self.next_id] = name
+                self.next_id += 1
+        if name.endswith("Destroy"):
+            pointer = args[-1].value
+>           assert pointer in self.live, "duplicate or unowned native destruction"
+E           AssertionError: duplicate or unowned native destruction
+E           assert 3 in {}
+E            +  where {} = <tests.test_construction_failure.NativeResources object at 0x7fa57e0d33d0>.live
+
+tests/test_construction_failure.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[False-cudssConfigCreate]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[False-cudssDataCreate]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[False-cudssSetStream]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[False-cudssConfigSet]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[True-cudssCreate]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[True-cudssConfigCreate]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[True-cudssDataCreate]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[True-cudssSetStream]
+FAILED tests/test_construction_failure.py::test_constructor_failure_unwinds_returned_resources[True-cudssConfigSet]
+FAILED tests/test_construction_failure.py::test_invalid_options_are_rejected_before_any_native_allocation[kwargs2]
+FAILED tests/test_construction_failure.py::test_release_attempts_all_resources_after_native_cleanup_error[cudssDataDestroy]
+FAILED tests/test_construction_failure.py::test_release_attempts_all_resources_after_native_cleanup_error[cudssConfigDestroy]
+FAILED tests/test_construction_failure.py::test_release_attempts_all_resources_after_native_cleanup_error[cudssDestroy]
+13 failed, 4 passed in 0.58s

@@ -1,0 +1,21 @@
+Warp 1.18.0 initialized:
+   CUDA Toolkit 12.9, Driver 12.8
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA L40" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /run/openclaw/horde/warpack-current-kernel-cache/1.18.0
+Module _bsr_accumulate_triplet_values_5520c14c 2336fbe load on device 'cuda:0' took 0.44 ms  (cached)
+Module warpack.kernels a7412d7 load on device 'cuda:0' took 1.57 ms  (cached)
+Module warpack.generalized_krylov a501ba1 load on device 'cuda:0' took 0.48 ms  (cached)
+Module warpack.krylov_kernels c6c22a1 load on device 'cuda:0' took 0.78 ms  (cached)
+Module jacobi_kernel__locals__compute_5e606eac 5e606ea load on device 'cuda:0' took 0.48 ms  (cached)
+Module warpack.linalg_tiles 1750f83 load on device 'cuda:0' took 123.21 ms  (cached)
+Module warpack.krylov_kernels e6afbee load on device 'cuda:0' took 0.85 ms  (cached)
+Module warpack.generalized_krylov c09eee4 load on device 'cuda:0' took 0.55 ms  (cached)
+Module warpack.generalized 6c0d845 load on device 'cuda:0' took 0.57 ms  (cached)
+Module warpack.generalized bb5a387 load on device 'cuda:0' took 0.54 ms  (cached)
+Traceback (most recent call last):
+  File "/home/horde/projects/warpack/build/run-cudss-provenance-smoke.py", line 11, in <module>
+    assert row['accepted'],row
+AssertionError: {'api_class': 'A', 'requested_size': 80, 'problem': 'bar_A', 'n': 80, 'columns': 80, 'nnz': 238, 'mass_nnz': 238, 'k': 4, 'ncv': 32, 'method': 'warp-cg-krylov', 'matrix_sha256': 'dd493da0847bc3e63d7a49189cfa2b923116d9154597cc54034141ca2bfd2c63', 'notes': 'P1 clamped axial FEM; non-diagonal consistent mass', 'target': [-1.0, 0.0], 'seed': 2026, 'outer_cycles': 5, 'cg_preconditioner': 'upstream diagonal', 'cg_block_size': 1, 'cg_tolerance': 1e-13, 'cg_absolute_tolerance': None, 'cg_maxiter': 10000, 'start': 'Warp seed 42; same start restored on every replay', 'outcome': 'error', 'reason': 'Explicit alternative Krylov benchmark is limited to Hodge class D', 'traceback': 'Traceback (most recent call last):\n  File "/home/horde/projects/warpack/benchmarks/applications/compare.py", line 164, in run\n    setup, (solver, inverse) = timed(\n  File "/home/horde/projects/warpack/benchmarks/applications/compare.py", line 39, in timed\n    value = fn()\n  File "/home/horde/projects/warpack/benchmarks/applications/compare.py", line 165, in <lambda>\n    lambda: warp_setup(\n  File "/home/horde/projects/warpack/benchmarks/applications/runner.py", line 150, in warp_setup\n    raise ValueError("Explicit alternative Krylov benchmark is limited to Hodge class D")\nValueError: Explicit alternative Krylov benchmark is limited to Hodge class D\n', 'accepted': False}

@@ -16,6 +16,7 @@ import warp as wp
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
 from benchmarks.audit_profile import graph_summary
+from benchmarks.cudss_provenance import cudss_dependencies
 from benchmarks.upstream.adapters import matrix
 from warpack import ConstrainedKrylovSchur, CuDSSInverse, SparseOperator, saddle_point_matrix
 
@@ -232,6 +233,9 @@ def run(case, method, k, ncv, steps, repeats, expected, basis, folder):
             solve_seconds=float(np.median(samples)),
             checks=checks,
             accepted=all(c["accepted"] for c in checks),
+            cudss_dependency=cudss_dependencies()
+            if method in ("warp-cudss", "cupy-cudss")
+            else None,
         )
         row["outcome"] = "passed" if row["accepted"] else "failed"
         if solver is not None:

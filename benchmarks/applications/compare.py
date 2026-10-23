@@ -18,6 +18,7 @@ import warp as wp
 import warp.optim.linear as linear
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+from benchmarks.cudss_provenance import cudss_dependencies, cudss_signature
 from warpack import CGInverse, CuDSSInverse
 
 from .problems import make_problem
@@ -102,6 +103,7 @@ def run(
         return None
 
     solver = graph = None
+    uses_cudss = False
     try:
         if method.startswith("warp"):
             selected = {
@@ -174,6 +176,7 @@ def run(
             # Complex shift-invert wraps the real factor object twice.
             factor = getattr(inverse, "inverse", inverse)
             factor = getattr(factor, "inverse", factor)
+            uses_cudss = isinstance(factor, CuDSSInverse)
             row["cudss_refinement_steps"] = (
                 factor.refinement_steps if isinstance(factor, CuDSSInverse) else None
             )
@@ -241,6 +244,7 @@ def run(
                     row["reference_block_size"] = p.k
                     row["reference_maxiter"] = lobpcg_maxiter
                 row["implementation"] = label
+                uses_cudss = isinstance(getattr(cleanup, "__self__", None), CuDSSInverse)
                 if p.mode == "svd":
                     row["implementation"] = "CuPy svds with explicit ncv"
                     row["reference_ncv"] = min(max(ncv, p.k + 2), min(p.a.shape) - 1)
@@ -346,6 +350,10 @@ def run(
                 )
         if cg_stats:
             row["cg_statistics"] = cg_stats
+        row["cudss_used"] = uses_cudss
+        row["cudss_dependency"] = cudss_dependencies() if uses_cudss else None
+        if uses_cudss:
+            cudss_signature(row["cudss_dependency"])
         row.update(
             samples_seconds=samples,
             solve_seconds=float(np.median(samples)),
@@ -430,15 +438,33 @@ def compare_baseline(rows, baseline, limit):
                 "projected_rigid_modes",
             ]
         )
+        cudss_same = True
+        if (
+            r.get("cudss_used")
+            or b.get("cudss_used")
+            or r.get("cudss_dependency")
+            or b.get("cudss_dependency")
+        ):
+            try:
+                cudss_same = cudss_signature(r.get("cudss_dependency")) == cudss_signature(
+                    b.get("cudss_dependency")
+                )
+            except (ValueError, KeyError):
+                cudss_same = False
         eligible = (
             same
+            and cudss_same
             and b.get("accepted")
             and r.get("accepted")
             and b.get("timing_uncontended", False)
             and r.get("timing_uncontended", False)
         )
         item = dict(
-            api_class=r["api_class"], n=r.get("n"), method=r["method"], comparable=bool(eligible)
+            api_class=r["api_class"],
+            n=r.get("n"),
+            method=r["method"],
+            comparable=bool(eligible),
+            cudss_dependency_comparable=cudss_same,
         )
         if eligible:
             ratio = r["solve_seconds"] / b["solve_seconds"]

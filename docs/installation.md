@@ -49,6 +49,24 @@ it. Warpack does not set this environment variable on your behalf. cuDSS 1.0 is
 under [separate qualification](https://github.com/alecjacobson/warpack/issues/189);
 the supported binary remains 0.8.0.10.
 
+### Updating an existing cuDSS installation
+
+Reinstall the pinned binding explicitly when updating an existing checkout:
+
+```bash
+python -m pip install --no-deps --force-reinstall \
+  'warp-cudss @ git+https://github.com/alecjacobson/warp-cuDSS.git@e1d1be41decb8d6a4305acdd40e26a5a86c0f797'
+python -c 'from importlib.metadata import distribution; print(distribution("warp-cudss").read_text("direct_url.json"))'
+```
+
+The reported commit should match the revision above and the `cudss` extra in
+`pyproject.toml`. Successive binding commits can declare the same package version;
+an ordinary install has been observed to leave the earlier commit installed.
+This command reinstalls only the adapter, preserving Warp and the NVIDIA binary.
+The current adapter also cleans up partial native resources when construction
+fails. Benchmark reports identify the loaded binary and binding source after
+measurement, since an explicit library override can differ from the pip package.
+
 ## Fast block solves
 
 `BatchedCGPreconditioner` and the tuned Anvil example require the pinned upstream

@@ -18,6 +18,7 @@ from benchmarks.applications.damped import quality
 from benchmarks.applications.damped_backends import initial, warp_setup
 from benchmarks.applications.damped_pencil import consistent_chain
 from benchmarks.audit_profile import graph_summary
+from benchmarks.cudss_provenance import cudss_dependencies
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.pencil_assembled_reference import assembled_reference
 from benchmarks.source_provenance import source_manifest
@@ -119,6 +120,7 @@ def main():
             ),
             source_sha256=source_manifest(__file__),
             dependency=warp_dependencies(),
+            cudss_dependency=cudss_dependencies(),
             graph=audit,
             rows=rows,
             accepted=all(r["accepted"] for r in rows),

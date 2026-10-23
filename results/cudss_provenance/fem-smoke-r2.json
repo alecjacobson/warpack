@@ -1,0 +1,188 @@
+{
+  "rows": [
+    {
+      "api_class": "A",
+      "requested_size": 80,
+      "problem": "bar_A",
+      "n": 80,
+      "columns": 80,
+      "nnz": 238,
+      "mass_nnz": 238,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp",
+      "matrix_sha256": "dd493da0847bc3e63d7a49189cfa2b923116d9154597cc54034141ca2bfd2c63",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "start": "Warp seed 42; same start restored on every replay",
+      "iteration_method": "GeneralizedKrylovSchur",
+      "cudss_refinement_steps": 0,
+      "cg_refinement_steps": null,
+      "cg_refinement_tol": null,
+      "cudss_reordering": "default",
+      "cudss_matching": false,
+      "cudss_mtype": "spd",
+      "setup_seconds": 0.25106916204094887,
+      "capture_seconds": 0.32427579164505005,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "HtoD (HOST PAGEABLE to DEVICE)": 264,
+          "DtoD (DEVICE to DEVICE)": 402
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.04339241608977318,
+      "cudss_used": true,
+      "cudss_dependency": {
+        "runtime_version": [
+          0,
+          8,
+          0
+        ],
+        "library": {
+          "path": "/home/horde/.local/lib/python3.10/site-packages/nvidia/cu12/lib/libcudss.so.0",
+          "sha256": "0740250950abbbbc7690c4edb1506f8432558658764d6c1f7cba29615acb3dfc"
+        },
+        "binding_files": {
+          "__init__.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/__init__.py",
+            "sha256": "9e018695bbab19c9e3af14f9aa38b3a10f3d30f033124356ef352faf79e8d206"
+          },
+          "_bindings.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/_bindings.py",
+            "sha256": "747914f904e4c4fb491189932ba9035a0214eeaf41e88e243ee2f7eaafa66e84"
+          },
+          "_csr.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/_csr.py",
+            "sha256": "c111cbbc8a40f995b1c83b4652abb1b069d990d4284a327ab06763c98d6a3280"
+          },
+          "solver.py": {
+            "path": "/home/horde/.local/lib/python3.10/site-packages/warp_cudss/solver.py",
+            "sha256": "aa0880400d0653ccca4b3ce8f5ddb69119f50cf19ec08c7044f945a1884064de"
+          }
+        },
+        "installed_package_version": "0.8.0.10",
+        "environment_at_reporting": {
+          "CUDSS_LIBRARY_PATH": null,
+          "CUDSS_JIT_CACHE_DIR": null,
+          "CUDSS_JIT_DISABLE": null
+        },
+        "scope": "Already-loaded symbol resolved after measurement; no backend preload. Package metadata and current override are context only, not the loaded binary identity. JIT settings describe the reporting environment; keep them fixed throughout each worker."
+      },
+      "samples_seconds": [
+        0.0126568004488945
+      ],
+      "solve_seconds": 0.0126568004488945,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 4.105679067942939e-13,
+          "max_absolute_residual": 5.324629626102251e-13,
+          "orthogonality": 1.1102230246251565e-14,
+          "spectrum_error": 1.6196401545029419e-15,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 4,
+          "solver_status": 0,
+          "reported_converged": 4,
+          "solver_full_count": true,
+          "reported_max_residual": 4.0198310813838846e-13
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 4,
+      "status": 0,
+      "device_only_graph": false,
+      "outcome": "passed",
+      "contract_accepted": false
+    },
+    {
+      "api_class": "A",
+      "requested_size": 80,
+      "problem": "bar_A",
+      "n": 80,
+      "columns": 80,
+      "nnz": 238,
+      "mass_nnz": 238,
+      "k": 4,
+      "ncv": 32,
+      "method": "warp-cg",
+      "matrix_sha256": "dd493da0847bc3e63d7a49189cfa2b923116d9154597cc54034141ca2bfd2c63",
+      "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "seed": 2026,
+      "outer_cycles": 5,
+      "cg_preconditioner": "upstream diagonal",
+      "cg_block_size": 1,
+      "cg_tolerance": 1e-13,
+      "cg_absolute_tolerance": null,
+      "cg_maxiter": 10000,
+      "start": "Warp seed 42; same start restored on every replay",
+      "iteration_method": "GeneralizedKrylovSchur",
+      "cudss_refinement_steps": null,
+      "cg_refinement_steps": null,
+      "cg_refinement_tol": null,
+      "cudss_reordering": null,
+      "cudss_matching": null,
+      "cudss_mtype": null,
+      "setup_seconds": 0.010328825563192368,
+      "capture_seconds": 0.43631262332201004,
+      "graph_audit": {
+        "host_nodes": 0,
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 534
+        },
+        "method": "CUDA graph DOT including nested bodies; not an API trace"
+      },
+      "warmup_seconds": 0.15785638615489006,
+      "cg_statistics": [
+        {
+          "total_iterations": 7478,
+          "max_iterations_per_rhs": 80,
+          "unconverged_rhs": 0,
+          "rhs_calls": 132
+        }
+      ],
+      "cudss_used": false,
+      "cudss_dependency": null,
+      "samples_seconds": [
+        0.13493561372160912
+      ],
+      "solve_seconds": 0.13493561372160912,
+      "validation": [
+        {
+          "accepted": true,
+          "residual": 1.3105643732365701e-11,
+          "max_absolute_residual": 4.0204950479960644e-11,
+          "orthogonality": 1.176836406102666e-14,
+          "spectrum_error": 1.2592464949422177e-15,
+          "outer_iterations": 5,
+          "breakdown_recoveries": 2,
+          "solver_status": 0,
+          "reported_converged": 3,
+          "solver_full_count": false,
+          "reported_max_residual": 1.31055564696686e-11
+        }
+      ],
+      "accepted": true,
+      "other_gpu_processes": [],
+      "timing_uncontended": true,
+      "reported_converged": 3,
+      "status": 0,
+      "device_only_graph": true,
+      "outcome": "passed",
+      "contract_accepted": true
+    }
+  ],
+  "timing_scope": "Correctness/provenance smoke only; not a performance comparison"
+}

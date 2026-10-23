@@ -1,0 +1,22 @@
+"""CPU-only resource ownership probe; fake handles stand in for cuDSS resources."""
+import ctypes as ct,gc,json
+from types import SimpleNamespace
+from unittest.mock import patch
+import warp_cudss.solver as module
+calls=[]
+class Library:
+ def __getattr__(self,name):
+  def call(*args):
+   calls.append(name)
+   if name in ('cudssCreate','cudssConfigCreate'):
+    ct.cast(args[0],ct.POINTER(ct.c_void_p))[0]=ct.c_void_p(len(calls))
+   if name=='cudssDataCreate':
+    ct.cast(args[1],ct.POINTER(ct.c_void_p))[0]=ct.c_void_p(len(calls))
+   return 0
+  return call
+with patch.object(module,'get_library',lambda:Library()),patch.object(module.wp,'get_device',lambda *_:SimpleNamespace(is_cuda=True)),patch.object(module.wp,'get_stream',lambda *_:SimpleNamespace(cuda_stream=1)):
+ try:module.CudssSolver(reordering='not-an-algorithm')
+ except KeyError:pass
+ else:raise AssertionError('Expected invalid option to fail')
+ gc.collect()
+print(json.dumps(dict(calls=calls,created=sum(x.endswith('Create') or x=='cudssCreate' for x in calls),destroyed=sum(x.endswith('Destroy') or x=='cudssDestroy' for x in calls)),indent=2))

@@ -1,0 +1,19 @@
+"""Small correctness/identity smoke; reported times are not comparison evidence."""
+import json
+from pathlib import Path
+from benchmarks.applications.compare import run
+from benchmarks.cudss_provenance import cudss_dependencies,cudss_signature
+rows=[]
+for method in ['warp','warp-cg']:
+ row=run('A',80,method,repeats=1,ncv=32,steps=5)
+ rows.append(row)
+ Path('results/cudss_provenance/fem-smoke-r2.json').write_text(json.dumps(dict(rows=rows,timing_scope='Correctness/provenance smoke only; not a performance comparison'),indent=2)+'\n')
+ assert row['accepted'],row
+ assert row['cudss_used']==(method=='warp')
+ if method=='warp':
+  assert row['cudss_dependency']['runtime_version']==[0,8,0]
+  cached=cudss_signature(row['cudss_dependency'])
+ else:
+  assert row['cudss_dependency'] is None
+  assert cudss_signature(cudss_dependencies())==cached
+print('Two sequential FEM methods passed with correct per-method attribution and cached backend identity')

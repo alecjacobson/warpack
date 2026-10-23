@@ -41,6 +41,9 @@ python -m pip install -e '.[test]'
 python -m pip install -e '.[cudss]'
 ```
 
+For an existing cuDSS installation, follow the
+[binding upgrade instructions](docs/installation.md#updating-an-existing-cudss-installation).
+
 **The fast Anvil configuration additionally requires a pinned upstream Warp
 FSAI/batched-CG overlay.** It is not installed by the commands above. Follow
 [the fast-path setup](docs/installation.md#fast-block-solves) to install it in a

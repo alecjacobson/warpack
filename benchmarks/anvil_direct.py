@@ -14,6 +14,7 @@ import warp as wp
 from benchmarks import anvil_inputs
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import timed
+from benchmarks.cudss_provenance import cudss_dependencies
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.compare_block import prepare
 from warpack import CuDSSInverse, KrylovSchur, SymmetricEigensolver
@@ -128,6 +129,7 @@ def main():
     report = dict(
         inputs=input_identity,
         dependency=warp_dependencies(),
+        cudss_dependency=cudss_dependencies(),
         backend=args.backend,
         setup_seconds=setup_seconds,
         setup_phases_seconds=phases,

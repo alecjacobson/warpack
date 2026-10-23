@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from benchmarks.anvil_inputs import signature as input_signature
+from benchmarks.cudss_provenance import cudss_signature
 from benchmarks.dependency_provenance import signature
 
 METHODS = ("arpack", "spectra", "cupy-direct", "warp-direct", "cupy-block", "warp-block")
@@ -121,6 +122,7 @@ def extract(method, data):
 def summarize(directory, rounds, repeats):
     rows = []
     dependency = None
+    cudss_dependency = None
     common_inputs = None
     for method in METHODS:
         setups, solves, medians, residuals = [], [], [], []
@@ -139,6 +141,11 @@ def summarize(directory, rounds, repeats):
             if dependency is not None and dependency != current:
                 raise RuntimeError(f"Mixed dependency overlays: {path}")
             dependency = current
+            if method.endswith("direct"):
+                current_cudss = cudss_signature(raw.get("cudss_dependency"))
+                if cudss_dependency is not None and cudss_dependency != current_cudss:
+                    raise RuntimeError(f"Mixed loaded cuDSS libraries or bindings: {path}")
+                cudss_dependency = current_cudss
             setup, samples, residual, accepted = extract(method, raw)
             occupancy = json.loads(path.with_suffix(".occupancy.json").read_text())
             if not accepted or not occupancy["timing_eligible"] or len(samples) != repeats:
@@ -167,6 +174,7 @@ def summarize(directory, rounds, repeats):
     summary = dict(
         common_inputs=common_inputs,
         dependency=dependency,
+        cudss_dependency=cudss_dependency,
         rows=rows,
         rounds=rounds,
         repeats=repeats,
