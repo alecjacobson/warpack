@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--gram-chunk", type=int, default=256)
     parser.add_argument("--require-wide-gram", action="store_true")
     parser.add_argument("--require-ritz-qr", action="store_true")
+    parser.add_argument("--require-wide-paired-rotation", action="store_true")
     args = parser.parse_args()
     sys.meta_path.insert(0, RejectNonCore())
     import numpy as np
@@ -42,7 +43,8 @@ def main():
     matrix, mass, inverse = [
         diagonal(values) for values in (weights * spectrum, weights, 1 / (weights * (spectrum + 1)))
     ]
-    basis = np.eye(n)[:2].copy()
+    basis = np.zeros((2, n))
+    basis[np.arange(2), np.arange(2)] = 1.0
     constraints = wp.array(basis, dtype=wp.float64, device="cuda:0")
     records = []
     for history, compact in [(True, False), (False, False), (False, True)]:
@@ -111,6 +113,8 @@ def main():
             assert "wide_gram_kernel__locals__compute" in dot.read_text()
         if args.require_ritz_qr:
             assert "metric_defect" in dot.read_text() and "choose_qr" in dot.read_text()
+        if args.require_wide_paired_rotation:
+            assert "wide_paired_ritz_rotation" in dot.read_text()
         dot.unlink()
     report = dict(
         installed=str(args.installed.resolve()),
@@ -121,6 +125,7 @@ def main():
         gram_chunk=args.gram_chunk,
         require_wide_gram=args.require_wide_gram,
         require_ritz_qr=args.require_ritz_qr,
+        require_wide_paired_rotation=args.require_wide_paired_rotation,
         replays=records,
         forbidden_imports=["benchmarks", "examples", "cupy", "scipy", "warp_cudss"],
     )

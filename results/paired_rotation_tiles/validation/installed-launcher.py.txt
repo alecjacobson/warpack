@@ -1,0 +1,20 @@
+"""Verify the loaded wheel before a benchmark and retain its identity afterwards."""
+import argparse,hashlib,json,os,runpy
+from pathlib import Path
+import warpack
+parser=argparse.ArgumentParser(add_help=False)
+parser.add_argument('--out',type=Path,required=True)
+args,_=parser.parse_known_args()
+audit=json.loads(Path(os.environ['WARPACK_INSTALLED_AUDIT']).read_text())
+installed=Path(audit['installed']);module=Path(warpack.__file__).resolve()
+assert audit['accepted'] and module.is_relative_to(installed)
+for name,digest in audit['source_sha256'].items():
+ assert hashlib.sha256((installed/name).read_bytes()).hexdigest()==digest,name
+identity=dict(module=str(module),wheel_sha256=audit['sha256'],core_modules=audit['modules'],launcher_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+print('Verified installed core',json.dumps(identity),flush=True)
+try:
+ runpy.run_module('benchmarks.experimental.compare_paired_rotation_whole',run_name='__main__')
+finally:
+ if args.out.exists():
+  report=json.loads(args.out.read_text());report['installed_package']=identity
+  args.out.write_text(json.dumps(report,indent=2)+'\n')

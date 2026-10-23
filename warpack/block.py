@@ -768,11 +768,17 @@ class BlockLOBPCG:
             K.rotation_coefficients, self.coeff.shape, [self.small.v, self.small.order, self.coeff]
         )
         if self.paired_rotation:
-            from .block_products import paired_ritz_rotation
-
-            wp.launch_tiled(
+            from .block_products import (
+                _use_wide_paired_rotation,
                 paired_ritz_rotation,
-                dim=((self.b + 3) // 4, (self.n + 31) // 32),
+                wide_paired_ritz_rotation,
+            )
+
+            wide = _use_wide_paired_rotation(self)
+            rows = 8 if wide else 4
+            wp.launch_tiled(
+                wide_paired_ritz_rotation if wide else paired_ritz_rotation,
+                dim=((self.b + rows - 1) // rows, (self.n + 31) // 32),
                 inputs=[
                     self.sx,
                     self.su,

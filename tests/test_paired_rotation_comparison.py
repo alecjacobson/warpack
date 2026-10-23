@@ -39,6 +39,7 @@ def test_selected_control_and_restoration(monkeypatch, tmp_path, choice, compact
         "--rotation",
         choice,
         "--public-api",
+        "--paired-rotation",
         "--out",
         str(destination),
         "--reference-cache",
@@ -55,7 +56,8 @@ def test_selected_control_and_restoration(monkeypatch, tmp_path, choice, compact
         driver.main()
     assert driver.warpack.BlockLOBPCG is DummyBlock
     assert driver.compare_block.source_manifest is manifest and sys.argv is argv
-    assert isinstance(instances[0], DummyCandidate) == (choice != "original")
+    assert isinstance(instances[0], DummyCandidate) == (choice not in ("original", "default"))
+    assert instances[0]._wide_paired_rotation_enabled == (choice == "default")
     assert instances[0].options == {"compact_projected_graphs": compact}
     actual = tuple(
         getattr(instances[0], "_rotation_" + key) for key in ["rows", "columns", "inner", "threads"]

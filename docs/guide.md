@@ -320,6 +320,14 @@ the QR policy and all rank/stopping thresholds are independent of this tile choi
 retain the original Gram implementation. The [Gram qualification](../results/gram_tiles/VALIDATION.md)
 records complete FEM comparisons and original-equation/replay checks.
 
+With `paired_rotation=True`, Ada SM89 devices use eight output rows per FP64
+Ritz-rotation tile for `n >= 32768` and block widths 24–256. The inner tile stays
+eight columns wide; separate bounded basis views preserve both the updated
+vectors and search directions. Other configurations retain the four-row
+kernel. This adds no workspace, host readbacks or accuracy-policy changes.
+The [rotation qualification](../results/paired_rotation_tiles/VALIDATION.md)
+records whole-solver controls and installed-package checks.
+
 For Ada block widths 96–256, `gram_chunk=4096`, `tol >= 1e-11`, and both
 `reuse_operator_images=True` and `symmetric_products=True`, captured execution
 checks a fresh mass Gram before reorthogonalizing Ritz vectors. If the finite
@@ -332,7 +340,7 @@ original-equation stopping and rank thresholds remain unchanged. Mutually
 exclusive search branches share 24 bytes of control/counter values and add no
 dense workspace or replay host readback. The [QR reuse qualification](../results/metric_qr_reuse/VALIDATION.md)
 records complete physical/replay and packaging checks. Anvil's width 24 retains
-the original graph.
+full Ritz-basis QR.
 
 For Ada CUDA devices, search metrics of size 96–512 use certified Cholesky
 whitening during capture. Both whitening passes remain. Each fast path must

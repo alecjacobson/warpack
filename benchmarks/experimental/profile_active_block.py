@@ -169,12 +169,12 @@ def capture_profile(solver, index=None):
         search.step_bucket(branch, index)
 
     try:
-        from warpack.block_products import paired_ritz_rotation
+        from warpack.block_products import paired_ritz_rotation, wide_paired_ritz_rotation
 
         original_tiled = wp.launch_tiled
 
         def instrument_tiled(kernel, *args, **kwargs):
-            if kernel is paired_ritz_rotation:
+            if kernel in (paired_ritz_rotation, wide_paired_ritz_rotation):
                 return events.wrap("paired_ritz_rotation", original_tiled)(kernel, *args, **kwargs)
             return original_tiled(kernel, *args, **kwargs)
 

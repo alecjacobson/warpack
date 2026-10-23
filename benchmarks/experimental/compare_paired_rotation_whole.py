@@ -13,6 +13,7 @@ from benchmarks.source_provenance import source_manifest
 
 SETTINGS = {
     "original": (4, 32, 8, 128),
+    "default": (8, 32, 8, 128),
     "r8k8": (8, 32, 8, 128),
     "r8k32": (8, 32, 32, 128),
     "r16k32t256": (16, 32, 32, 256),
@@ -28,15 +29,22 @@ def main():
     destination_parser = argparse.ArgumentParser(add_help=False)
     destination_parser.add_argument("--out", type=Path, required=True)
     destination, _ = destination_parser.parse_known_args(remainder)
-    if "--public-api" not in remainder or "--cupy" in remainder:
-        parser.error("require public Warp composition without a shared CuPy comparison")
+    if (
+        "--public-api" not in remainder
+        or "--paired-rotation" not in remainder
+        or "--cupy" in remainder
+    ):
+        parser.error(
+            "require public paired-rotation Warp composition without a shared CuPy comparison"
+        )
     if destination.out.exists():
         parser.error("require a new output path")
     original, manifest, argv = warpack.BlockLOBPCG, compare_block.source_manifest, sys.argv
-    base = original if choice.rotation == "original" else PairedRotationBlock
+    base = original if choice.rotation in ("original", "default") else PairedRotationBlock
     error = None
 
     class Tracking(base):
+        _wide_paired_rotation_enabled = choice.rotation == "default"
         _rotation_rows, _rotation_columns, _rotation_inner, _rotation_threads = SETTINGS[
             choice.rotation
         ]
@@ -64,13 +72,14 @@ def main():
         report["rotation_tile"] = list(SETTINGS[choice.rotation])
         report["independent_reference_cache"] = cache.records
         report["rotation_scope"] = (
-            "Original installed paired Ritz rotation or explicitly selected benchmark-only "
+            "Original four-row paired rotation, installed guarded default, or benchmark-only "
             "FP64 tile geometry. Separate bounded X/U inputs and both outputs are retained; "
             "all other installed kernels, QR policies, rank/stopping/physical gates and "
             "settings are identical. Each worker owns its solver and preconditioner. "
             "Only verified independent CPU references may be reused outside timers. "
-            "First output and all measured outputs are checked. This is not an installed "
-            "dispatch or an accuracy-policy change."
+            "First output and all measured outputs are checked. There is no "
+            "accuracy-policy change. The installed default uses eight output rows only on "
+            "Ada SM89, n>=32768 and widths24..256; other configurations retain four rows."
         )
         destination.out.write_text(json.dumps(report, indent=2) + "\n")
     if error is not None:

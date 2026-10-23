@@ -215,8 +215,9 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [latest full-suite checkpoint](results/metric_qr_reuse/VALIDATION.md)
-records **3,237 passes and 11 skips**, with separate stock-Warp and isolated-wheel
+The [latest validation checkpoint](results/paired_rotation_tiles/VALIDATION.md)
+records **3,384 distinct passing tests and 11 remaining skips** across a full run
+and a historical-fixture supplement, with separate stock-Warp and isolated-wheel
 checks. This includes the memory, graph-preparation and projected-solve regressions.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.

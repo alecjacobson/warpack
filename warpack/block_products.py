@@ -111,3 +111,44 @@ def paired_ritz_rotation(
         wp.tile_matmul(a, b, acc_u)
     wp.tile_store(x, acc_x + acc_u, offset=(i * 4, j * 32))
     wp.tile_store(p, acc_u, offset=(i * 4, j * 32))
+
+
+@wp.kernel(enable_backward=False)
+def wide_paired_ritz_rotation(
+    sx: wp.array2d[wp.float64],
+    su: wp.array2d[wp.float64],
+    cx: wp.array2d[wp.float64],
+    cu: wp.array2d[wp.float64],
+    x: wp.array2d[wp.float64],
+    p: wp.array2d[wp.float64],
+):
+    # Eight output rows reuse each basis tile across more products. Keep the
+    # original inner width of eight, FP64, separate X/U views and accumulators.
+    i, j = wp.tid()
+    acc_x = wp.tile_zeros(shape=(8, 32), dtype=wp.float64)
+    acc_u = wp.tile_zeros(shape=(8, 32), dtype=wp.float64)
+    k = int(0)
+    while k < sx.shape[0]:
+        a = wp.tile_load(cx, shape=(8, 8), offset=(i * 8, k))
+        b = wp.tile_load(sx, shape=(8, 32), offset=(k, j * 32))
+        wp.tile_matmul(a, b, acc_x)
+        k += 8
+    k = int(0)
+    while k < su.shape[0]:
+        a = wp.tile_load(cu, shape=(8, 8), offset=(i * 8, k))
+        b = wp.tile_load(su, shape=(8, 32), offset=(k, j * 32))
+        wp.tile_matmul(a, b, acc_u)
+        k += 8
+    wp.tile_store(x, acc_x + acc_u, offset=(i * 8, j * 32))
+    wp.tile_store(p, acc_u, offset=(i * 8, j * 32))
+
+
+def _use_wide_paired_rotation(solver):
+    """Static capture configuration; no device values or solver state are read."""
+    return (
+        getattr(solver, "_wide_paired_rotation_enabled", True)
+        and solver.device.is_cuda
+        and solver.device.arch == 89
+        and 24 <= solver.b <= 256
+        and solver.n >= getattr(solver, "_wide_paired_rotation_minimum", 32768)
+    )

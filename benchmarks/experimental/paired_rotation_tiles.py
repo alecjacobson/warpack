@@ -66,6 +66,7 @@ def rotation(sx, su, cx, cu, x, p, *, rows=16, columns=32, inner=32, threads=128
 
 
 class PairedRotationBlock(BlockLOBPCG):
+    _wide_paired_rotation_enabled = False
     _rotation_rows = 16
     _rotation_columns = 32
     _rotation_inner = 32
