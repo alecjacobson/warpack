@@ -39,9 +39,10 @@ row is used above.
 
 GPU rows explicitly use **one fixed cycle**. They pass independent complete
 requested-subspace checks, with worst subspace error below 9e-13 across all
-warmups and repeats. Their recovery counts do not satisfy the generic adaptive
-exploration guard; no adaptive-completion claim is made. ARPACK uses its native
-stopping. Core tolerances differ from the shared physical `1e-8` acceptance
+warmups and repeats. The full-rank rows have zero recoveries and do not satisfy
+the generic adaptive exploration guard. The rank-32 localized rows have 29–30
+recoveries and do satisfy that guard, but still use explicit fixed capture.
+ARPACK uses its native stopping. Core tolerances differ from the shared physical `1e-8` acceptance
 gate; all counts and requested positive ranks must also pass.
 
 These are comparisons of the **implicit covariance formulation**. For `S=M`,
