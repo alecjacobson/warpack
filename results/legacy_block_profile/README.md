@@ -1,0 +1,5 @@
+# Legacy block profiler conditional-capture failure (#185)
+
+The optional `compare_block --profile` path on numerical source `d5f5b1e` fails after an accepted uninstrumented solve. The [isolated reproducer](reproducer.py.txt) uses the existing side-3 consistent-mass fixture, width 52, six modes and active search. The [failure log](initial-failure.log) records `Conditional body graph contains an unsupported operation (event record)` inside the active-search branch. No solver arithmetic is changed by the reproducer.
+
+The legacy profiler wraps shared operator calls globally, then captures `solver.step()` while incorrectly assuming no conditional bodies. Those wrappers are reached inside active-search children; installed whitening/QR conditional helpers add another nesting hazard. Its module-level Gram wrapper also misses installed instance dispatch. The ordinary solve succeeds before this instrumentation failure. Source and exact control are preserved here; the fix must cover static and active search, nested helpers, actual Gram/paired-rotation dispatch and wrapper restoration.

@@ -1,0 +1,14 @@
+import json
+from pathlib import Path
+from types import SimpleNamespace
+import warp as wp
+from benchmarks.experimental.profile_active_block import create_solver
+from benchmarks.experimental.compare_block import profile_step
+config=json.loads(Path('results/first_whitening/production/100-default-a1.json').read_text())['args']
+config.update(case='clamped_consistent',side=3,modes=6,width=52)
+solver,check,_,_=create_solver(SimpleNamespace(**config))
+graph=solver.capture(300);wp.capture_launch(graph)
+quality=check(solver.eigenvalues.numpy(),solver.eigenvectors.numpy().T)
+assert quality['accepted'] and solver.status.numpy()[0]==0 and solver.converged.numpy()[0]==6
+print('Uninstrumented solve accepted; entering legacy profile',flush=True)
+print(profile_step(solver),flush=True)
