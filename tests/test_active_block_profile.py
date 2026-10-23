@@ -11,6 +11,25 @@ from warp.optim import linear
 from benchmarks.experimental.profile_active_block import create_solver, profile
 
 
+@pytest.mark.parametrize("pool_width", [None, 16])
+def test_profile_uploads_comparison_pool_prefix_and_distinguishes_digest(pool_width):
+    if not hasattr(linear, "FSAI"):
+        pytest.skip("pinned upstream FSAI required")
+    config = json.loads(Path("results/cg_partitioned/final/exact-a1.json").read_text())["args"]
+    config.update(side=2, modes=6, width=12)
+    # None intentionally leaves the new key absent, as in historical configs.
+    if pool_width is not None:
+        config["initial_pool_width"] = pool_width
+    solver, _, _, digest = create_solver(SimpleNamespace(**config))
+    expected = np.random.default_rng(42).normal(size=(solver.n, pool_width or 12))[:, :12]
+    np.testing.assert_array_equal(solver.initial_vectors.numpy().T, expected)
+    if pool_width is not None:
+        config.pop("initial_pool_width")
+        legacy, _, _, legacy_digest = create_solver(SimpleNamespace(**config))
+        assert digest != legacy_digest
+        assert not np.array_equal(legacy.initial_vectors.numpy(), solver.initial_vectors.numpy())
+
+
 def test_selected_branch_profiles_preserve_solver_and_restore_wrappers():
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")

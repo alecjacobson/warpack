@@ -17,6 +17,7 @@ import warp as wp
 from warp.optim import linear
 
 from benchmarks.audit_profile import graph_summary
+from benchmarks.block_inputs import initial_block
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.compare_block import prepare
 from benchmarks.source_provenance import source_manifest
@@ -79,8 +80,10 @@ def create_solver(config):
         fsai_layout=config.fsai_layout,
         matrix_layout=config.matrix_layout,
     )
-    # Match compare_block's column-major host generation before row upload.
-    starts = np.random.default_rng(42).normal(size=(a.shape[0], config.width)).T.copy()
+    # Honor width-control pools while preserving legacy configurations/starts.
+    starts = initial_block(
+        a.shape[0], config.width, getattr(config, "initial_pool_width", None)
+    ).T.copy()
     solver = BlockLOBPCG(
         BatchedSparseOperator(a),
         k,
