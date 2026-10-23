@@ -38,3 +38,27 @@ and a mass matrix equilibrated with diagonal factors spanning 1e±6. Both
 methods retain the complete physical subspace and cached-image consistency.
 [Transcript](validation/tests.log); adjacent reports retain exact source/input
 identities, commands, samples and occupancy. The candidate remains outside core.
+
+## Existing triangular kernel: thread grouping
+
+A second screen changes only the original kernel's block size. Twelve tests
+verify bit-identical triangular outputs at widths24/104/204 for32/64/128/512
+threads versus the256-thread baseline, including strided storage, scale1e±80,
+zero/changed replay and independent triangular equations.
+
+All120 first/measured full-stage outputs pass original M-orthogonality/AX/MX
+checks; occupancy is clean. Same fixture/protocol as above. Warm stage medians
+in milliseconds:
+
+| Width/input | 256 threads | 32 | 64 | 128 | 512 |
+|---|---:|---:|---:|---:|---:|
+|104/random|6.535|6.443|6.511|6.496|7.006|
+|104/orthonormal|6.538|6.443|6.517|6.499|7.011|
+|204/random|26.074|26.031|26.075|26.103|26.991|
+|204/orthonormal|26.106|26.018|26.094|26.123|27.023|
+
+The widest problem shows no substantive gain. The small104-width improvement
+is about0.09ms for this stage, not a demonstrated whole-solve improvement.
+512threads loses. This does not justify a production policy or expensive
+whole-FEM tuning runs. [Raw controls](block-size-a1.json) and
+[exact-output tests](validation/block-size-tests.log) retain the experiment.
