@@ -218,12 +218,14 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [latest validation checkpoint](results/paired_rotation_tiles/VALIDATION.md)
+The [latest passing validation checkpoint](results/paired_rotation_tiles/VALIDATION.md)
 records **3,384 distinct passing tests and 11 remaining skips** across a full run
 and a historical-fixture supplement, with separate stock-Warp and isolated-wheel
 checks. This includes the memory, graph-preparation and projected-solve regressions.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.
+An [intermittent captured mass-QR stage regression](https://github.com/alecjacobson/warpack/issues/198)
+is under investigation; the next projection optimization has not been promoted.
 
 [Run tests and comparisons](docs/development.md)
 · [CuPy coverage](benchmarks/upstream/CUPY_REFRESH.md)
