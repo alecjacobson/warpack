@@ -10,9 +10,8 @@ import warp as wp
 
 from benchmarks.anvil_inputs import array_identity
 from benchmarks.dependency_provenance import warp_dependencies
-from benchmarks.experimental.normalized_jacobi import NormalizedJacobi
+from benchmarks.experimental.normalized_jacobi import LegacyJacobi, NormalizedJacobi
 from benchmarks.source_provenance import source_manifest
-from warpack.projected import GlobalJacobi
 
 
 def main():
@@ -31,7 +30,7 @@ def main():
         a = (q * expected) @ q.T
         reference = la.eigvalsh(a)
         source = wp.array(a, dtype=wp.float64)
-        for name, constructor in [("default", GlobalJacobi), ("normalized", NormalizedJacobi)]:
+        for name, constructor in [("legacy", LegacyJacobi), ("normalized", NormalizedJacobi)]:
             h, v, tmp, vt = [wp.empty_like(source) for _ in range(4)]
             cs, ss = [wp.empty(n, dtype=wp.float64) for _ in range(2)]
             eig = constructor(h, v, cs, ss, wp.empty(n, dtype=wp.int32), tmp, vt)

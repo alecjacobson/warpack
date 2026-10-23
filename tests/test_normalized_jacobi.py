@@ -5,8 +5,7 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 
-from benchmarks.experimental.normalized_jacobi import NormalizedJacobi
-from warpack.projected import GlobalJacobi
+from benchmarks.experimental.normalized_jacobi import LegacyJacobi, NormalizedJacobi
 
 
 def create(constructor, n):
@@ -30,7 +29,7 @@ def test_column_norm_recovery_and_independent_full_basis(n, kind, tmp_path):
         a = (q * values) @ q.T
     values = la.eigvalsh(a)
     source = wp.array(a, dtype=wp.float64)
-    solvers = [create(c, n) for c in [GlobalJacobi, NormalizedJacobi]]
+    solvers = [create(c, n) for c in [LegacyJacobi, NormalizedJacobi]]
     graphs = []
     for eig in solvers:
         wp.copy(eig.h, source)

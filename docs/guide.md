@@ -109,6 +109,10 @@ even-dimensional global projected solves of size 96–1024 change; the Anvil
 recipe and small/odd projected problems keep their established paths.
 Both global graph policies restore projected symmetry before testing convergence;
 [regressions](../results/projected_symmetry/VALIDATION.md) include repeated and null spectra.
+For projected dimensions ≥256, a final device kernel normalizes eigenvector
+columns to contain accumulated length drift. Eigenvalues and convergence tests
+are unchanged; [validation](../results/normalized_jacobi/VALIDATION.md) includes
+the large repeated/null regression and both graph policies.
 [Complete setup/capture/replay controls](../results/compact_jacobi/README.md)
 report the tradeoff separately from the main six-backend comparison.
 

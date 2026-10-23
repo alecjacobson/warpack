@@ -1,5 +1,8 @@
 # Current library validation after projected symmetry recovery
 
+This historical baseline is superseded by the [projected column-normalization
+validation](../normalized_jacobi/VALIDATION.md).
+
 On 2026-10-23, pinned Warp/FSAI runtime, L40 GPU and four Xeon cores:
 
 - **Full suite: 2,445 passed, 11 skipped**, 805.37 seconds.

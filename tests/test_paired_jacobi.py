@@ -48,15 +48,7 @@ def solver(constructor, n):
 
 @pytest.mark.parametrize("n", [8, 48, 104, 208, 408, 612, 1024])
 @pytest.mark.parametrize("kind", ["indefinite", "repeated_null"])
-def test_complete_solver_exact_control_and_independent_accuracy(n, kind, request):
-    if n == 1024 and kind == "repeated_null":
-        request.node.add_marker(
-            pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="#174: existing full-basis norm drift; paired and default remain bit-identical",
-            )
-        )
+def test_complete_solver_exact_control_and_independent_accuracy(n, kind):
     rng = np.random.default_rng(159)
     a = rng.normal(size=(n, n))
     a = (a + a.T) * 0.5

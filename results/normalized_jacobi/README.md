@@ -53,6 +53,7 @@ preservation. The stock log also runs four added paired-Jacobi cases: three
 pass and the existing #174 regression remains strict xfail before integration.
 [Logs](validation/) preserve that distinction.
 
-Core integration, compact-graph qualification, full-suite/package verification
-and fresh installed-path controls follow this prototype evidence. The original
-failure is recorded under #174; no test threshold is loosened.
+The installed large projected path now includes this fix, shared with compact
+graphs. [Current validation](VALIDATION.md) records 2,566 full-suite passes,
+focused checks on both runtimes and exact-source wheel verification. The tables
+above remain prototype controls; no test threshold is loosened.
