@@ -113,6 +113,11 @@ For projected dimensions ≥256, a final device kernel normalizes eigenvector
 columns to contain accumulated length drift. Eigenvalues and convergence tests
 are unchanged; [validation](../results/normalized_jacobi/VALIDATION.md) includes
 the large repeated/null regression and both graph policies.
+On Ada GPUs, even global projections of size256–1024 reuse each2×2 output
+block within a Jacobi round. Both graph policies retain the original FP64
+expressions and rotation order; [validation](../results/paired_jacobi/VALIDATION.md)
+includes bit-identical legacy controls. Smaller projections keep their existing
+update because reduced parallelism offsets the reuse there.
 [Complete setup/capture/replay controls](../results/compact_jacobi/README.md)
 report the tradeoff separately from the main six-backend comparison.
 

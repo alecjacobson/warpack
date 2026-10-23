@@ -71,6 +71,27 @@ def two_sided_advance(
         running[0] = int(next_round < round_stop)
 
 
+@wp.kernel(enable_backward=False)
+def paired_two_sided_advance(
+    h: wp.array2d[wp.float64],
+    v: wp.array2d[wp.float64],
+    out_h: wp.array2d[wp.float64],
+    out_v: wp.array2d[wp.float64],
+    c: wp.array[wp.float64],
+    s: wp.array[wp.float64],
+    partners: wp.array[wp.int32],
+    round_index: wp.array[wp.int32],
+    running: wp.array[wp.int32],
+    stop: int,
+):
+    i, j = wp.tid()
+    K.paired_jacobi_entry(h, v, out_h, out_v, c, s, partners, i, j)
+    if i == 0 and j == 0:
+        next_round = round_index[0] + 2
+        round_index[0] = next_round
+        running[0] = int(next_round < stop)
+
+
 class CompactJacobi(GlobalJacobi):
     def __init__(self, h, v, cs, ss, partners, temp, vtemp, rounds_per_loop=2):
         n = h.shape[0]
@@ -84,6 +105,11 @@ class CompactJacobi(GlobalJacobi):
         self.round_index = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.round_running = wp.zeros_like(self.round_index)
         wp.load_module(module=dynamic_pairs.module, device=self.device)
+        self._advance_kernel = (
+            paired_two_sided_advance if self._paired_update else two_sided_advance
+        )
+        if self._paired_update:
+            wp.load_module(module=paired_two_sided_advance.module, device=self.device, block_dim=64)
 
     def _round_pair(self):
         wp.launch(
@@ -92,12 +118,7 @@ class CompactJacobi(GlobalJacobi):
             [self.h, self.cs, self.ss, self.partners, self.round_index, 0],
             device=self.device,
         )
-        wp.launch(
-            K.jacobi_two_sided,
-            self.h.shape,
-            [self.h, self.v, self.temp, self.vtemp, self.cs, self.ss, self.partners],
-            device=self.device,
-        )
+        self._update(self.h, self.v, self.temp, self.vtemp)
         wp.launch(
             dynamic_pairs,
             self.n // 2,
@@ -105,8 +126,8 @@ class CompactJacobi(GlobalJacobi):
             device=self.device,
         )
         wp.launch(
-            two_sided_advance,
-            self.h.shape,
+            self._advance_kernel,
+            self._update_shape,
             [
                 self.temp,
                 self.vtemp,
@@ -119,6 +140,7 @@ class CompactJacobi(GlobalJacobi):
                 self.round_running,
                 self.loop_rounds,
             ],
+            block_dim=self._update_block_dim,
             device=self.device,
         )
 
@@ -140,12 +162,7 @@ class CompactJacobi(GlobalJacobi):
                 [current_h, self.cs, self.ss, self.partners, r],
                 device=self.device,
             )
-            wp.launch(
-                K.jacobi_two_sided,
-                self.h.shape,
-                [current_h, current_v, next_h, next_v, self.cs, self.ss, self.partners],
-                device=self.device,
-            )
+            self._update(current_h, current_v, next_h, next_v)
             current_h, next_h = next_h, current_h
             current_v, next_v = next_v, current_v
         if current_h is not self.h:

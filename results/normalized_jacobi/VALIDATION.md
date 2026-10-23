@@ -50,3 +50,6 @@ CuPy/Spectra conformance or closure of the other open issues.
 outputs**, including ordinary and compact projected graphs. All source and
 input identities and native/independent gates were checked; all timing workers
 were uncontended. This completes #174 qualification without changing thresholds.
+
+The subsequent [paired-update validation](../paired_jacobi/VALIDATION.md) records
+2,638 full-suite passes and supersedes this as the latest complete test run.

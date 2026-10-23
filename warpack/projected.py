@@ -181,6 +181,7 @@ class GlobalJacobi:
 
     _restore_symmetry = True
     _normalize_vectors = True
+    _paired_outputs = True
 
     def __init__(self, h, v, cs, ss, partners, temp, vtemp):
         self.h, self.v = h, v
@@ -190,6 +191,33 @@ class GlobalJacobi:
         self.sweeps = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.running = wp.zeros_like(self.sweeps)
         self.graph = None
+        from . import kernels as K
+
+        # Qualified on Ada: smaller projections lose from reduced parallelism.
+        # Static setup dispatch only; no device readback or replay host branch.
+        self._paired_update = (
+            self._paired_outputs
+            and self.device.is_cuda
+            and self.device.arch == 89
+            and 256 <= self.n <= 1024
+            and self.n % 2 == 0
+        )
+        self._update_kernel = (
+            K.jacobi_two_sided_paired if self._paired_update else K.jacobi_two_sided
+        )
+        self._update_shape = (self.n // 2, self.n // 2) if self._paired_update else self.h.shape
+        self._update_block_dim = 64 if self._paired_update else 256
+        if self._paired_update:
+            wp.load_module(module=self._update_kernel.module, device=self.device, block_dim=64)
+
+    def _update(self, h, v, out_h, out_v):
+        wp.launch(
+            self._update_kernel,
+            self._update_shape,
+            [h, v, out_h, out_v, self.cs, self.ss, self.partners],
+            block_dim=self._update_block_dim,
+            device=self.device,
+        )
 
     def _sweep(self):
         from . import kernels as K
@@ -203,12 +231,7 @@ class GlobalJacobi:
                 [current_h, self.cs, self.ss, self.partners, r],
                 device=self.device,
             )
-            wp.launch(
-                K.jacobi_two_sided,
-                self.h.shape,
-                [current_h, current_v, next_h, next_v, self.cs, self.ss, self.partners],
-                device=self.device,
-            )
+            self._update(current_h, current_v, next_h, next_v)
             current_h, next_h = next_h, current_h
             current_v, next_v = next_v, current_v
         # Even projected dimensions have an odd number of rounds. Restore the

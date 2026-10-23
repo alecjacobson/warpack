@@ -315,6 +315,65 @@ def jacobi_left(
     v[i, j] = vt[i, j]
 
 
+@wp.func
+def paired_jacobi_entry(
+    h: wp.array2d[wp.float64],
+    v: wp.array2d[wp.float64],
+    out_h: wp.array2d[wp.float64],
+    out_v: wp.array2d[wp.float64],
+    c: wp.array[wp.float64],
+    s: wp.array[wp.float64],
+    partners: wp.array[wp.int32],
+    i: int,
+    j: int,
+):
+    n = h.shape[0]
+    # Both pair kernels pair the final index with the current round index.
+    # partners is immutable throughout this update, unlike round_index when
+    # the compact variant advances its loop in thread(0,0).
+    r = partners[n - 1]
+    p, q = (r + i) % (n - 1), (r - i + n - 1) % (n - 1)
+    u, w = (r + j) % (n - 1), (r - j + n - 1) % (n - 1)
+    if i == 0:
+        q = n - 1
+    if j == 0:
+        w = n - 1
+    a00 = h[p, u]
+    a01 = h[p, w]
+    a10 = h[q, u]
+    a11 = h[q, w]
+    b00 = c[u] * a00 - s[u] * a01
+    b01 = c[w] * a01 - s[w] * a00
+    b10 = c[u] * a10 - s[u] * a11
+    b11 = c[w] * a11 - s[w] * a10
+    out_h[p, u] = c[p] * b00 - s[p] * b10
+    out_h[p, w] = c[p] * b01 - s[p] * b11
+    out_h[q, u] = c[q] * b10 - s[q] * b00
+    out_h[q, w] = c[q] * b11 - s[q] * b01
+    v00 = v[p, u]
+    v01 = v[p, w]
+    v10 = v[q, u]
+    v11 = v[q, w]
+    out_v[p, u] = c[u] * v00 - s[u] * v01
+    out_v[p, w] = c[w] * v01 - s[w] * v00
+    out_v[q, u] = c[u] * v10 - s[u] * v11
+    out_v[q, w] = c[w] * v11 - s[w] * v10
+
+
+@wp.kernel(enable_backward=False)
+def jacobi_two_sided_paired(
+    h: wp.array2d[wp.float64],
+    v: wp.array2d[wp.float64],
+    out_h: wp.array2d[wp.float64],
+    out_v: wp.array2d[wp.float64],
+    c: wp.array[wp.float64],
+    s: wp.array[wp.float64],
+    partners: wp.array[wp.int32],
+):
+    i, j = wp.tid()
+    paired_jacobi_entry(h, v, out_h, out_v, c, s, partners, i, j)
+
+
 @wp.kernel
 def jacobi_two_sided(
     h: wp.array2d[wp.float64],
