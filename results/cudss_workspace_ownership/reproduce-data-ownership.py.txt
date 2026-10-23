@@ -1,0 +1,27 @@
+"""CPU-only mock: inspect ownership after allocator setup fails."""
+import ctypes as ct
+import json
+from types import SimpleNamespace
+import warp as wp
+from warpack.cudss_memory import Workspace
+
+old_get_stream=wp.get_stream
+wp.get_stream=lambda _:SimpleNamespace(cuda_stream=1)
+results=[]
+try:
+ for failure in ['handler','data_create']:
+  live={1234};destroyed=[]
+  def destroy(handle,data):
+   destroyed.append(data.value);live.remove(data.value);return 0
+  def handler(handle,callback):return 4 if failure=='handler' else 0
+  def create(handle,output):
+   ct.cast(output,ct.POINTER(ct.c_void_p))[0]=5678
+   live.add(5678)
+   return 4
+  native=SimpleNamespace(cudssDataDestroy=destroy,cudssSetDeviceMemHandler=handler,cudssDataCreate=create)
+  solver=SimpleNamespace(device='cpu',_handle=ct.c_void_p(7),_data=ct.c_void_p(1234),_lib=native)
+  try:Workspace(solver)
+  except Exception as error:
+   results.append(dict(failure=failure,error=str(error),destroyed=destroyed,retained_data=solver._data.value if solver._data else None,live_native_data=sorted(live),retained_destroyed_pointer=solver._data.value in destroyed if solver._data else False))
+ print(json.dumps(results,indent=2))
+finally:wp.get_stream=old_get_stream

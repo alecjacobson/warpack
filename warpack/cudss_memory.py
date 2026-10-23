@@ -7,6 +7,7 @@ Destroy graphs before closing the owning CuDSSInverse. Not thread safe.
 """
 
 import ctypes as ct
+from contextlib import suppress
 
 import warp as wp
 
@@ -38,15 +39,28 @@ class Workspace:
         # empty data with our allocator to avoid mixing allocation ownership.
         from warp_cudss._bindings import _check, cudssData_t
 
-        _check(lib.cudssDataDestroy(solver._handle, solver._data), "cudssDataDestroy")
-        lib.cudssSetDeviceMemHandler.argtypes = [ct.c_void_p, ct.POINTER(Handler)]
-        lib.cudssSetDeviceMemHandler.restype = ct.c_int
-        status = lib.cudssSetDeviceMemHandler(solver._handle, ct.byref(self.handler))
-        if status:
-            raise RuntimeError(f"cuDSS allocator setup failed: {status}")
-        data = cudssData_t()
-        _check(lib.cudssDataCreate(solver._handle, ct.byref(data)), "cudssDataCreate")
-        solver._data = data
+        try:
+            # Destroy may report a pending native error after cleanup. Relinquish
+            # ownership before checking status so release cannot destroy it twice.
+            old_data = solver._data
+            solver._data = None
+            _check(lib.cudssDataDestroy(solver._handle, old_data), "cudssDataDestroy")
+            lib.cudssSetDeviceMemHandler.argtypes = [ct.c_void_p, ct.POINTER(Handler)]
+            lib.cudssSetDeviceMemHandler.restype = ct.c_int
+            status = lib.cudssSetDeviceMemHandler(solver._handle, ct.byref(self.handler))
+            if status:
+                raise RuntimeError(f"cuDSS allocator setup failed: {status}")
+            # A failed creation can still return a partial object. Its owner must
+            # see that output before the status check raises.
+            solver._data = data = cudssData_t()
+            _check(lib.cudssDataCreate(solver._handle, ct.byref(data)), "cudssDataCreate")
+        except Exception:
+            # Native destruction may call our allocator. Finish while this
+            # partially constructed Workspace and its callbacks are still alive,
+            # and preserve the original installation error if cleanup also fails.
+            with suppress(Exception):
+                solver.release()
+            raise
 
     def _alloc(self, ctx, out, size, stream):
         try:
