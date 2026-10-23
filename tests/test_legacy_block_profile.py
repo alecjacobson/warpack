@@ -81,6 +81,7 @@ def test_static_and_active_steps_preserve_complete_solves_and_wrappers(width, ac
     for times, selection in zip(result["samples_ms"], result["selections"], strict=True):
         assert times["selected_step"] > 0 and times["gram"] > 0
         assert times["paired_ritz_rotation"] > 0
+        assert times["subtract_projection"] > 0
         assert all(np.isfinite(t) and t >= 0 for t in times.values())
         assert (selection["bucket_index"] is not None) == active
         if width == 104 and wp.get_device().arch == 89:
