@@ -1,0 +1,18 @@
+"""Run unchanged benchmark, then record the actual already-loaded binary."""
+import ctypes as ct,hashlib,json,os,runpy,sys
+from pathlib import Path
+out=Path(sys.argv[1]);expected=sys.argv[2]
+assert not out.exists()
+sys.argv=['benchmarks.anvil_direct','--backend','warp','--repeats','5','--out',str(out)]
+runpy.run_module('benchmarks.anvil_direct',run_name='__main__')
+from warp_cudss import _bindings as b
+lib=b.get_library();version=[]
+for key in range(3):
+ value=ct.c_int();b._check(lib.cudssGetProperty(key,ct.byref(value)),'cudssGetProperty');version.append(value.value)
+assert '.'.join(map(str,version))==expected
+from benchmarks.source_provenance import source_manifest
+report=json.loads(out.read_text())
+report['cudss_runtime']=dict(version=version,library=lib._name,library_sha256=hashlib.sha256(Path(lib._name).read_bytes()).hexdigest(),binding=b.__file__,binding_sha256=hashlib.sha256(Path(b.__file__).read_bytes()).hexdigest(),jit_cache_dir=os.environ.get('CUDSS_JIT_CACHE_DIR'),jit_disabled=os.environ.get('CUDSS_JIT_DISABLE'),note='Fresh process for each independent setup; no cuDSS JIT disk cache enabled. Candidate analysis includes any per-process NVRTC compilation. Library identity is read after the timed benchmark, not preloaded by this launcher.')
+report['source_sha256_full']=source_manifest('benchmarks/anvil_direct.py')
+report['version_launcher_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+out.write_text(json.dumps(report,indent=2)+'\n')

@@ -1,0 +1,913 @@
+{
+  "runtime": [
+    0,
+    8,
+    0
+  ],
+  "library": "/home/horde/.local/lib/python3.10/site-packages/nvidia/cu12/lib/libcudss.so.0",
+  "library_sha256": "0740250950abbbbc7690c4edb1506f8432558658764d6c1f7cba29615acb3dfc",
+  "binding_sha256": "747914f904e4c4fb491189932ba9035a0214eeaf41e88e243ee2f7eaafa66e84",
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 649,
+      "MEMCPY": 326,
+      "KERNEL": 2628,
+      "CONDITIONAL": 64
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 198,
+      "HtoD (HOST PAGEABLE to DEVICE)": 128
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "changed_starts": [
+    {
+      "seed": null,
+      "quality": {
+        "eigenvalues": [
+          -1.0303113756644486e-12,
+          1.6260857226930397e-12,
+          1.9249507496497866e-12,
+          3.0201871792567573e-12,
+          3.6291310399216473e-12,
+          9.119832364034166e-12,
+          129.5365633077002,
+          147.37679501010848,
+          184.8186317371491,
+          253.27406419090838,
+          560.2701334618615,
+          607.3935917630814,
+          792.1583656154119,
+          975.6634166176289,
+          1156.1426495860742,
+          1289.4712956372796,
+          1337.050414241995,
+          1418.9213888704246,
+          1935.556844757566,
+          1949.6753874244855,
+          2241.017931913677,
+          2302.4355924284387,
+          2743.4158894489624,
+          3047.708181597104,
+          3191.8214932293977,
+          3316.495954617461
+        ],
+        "frequencies_hz": [
+          1.811408148326655,
+          1.9321226223921693,
+          2.1636798819814635,
+          2.5328851123633833,
+          3.7672016498259806,
+          3.922430294288425,
+          4.479464902093031,
+          4.971301947383237,
+          5.411601928159756,
+          5.715128125133941,
+          5.8196118977230125,
+          5.995139585859976,
+          7.002015968952534,
+          7.027506989896601,
+          7.5342980665951504,
+          7.636843253025045,
+          8.336158364950935,
+          8.786316070399693,
+          8.991650733723155,
+          9.165578209623032
+        ],
+        "original_residuals": [
+          2.6134208647412355e-09,
+          2.557425714217364e-09,
+          2.49466797934526e-09,
+          2.472206770774766e-09,
+          2.4941127887512902e-09,
+          2.447769038381667e-09,
+          2.87369600970333e-10,
+          2.951267375798019e-10,
+          8.329597244281592e-11,
+          2.9226286956827774e-10,
+          3.149106861930098e-10,
+          2.335740602173336e-10,
+          3.1414096890454485e-10,
+          2.0758904801197328e-10,
+          8.034506774194363e-11,
+          1.790358524771955e-11,
+          1.873011243435331e-10,
+          7.684700591066508e-11,
+          7.054489249529109e-11,
+          1.666593151240951e-10,
+          1.309683745156226e-11,
+          3.583510608215636e-10,
+          3.580004371258723e-10,
+          1.0530305853573083e-10,
+          1.9527730353415242e-10,
+          1.5161125019774716e-09
+        ],
+        "max_original_residual": 2.6134208647412355e-09,
+        "max_elastic_residual": 1.5161125019774716e-09,
+        "orthogonality_max_error": 1.865174681370263e-14,
+        "max_relative_elastic_eigenvalue_error": 7.127631818093505e-14,
+        "max_relative_elastic_frequency_error": 3.5638159090467525e-14,
+        "minimum_elastic_mac": 0.9999999999999996,
+        "rigid_subspace_min_cosine": 0.9999999999999994,
+        "accepted": true,
+        "status": 0,
+        "converged": 26
+      }
+    },
+    {
+      "seed": 11,
+      "quality": {
+        "eigenvalues": [
+          -2.1838818618929517e-12,
+          -1.389640463196529e-12,
+          -7.365766164514734e-13,
+          1.4076349966653193e-12,
+          1.9140392604995576e-12,
+          1.4612478896176882e-11,
+          129.53656330770863,
+          147.3767950101181,
+          184.81863173714672,
+          253.2740641909117,
+          560.2701334618863,
+          607.393591763099,
+          792.1583656154129,
+          975.6634166175916,
+          1156.1426495860962,
+          1289.4712956373182,
+          1337.0504142420032,
+          1418.9213888704307,
+          1935.5568447575965,
+          1949.6753874244541,
+          2241.017931913633,
+          2302.435592428467,
+          2743.4158894489633,
+          3047.708181596909,
+          3191.821493229412,
+          3316.4959546173677
+        ],
+        "frequencies_hz": [
+          1.811408148326714,
+          1.932122622392232,
+          2.1636798819814493,
+          2.5328851123633997,
+          3.7672016498260645,
+          3.9224302942884814,
+          4.479464902093033,
+          4.971301947383142,
+          5.411601928159809,
+          5.715128125134028,
+          5.81961189772303,
+          5.995139585859989,
+          7.002015968952589,
+          7.027506989896544,
+          7.534298066595077,
+          7.636843253025091,
+          8.336158364950936,
+          8.78631607039941,
+          8.991650733723176,
+          9.165578209622902
+        ],
+        "original_residuals": [
+          2.4727847505416996e-09,
+          2.5100609055069766e-09,
+          2.4935937194694826e-09,
+          2.5242915711378605e-09,
+          2.5748188860941816e-09,
+          2.4828025709049735e-09,
+          1.332326111643065e-10,
+          1.4854951345001514e-10,
+          1.3139734508883927e-10,
+          1.9619538622167633e-10,
+          3.1421382396925667e-10,
+          2.466577731938855e-10,
+          3.6223008944472383e-10,
+          1.154793203810754e-10,
+          3.1964850018575014e-10,
+          1.5702201173035224e-10,
+          8.830884290870728e-11,
+          3.79371259439165e-11,
+          1.2861391272741073e-10,
+          3.439187059649131e-10,
+          1.6344156706375134e-10,
+          7.175570331023781e-11,
+          5.323989872704975e-11,
+          1.0306231221937738e-10,
+          2.140965150580217e-10,
+          1.3260424767243908e-09
+        ],
+        "max_original_residual": 2.5748188860941816e-09,
+        "max_elastic_residual": 1.3260424767243908e-09,
+        "orthogonality_max_error": 1.509903313490213e-14,
+        "max_relative_elastic_eigenvalue_error": 7.016609515630989e-14,
+        "max_relative_elastic_frequency_error": 3.5083047578154947e-14,
+        "minimum_elastic_mac": 0.9999999999999991,
+        "rigid_subspace_min_cosine": 0.9999999999999996,
+        "accepted": true,
+        "status": 0,
+        "converged": 26
+      }
+    },
+    {
+      "seed": 42,
+      "quality": {
+        "eigenvalues": [
+          -3.688820862678939e-12,
+          -4.574695243648118e-13,
+          7.253447390949703e-13,
+          1.9461025148874038e-12,
+          3.0042132544266813e-12,
+          6.227122136734703e-12,
+          129.53656330770588,
+          147.37679501011064,
+          184.81863173715732,
+          253.27406419089354,
+          560.2701334618989,
+          607.3935917631063,
+          792.1583656154247,
+          975.6634166176216,
+          1156.1426495860592,
+          1289.4712956372746,
+          1337.050414242006,
+          1418.921388870414,
+          1935.5568447575545,
+          1949.6753874244318,
+          2241.017931913615,
+          2302.4355924284487,
+          2743.4158894489433,
+          3047.7081815969427,
+          3191.821493229485,
+          3316.4959546174723
+        ],
+        "frequencies_hz": [
+          1.8114081483266948,
+          1.9321226223921835,
+          2.163679881981512,
+          2.532885112363309,
+          3.7672016498261067,
+          3.9224302942885054,
+          4.479464902093067,
+          4.971301947383219,
+          5.411601928159722,
+          5.715128125133932,
+          5.819611897723036,
+          5.9951395858599525,
+          7.002015968952514,
+          7.027506989896505,
+          7.534298066595046,
+          7.636843253025061,
+          8.336158364950906,
+          8.786316070399458,
+          8.991650733723278,
+          9.165578209623046
+        ],
+        "original_residuals": [
+          2.4750985727661473e-09,
+          2.5250972349629862e-09,
+          2.470914541751357e-09,
+          2.525747228298976e-09,
+          2.515562394951109e-09,
+          2.507140484268069e-09,
+          5.3421651062622146e-11,
+          2.186873791746963e-10,
+          7.265995016209422e-11,
+          2.1401806777460608e-10,
+          4.16919005409988e-10,
+          1.2334581277566523e-10,
+          3.069184743111423e-10,
+          4.108451423331776e-10,
+          3.7620634314773364e-11,
+          4.211421351338519e-12,
+          1.0664946513966847e-10,
+          7.968757013191043e-11,
+          3.033892960825469e-10,
+          1.2015554219864571e-11,
+          1.420260238426107e-10,
+          1.0121387281672934e-10,
+          3.200661314152513e-10,
+          4.6848239820236906e-11,
+          6.176011726351428e-10,
+          2.9586412036060786e-09
+        ],
+        "max_original_residual": 2.9586412036060786e-09,
+        "max_elastic_residual": 2.9586412036060786e-09,
+        "orthogonality_max_error": 2.1538326677728037e-14,
+        "max_relative_elastic_eigenvalue_error": 4.418687638008123e-14,
+        "max_relative_elastic_frequency_error": 2.2093438190040615e-14,
+        "minimum_elastic_mac": 0.9999999999999991,
+        "rigid_subspace_min_cosine": 0.9999999999999994,
+        "accepted": true,
+        "status": 0,
+        "converged": 26
+      }
+    }
+  ],
+  "after_burst": {
+    "eigenvalues": [
+      -6.56450410339482e-12,
+      6.74946486245041e-13,
+      5.722150037604702e-12,
+      6.538384571660874e-12,
+      7.837921550993266e-12,
+      1.0294801410384686e-11,
+      129.53656330770235,
+      147.37679501010783,
+      184.81863173716155,
+      253.27406419089985,
+      560.2701334618715,
+      607.39359176309,
+      792.15836561545,
+      975.6634166175818,
+      1156.1426495860646,
+      1289.4712956372873,
+      1337.0504142420143,
+      1418.9213888704105,
+      1935.5568447576106,
+      1949.6753874244532,
+      2241.0179319135996,
+      2302.4355924284464,
+      2743.415889448956,
+      3047.7081815970946,
+      3191.82149322943,
+      3316.4959546174314
+    ],
+    "frequencies_hz": [
+      1.8114081483266702,
+      1.932122622392165,
+      2.163679881981537,
+      2.5328851123633407,
+      3.767201649826015,
+      3.922430294288452,
+      4.479464902093138,
+      4.971301947383117,
+      5.411601928159735,
+      5.71512812513396,
+      5.819611897723054,
+      5.995139585859945,
+      7.002015968952616,
+      7.027506989896543,
+      7.53429806659502,
+      7.636843253025058,
+      8.336158364950924,
+      8.786316070399678,
+      8.991650733723201,
+      9.16557820962299
+    ],
+    "original_residuals": [
+      2.4867709694920214e-09,
+      2.5108364592057796e-09,
+      2.532211656696126e-09,
+      2.5149465971463986e-09,
+      2.5158729406377316e-09,
+      2.500366776660619e-09,
+      1.3342790439078424e-10,
+      2.1441597075544827e-10,
+      6.948538139311775e-11,
+      2.109547680395889e-10,
+      4.1181839532263664e-10,
+      1.213469699116129e-10,
+      3.007726100054336e-10,
+      4.032749200062885e-10,
+      3.853360181312864e-11,
+      4.3616896002032065e-12,
+      1.0574571052077653e-10,
+      8.091313549490866e-11,
+      3.0101647699021317e-10,
+      1.197503085961425e-11,
+      1.4097436700053883e-10,
+      1.0049585081602457e-10,
+      3.172171131377952e-10,
+      4.828464620917148e-11,
+      6.139788586968493e-10,
+      2.96959035970109e-09
+    ],
+    "max_original_residual": 2.96959035970109e-09,
+    "max_elastic_residual": 2.96959035970109e-09,
+    "orthogonality_max_error": 1.7319479184152442e-14,
+    "max_relative_elastic_eigenvalue_error": 6.23945339839338e-14,
+    "max_relative_elastic_frequency_error": 3.108624468950438e-14,
+    "minimum_elastic_mac": 0.9999999999999991,
+    "rigid_subspace_min_cosine": 0.9999999999999996,
+    "accepted": true,
+    "status": 0,
+    "converged": 26
+  },
+  "api_events": [
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuCtxPushCurrent_v2",
+      "site": 0,
+      "correlation": 1,
+      "time_ns": 19714521301301108
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuCtxPushCurrent_v2",
+      "site": 1,
+      "correlation": 1,
+      "time_ns": 19714521301310607,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 2,
+      "time_ns": 19714521301322082
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 2,
+      "time_ns": 19714521301324758,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaFreeAsync",
+      "site": 0,
+      "correlation": 3,
+      "time_ns": 19714521301330930
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuMemFreeAsync",
+      "site": 0,
+      "correlation": 3,
+      "time_ns": 19714521301334761
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuMemFreeAsync",
+      "site": 1,
+      "correlation": 3,
+      "time_ns": 19714521301352905,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaFreeAsync",
+      "site": 1,
+      "correlation": 3,
+      "time_ns": 19714521301355907,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuCtxPopCurrent_v2",
+      "site": 0,
+      "correlation": 4,
+      "time_ns": 19714521301363177
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuCtxPopCurrent_v2",
+      "site": 1,
+      "correlation": 4,
+      "time_ns": 19714521301365562,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 5,
+      "time_ns": 19714521301391262
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 5,
+      "time_ns": 19714521301395601
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 5,
+      "time_ns": 19714521330356838,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 5,
+      "time_ns": 19714521330366883,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 6,
+      "time_ns": 19714521330380667
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 6,
+      "time_ns": 19714521330386205
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 6,
+      "time_ns": 19714521796426544,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 6,
+      "time_ns": 19714521796436617,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 0,
+      "correlation": 7,
+      "time_ns": 19714521796456540
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 0,
+      "correlation": 7,
+      "time_ns": 19714521796462928
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 1,
+      "name": "cuGraphLaunch",
+      "site": 1,
+      "correlation": 7,
+      "time_ns": 19714522262573079,
+      "status": 0
+    },
+    {
+      "phase": "warm_enqueue",
+      "domain": 2,
+      "name": "cudaGraphLaunch",
+      "site": 1,
+      "correlation": 7,
+      "time_ns": 19714522262594981,
+      "status": 0
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 8,
+      "time_ns": 19714522262648606
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 8,
+      "time_ns": 19714522262655633,
+      "status": 0
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 2,
+      "name": "cudaStreamIsCapturing",
+      "site": 0,
+      "correlation": 9,
+      "time_ns": 19714522262697021
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuStreamIsCapturing",
+      "site": 0,
+      "correlation": 9,
+      "time_ns": 19714522262706230
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuStreamIsCapturing",
+      "site": 1,
+      "correlation": 9,
+      "time_ns": 19714522262708800,
+      "status": 0
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 2,
+      "name": "cudaStreamIsCapturing",
+      "site": 1,
+      "correlation": 9,
+      "time_ns": 19714522262712762,
+      "status": 0
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 10,
+      "time_ns": 19714522262720239
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 10,
+      "time_ns": 19714522262722435,
+      "status": 0
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxSynchronize",
+      "site": 0,
+      "correlation": 11,
+      "time_ns": 19714522262727053
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxSynchronize",
+      "site": 1,
+      "correlation": 11,
+      "time_ns": 19714522700028444,
+      "status": 0
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 0,
+      "correlation": 12,
+      "time_ns": 19714522700040316
+    },
+    {
+      "phase": "caller_sync",
+      "domain": 1,
+      "name": "cuCtxGetCurrent",
+      "site": 1,
+      "correlation": 12,
+      "time_ns": 19714522700045783,
+      "status": 0
+    }
+  ],
+  "trace_errors": [],
+  "api_entries": {
+    "warm_enqueue": {
+      "cuCtxPushCurrent_v2": 1,
+      "cuCtxGetCurrent": 1,
+      "cudaFreeAsync": 1,
+      "cuMemFreeAsync": 1,
+      "cuCtxPopCurrent_v2": 1,
+      "cudaGraphLaunch": 3,
+      "cuGraphLaunch": 3
+    },
+    "caller_sync": {
+      "cuCtxGetCurrent": 3,
+      "cudaStreamIsCapturing": 1,
+      "cuStreamIsCapturing": 1,
+      "cuCtxSynchronize": 1
+    }
+  },
+  "source_sha256": {
+    "benchmarks/acceptance.py": "51af40b406d79f3579b620d1ce118af8bb0e02e3d90d754ffaa95cc72f6e004a",
+    "benchmarks/anvil.py": "8363ea50f17006f68093c15e254d40b9942d2aaa9080b559c26188e545bf41b1",
+    "benchmarks/anvil_direct.py": "3de0e7194e670ab9c2ef8a6f1301954cf98032a88b8d15e8ede43e5497bb4598",
+    "benchmarks/anvil_inputs.py": "00c5eb4a1cb36337984761d93da1c367b1c1761003bd94780dd8b6186ef29e9c",
+    "benchmarks/applications/__init__.py": "a517d73e69ebb3dc905b95b63eac4e34625df802a48ed523516f1c030f388b0d",
+    "benchmarks/applications/compare.py": "a08b4704ba1caeb7558878d71bf416a600827fa8349ebfc2cd439c6848baea79",
+    "benchmarks/applications/diagonal_mass.py": "e617a6d21a5e97b2b8bb42f7f35a28822dce2632abb43d06f2921ac9ed9aa684",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/hodge.py": "4ba553ad4b944fb28c1c0d65bc5f0c3488e609251dbcf57447066aaaac540e3c",
+    "benchmarks/applications/problems.py": "15e5d47aecf81b772f79aeba0dd8c445071b03c0317ff73cc94ced78986a9ab8",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/applications/runner.py": "1293eb027f38080c247e5e92d13016f6b7120927abdbd57fdeb40bfc2e8ca22a",
+    "benchmarks/audit_profile.py": "e718c8c407aca6ea39faf38681cb63f25243f2acf261648ddd387ff0913760ee",
+    "benchmarks/block_inputs.py": "4ddece4c705750eb58c0947f94940c2278a6b4b323d048764fd1585e21f31267",
+    "benchmarks/compare.py": "70218c8e5dcb12c1bac86de5757aa4407a1dfc791f54c48fb1fb3e267b95fc4f",
+    "benchmarks/dependency_provenance.py": "390309b2bf1d6dc5eec41960047eb5ae79a89aeee50c164df9811ecaf4f50e6e",
+    "benchmarks/experimental/active_cg.py": "8b26f68e144b8b2387182b34d9888d05f7483316022e311793ad4bf955d35863",
+    "benchmarks/experimental/active_search.py": "5be7e186d32331886de833fbd33bfcba17f595e91eb82c0d584f1e991e3df0b5",
+    "benchmarks/experimental/batched_cg.py": "b121520fe8dbdd5a892df8e1bebb3989419c8a860f07dcd33c8325ad4eeac0f6",
+    "benchmarks/experimental/block_kernels.py": "eaab62a6274e995e710f4b3b3666520ec6eb50449e104babec883ef0aa289a8f",
+    "benchmarks/experimental/block_lobpcg.py": "1853838759eaf90a9fec6d775ac01221f06d7b7729e83332950bcafe6384d33e",
+    "benchmarks/experimental/cached_x_image.py": "d9ce02e7ec77fd6c68f18754b2def83d5c30e2101a4cf6862702b7d15816b239",
+    "benchmarks/experimental/compare_block.py": "4ab83c6c5d765a04dad9ddf84b7b702bdb854ecb6e689aa4708b32b249f56e0c",
+    "benchmarks/experimental/profile_active_block.py": "91b7920816ba95a3e4b500105129d652fea96d90fd0545c5db9cc1dd42b777b8",
+    "benchmarks/source_provenance.py": "3267e866bbbc1c32957ad350e2889285e9703fd8279ddc884d9728bb71c41062",
+    "benchmarks/upstream/__init__.py": "efeb32afe41f0a6d8385b636de39cd4e9c6e8c8d7f2d45c84028391895705377",
+    "benchmarks/upstream/adapters.py": "d3f2f4eb10cf88d5067595b6db4badc3881cb6006b517dce0ba4e9f06abd245c",
+    "benchmarks/validate_dragon_meshes.py": "bed1d9f0518abeeedef8b0264ebd3829b394551dbcbe62d51d89adcbdabf41b0",
+    "examples/__init__.py": "225a557796620a17a0f23488f0edce3b4019dfd97b5bb905371a483c7f87a6ec",
+    "examples/problems/__init__.py": "408f45e3a66bdebbe67e7e38ae9edb17b6e57b01abdcc7589b814984f4e64a43",
+    "examples/problems/elasticity.py": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "b2cc3e17c9355eff9d3524e17fb9cd93016aaebf2a4a5c33672380c2a539b1d0",
+    "warpack/_block_search.py": "3e5004a0bc110c35fbe4bd73ee29538789469d617a6f83b0780f4b3f73719448",
+    "warpack/_block_whitening.py": "805c27508747521ca0b7de2886b371422d321c27f5e0e4453b27ba650123f3a9",
+    "warpack/_coalesced_fsai.py": "d1267039b1b3f15a63ee4c4f6e6c0db6483d403b9cff0e7549dad7628703409c",
+    "warpack/_coalesced_operator.py": "bb6b34a7aa62dd19502ae5c28861785ab6230d17b1b05faac4e20be4d869d132",
+    "warpack/_compact_jacobi.py": "7da52eb930ab36f68d50c4a25fb8c45fa4a0142880523d9a563244409b4b3cfe",
+    "warpack/_first_whitening.py": "53cc5d906a781ccb180106fd09e2619704a269e6da2da1efe443994f7845e5ad",
+    "warpack/_gram.py": "3ebafdc623cec5f11ef6ab82da3498afa6f0538b5f4a470019cc8025c2d6e7e9",
+    "warpack/_projected_cholesky.py": "8b9ea32c35bac2d7c942ca7d201770cf43ad02982d59a658d4eab2352721fd88",
+    "warpack/_ritz_qr.py": "f64262aef923f3d6359e4de166c77f0c738b6848fc2126ac94302aca5a646a58",
+    "warpack/_scratch.py": "153c260b5a6b84d1f4346ba5ebd6805e7a6c06261f35cd755cfee994f9cb1e50",
+    "warpack/_triangular.py": "67076818b6cc1286173dded6ce5287a6b10e4850aa04a067f479c32aab0898ed",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "d492a54956d7043ca39477663e60d11bbf32ddcdbb143c04419f1a42e3659871",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "902799e4838e904b1b71885b45d5ea98116232f251aaea4ddd54f2c0c2c39dff",
+    "warpack/block_products.py": "5d57870617f2bce13030ff6368b632c1c876c4658bf17801dcce7020c3054c30",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "db470884bc318522654eb558088c44c19f861d9cfdf52d76c91e8f771f4dcb0a",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "706be371520d56cb3e96064c0163be2ff7a5c718b99881c89542eac491d2f5f5",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "f31c8d065bf69e9429b5ab47702e1dda0596191f407107d5890a45f7c1b8861b",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "c668e2630a9f311d42af7cbb6d7fedb7d0db5e5910edc94b1bd0c423f6029f5b",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "launcher_sha256": "c3c51c0456d21591ea513613b02853c5453b1a5be34f8b48f14d215da89eec67",
+  "inputs": {
+    "schema": 1,
+    "common": {
+      "fixture": {
+        "arrays": {
+          "columns": {
+            "dtype": "<i4",
+            "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+            "shape": [
+              1331499
+            ]
+          },
+          "mass": {
+            "dtype": "<f8",
+            "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+            "shape": [
+              94619
+            ]
+          },
+          "normalized": {
+            "dtype": "<f8",
+            "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+            "shape": [
+              1331499,
+              3,
+              3
+            ]
+          },
+          "offsets": {
+            "dtype": "<i4",
+            "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+            "shape": [
+              94620
+            ]
+          },
+          "positions": {
+            "dtype": "<f8",
+            "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+            "shape": [
+              94619,
+              3
+            ]
+          },
+          "rigid": {
+            "dtype": "<f8",
+            "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+            "shape": [
+              6,
+              283857
+            ]
+          },
+          "stiffness": {
+            "dtype": "<f8",
+            "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+            "shape": [
+              1331499,
+              3,
+              3
+            ]
+          }
+        },
+        "configuration": {
+          "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+          "energy": "stable Neo-Hookean rest Hessian",
+          "mass": "lumped per-vertex mass, repeated for xyz",
+          "material": {
+            "density": 1000.0,
+            "poisson": 0.3,
+            "young": 100000.0
+          },
+          "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+          "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+        },
+        "schema": 1
+      },
+      "reference": {
+        "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+        "values": {
+          "shape": [
+            26
+          ],
+          "dtype": "<f8",
+          "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+        },
+        "vectors": {
+          "shape": [
+            26,
+            283857
+          ],
+          "dtype": "<f8",
+          "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+        }
+      }
+    },
+    "method": {
+      "initial": {
+        "shape": [
+          283857
+        ],
+        "dtype": "<f8",
+        "sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f"
+      },
+      "shifted_matrix": {
+        "shape": [
+          283857,
+          283857
+        ],
+        "offsets": {
+          "shape": [
+            283858
+          ],
+          "dtype": "<i8",
+          "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+        },
+        "columns": {
+          "shape": [
+            11983107
+          ],
+          "dtype": "<i8",
+          "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+        },
+        "values": {
+          "shape": [
+            11983107
+          ],
+          "dtype": "<f8",
+          "sha256": "6d39ca3459d4d394aebefe6bcf5c0fbf8a96e8bd1a90caadf04e25c8a1dcef10"
+        }
+      },
+      "constraints": null
+    }
+  },
+  "accepted": true
+}

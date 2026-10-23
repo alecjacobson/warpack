@@ -1,0 +1,55 @@
+"""Full Anvil graph inspection and separated launch/API audit; no timing claims."""
+import argparse,ctypes as ct,hashlib,json
+from collections import Counter
+from pathlib import Path
+from types import SimpleNamespace
+import numpy as np
+import warp as wp
+from warp_cudss import _bindings as b
+from benchmarks import anvil_inputs
+from benchmarks.anvil import validate
+from benchmarks.audit_profile import graph_summary
+from benchmarks.applications.cuda_api_trace import ApiTrace
+from benchmarks.experimental.compare_block import prepare
+from benchmarks.source_provenance import source_manifest
+from warpack import CuDSSInverse,KrylovSchur
+p=argparse.ArgumentParser();p.add_argument('--version',required=True);p.add_argument('--out',type=Path,required=True);args=p.parse_args();assert not args.out.exists()
+fixture={}
+_,_,shifted,_,sa,_,_,_=prepare(SimpleNamespace(case='anvil',shift=1.),metadata=fixture)
+reference,ref_identity=anvil_inputs.reference()
+initial=np.load('build/anvil_initial.npy')
+start=wp.array(initial.reshape(1,-1),dtype=wp.float64)
+inverse=CuDSSInverse(shifted,1)
+solver=KrylovSchur(inverse,26,ncv=64,which='LA',tol=1e-12,initial_vector=start)
+graph=solver.capture(1,adaptive=False)
+trace=None
+try:
+ lib=b.get_library();version=[]
+ for key in range(3):
+  value=ct.c_int();b._check(lib.cudssGetProperty(key,ct.byref(value)),'cudssGetProperty');version.append(value.value)
+ assert '.'.join(map(str,version))==args.version
+ rows=[]
+ for seed in [None,11,42]:
+  vector=initial if seed is None else np.random.default_rng(seed).normal(size=initial.size)
+  start.assign(vector.reshape(1,-1));wp.capture_launch(graph)
+  quality=validate(sa,solver.eigenvectors.numpy(),reference)[0]
+  quality.update(status=int(solver.status.numpy()[0]),converged=int(solver.converged.numpy()[0]))
+  quality['accepted'] &= quality['status']==0 and quality['converged']==26
+  rows.append(dict(seed=seed,quality=quality))
+ dot=args.out.with_suffix('.dot');wp.capture_debug_dot_print(graph,str(dot));audit=graph_summary(dot);dot.unlink()
+ wp.capture_launch(graph);wp.synchronize()
+ trace=ApiTrace();trace.phase='warm_enqueue'
+ for _ in range(3):wp.capture_launch(graph)
+ trace.phase='caller_sync';wp.synchronize();trace.phase=None
+ final=validate(sa,solver.eigenvectors.numpy(),reference)[0]
+ final.update(status=int(solver.status.numpy()[0]),converged=int(solver.converged.numpy()[0]))
+ final['accepted'] &= final['status']==0 and final['converged']==26
+ report=dict(runtime=version,library=lib._name,library_sha256=hashlib.sha256(Path(lib._name).read_bytes()).hexdigest(),binding_sha256=hashlib.sha256(Path(b.__file__).read_bytes()).hexdigest(),graph=audit,changed_starts=rows,after_burst=final,api_events=trace.events,trace_errors=trace.errors,api_entries={phase:dict(Counter(e['name'] for e in trace.events if e['site']==0 and e['phase']==phase)) for phase in ['warm_enqueue','caller_sync']},source_sha256=source_manifest('benchmarks/anvil_direct.py'),launcher_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),inputs=anvil_inputs.inputs(fixture['anvil_fixture'],ref_identity,initial,anvil_inputs.host_device_matrix(shifted)))
+ report['accepted']=all(r['quality']['accepted'] for r in rows) and final['accepted'] and not trace.errors and not any(e.get('status',0) for e in trace.events)
+ args.out.parent.mkdir(parents=True,exist_ok=True);args.out.write_text(json.dumps(report,indent=2)+'\n')
+ print(json.dumps(dict(version=version,accepted=report['accepted'],graph=audit,entries=report['api_entries']),indent=2))
+ if not report['accepted']:raise SystemExit('Rejected audit retained')
+finally:
+ if trace is not None:trace.close()
+ solver.graph=graph=None
+ inverse.close()

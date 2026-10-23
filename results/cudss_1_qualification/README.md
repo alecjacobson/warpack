@@ -57,3 +57,5 @@ not a claim that the currently supported 0.8 backend has changed. Full FEM graph
 and enqueue audits, large-matrix accuracy/performance, explicit public policy,
 JIT/cache setup accounting, and the strict pencil floor remain to be qualified.
 The source launchers are retained as `.py.txt` with raw JSON/log evidence.
+
+[Fresh Anvil timing and complete-graph qualification](ANVIL.md): candidate setup improves, warm replay is slightly slower, and all captured host/device transfer nodes disappear for this SPD problem. Broader qualification remains open.
