@@ -1,0 +1,53 @@
+.F
+=================================== FAILURES ===================================
+_ test_complete_solver_exact_control_and_independent_accuracy[repeated_null-1024] _
+
+n = 1024, kind = 'repeated_null'
+
+    @pytest.mark.parametrize("n", [8, 48, 104, 208, 408, 612, 1024])
+    @pytest.mark.parametrize("kind", ["indefinite", "repeated_null"])
+    def test_complete_solver_exact_control_and_independent_accuracy(n, kind):
+        rng = np.random.default_rng(159)
+        a = rng.normal(size=(n, n))
+        a = (a + a.T) * 0.5
+        if kind == "repeated_null":
+            q = la.qr(a)[0]
+            values = np.repeat(np.arange((n + 3) // 4), 4)[:n].astype(float)
+            values[: n // 3] = 0
+            a = (q * values) @ q.T
+        original = wp.array(a, dtype=wp.float64)
+        controls = [solver(constructor, n) for constructor in [GlobalJacobi, PairedOutputJacobi]]
+        graphs = []
+        for eig in controls:
+            wp.copy(eig.h, original)
+            eig.apply()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                wp.copy(eig.h, original)
+                eig.apply()
+            graphs.append(capture.graph)
+        for scale in [1.0, 1e-80, 1e80, 0.0, 1.0]:
+            original.assign(a * scale)
+            for graph in graphs:
+                wp.capture_launch(graph)
+            baseline, candidate = controls
+            np.testing.assert_array_equal(candidate.h.numpy(), baseline.h.numpy())
+            np.testing.assert_array_equal(candidate.v.numpy(), baseline.v.numpy())
+            np.testing.assert_array_equal(candidate.sweeps.numpy(), baseline.sweeps.numpy())
+            h, v = candidate.h.numpy(), candidate.v.numpy()
+            if scale:
+                values = np.diag(h) / scale
+                assert la.norm(a @ v - v * values) / max(1, la.norm(a)) < 1e-11
+>               assert la.norm(v.T @ v - np.eye(n)) < 1e-11
+E               assert np.float64(1.1800884369777445e-11) < 1e-11
+E                +  where np.float64(1.1800884369777445e-11) = <function norm at 0x7f43649420e0>(((array([[-0.02196523,  0.02887358,  0.03579139, ..., -0.01424617,\n        -0.00268897, -0.04113273],\n       [-0.0231041...      [ 0.01990942,  0.04826777, -0.04669586, ..., -0.00733502,\n        -0.01504141,  0.01698612]], shape=(1024, 1024)) @ array([[-0.02196523, -0.02310416, -0.06100344, ...,  0.03361947,\n        -0.06755011,  0.01990942],\n       [ 0.0288735...      [-0.04113273,  0.02432061, -0.04529738, ...,  0.05199149,\n         0.0225334 ,  0.01698612]], shape=(1024, 1024))) - array([[1., 0., 0., ..., 0., 0., 0.],\n       [0., 1., 0., ..., 0., 0., 0.],\n       [0., 0., 1., ..., 0., 0., 0.],\n    ... 0., ..., 1., 0., 0.],\n       [0., 0., 0., ..., 0., 1., 0.],\n       [0., 0., 0., ..., 0., 0., 1.]], shape=(1024, 1024))))
+E                +    where <function norm at 0x7f43649420e0> = la.norm
+E                +    and   array([[-0.02196523,  0.02887358,  0.03579139, ..., -0.01424617,\n        -0.00268897, -0.04113273],\n       [-0.0231041...      [ 0.01990942,  0.04826777, -0.04669586, ..., -0.00733502,\n        -0.01504141,  0.01698612]], shape=(1024, 1024)) = array([[-0.02196523, -0.02310416, -0.06100344, ...,  0.03361947,\n        -0.06755011,  0.01990942],\n       [ 0.0288735...      [-0.04113273,  0.02432061, -0.04529738, ...,  0.05199149,\n         0.0225334 ,  0.01698612]], shape=(1024, 1024)).T
+E                +    and   array([[1., 0., 0., ..., 0., 0., 0.],\n       [0., 1., 0., ..., 0., 0., 0.],\n       [0., 0., 1., ..., 0., 0., 0.],\n    ... 0., ..., 1., 0., 0.],\n       [0., 0., 0., ..., 0., 1., 0.],\n       [0., 0., 0., ..., 0., 0., 1.]], shape=(1024, 1024)) = <function eye at 0x7f436e523640>(1024)
+E                +      where <function eye at 0x7f436e523640> = np.eye
+
+tests/test_paired_jacobi.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_paired_jacobi.py::test_complete_solver_exact_control_and_independent_accuracy[repeated_null-1024]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed, 35 deselected in 7.19s
