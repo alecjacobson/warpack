@@ -1,0 +1,219 @@
+{
+  "accepted": true,
+  "cases": {
+    "100": {
+      "canonical": {
+        "source": "results/certified_whitening/production/100-canonical-a1.json",
+        "setup_seconds": 0.3659684993326664,
+        "capture_seconds": 3.8533062264323235,
+        "methods": {
+          "Warp": {
+            "seconds": [
+              3.234192993491888,
+              3.186336573213339,
+              3.1800526082515717
+            ],
+            "median_seconds": 3.186336573213339,
+            "iterations": [
+              35,
+              34,
+              34
+            ],
+            "worst_residual": 9.038585943230045e-12
+          },
+          "CuPy": {
+            "seconds": [
+              3.5066624581813812,
+              2.8584141433238983,
+              3.4873697459697723
+            ],
+            "median_seconds": 3.4873697459697723,
+            "iterations": [
+              null,
+              null,
+              null
+            ],
+            "worst_residual": 7.323023628056822e-11
+          }
+        },
+        "usage_last_replay": [],
+        "paired_cupy": true
+      },
+      "default": {
+        "source": "results/certified_whitening/production/100-default-a1.json",
+        "setup_seconds": 0.3691248819231987,
+        "capture_seconds": 3.9088703393936157,
+        "methods": {
+          "Warp": {
+            "seconds": [
+              2.974229957908392,
+              3.040587328374386,
+              3.09184392914176
+            ],
+            "median_seconds": 3.040587328374386,
+            "iterations": [
+              34,
+              35,
+              36
+            ],
+            "worst_residual": 7.601369998561007e-12
+          },
+          "CuPy": {
+            "seconds": [
+              2.7686881721019745,
+              2.766853913664818,
+              3.578787751495838
+            ],
+            "median_seconds": 2.7686881721019745,
+            "iterations": [
+              null,
+              null,
+              null
+            ],
+            "worst_residual": 7.324112048607061e-11
+          }
+        },
+        "usage_last_replay": [
+          [
+            37,
+            0
+          ]
+        ],
+        "paired_cupy": true
+      },
+      "warp_ratio": 0.9542580510595688
+    },
+    "anvil": {
+      "canonical": {
+        "source": "results/certified_whitening/production/anvil-canonical-a1.json",
+        "setup_seconds": 0.7885695695877075,
+        "capture_seconds": 0.8178716637194157,
+        "methods": {
+          "Warp": {
+            "seconds": [
+              1.6199362091720104,
+              1.618433140218258,
+              1.6293553672730923
+            ],
+            "median_seconds": 1.6199362091720104,
+            "iterations": [
+              16,
+              16,
+              16
+            ],
+            "worst_residual": 1.9625845048230483e-08
+          },
+          "CuPy": {
+            "seconds": [
+              2.3712251521646976,
+              2.383748721331358,
+              2.3833014629781246
+            ],
+            "median_seconds": 2.3833014629781246,
+            "iterations": [
+              null,
+              null,
+              null
+            ],
+            "worst_residual": 1.6780741567222181e-09
+          }
+        },
+        "usage_last_replay": [],
+        "paired_cupy": true
+      },
+      "default": {
+        "source": "results/certified_whitening/production/anvil-default-a1.json",
+        "setup_seconds": 0.8151528127491474,
+        "capture_seconds": 0.8170413374900818,
+        "methods": {
+          "Warp": {
+            "seconds": [
+              1.6338118650019169,
+              1.6201505735516548,
+              1.616454292088747
+            ],
+            "median_seconds": 1.6201505735516548,
+            "iterations": [
+              16,
+              16,
+              16
+            ],
+            "worst_residual": 1.917948640388751e-08
+          },
+          "CuPy": {
+            "seconds": [
+              2.388484824448824,
+              2.53421663120389,
+              2.382989339530468
+            ],
+            "median_seconds": 2.388484824448824,
+            "iterations": [
+              null,
+              null,
+              null
+            ],
+            "worst_residual": 1.678113665354303e-09
+          }
+        },
+        "usage_last_replay": [],
+        "paired_cupy": true
+      },
+      "warp_ratio": 1.0001323289018609
+    },
+    "200": {
+      "canonical": {
+        "source": "results/certified_whitening/production-warp-only/200-canonical-a1.json",
+        "setup_seconds": 0.6433429308235645,
+        "capture_seconds": 18.340092692524195,
+        "methods": {
+          "Warp": {
+            "seconds": [
+              11.296394102275372,
+              11.086639046669006,
+              11.130918581038713
+            ],
+            "median_seconds": 11.130918581038713,
+            "iterations": [
+              36,
+              35,
+              35
+            ],
+            "worst_residual": 9.086806885023381e-12
+          }
+        },
+        "usage_last_replay": [],
+        "paired_cupy": false
+      },
+      "default": {
+        "source": "results/certified_whitening/production-warp-only/200-default-a1.json",
+        "setup_seconds": 0.6360432580113411,
+        "capture_seconds": 18.69266863912344,
+        "methods": {
+          "Warp": {
+            "seconds": [
+              10.473334524780512,
+              10.463441297411919,
+              10.694597620517015
+            ],
+            "median_seconds": 10.473334524780512,
+            "iterations": [
+              35,
+              35,
+              36
+            ],
+            "worst_residual": 8.901653197094044e-12
+          }
+        },
+        "usage_last_replay": [
+          [
+            37,
+            0
+          ]
+        ],
+        "paired_cupy": false
+      },
+      "warp_ratio": 0.9409227503129542
+    }
+  },
+  "scope": "100-mode and Anvil use accepted Warp/CuPy paired workers. 200-mode production regression uses a separate predeclared Warp-only pair because one original paired CuPy trial missed its native tolerance; no ratio comes from that rejected worker. All own method/input/source/dependency identities match within each control pair. 30 measured solves in these qualifying controls pass."
+}

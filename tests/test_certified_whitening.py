@@ -70,7 +70,7 @@ def failed_factor(
 
 
 def test_factor_failure_uses_unmodified_canonical_matrix(monkeypatch):
-    from benchmarks.experimental import certified_whitening
+    from warpack import _block_whitening as certified_whitening
 
     monkeypatch.setattr(certified_whitening, "global_cholesky", failed_factor)
     solver = CertifiedWhiteningBlock(Identity(32, wp.get_device()), 2, 4)
@@ -207,3 +207,65 @@ def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path):
     wp.capture_debug_dot_print(graph, str(dot))
     content = dot.read_text()
     assert "HtoD" not in content and "DtoH" not in content and "HOST" not in content
+
+
+@pytest.mark.parametrize("width", [51, 52])
+def test_production_size_guard_and_shared_branch_scratch(width):
+    from warpack import BlockLOBPCG
+
+    if wp.get_device().arch != 89:
+        pytest.skip("production specialization is qualified on Ada")
+    small = BlockLOBPCG(
+        Identity(96, wp.get_device()), 6, 24, search_bucket_size=4, reuse_operator_images=True
+    )
+    assert small._second_whitening_storage is None
+    assert all(branch._second_whitener is None for branch in small._search.buckets)
+    solver = BlockLOBPCG(
+        Identity(180, wp.get_device()),
+        6,
+        width,
+        search_bucket_size=4,
+        keep_history=True,
+        reuse_operator_images=True,
+    )
+    storage = solver._second_whitening_storage
+    assert storage is not None and len(storage) == 3
+    for branch in [solver, *solver._search.buckets]:
+        helper = branch._second_whitener
+        assert (helper is not None) == (96 <= branch.su.shape[0] <= 512)
+        if helper is None:
+            continue
+        for array, backing in zip(
+            (helper.matrix, helper.factor, helper.work), storage, strict=True
+        ):
+            assert array.ptr == backing.ptr and array.strides == backing.strides
+        m = branch.su.shape[0]
+        source = la.qr(np.random.default_rng(m).normal(size=(solver.n, m)), mode="economic")[
+            0
+        ].T.copy()
+        branch.u1.assign(source)
+        branch.whiten(branch.u1, branch.u2)
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            branch.whiten(branch.u1, branch.u2)
+        branch.active_u.fill_(1)
+        wp.capture_launch(capture.graph)
+        assert branch.status.numpy()[0] == 0 and branch.rank.numpy()[0] == m
+        assert helper.flags.numpy()[1] == 1
+        result = branch.u2.numpy()
+        assert np.linalg.norm(result @ result.T - np.eye(m)) < 1e-11
+
+
+def test_roundoff_margin_routes_borderline_certificate_to_canonical():
+    solver = CertifiedWhiteningBlock(Identity(32, wp.get_device()), 2, 4, rank_tol=1.0 - 1e-14)
+    source = np.eye(32)[:8].copy()
+    solver.u1.assign(source)
+    solver.whiten(solver.u1, solver.u2)
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        solver.whitening_usage.zero_()
+        solver.whiten(solver.u1, solver.u2)
+    solver.active_u.fill_(1)
+    wp.capture_launch(capture.graph)
+    assert solver.status.numpy()[0] == 0 and solver.rank.numpy()[0] == 8
+    np.testing.assert_array_equal(solver.whitening_usage.numpy(), [0, 1])

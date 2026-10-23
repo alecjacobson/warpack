@@ -469,6 +469,41 @@ class BlockLOBPCG:
                 self.preconditioner, self.errors, self.tol, preconditioner_bucket_size
             )
 
+        self._configure_second_whitening()
+
+    def _configure_second_whitening(self):
+        # Only wide projected metrics on the qualified Ada path use this
+        # specialization. Other dimensions/devices retain canonical whitening.
+        branches = [self] + ([] if self._search is None else self._search.buckets)
+        minimum = getattr(self, "_metric_whitening_minimum", 96)
+        architectures = getattr(self, "_metric_whitening_arches", (89,))
+        eligible = []
+        for branch in branches:
+            branch._second_whitener = None
+            if (
+                self.device.is_cuda
+                and (architectures is None or self.device.arch in architectures)
+                and minimum <= branch.su.shape[0] <= 512
+            ):
+                eligible.append(branch)
+        self._second_whitening_storage = None
+        self._second_whitening_usage = None
+        if eligible:
+            from ._block_whitening import SecondWhitening
+
+            size = max(branch.su.shape[0] for branch in eligible)
+            self._second_whitening_storage = tuple(
+                wp.empty((size, size), dtype=wp.float64, device=self.device) for _ in range(3)
+            )
+            self._second_whitening_usage = wp.zeros(2, dtype=wp.int32, device=self.device)
+            for branch in eligible:
+                branch._second_whitener = SecondWhitening(
+                    branch.su.shape[0],
+                    self.device,
+                    self._second_whitening_usage,
+                    self._second_whitening_storage,
+                )
+
     def launch(self, kernel, shape, args):
         if kernel is K.cholesky:
             size = args[0].shape[0]
@@ -562,6 +597,13 @@ class BlockLOBPCG:
                 self.subtract(self.constraints, self.projection_u, x, self.bu)
 
     def whiten(self, x, out, normalize=False):
+        if (
+            not normalize
+            and self._second_whitener is not None
+            and wp.get_stream(self.device).is_capturing
+        ):
+            self._second_whitener.apply(self, x, out)
+            return
         self.mass.apply(x, self.bu)
         self.gram(x, self.bu, self.metric.g, symmetric=True)
         if normalize:
@@ -638,6 +680,8 @@ class BlockLOBPCG:
         self.finalize()
 
     def initialize(self, seed=42):
+        if self._second_whitening_usage is not None:
+            self._second_whitening_usage.zero_()
         self._image_reuse_active = False
         self.status.zero_()
         self.iterations.zero_()

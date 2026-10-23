@@ -266,6 +266,15 @@ factor to CUDA widths 129–512 with a setup-time device workspace of
 qualified packed shared-memory path when capacity permits; other widths and
 non-CUDA devices retain the serial fallback. No allocation or host convergence
 decision is added to replay.
+For Ada CUDA devices, search metrics of size 96–512 also use a certified
+Cholesky second-whitening path during capture. The first rank-revealing
+whitening remains canonical. A fresh conservative spectral bound must certify
+the retained rank; otherwise the existing canonical second pass runs on device.
+Failed factorization also selects that fallback. Three FP64 square scratch arrays
+are allocated for the largest eligible search metric and shared across its
+mutually exclusive branches (`24 * metric_size**2` bytes, plus small flags).
+Smaller metrics, other architectures and eager solves retain canonical whitening.
+See the [qualification and fallback checks](../results/certified_whitening/README.md).
 The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
 measures that tradeoff while holding final fine-grid accuracy fixed.
 

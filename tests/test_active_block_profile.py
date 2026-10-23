@@ -48,3 +48,24 @@ def test_selected_branch_profiles_preserve_solver_and_restore_wrappers():
         assert row["events_ms"]["cholesky"] > 0
         assert row["events_ms"]["triangular"] > 0
         assert all(np.isfinite(v) and v >= 0 for v in row["events_ms"].values())
+
+
+def test_conditional_second_whitening_is_timed_outside_child_graphs(monkeypatch):
+    from benchmarks.experimental import profile_active_block
+    from benchmarks.experimental.certified_whitening import CertifiedWhiteningBlock
+
+    if not hasattr(linear, "FSAI"):
+        pytest.skip("pinned upstream FSAI required")
+    monkeypatch.setattr(profile_active_block, "BlockLOBPCG", CertifiedWhiteningBlock)
+    config = json.loads(Path("results/cg_partitioned/final/exact-a1.json").read_text())["args"]
+    config.update(side=2, modes=6, width=12)
+    solver, check, _, _ = create_solver(SimpleNamespace(**config))
+    helpers = [branch._second_whitener for branch in solver._search.buckets]
+    original = [helper.apply for helper in helpers]
+    result, _ = profile(solver, check, 300, [0, 1], 2)
+    assert result["before"]["accepted"] and result["after"]["accepted"]
+    assert [helper.apply for helper in helpers] == original
+    for sample in result["samples"]:
+        assert sample["events_ms"]["second_metric_whitening"] > 0
+        assert sample["events_ms"]["metric_eigh"] > 0
+        assert all(np.isfinite(t) and t >= 0 for t in sample["events_ms"].values())

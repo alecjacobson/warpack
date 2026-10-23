@@ -7,13 +7,18 @@ from pathlib import Path
 
 import warpack
 from benchmarks.experimental import compare_block
-from benchmarks.experimental.certified_whitening import CertifiedWhiteningBlock
+from benchmarks.experimental.certified_whitening import (
+    CanonicalWhiteningBlock,
+    CertifiedWhiteningBlock,
+)
 from benchmarks.source_provenance import source_manifest
 
 
 def main():
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--whitening-backend", choices=("certified", "default"), required=True)
+    parser.add_argument(
+        "--whitening-backend", choices=("certified", "canonical", "default"), required=True
+    )
     choice, remainder = parser.parse_known_args()
     destination_parser = argparse.ArgumentParser(add_help=False)
     destination_parser.add_argument("--out", type=Path, required=True)
@@ -28,14 +33,18 @@ def main():
     error = None
     try:
         instances = []
-        if choice.whitening_backend == "certified":
+        base = {
+            "certified": CertifiedWhiteningBlock,
+            "canonical": CanonicalWhiteningBlock,
+            "default": original_class,
+        }[choice.whitening_backend]
 
-            class Tracking(CertifiedWhiteningBlock):
-                def __init__(self, *args, **kwargs):
-                    super().__init__(*args, **kwargs)
-                    instances.append(self)
+        class Tracking(base):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                instances.append(self)
 
-            warpack.BlockLOBPCG = Tracking
+        warpack.BlockLOBPCG = Tracking
         compare_block.source_manifest = lambda *_: source_manifest(__file__)
         sys.argv = [sys.argv[0]] + remainder
         compare_block.main()
@@ -54,7 +63,9 @@ def main():
             "Only second search-metric whitening changes. Conservative device spectral/rank certificate permits Cholesky; failed certificate/factorization uses the original canonical eigensolve. First whitening, outer stopping and physical checks unchanged. Extra workspaces included in setup."
         )
         report["whitening_usage_last_replay"] = [
-            instance.whitening_usage.numpy().tolist() for instance in instances
+            instance._second_whitening_usage.numpy().tolist()
+            for instance in instances
+            if instance._second_whitening_usage is not None
         ]
         report["whitening_usage_scope"] = (
             "Last measured Warp replay only: [certified Cholesky, canonical fallback] per solver; not an aggregate over timed repeats."

@@ -32,9 +32,12 @@ class Events:
 
     def __init__(self):
         self.pairs = []
+        self.suspended = 0
 
     def wrap(self, name, function):
         def call(*args, **kwargs):
+            if self.suspended:
+                return function(*args, **kwargs)
             start, end = wp.Event(enable_timing=True), wp.Event(enable_timing=True)
             wp.record_event(start, external=True)
             result = function(*args, **kwargs)
@@ -165,6 +168,19 @@ def capture_profile(solver, index):
             original = getattr(obj, attribute)
             saved.append((obj, attribute, original))
             setattr(obj, attribute, events.wrap(label, original))
+        helper = getattr(branch, "_second_whitener", None)
+        if helper is not None:
+            original_second = helper.apply
+
+            def conditional_second(*args, **kwargs):
+                events.suspended += 1
+                try:
+                    return original_second(*args, **kwargs)
+                finally:
+                    events.suspended -= 1
+
+            saved.append((helper, "apply", original_second))
+            helper.apply = events.wrap("second_metric_whitening", conditional_second)
         original_launch = branch.launch
 
         def instrument_launch(kernel, shape, arguments):
@@ -245,6 +261,7 @@ def profile(solver, check, steps, checkpoints, repeats):
                     projected_sweeps=None
                     if branch.small._global_jacobi is None
                     else int(branch.small._global_jacobi.sweeps.numpy()[0]),
+                    metric_sweeps_scope="Last executed canonical metric solve; first pass when certified second whitening succeeds, second pass otherwise. metric_eigh events exclude conditional second-pass work; second_metric_whitening includes that entire stage.",
                     metric_sweeps=None
                     if branch.metric._global_jacobi is None
                     else int(branch.metric._global_jacobi.sweeps.numpy()[0]),
