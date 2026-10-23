@@ -141,3 +141,28 @@ Almost every search direction remains active, so further rank compaction would
 save little here. The first metric and Ritz eigensolves still matter; CG becomes
 a small fraction of late steps. [Raw profile](profile/profile-a1.json) and
 [occupancy](profile/profile-a1.occupancy.json).
+
+## Narrower CuPy controls
+
+Fresh controls give CuPy exactly the requested 100/200 starting columns, while
+Warp keeps its qualified 104/204 search width. Both take prefixes of the same
+seeded 104/204-column pool. Exact inputs/reference/source/dependencies match
+within each canonical/default pair. All 24 measured solves pass native and
+physical gates with clean occupancy. Times are seconds.
+
+| Modes | Warp second whitening | Warp replay median | CuPy replay median |
+| ---: | --- | ---: | ---: |
+| 100 | canonical | 3.1835 | 2.9878 |
+| 100 | default | 2.9654 | 2.9257 |
+| 200 | canonical | 11.1030 | 3.7044 |
+| 200 | default | 10.4544 | 3.6758 |
+
+The current 100-mode medians are close on this fixture; this is not proof of
+universal parity. The 200-mode case still has a substantial CuPy advantage.
+Native criteria differ (Warp normalized 1e-11 on requested modes, CuPy absolute
+1e-10 on its whole block); original physical/subspace gates are common and all
+pass. These experiments preserve the strict Warp target rather than changing
+its tolerance to match runtime. Setup/capture, actual errors and complete
+samples are in the [summary](narrow-cupy/summary.json) and adjacent raw records.
+#147 remains open. CuPy uses the same supplied Warp FSAI/CG preconditioner,
+not an independent standalone setup in this comparison.
