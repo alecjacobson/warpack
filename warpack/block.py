@@ -318,6 +318,7 @@ class BlockLOBPCG:
         search_bucket_size=0,
         keep_history=True,
         preconditioner_bucket_size=0,
+        compact_projected_graphs=False,
     ):
         if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
             raise ValueError("operator must expose n, device and apply")
@@ -333,6 +334,7 @@ class BlockLOBPCG:
             raise ValueError("bucket sizes must be nonnegative")
         if search_bucket_size and not reuse_operator_images:
             raise ValueError("search buckets require reuse_operator_images=True")
+        self.compact_projected_graphs = bool(compact_projected_graphs)
         self.reuse_operator_images = bool(reuse_operator_images)
         self._image_reuse_active = False
         self._search = None
@@ -470,6 +472,31 @@ class BlockLOBPCG:
             )
 
         self._configure_second_whitening()
+        self._configure_compact_projected_graphs()
+
+    def _configure_compact_projected_graphs(self):
+        if not self.compact_projected_graphs:
+            return
+        from ._compact_jacobi import CompactJacobi
+
+        branches = [self] + ([] if self._search is None else self._search.buckets)
+        for branch in branches:
+            for projected in (branch.small, branch.metric):
+                original = projected._global_jacobi
+                # Small projected problems (including the Anvil recipe) retain
+                # their established replay path. Odd/unsupported dimensions
+                # retain the canonical solver selected during construction.
+                if original is not None and 96 <= original.n <= 1024:
+                    projected._global_jacobi = CompactJacobi(
+                        original.h,
+                        original.v,
+                        original.cs,
+                        original.ss,
+                        original.partners,
+                        original.temp,
+                        original.vtemp,
+                        rounds_per_loop=16,
+                    )
 
     def _configure_second_whitening(self):
         # Only wide projected metrics on the qualified Ada path use this

@@ -214,8 +214,10 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [current full-suite validation](results/certified_whitening/README.md#production-integration)
-records 2,214 passes and 11 skips, with separate focused and stock-Warp checks.
+The [full-suite baseline](results/certified_whitening/README.md#production-integration)
+records 2,214 passes and 11 skips. Subsequent
+[focused regressions](results/compact_jacobi/README.md#production-integration)
+cover optional compact graphs and first-solve benchmark validation.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.
 

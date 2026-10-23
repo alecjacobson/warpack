@@ -146,6 +146,18 @@ def finalize_acceptance(report):
         row["accepted"] = row["physical_and_outer_accepted"] and row["native_stopping_accepted"]
     report["accepted"] = bool(report["rows"]) and all(row["accepted"] for row in report["rows"])
     report["accepted"] &= report.get("post_profile_quality", {}).get("accepted", True)
+    first = report.get("first_captured_solve_quality")
+    report["first_solve_accepted"] = (
+        None
+        if first is None
+        else bool(
+            first.get("accepted", False)
+            and first.get("status") == 0
+            and first.get("converged") == report["k"]
+        )
+    )
+    if first is not None:
+        report["accepted"] &= report["first_solve_accepted"]
     return report["accepted"]
 
 
@@ -409,6 +421,11 @@ def main():
     if not args.keep_graph:
         dot.unlink()
     warmup_seconds, _ = timed(lambda: wp.capture_launch(graph))
+    first_quality = check(solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T)
+    first_quality.update(
+        status=int(solver.status.numpy()[0]), converged=int(solver.converged.numpy()[0])
+    )
+    first_quality["accepted"] &= first_quality["status"] == 0 and first_quality["converged"] == k
     report = dict(
         inputs=input_identity,
         dependency=warp_dependencies(type(pre) if args.preconditioner == "fsai" else None),
@@ -438,6 +455,18 @@ def main():
         pool_memory_scope="Warp CUDA pool counters only, excluding driver/context allocations. The high-water counter covers the whole process, including fixture preparation; it is not the setup interval peak. Missing counters are null. Upstream FSAI can consume substantial device memory outside this pool.",
         capture_seconds=capture_seconds,
         warmup_seconds=warmup_seconds,
+        first_captured_solve_quality=first_quality,
+        first_solve_compute_seconds=(
+            setup_seconds + solver_setup_seconds + capture_seconds + warmup_seconds
+        ),
+        first_solve_compute_scope=(
+            "Preconditioner/workspace setup + capture (including its eager preparation) + "
+            "first captured solve. Original equations/spectrum and native stopping are "
+            "checked after this first output outside the timed phase. Excludes mesh assembly, "
+            "reference construction/loading, host input fingerprinting, host validation and "
+            "initial imports. Cached compilation where available; not total process wall time. "
+            "Historical warmup_seconds now measures this independently validated first replay."
+        ),
         graph=audit,
         rows=[],
         versions={

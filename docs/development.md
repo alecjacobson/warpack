@@ -105,6 +105,12 @@ complete API traces. The cuDSS vendor metadata exception remains explicit.
 Application setup, host file I/O and independent references stay outside the
 timed/captured solver.
 
+The complete block comparison also validates its first captured output before
+reporting `first_solve_compute_seconds` (setup + capture + first solve). A failed
+first result rejects the worker even if later replays pass. Host validation is
+outside that compute time; it is not total process wall time. Historical reports
+without `first_captured_solve_quality` remain uncertified for first-use accuracy.
+
 ## Package checks
 
 `python -m build` builds the wheel from the source distribution. Verify installed

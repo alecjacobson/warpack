@@ -7,7 +7,7 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 
-from benchmarks.experimental.compact_jacobi import CompactJacobi
+from warpack._compact_jacobi import CompactJacobi
 from warpack.projected import GlobalJacobi
 
 
@@ -87,3 +87,22 @@ def test_preserves_installed_round_order(n, rounds):
     # an equivalent sorted spectrum alone would not prove the same round order.
     for baseline, candidate in zip(*outputs):
         np.testing.assert_array_equal(candidate, baseline)
+
+
+def test_largest_installed_dimension():
+    n = 1024
+    rng = np.random.default_rng(164)
+    source = rng.normal(size=(n, n))
+    source = (source + source.T) * 0.5
+    solver, _ = allocate(n, constructor=partial(CompactJacobi, rounds_per_loop=16))
+    solver.h.assign(source)
+    solver.apply()
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        solver.apply()
+    solver.h.assign(source)
+    wp.capture_launch(capture.graph)
+    values, vectors = np.diag(solver.h.numpy()), solver.v.numpy()
+    np.testing.assert_allclose(np.sort(values), la.eigvalsh(source), atol=1e-11, rtol=1e-12)
+    assert np.linalg.norm(source @ vectors - vectors * values) / np.linalg.norm(source) < 1e-12
+    assert np.linalg.norm(vectors.T @ vectors - np.eye(n)) < 1e-11

@@ -85,6 +85,16 @@ Their upstream CG workspaces remain independent. This reduces memory without
 changing stopping tests or the public `for_width` behavior;
 [allocation controls](../results/cg_packing/README.md) quantify the savings.
 
+For one-time ROM generation, `BlockLOBPCG(..., compact_projected_graphs=True)`
+reduces the graph construction work for wide projected solves. It records
+16 Jacobi rounds per device-loop iteration, preserving FP64 rotation order and
+convergence tests. The default remains `False`: compact graphs can cost more
+per warmed replay, so repeated solves may favor the default. Only existing
+even-dimensional global projected solves of size 96–1024 change; the Anvil
+recipe and small/odd projected problems keep their established paths.
+[Complete setup/capture/replay controls](../results/compact_jacobi/README.md)
+report the tradeoff separately from the main six-backend comparison.
+
 The current pinned FSAI supports `reuse_pattern=True` and captured `update()`.
 After changing matrix values at stable storage addresses, enqueue the update
 before the solve on the same stream. Check `update_status` after replay:

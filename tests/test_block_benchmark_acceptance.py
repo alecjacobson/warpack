@@ -89,3 +89,30 @@ def test_related_starts_rejects_host_work_in_source_or_target_graph():
     row["graph"] = dict(memcpy_kinds={"DtoD (DEVICE to DEVICE)": 2})
     report["source_graph"] = dict(node_types_including_conditional_body={"HOST": 1})
     assert not finalize_starts_acceptance(report)
+
+
+def test_first_output_failure_cannot_hide_behind_good_later_replays():
+    for first in [
+        dict(accepted=False, status=0, converged=4),
+        dict(accepted=True, status=1, converged=4),
+        dict(accepted=True, status=0, converged=3),
+    ]:
+        report = dict(
+            k=4, rows=[dict(quality=dict(accepted=True))], first_captured_solve_quality=first
+        )
+        assert not finalize_acceptance(report)
+        assert report["rows"][0]["accepted"]
+        assert report["first_solve_accepted"] is False
+
+
+def test_first_output_certification_requires_separate_evidence():
+    legacy = dict(rows=[dict(quality=dict(accepted=True))])
+    assert finalize_acceptance(legacy)
+    assert legacy["first_solve_accepted"] is None
+    current = dict(
+        k=4,
+        rows=[dict(quality=dict(accepted=True))],
+        first_captured_solve_quality=dict(accepted=True, status=0, converged=4),
+    )
+    assert finalize_acceptance(current)
+    assert current["first_solve_accepted"] is True
