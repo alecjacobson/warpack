@@ -169,7 +169,7 @@ in `production/`.
   reconstruction/status checks, graph audit and explicit working-memory bytes.
 - `benchmarks.experimental.compare_global_cholesky`: unchanged block comparison
   with `--cholesky-backend serial`, `global` or `default`, plus `--public-api`.
-  `default` keeps the current production packed/serial dispatch.
+  `default` uses the current production packed/global/serial dispatch.
 - `tests/test_global_cholesky.py`: direct and complete FEM correctness tests.
 
 Use the pinned dependency overlay and serial GPU occupancy monitor described in

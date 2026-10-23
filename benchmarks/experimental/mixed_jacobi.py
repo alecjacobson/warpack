@@ -7,6 +7,7 @@ and acceptance use FP64 data; this benchmark experiment changes no public API.
 import warp as wp
 
 from benchmarks.experimental.fp32_jacobi import FP32Jacobi
+from benchmarks.experimental.fp32_shared_jacobi import SharedFP32Jacobi
 from warpack import kernels as K
 from warpack._projected_cholesky import global_cholesky
 from warpack.block import gram, rotate, symmetrize
@@ -52,10 +53,12 @@ def basis_rows(v: wp.array2d[wp.float32], rows: wp.array2d[wp.float64]):
 class MixedJacobi:
     """Same buffer interface as GlobalJacobi, with preallocated recovery work."""
 
-    def __init__(self, h, v, cs, ss, partners, temp, vtemp):
+    def __init__(self, h, v, cs, ss, partners, temp, vtemp, *, initializer="persistent"):
         self.n, self.device = h.shape[0], h.device
         if not self.device.is_cuda or not 2 <= self.n <= 512 or self.n % 2:
             raise ValueError("mixed Jacobi requires CUDA and an even dimension in 2..512")
+        if initializer not in ("persistent", "shared"):
+            raise ValueError("unknown mixed Jacobi initializer")
         self.h, self.v = h, v
         (
             self.original,
@@ -73,7 +76,8 @@ class MixedJacobi:
         def single():
             return wp.empty((self.n, self.n), dtype=wp.float32, device=self.device)
 
-        self.coarse = FP32Jacobi(
+        coarse_type = FP32Jacobi if initializer == "persistent" else SharedFP32Jacobi
+        self.coarse = coarse_type(
             single(),
             single(),
             wp.empty(self.n, dtype=wp.float32, device=self.device),
@@ -120,3 +124,8 @@ class MixedJacobi:
         self.polish.apply()
         gram(self.basis_transpose, self.vector_transpose, self.lifted)
         wp.copy(self.v, self.lifted)
+
+
+class MixedSharedJacobi(MixedJacobi):
+    def __init__(self, h, v, cs, ss, partners, temp, vtemp):
+        super().__init__(h, v, cs, ss, partners, temp, vtemp, initializer="shared")

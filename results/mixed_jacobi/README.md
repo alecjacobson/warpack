@@ -43,3 +43,40 @@ testing a cheaper initializer, with the same final-accuracy requirements.
 [Raw evidence](isolated/jacobi-a1.json),
 [occupancy](isolated/jacobi-a1.occupancy.json),
 [log](isolated/jacobi-a1.log).
+
+## Shared-memory initializer
+
+A second benchmark-only variant keeps the complete FP32 matrix and basis in
+shared memory and stops its coarse solve at 2e-5. It uses the same FP64 recovery
+and final acceptance as above. The full pipeline beats the existing global
+FP64 path at 48–72 columns, but loses at 96 and above. Production is unchanged.
+
+Uncontended L40 medians in milliseconds, three measured replays plus a validated
+warmup; reset included, setup/capture excluded:
+
+| Dimension | Existing FP64 global | Shared-initialized mixed | FP32 / FP64 finishing sweeps |
+| ---: | ---: | ---: | ---: |
+| 36 | 1.1013 | 0.6566 | 6 / 2 |
+| 48 | 1.6583 | 0.9514 | 6 / 2 |
+| 64 | 2.2389 | 1.5427 | 7 / 2 |
+| 72 | 2.5288 | 2.3370 | 7 / 2 |
+| 96 | 3.8232 | 3.9475 | 7 / 2 |
+| 104 | 4.1835 | 4.8977 | 7 / 2 |
+| 108 | 4.3552 | 5.6163 | 7 / 2 |
+
+The 36-column control forces the global solver; it is **not** the production
+36-column default. The complete FEM experiment therefore replaces only the
+existing Ada global path at 48–64 or 48–72 columns, checking shared capacity.
+Other sizes and architectures retain their original dispatch.
+
+The expanded isolated suite passes 39 tests on pinned Warp 1.18 and stock Warp
+1.15, with six shared-capacity skips on this L40. It includes scales, strided
+buffers, rank-threshold spectra, repeated spectra, changed-input graph replay,
+and zero/nonfinite recovery. Six additional pinned-runtime FEM tests pass:
+clamped consistent mass, free-body, and heterogeneous systems, each using both
+candidate size limits and two validated graph replays. Complete Anvil timing
+and accuracy controls are required before considering production use.
+
+[Shared initializer raw evidence](shared-initializer/jacobi-a1.json),
+[occupancy](shared-initializer/jacobi-a1.occupancy.json),
+[log](shared-initializer/jacobi-a1.log).

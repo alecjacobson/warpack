@@ -5,20 +5,24 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 
+from benchmarks.experimental.fp32_shared_jacobi import shared_bytes
 from benchmarks.experimental.mixed_jacobi import MixedJacobi
 
 
-def allocate(n):
+def allocate(n, initializer="persistent"):
     stores = [wp.full((n, n + 3), 17.0, dtype=wp.float64) for _ in range(4)]
     h, v, temp, vtemp = (a[:, :n] for a in stores)
     cs, ss = (wp.empty(n, dtype=wp.float64) for _ in range(2))
     partners = wp.empty(n, dtype=wp.int32)
-    return MixedJacobi(h, v, cs, ss, partners, temp, vtemp), stores
+    return MixedJacobi(h, v, cs, ss, partners, temp, vtemp, initializer=initializer), stores
 
 
-@pytest.mark.parametrize("n", [2, 48, 72, 104, 128, 208])
+@pytest.mark.parametrize("initializer", ["persistent", "shared"])
+@pytest.mark.parametrize("n", [2, 48, 72, 104, 108, 128, 208])
 @pytest.mark.parametrize("kind", ["indefinite", "repeated", "rank_threshold"])
-def test_fp64_equation_spectrum_rank_and_changed_strided_replay(n, kind):
+def test_fp64_equation_spectrum_rank_and_changed_strided_replay(n, kind, initializer):
+    if initializer == "shared" and shared_bytes(n) > wp.get_device().max_shared_memory_per_block:
+        pytest.skip("FP32 shared initializer exceeds this GPU's capacity")
     rng = np.random.default_rng(160)
     random = rng.normal(size=(n, n))
     q, _ = la.qr(random)
@@ -31,7 +35,7 @@ def test_fp64_equation_spectrum_rank_and_changed_strided_replay(n, kind):
         small = [0, 0.5e-11, 0.9e-11, 1.1e-11, 1.5e-11, 1e-8]
         spectrum[: min(n - 1, len(small))] = small[: min(n - 1, len(small))]
     original = (q * spectrum) @ q.T
-    solver, stores = allocate(n)
+    solver, stores = allocate(n, initializer)
     solver.h.assign(original)
     solver.apply()
     wp.synchronize()
@@ -55,11 +59,13 @@ def test_fp64_equation_spectrum_rank_and_changed_strided_replay(n, kind):
             assert np.all(store.numpy()[:, n:] == 17)
         coarse = solver.coarse.h.numpy()
         off = coarse - np.diag(np.diag(coarse))
-        assert np.max(abs(off)) <= 1e-6 * max(np.max(abs(np.diag(coarse))), 1)
+        coarse_bound = 3e-5 if initializer == "shared" else 1e-6
+        assert np.max(abs(off)) <= coarse_bound * max(np.max(abs(np.diag(coarse))), 1)
 
 
-def test_zero_nonfinite_status_and_graph_recovery():
-    solver, _ = allocate(8)
+@pytest.mark.parametrize("initializer", ["persistent", "shared"])
+def test_zero_nonfinite_status_and_graph_recovery(initializer):
+    solver, _ = allocate(8, initializer)
     solver.h.assign(np.eye(8))
     solver.apply()
     wp.synchronize()
@@ -72,3 +78,10 @@ def test_zero_nonfinite_status_and_graph_recovery():
         if status == 0:
             np.testing.assert_array_equal(solver.h.numpy(), source)
             np.testing.assert_array_equal(solver.v.numpy(), np.eye(8))
+
+
+def test_shared_initializer_rejects_excess_capacity():
+    if shared_bytes(512) <= wp.get_device().max_shared_memory_per_block:
+        pytest.skip("test needs a GPU with less than this initializer's shared requirement")
+    with pytest.raises(ValueError, match="shared-memory capacity"):
+        allocate(512, "shared")

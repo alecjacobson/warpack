@@ -49,7 +49,7 @@ def main():
         report = json.loads(destination.out.read_text())
         report["args"]["cholesky_backend"] = choice.cholesky_backend
         report["cholesky_scope"] = (
-            "Only BlockLOBPCG projected Cholesky: global uses a preallocated transposed device workspace through width 512; serial forces the old factor; default retains production shared/serial dispatch. No triangular solve, projected eigensolve, iteration or stopping change. Extra workspace is included in solver setup."
+            "Only BlockLOBPCG projected Cholesky: global forces a preallocated transposed device workspace through width 512; serial forces the old factor; default uses production guarded packed/global/serial dispatch. No triangular solve, projected eigensolve, iteration or stopping change. Extra workspace is included in solver setup."
         )
         destination.out.write_text(json.dumps(report, indent=2) + "\n")
     if error is not None:
