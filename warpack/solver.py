@@ -476,14 +476,19 @@ class SymmetricEigensolver:
 
         Setup/JIT/warmup happen here; replay never transfers convergence values
         to the host. `iterations`, `converged`, and `status` remain on device.
+        Default outer capture respects restrictions declared by both the
+        iteration and physical operators, plus a subclass's mass operator.
         """
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")
-        static_only = getattr(self.iter_op, "requires_static_outer_capture", False)
+        static_only = any(
+            getattr(op, "requires_static_outer_capture", False)
+            for op in (self.iter_op, self.op, getattr(self, "mass", None))
+        )
         if adaptive is None:
             adaptive = not static_only
         if adaptive and static_only:
-            raise ValueError("This inverse backend requires adaptive=False for the outer graph")
+            raise ValueError("This operator backend requires adaptive=False for the outer graph")
         self._prepare_capture(finalizer)
         wp.synchronize_device(self.device)
 
