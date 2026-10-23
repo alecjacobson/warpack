@@ -307,15 +307,21 @@ factor to CUDA widths 129–512 with a setup-time device workspace of
 qualified packed shared-memory path when capacity permits; other widths and
 non-CUDA devices retain the serial fallback. No allocation or host convergence
 decision is added to replay.
-For Ada CUDA devices, search metrics of size 96–512 also use a certified
-Cholesky second-whitening path during capture. The first rank-revealing
-whitening remains canonical. A fresh conservative spectral bound must certify
-the retained rank; otherwise the existing canonical second pass runs on device.
-Failed factorization also selects that fallback. Three FP64 square scratch arrays
-are allocated for the largest eligible search metric and shared across its
-mutually exclusive branches (`24 * metric_size**2` bytes, plus small flags).
-Smaller metrics, other architectures and eager solves retain canonical whitening.
-See the [qualification and fallback checks](../results/certified_whitening/README.md).
+For Ada CUDA devices, search metrics of size 96–512 use certified Cholesky
+whitening during capture. Both whitening passes remain. Each fast path must
+establish a fresh conservative spectral bound above the unchanged relative
+rank threshold; uncertain or failed attempts use canonical rank revelation on
+device. The first pass also handles exact zero padding: an auxiliary identity
+helps certify the active block, but its added directions never become physical
+modes. Failed normalization retains the original failure status and canonical
+fallback.
+
+Both passes share three FP64 square scratch arrays across mutually exclusive
+search branches (`24 * metric_size**2` bytes for the largest eligible metric,
+plus small flags). The first pass adds no dense workspace, host numerical
+decision, or transfer. Smaller metrics, other architectures and eager solves
+retain canonical whitening. See the [first-pass qualification](../results/first_whitening/VALIDATION.md)
+and [second-pass qualification](../results/certified_whitening/README.md).
 The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
 measures that tradeoff while holding final fine-grid accuracy fixed.
 

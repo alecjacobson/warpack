@@ -144,8 +144,9 @@ def test_complete_fem_spectrum_with_certified_second_pass(case, monkeypatch):
         assert solver.whitening_usage.numpy()[0] > 0
 
 
-@pytest.mark.parametrize("first_pass", [False, True, "padded"])
-def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_pass):
+@pytest.mark.parametrize("first_pass", [False, True, "padded", "installed"])
+@pytest.mark.parametrize("keep_history", [True, False])
+def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_pass, keep_history):
     import scipy.sparse as sp
 
     from benchmarks.upstream.adapters import matrix
@@ -182,6 +183,10 @@ def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_p
             _first_metric_minimum = 2
 
         solver_type = FirstCertified
+    if first_pass == "installed":
+        from tests.test_first_whitening import AllSizeInstalledWhitening
+
+        solver_type = AllSizeInstalledWhitening
     solver = solver_type(
         op,
         k,
@@ -196,7 +201,7 @@ def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_p
         paired_rotation=True,
         reuse_operator_images=True,
         search_bucket_size=4,
-        keep_history=True,
+        keep_history=keep_history,
     )
     graph = solver.capture(200)
     for seed in [19, 31, 19]:

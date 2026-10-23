@@ -2,7 +2,8 @@
 
 This experiment extends the [full-rank-only first-whitening certificate](../first_metric_certificate/README.md)
 to normalized search metrics with **exact zero padding**. Production dispatch
-is unchanged. Component and small complete-solve tests pass. Subsequent [primary controls](whole/README.md)
+was unchanged at this prototype checkpoint; see the later
+[installed qualification](../first_whitening/VALIDATION.md). Component and small complete-solve tests pass. Subsequent [primary controls](whole/README.md)
 and [broader families](families/README.md) qualify **48 complete outputs** with
 roughly3.4–5.9% measured replay reductions on the wide FEM cases. The small
 Anvil path remains unchanged. The separate failed-normalization routing finding (#176) is now fixed before

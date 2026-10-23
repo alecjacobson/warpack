@@ -115,6 +115,8 @@ class FirstWhitening:
 
 
 class FirstWhiteningBlock(BlockLOBPCG):
+    # Keep this prototype independent of the installed first-pass dispatcher.
+    _first_whitening_enabled = False
     _first_metric_minimum = 96
     _first_whitener_type = FirstWhitening
 
@@ -140,10 +142,6 @@ class FirstWhiteningBlock(BlockLOBPCG):
                 branch._first_whitener = self._first_whitener_type(
                     branch, storage, self._first_whitening_usage
                 )
-
-    def initialize(self, seed=42):
-        self._first_whitening_usage.zero_()
-        super().initialize(seed)
 
     def whiten(self, x, out, normalize=False):
         if (

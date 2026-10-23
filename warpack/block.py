@@ -472,6 +472,7 @@ class BlockLOBPCG:
             )
 
         self._configure_second_whitening()
+        self._configure_first_whitening()
         self._configure_compact_projected_graphs()
 
     def _configure_compact_projected_graphs(self):
@@ -529,6 +530,39 @@ class BlockLOBPCG:
                     self.device,
                     self._second_whitening_usage,
                     self._second_whitening_storage,
+                )
+
+    def _configure_first_whitening(self):
+        branches = [self] + ([] if self._search is None else self._search.buckets)
+        minimum = getattr(self, "_first_whitening_minimum", 96)
+        architectures = getattr(self, "_first_whitening_arches", (89,))
+        enabled = getattr(self, "_first_whitening_enabled", True)
+        eligible = []
+        for branch in branches:
+            branch._first_whitener = None
+            if (
+                enabled
+                and self.device.is_cuda
+                and (architectures is None or self.device.arch in architectures)
+                and minimum <= branch.su.shape[0] <= 512
+            ):
+                eligible.append(branch)
+        self._first_whitening_storage = None
+        self._first_whitening_usage = None
+        if eligible:
+            from ._first_whitening import FirstWhitening
+
+            size = max(branch.su.shape[0] for branch in eligible)
+            storage = self._second_whitening_storage
+            if storage is None or storage[0].shape[0] < size:
+                storage = tuple(
+                    wp.empty((size, size), dtype=wp.float64, device=self.device) for _ in range(3)
+                )
+            self._first_whitening_storage = storage
+            self._first_whitening_usage = wp.zeros(3, dtype=wp.int32, device=self.device)
+            for branch in eligible:
+                branch._first_whitener = FirstWhitening(
+                    branch, storage, self._first_whitening_usage
                 )
 
     def launch(self, kernel, shape, args):
@@ -625,6 +659,13 @@ class BlockLOBPCG:
 
     def whiten(self, x, out, normalize=False):
         if (
+            normalize
+            and self._first_whitener is not None
+            and wp.get_stream(self.device).is_capturing
+        ):
+            self._first_whitener.apply(self, x, out)
+            return
+        if (
             not normalize
             and self._second_whitener is not None
             and wp.get_stream(self.device).is_capturing
@@ -707,6 +748,8 @@ class BlockLOBPCG:
         self.finalize()
 
     def initialize(self, seed=42):
+        if self._first_whitening_usage is not None:
+            self._first_whitening_usage.zero_()
         if self._second_whitening_usage is not None:
             self._second_whitening_usage.zero_()
         self._image_reuse_active = False

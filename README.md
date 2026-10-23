@@ -214,8 +214,8 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [latest full-suite checkpoint](results/paired_jacobi/VALIDATION.md)
-records **2,638 passes and 11 skips**, with separate stock-Warp and isolated-wheel
+The [latest full-suite checkpoint](results/first_whitening/VALIDATION.md)
+records **2,735 passes and 11 skips**, with separate stock-Warp and isolated-wheel
 checks. This includes the memory, graph-preparation and projected-solve regressions.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.

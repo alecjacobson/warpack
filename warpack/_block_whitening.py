@@ -1,7 +1,7 @@
 """Internal certified second metric whitening with canonical device fallback.
 
-The first rank-revealing pass remains canonical. A fresh conservative spectral
-bound must certify all retained directions before Cholesky QR is used.
+A fresh conservative spectral bound must certify all retained directions
+after the first rank-revealing pass before Cholesky QR is used.
 """
 
 import warp as wp

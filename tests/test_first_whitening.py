@@ -16,6 +16,11 @@ from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 from warpack.block import Identity
 
 
+class AllSizeInstalledWhitening(BlockLOBPCG):
+    _first_whitening_minimum = 2
+    _first_whitening_arches = None
+
+
 class AllSizeFirstWhitening(FirstWhiteningBlock):
     _first_metric_minimum = 2
 
@@ -24,7 +29,9 @@ class AllSizePaddedWhitening(PaddedFirstWhiteningBlock):
     _first_metric_minimum = 2
 
 
-@pytest.mark.parametrize("solver_type", [AllSizeFirstWhitening, AllSizePaddedWhitening])
+@pytest.mark.parametrize(
+    "solver_type", [AllSizeFirstWhitening, AllSizePaddedWhitening, AllSizeInstalledWhitening]
+)
 @pytest.mark.parametrize("width", [4, 24, 52, 104, 204])
 def test_first_pass_rank_scale_and_replay(width, tmp_path, solver_type):
     n, m = 3 * width + 7, 2 * width
@@ -45,7 +52,7 @@ def test_first_pass_rank_scale_and_replay(width, tmp_path, solver_type):
             source *= np.geomspace(1e-80, 1e80, m)[:, None]
         elif kind == "partial":
             source[-3:] = 0
-            expected_rank, fast = m - 3, solver_type is AllSizePaddedWhitening
+            expected_rank, fast = m - 3, solver_type is not AllSizeFirstWhitening
         elif kind == "dependent":
             source[1] = source[0] + 1e-8 * source[1]
             expected_rank, fast = m - 1, False
@@ -128,7 +135,9 @@ def test_first_and_second_share_scratch_across_search_branches():
         assert certificate.image.ptr == solver._second_whitening_storage[0].ptr
 
 
-@pytest.mark.parametrize("solver_type", [FirstWhiteningBlock, PaddedFirstWhiteningBlock])
+@pytest.mark.parametrize(
+    "solver_type", [FirstWhiteningBlock, PaddedFirstWhiteningBlock, BlockLOBPCG]
+)
 @pytest.mark.parametrize(
     "case", ["clamped_consistent", "clamped_lumped", "free", "disconnected", "heterogeneous"]
 )
