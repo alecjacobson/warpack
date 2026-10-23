@@ -28,7 +28,7 @@ is **not installed in the solver** and is not a silently chosen fallback.
 | Read-only graph probes, 0.8 default policy | 6 cases, 18 changed-RHS outputs passed |
 | Read-only graph probes, 1.0 explicit diagonal policy | 6 cases, 18 changed-RHS outputs passed |
 
-The first test group includes 32 complex **GMRES** refresh tests, which are useful
+The first test group includes 16 complex **GMRES** refresh tests, which are useful
 regressions but do not exercise cuDSS. The second group includes actual cuDSS
 complex realification and connection-mode solves as well as pure-Warp controls.
 Passing these small cases does not qualify large FEM/KKT matrices or all pivot

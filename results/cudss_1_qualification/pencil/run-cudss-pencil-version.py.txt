@@ -1,0 +1,18 @@
+"""Retain native failures while recording the actual backend after each control."""
+import json,runpy,sys,hashlib
+from pathlib import Path
+from benchmarks.cudss_provenance import cudss_dependencies
+out=Path(sys.argv[1]);expected=sys.argv[2];kind=sys.argv[3];cycles=sys.argv[4]
+assert not out.exists()
+sys.argv=['benchmarks.experimental.pencil_refinement','--kind',kind,'--cycles',cycles,'--refinement-steps','1','--repeats','3','--out',str(out)]
+error=None
+try:runpy.run_module('benchmarks.experimental.pencil_refinement',run_name='__main__')
+except SystemExit as caught:error=caught
+if out.exists():
+ report=json.loads(out.read_text());identity=cudss_dependencies()
+ assert '.'.join(map(str,identity['runtime_version']))==expected
+ report['cudss_dependency']=identity
+ report['version_launcher_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+ report['version_provenance_helper_sha256']=hashlib.sha256(Path('benchmarks/cudss_provenance.py').read_bytes()).hexdigest()
+ out.write_text(json.dumps(report,indent=2)+'\n')
+if error is not None:raise error

@@ -1,0 +1,24 @@
+import fcntl,json,os,subprocess,sys,time
+from pathlib import Path
+out=Path('results/cudss_1_qualification/pencil');out.mkdir(exist_ok=True)
+env=os.environ|{'PYTHONPATH':'/run/openclaw/horde/warpack-fsai-promotion:'+str(Path.cwd()),'WARP_CACHE_PATH':'/run/openclaw/horde/warpack-current-kernel-cache','OPENBLAS_NUM_THREADS':'4','OMP_NUM_THREADS':'4'}
+for key in ['CUDSS_LIBRARY_PATH','CUDSS_JIT_CACHE_DIR','CUDSS_JIT_DISABLE']:env.pop(key,None)
+with open('/run/openclaw/horde/warpack-gpu-work.lock','a') as lock:
+ for kind in ['nonproportional','gyroscopic']:
+  for cycles in ['2','8']:
+   for version in ['0.8.0','1.0.0']:
+    target=out/f'{kind}-{cycles}-{version}.json'
+    assert not target.exists() and not target.with_suffix('.log').exists()
+    while True:
+     fcntl.flock(lock,fcntl.LOCK_EX)
+     if not subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader'],text=True).strip():break
+     fcntl.flock(lock,fcntl.LOCK_UN);time.sleep(10)
+    worker=env.copy()
+    if version=='1.0.0':worker['CUDSS_LIBRARY_PATH']='/run/openclaw/horde/warpack-cudss1/installed/nvidia/cu12/lib/libcudss.so.1'
+    cmd=[sys.executable,'-m','benchmarks.monitor_gpu','--out',str(target.with_suffix('.occupancy.json')),'--log',str(target.with_suffix('.log')),'--','timeout','900','taskset','-c','8-11',sys.executable,'build/run-cudss-pencil-version.py',str(target),version,kind,cycles]
+    print('START',kind,cycles,version,flush=True)
+    try:code=subprocess.call(cmd,env=worker)
+    finally:fcntl.flock(lock,fcntl.LOCK_UN)
+    print('EXIT',code,flush=True)
+    # Rejected numerics are evidence; runtime/setup failures require investigation.
+    if not target.exists() or 'cudss_dependency' not in json.loads(target.read_text()):raise SystemExit('Incomplete worker evidence')
