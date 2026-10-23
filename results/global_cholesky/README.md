@@ -120,9 +120,48 @@ instead of allocating a duplicate. This additional test is not included in 2,083
 The [stock Warp 1.15 check](production-stock-tests.log) passes 82 tests and skips 12 requiring
 the pinned upstream preconditioners. This run also includes the separate
 persistent-Jacobi prototype tests (#159), which remain benchmark-only.
-Full repository lint/format checks pass. Fresh public-default timing controls
-for 200/100 modes and the unchanged Anvil path are running separately; these
-correctness-test durations are not performance claims.
+Full repository lint/format checks pass. These correctness-test durations are
+not performance claims.
+
+## Fresh public-default regression controls
+
+All six workers pass three measured Warp and three CuPy solves (36 measured
+solves total), with no competing GPU process observed. Each serial/default pair
+has identical actual input/reference/start, source and dependency identities;
+only the explicit factor selector changes. The serial override keeps the same
+solver/workspace composition and forces the old factor kernel.
+
+| Problem | Dispatch | Warp setup + capture (s) | Warp warm median (s) | CuPy warm median (s) |
+| --- | --- | ---: | ---: | ---: |
+| 200 modes, width 204 | Forced serial | 24.9884 | 15.3630 | 5.8473 |
+| Same | Public default, global workspace | 18.6999 | 11.1112 | 5.7516 |
+| 100 modes, width 104 | Forced serial | 4.6117 | 3.6979 | 3.9979 |
+| Same | Public default, existing packed shared | 4.2077 | 3.1845 | 2.7942 |
+| Anvil 20, width 24 | Forced serial | 1.6026 | 1.6683 | 2.3473 |
+| Same | Public default, same serial kernel | 1.6110 | 1.6381 | 2.3857 |
+
+The new public wide-factor path reduces 200-mode warm time by 27.7%. The 100-mode
+result retains the preceding #154 optimization (13.9% versus forced serial)
+and stays near its independently measured 3.18-second baseline; #155 adds no
+new factor dispatch at that width. Anvil varies by 1.8% with identical dispatch,
+so no Anvil speedup is attributed to this change.
+
+CuPy's 100-mode samples vary from 2.639 to 4.167 s across the pair, despite the same
+inputs and method. This variation, and its faster narrowed-start controls in
+[#147's study](../procedural_inputs/README.md#starting-width-controls-147),
+preclude a universal Warp-over-CuPy claim. The accepted 200-mode CuPy comparison
+also remains faster than Warp. All requested-mode and native stopping gates
+are retained.
+
+Setup/capture is one construction per worker; warmup/validation are separately
+recorded and excluded from warm solve timing. Additional CuPy adapter/upload
+costs are 0.103–0.111 s (200 modes), 0.082–0.090 s (100), and 0.250–0.258 s (Anvil).
+CuPy uses the worker's supplied preconditioner, so these are not standalone
+CuPy setup measurements. The README's dated six-backend Anvil table is unchanged.
+
+[Summary, individual samples and controlled-difference checks](production/summary.json),
+[environment](production/environment.json), and all raw/occupancy records are
+in `production/`.
 
 ## Drivers
 
