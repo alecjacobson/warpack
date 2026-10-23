@@ -1,0 +1,868 @@
+.........FFFFFFFFF.............................                          [100%]
+=================================== FAILURES ===================================
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings0] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (4, 32, 8, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86d01ac430>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings1] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (4, 32, 32, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86ac8781c0>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings2] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (8, 32, 8, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86deb48100>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings3] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (8, 32, 32, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86ac20fc40>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings4] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (16, 32, 8, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86deb87ee0>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings5] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (16, 32, 32, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86ac87af80>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings6] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (8, 64, 32, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86decca590>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings7] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (16, 64, 32, 128), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86ac636f20>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+_ test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings8] _
+TypeError: float() argument must be a string or a real number, not 'array'
+
+The above exception was the direct cause of the following exception:
+
+settings = (16, 32, 32, 256), width = 13, search = 0, n = 63
+
+    @pytest.mark.parametrize("settings", SETTINGS)
+    @pytest.mark.parametrize(
+        "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+    )
+    def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+        rng = np.random.default_rng(186)
+        basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+        coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+        sx, su = basis[:width, :n], basis[width : width + search, :n]
+        cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+        stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+        x, p = [store[:width, :n] for store in stores]
+        rows, columns, inner, threads = settings
+    
+        def run():
+            candidate.rotation(
+                sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+            hx = rng.normal(size=sx.shape) * scale
+            hu = rng.normal(size=su.shape) * scale
+            hcx = rng.normal(size=cx.shape) * scale
+            hcu = rng.normal(size=cu.shape) * scale
+            for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+                if source.size:
+                    dest.assign(source)
+            expected_p = hcu @ hu
+            expected_x = hcx @ hx + expected_p
+            wp.capture_launch(capture.graph)
+            for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+                largest = np.max(abs(expected))
+                error = np.max(abs(actual - expected))
+                assert np.isfinite(actual).all()
+                assert error <= 5e-13 * largest if largest else error == 0
+            for store in stores:
+                values = store.numpy()
+                assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+            for actual, expected in [
+                (sx.numpy(), hx),
+>               (su.numpy(), hu),
+                (cx.numpy(), hcx),
+                (cu.numpy(), hcu),
+            ]:
+
+tests/test_paired_rotation_tiles.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'array' object has no attribute 'typecode'") raised in repr()] array object at 0x7f86b4654760>
+_suppress_bfloat16_warning = False
+
+    def numpy(self, *, _suppress_bfloat16_warning=False):
+        """Convert the array to a :class:`numpy.ndarray` (aliasing memory through the array interface protocol)
+        If the array is on the GPU, a synchronous device-to-host copy (on the CUDA default stream) will be
+        automatically performed to ensure that any outstanding work is completed.
+        """
+        # Determine if this array contains bfloat16 data (scalar or compound type)
+        is_bf16 = self.dtype is bfloat16 or (
+            isinstance(self.dtype, type)
+            and issubclass(self.dtype, ctypes.Array)
+            and self.dtype._wp_scalar_type_ is bfloat16
+        )
+    
+        if is_bf16 and not _suppress_bfloat16_warning:
+            ml_bf16 = _get_ml_dtypes_bfloat16()
+            if ml_bf16 is None:
+                log_warning(
+                    "bfloat16 arrays are returned as np.uint16 (raw bit representation) "
+                    "because NumPy does not natively support bfloat16. "
+                    "Use wp.to_torch() or wp.to_jax() for frameworks that support bfloat16 natively, "
+                    "or install ml-dtypes for a NumPy bfloat16 dtype.",
+                    once=True,
+                )
+    
+        if self.ptr:
+            # use the CUDA default stream for synchronous behaviour with other streams
+            with warp.ScopedStream(self.device.null_stream):
+                a = self.to("cpu", requires_grad=False)
+            # convert through __array_interface__
+            # Note: this handles arrays of structs using `descr`, so the result will be a structured NumPy array
+>           result = np.asarray(a)
+E           ValueError: setting an array element with a sequence.
+
+../../.local/lib/python3.10/site-packages/warp/_src/types.py:4333: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings0]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings1]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings2]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings3]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings4]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings5]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings6]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings7]
+FAILED tests/test_paired_rotation_tiles.py::test_split_strided_partial_tiles_changed_replay_and_sentinels[13-0-63-settings8]
+9 failed, 38 passed in 146.76s (0:02:26)

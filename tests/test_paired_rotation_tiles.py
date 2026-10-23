@@ -1,0 +1,112 @@
+"""Both Ritz outputs must match independent products without view-boundary bleed."""
+
+from types import SimpleNamespace
+
+import numpy as np
+import pytest
+import warp as wp
+
+from benchmarks.experimental import paired_rotation_tiles as candidate
+from warpack import BlockLOBPCG
+
+SETTINGS = [
+    (4, 32, 8, 128),
+    (4, 32, 32, 128),
+    (8, 32, 8, 128),
+    (8, 32, 32, 128),
+    (16, 32, 8, 128),
+    (16, 32, 32, 128),
+    (8, 64, 32, 128),
+    (16, 64, 32, 128),
+    (16, 32, 32, 256),
+]
+
+
+@pytest.mark.parametrize("settings", SETTINGS)
+@pytest.mark.parametrize(
+    "width,search,n", [(7, 3, 37), (13, 0, 63), (24, 48, 257), (104, 8, 1031), (204, 408, 257)]
+)
+def test_split_strided_partial_tiles_changed_replay_and_sentinels(settings, width, search, n):
+    rng = np.random.default_rng(186)
+    basis = wp.full((width + search + 2, n + 3), 17.0, dtype=wp.float64)
+    coeff = wp.full((width + 1, width + search + 5), 17.0, dtype=wp.float64)
+    sx, su = basis[:width, :n], basis[width : width + search, :n]
+    cx, cu = coeff[:width, :width], coeff[:width, width : width + search]
+    stores = [wp.full((width + 1, n + 7), -17.0, dtype=wp.float64) for _ in range(2)]
+    x, p = [store[:width, :n] for store in stores]
+    rows, columns, inner, threads = settings
+
+    def run():
+        candidate.rotation(
+            sx, su, cx, cu, x, p, rows=rows, columns=columns, inner=inner, threads=threads
+        )
+
+    run()
+    wp.synchronize()
+    with wp.ScopedCapture() as capture:
+        run()
+    for scale in [1.0, 1e100, 1e-100, 0.0, 1.0]:
+        hx = rng.normal(size=sx.shape) * scale
+        hu = rng.normal(size=su.shape) * scale
+        hcx = rng.normal(size=cx.shape) * scale
+        hcu = rng.normal(size=cu.shape) * scale
+        for dest, source in [(sx, hx), (su, hu), (cx, hcx), (cu, hcu)]:
+            if source.size:
+                dest.assign(source)
+        expected_p = hcu @ hu
+        expected_x = hcx @ hx + expected_p
+        wp.capture_launch(capture.graph)
+        for actual, expected in [(x.numpy(), expected_x), (p.numpy(), expected_p)]:
+            largest = np.max(abs(expected))
+            error = np.max(abs(actual - expected))
+            assert np.isfinite(actual).all()
+            assert error <= 5e-13 * largest if largest else error == 0
+        for store in stores:
+            values = store.numpy()
+            assert np.all(values[width:] == -17) and np.all(values[:, n:] == -17)
+        # Warp 1.15 cannot materialize empty device views with .numpy().
+        # Validate every view (including empty ones) through its backing array.
+        hb, hc = basis.numpy(), coeff.numpy()
+        for actual, expected in [
+            (hb[:width, :n], hx),
+            (hb[width : width + search, :n], hu),
+            (hc[:width, :width], hcx),
+            (hc[:width, width : width + search], hcu),
+        ]:
+            np.testing.assert_array_equal(actual, expected)
+        assert np.all(hb[width + search :] == 17)
+        assert np.all(hb[:, n:] == 17)
+        assert np.all(hc[width:] == 17)
+        assert np.all(hc[:, width + search :] == 17)
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_prototype_launch_interception_restores_global_callable(monkeypatch, failed):
+    calls = []
+    replacement = object()
+
+    def original(*args, **kwargs):
+        calls.append((args, kwargs))
+        if failed:
+            raise RuntimeError("launch failed")
+
+    def ritz(self):
+        wp.launch_tiled(
+            candidate.paired_ritz_rotation,
+            dim=(1, 1),
+            inputs=[None] * 4 + [SimpleNamespace(shape=(17, 37))],
+            block_dim=128,
+        )
+
+    monkeypatch.setattr(wp, "launch_tiled", original)
+    monkeypatch.setattr(BlockLOBPCG, "rayleigh_ritz", ritz)
+    monkeypatch.setattr(candidate, "rotation_kernel", lambda *args: replacement)
+    solver = object.__new__(candidate.PairedRotationBlock)
+    if failed:
+        with pytest.raises(RuntimeError, match="launch failed"):
+            solver.rayleigh_ritz()
+    else:
+        solver.rayleigh_ritz()
+    assert wp.launch_tiled is original
+    assert calls[0][0] == (replacement,)
+    assert calls[0][1]["dim"] == (2, 2) and calls[0][1]["block_dim"] == 128
