@@ -1,0 +1,66 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.force_covariance_compare",
+    "--side",
+    "10",
+    "--columns",
+    "32",
+    "--modes",
+    "20",
+    "--mass",
+    "lumped",
+    "--backend",
+    "cudss",
+    "--prior",
+    "localized",
+    "--cycles",
+    "1",
+    "--repeats",
+    "1",
+    "--out",
+    "/home/horde/projects/warpack/results/force_covariance/budget-screen/localized-cudss-a1.json"
+  ],
+  "pid": 374721,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792714367.0920112,
+      "other": [],
+      "gpu": "14 %, 1 MiB, 2490 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792714368.1771777,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 28",
+      "error": null
+    },
+    {
+      "time": 1792714369.3007517,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 510 MHz, 27",
+      "error": null
+    },
+    {
+      "time": 1792714370.3851519,
+      "other": [],
+      "gpu": "7 %, 658 MiB, 2490 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792714371.470102,
+      "other": [],
+      "gpu": "0 %, 716 MiB, 2490 MHz, 29",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

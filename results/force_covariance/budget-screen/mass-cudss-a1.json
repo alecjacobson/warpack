@@ -1,0 +1,161 @@
+{
+  "arguments": {
+    "side": 10,
+    "modes": 20,
+    "columns": 32,
+    "mass": "lumped",
+    "prior": "mass",
+    "backend": "cudss",
+    "cycles": 1,
+    "ncv": 64,
+    "repeats": 1,
+    "out": "/home/horde/projects/warpack/results/force_covariance/budget-screen/mass-cudss-a1.json"
+  },
+  "n": 10890,
+  "prior_rank_bound": 10890,
+  "reference": "Independent stiffness/mass ARPACK; covariance values are inverse squared elastic values",
+  "guard": 0.0002685975054594087,
+  "assembly_seconds": 0.1787394843995571,
+  "setup_seconds": 0.5004867017269135,
+  "capture_seconds": 0.46557073295116425,
+  "reference_seconds": 1.6843608506023884,
+  "warmup": {
+    "seconds": 0.08838730305433273,
+    "iterations": 1,
+    "quality": {
+      "residual": 3.219215559793788e-13,
+      "orthogonality": 2.1094237467877974e-14,
+      "spectrum_error": 5.42738458833512e-13,
+      "subspace_error": 6.598568510214548e-14,
+      "captured_energy_error": 5.912874452709424e-15,
+      "positive": 20,
+      "status": 0,
+      "converged": 20,
+      "inner": [
+        null,
+        null
+      ],
+      "accepted": true
+    }
+  },
+  "rows": [
+    {
+      "seconds": 0.08820352330803871,
+      "iterations": 1,
+      "quality": {
+        "residual": 3.218726848972095e-13,
+        "orthogonality": 2.020605904817785e-14,
+        "spectrum_error": 5.433034190613054e-13,
+        "subspace_error": 6.541171879487224e-14,
+        "captured_energy_error": 5.912874452709424e-15,
+        "positive": 20,
+        "status": 0,
+        "converged": 20,
+        "inner": [
+          null,
+          null
+        ],
+        "accepted": true
+      }
+    }
+  ],
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 1273,
+      "KERNEL": 3919,
+      "MEMCPY": 996,
+      "CONDITIONAL": 64
+    },
+    "memcpy_kinds": {
+      "HtoD (HOST PAGEABLE to DEVICE)": 464,
+      "DtoD (DEVICE to DEVICE)": 532
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "matrix_sha256": "609718f1f2150217e2b621b7d23533ded6629de7cd425992bbff476f4af395b2",
+  "prior_sha256": "2c573faa0cb76254559a2694975fcf7c5b40e81cee6382f760680c8f0bc61777",
+  "source_sha256": {
+    "benchmarks/applications/__init__.py": "a517d73e69ebb3dc905b95b63eac4e34625df802a48ed523516f1c030f388b0d",
+    "benchmarks/applications/diagonal_mass.py": "e617a6d21a5e97b2b8bb42f7f35a28822dce2632abb43d06f2921ac9ed9aa684",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/fem_hierarchy.py": "2f91e8c802ae9d553d7804244a4406d4cedf644c1395a64a23d03112b94e6e9d",
+    "benchmarks/applications/fem_shapes.py": "91ca37aa5cf5dab59951ebd94c5ed636409886e8726d18086fee1be90990877e",
+    "benchmarks/applications/force_covariance.py": "4d49fe0317517725ff25e709bd177d5abb172c6a975f80ecb3a9ad1d47d48777",
+    "benchmarks/applications/force_covariance_compare.py": "d67cd526c8a067f035aac20eef8357c217de4b3fc2653aa33c148836977a84c4",
+    "benchmarks/applications/force_dual.py": "bb67ddaee22e37ff8c7a99e47fd6b6f82037c8339f6126c3f0f4f9d4bb091a40",
+    "benchmarks/applications/problems.py": "15e5d47aecf81b772f79aeba0dd8c445071b03c0317ff73cc94ced78986a9ab8",
+    "benchmarks/applications/runner.py": "1293eb027f38080c247e5e92d13016f6b7120927abdbd57fdeb40bfc2e8ca22a",
+    "benchmarks/applications/weighted_snapshot_reference.py": "df5962847abc6417f740151129c7c87b9a887754951ec065d5d993bd2171bbae",
+    "benchmarks/applications/weighted_snapshot_svd.py": "e2f7a65dde8e609a2c4ea9d70923bad7ed9d960821ea3af350c095b3c8bec9ef",
+    "benchmarks/audit_profile.py": "e718c8c407aca6ea39faf38681cb63f25243f2acf261648ddd387ff0913760ee",
+    "benchmarks/compare.py": "70218c8e5dcb12c1bac86de5757aa4407a1dfc791f54c48fb1fb3e267b95fc4f",
+    "benchmarks/dependency_provenance.py": "390309b2bf1d6dc5eec41960047eb5ae79a89aeee50c164df9811ecaf4f50e6e",
+    "benchmarks/source_provenance.py": "3267e866bbbc1c32957ad350e2889285e9703fd8279ddc884d9728bb71c41062",
+    "benchmarks/upstream/__init__.py": "efeb32afe41f0a6d8385b636de39cd4e9c6e8c8d7f2d45c84028391895705377",
+    "benchmarks/upstream/adapters.py": "d3f2f4eb10cf88d5067595b6db4badc3881cb6006b517dce0ba4e9f06abd245c",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "22de5741e7718a63bd5a184c5b33fa9d9fcc3f9195b7b8a05cae5c264a42d650",
+    "warpack/_block_search.py": "0a2f5e190cf36fa173ed47998774a7db9c984215897b5e34cb25d2eb52606fa2",
+    "warpack/_coalesced_fsai.py": "8ec706fef7c8bb20274e3b57d6dfda6db41c77c598de6661d4bcea696169bc6c",
+    "warpack/_coalesced_operator.py": "c12914049fb2dba837ce1526f20c1bdcc170d0680348e8256184f0e8e07686b3",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "38b5c7bb8320a682ee9aa6c64403dddc6adf78b20bbadf27232aacfde17f2f6c",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "9c13850750bf319944380c3f27ffd7cc76b3f118760dbfbd2626fc845495ba3f",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "7caf129584e9ccc4f78bbf8d3f2cc94ea2ad3f6b9f0c63e0927e817f01932dcd",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "58f62d156207f0778123891f82a66c8d253bc722aafa2c6817fb7c4ec5406ca0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "accepted": true
+}

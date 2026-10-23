@@ -160,6 +160,7 @@ from the installed library.
 | [`python -m examples.anvil_block`](examples/anvil_block.py) | First 20 elastic Anvil modes with the fast pure-Warp configuration; requires the pinned overlay |
 | [Skinning modes](benchmarks/applications/SKINNING.md) | Rig constraints and the physical-space KKT formulation |
 | [Spectral surface reconstruction](benchmarks/applications/SPECTRAL_SURFACE.md) | Largest generalized modes with an SPD regularization metric; direct and pure-Warp block routes |
+| [Force-aware reduced bases](benchmarks/applications/FORCE_COVARIANCE.md) | Sparse implicit covariance and snapshot reductions; full-rank or singular force priors with SPD mass |
 | [Application guide](benchmarks/applications/README.md) | FEM, Hodge/nullspaces, conformal maps, connection modes, buckling and damped dynamics |
 
 ## Anvil showcase

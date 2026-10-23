@@ -20,6 +20,7 @@ implementation bugs and the remaining coverage requirements.
 | H / P3 | Damped coupled chain, standard first-order nonsymmetric linearization; analytic complex frequencies | [#27](https://github.com/alecjacobson/warpack/issues/27) |
 | I / P2 | [Large tall/wide POD and analytic string snapshots](POD.md); repeated leading clusters, rank deficiency, both singular subspaces and reconstruction energy | [#28](https://github.com/alecjacobson/warpack/issues/28) |
 | Dominant generalized / P2 | [Spectral surface reconstruction](SPECTRAL_SURFACE.md): PSD alignment A, SPD nonmass regularization B; largest modes and complete repeated clusters | [#136](https://github.com/alecjacobson/warpack/issues/136) |
+| Force-aware ROM / P2 | [Implicit force covariance](FORCE_COVARIANCE.md) and [weighted snapshots](WEIGHTED_SNAPSHOT_SVD.md): largest mass-weighted covariance modes, full-rank/singular force priors, SPD coupled or lumped mass | [#135](https://github.com/alecjacobson/warpack/issues/135) |
 
 The FEM bar, ring and load-factor pencil have analytic spectra, so comparison
 does not depend on trusting another iterative solver. The original regularized conformal case
