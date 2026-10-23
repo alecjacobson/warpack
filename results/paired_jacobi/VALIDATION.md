@@ -40,8 +40,9 @@ sparse equations, constraints, coupled mass, repeated/null modes, callbacks,
 changed inputs and device-controlled stopping.
 
 [Experimental whole/component qualification](runtime/README.md) preceded core
-promotion. Installed complete-solve timing and broader-family controls are
-separate and still being collected; #172 remains open until they qualify.
+promotion. [Installed paired controls](production/README.md) and [broader FEM families](families/README.md)
+subsequently qualified all **44 complete first/later outputs**, with identical
+pair inputs/source/dependencies and clean occupancy. This completes #172.
 This validation supersedes the 2,566-pass normalization checkpoint as the latest
 full-suite result. It does not claim closure of the wider CuPy gap or all
 upstream conformance issues.
