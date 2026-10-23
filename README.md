@@ -218,6 +218,9 @@ The [full-suite baseline](results/certified_whitening/README.md#production-integ
 records 2,214 passes and 11 skips. Subsequent
 [focused regressions](results/compact_jacobi/README.md#production-integration)
 cover optional compact graphs and first-solve benchmark validation.
+[Allocation](results/cg_adapter_storage/README.md) and
+[capture preparation](results/capture_preparation/production/README.md)
+regressions cover subsequent memory and setup improvements.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.
 

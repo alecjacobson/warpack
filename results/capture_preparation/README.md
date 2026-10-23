@@ -20,10 +20,8 @@ The first output and all three subsequent complete replays pass native stopping
 and independent physical/spectrum/subspace checks. External GPU occupancy is
 clean. The captured graph retains device-only nodes/transfers.
 
-`ActiveSearch.warm()` already sets the active residual count to zero but retains
-the previous search-history vectors. Every branch still performs numerical
-Rayleigh–Ritz preparation. Clearing that setup-only history before branch warmup
-may reduce dense numerical work without skipping any branch or kernel preparation.
-The captured solve initializes its own search space afterward. This proposed
-change requires full replay, callback, spectrum and timing regression controls;
-it is not yet installed.
+The [history-clearing control](zero-history/README.md) saved little: most of
+this cost remained. The [direct-recording prototype](capture-only/README.md)
+removed redundant numerical branch solves, including cold-cache qualification
+on both supported Warp environments. See the [production controls](production/README.md)
+for the guarded implementation and current setup/capture/replay measurements.

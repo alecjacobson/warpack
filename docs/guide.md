@@ -85,6 +85,14 @@ storage. Upstream CG's internal workspaces and public `for_width` variants
 remain independent. This reduces memory without changing stopping tests;
 [allocation controls](../results/cg_adapter_storage/README.md) quantify the savings.
 
+Active-search capture directly records all branch kernels for built-in
+`SparseOperator`, `BatchedSparseOperator` and `Identity` applications. This avoids
+an extra numerical solve of every branch during preparation. Custom stiffness
+or mass operators (including subclasses and instance overrides) retain eager
+per-width preparation. The initial eager solve and synchronization before
+capture remain. [Preparation controls](../results/capture_preparation/production/README.md)
+report the first-solve benefit; replay arithmetic is unchanged.
+
 For one-time ROM generation, `BlockLOBPCG(..., compact_projected_graphs=True)`
 reduces the graph construction work for wide projected solves. It records
 16 Jacobi rounds per device-loop iteration, preserving FP64 rotation order and

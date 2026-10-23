@@ -6,8 +6,9 @@ import weakref
 import warp as wp
 
 from ._active_cg import pack_rows
+from .batched_sparse import BatchedSparseOperator
 from .block import Identity
-from .solver import SymmetricEigensolver
+from .solver import SparseOperator, SymmetricEigensolver
 
 
 @wp.kernel
@@ -38,6 +39,8 @@ def record_search(usage: wp.array[wp.int32], bucket: int):
 
 
 class ActiveSearch:
+    _force_eager_warmup = False
+
     def __init__(self, owner, size, keep_history):
         self.owner = weakref.proxy(owner)
         self.keep_history = bool(keep_history)
@@ -130,7 +133,24 @@ class ActiveSearch:
         else:
             self.step_bucket(self.buckets[-1], len(self.buckets) - 1)
 
+    def _can_record_directly(self):
+        # Conditional graphs require CUDA 12.4+, which also supports loading
+        # kernels during capture. Owned applications have no per-width lazy
+        # state. Preserve eager setup for arbitrary user operators/overrides.
+        if not self.owner.device.is_cuda or not wp.is_conditional_graph_supported():
+            return False
+        owned = (SparseOperator, BatchedSparseOperator, Identity)
+        return all(
+            type(op) in owned and getattr(op.apply, "__func__", None) is type(op).apply
+            for op in (self.owner.op, self.owner.mass)
+        )
+
     def warm(self):
+        if not self._force_eager_warmup and self._can_record_directly():
+            # The final graph records every branch and loads any missing
+            # kernels. Its caller still synchronizes pending eager work before
+            # capture (#61). Avoid solving all branches merely to prepare them.
+            return
         self.count.zero_()
         for i, branch in enumerate(self.buckets):
             self.step_bucket(branch, i)
