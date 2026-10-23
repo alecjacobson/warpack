@@ -57,6 +57,10 @@ finalization and retain exact-result comparisons. Initial eager preparation,
 pre-capture synchronization and callback order are unchanged. The private legacy
 flag exists only for controls and is not a new public configuration.
 
+The [broader FEM qualification](../families/README.md) additionally passes all 12
+first/later outputs for free, disconnected and heterogeneous systems, including
+six/twelve rigid null modes. These extend the total to 44 accepted complete outputs.
+
 ## Reproduce
 
 `python -m benchmarks.experimental.compare_symmetry_api --symmetry legacy|default`
