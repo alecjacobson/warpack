@@ -1,0 +1,78 @@
+{
+  "command": [
+    "timeout",
+    "900",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.pencil_refinement",
+    "--nodes",
+    "16384",
+    "--kind",
+    "gyroscopic",
+    "--k",
+    "20",
+    "--ncv",
+    "64",
+    "--cycles",
+    "2",
+    "--refinement-steps",
+    "1",
+    "--repeats",
+    "3",
+    "--tol",
+    "1e-9",
+    "--out",
+    "results/pencil_refinement/cycles/gyroscopic-2-a1.json"
+  ],
+  "pid": 536559,
+  "exit_code": 1,
+  "timing_eligible": false,
+  "samples": [
+    {
+      "time": 1792775890.4364522,
+      "other": [],
+      "gpu": "5 %, 1 MiB, 2490 MHz, 41",
+      "error": null
+    },
+    {
+      "time": 1792775891.5756497,
+      "other": [],
+      "gpu": "0 %, 22 MiB, 2490 MHz, 41",
+      "error": null
+    },
+    {
+      "time": 1792775892.7278929,
+      "other": [],
+      "gpu": "100 %, 1010 MiB, 2490 MHz, 45",
+      "error": null
+    },
+    {
+      "time": 1792775893.8696036,
+      "other": [],
+      "gpu": "100 %, 1010 MiB, 2490 MHz, 46",
+      "error": null
+    },
+    {
+      "time": 1792775894.9623277,
+      "other": [],
+      "gpu": "0 %, 1010 MiB, 2490 MHz, 42",
+      "error": null
+    },
+    {
+      "time": 1792775896.0423038,
+      "other": [],
+      "gpu": "0 %, 1010 MiB, 2490 MHz, 41",
+      "error": null
+    },
+    {
+      "time": 1792775897.129851,
+      "other": [],
+      "gpu": "0 %, 1000 MiB, 2490 MHz, 41",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

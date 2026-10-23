@@ -90,3 +90,5 @@ Reproduce with `benchmarks.experimental.pencil_refinement` and explicit
 Each adjacent occupancy JSON retains the full command, and each report records
 exact inputs, source/dependency identities, original/native and extended checks.
 #123 remains open for a generic correction or justified attainable-accuracy route.
+
+The [fixed-cycle follow-up](cycles/README.md) retains 32 further outputs. Eight/sixteen cycles qualify the gyroscopic profile in four outputs each; all nonproportional profiles still reject at least one output. No generic recovery is promoted.
