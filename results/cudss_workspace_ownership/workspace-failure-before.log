@@ -1,0 +1,328 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+_ test_workspace_construction_failure_unwinds_all_owners[False-False-destroy] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d0b3430>
+failure = 'destroy', partial = False, cleanup_error = False
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81d0b34c0>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+_ test_workspace_construction_failure_unwinds_all_owners[False-False-handler] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81cf13b50>
+failure = 'handler', partial = False, cleanup_error = False
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81cf13850>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[False-False-create] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d0b2590>
+failure = 'create', partial = False, cleanup_error = False
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81cf38790>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[False-True-destroy] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d0b1ab0>
+failure = 'destroy', partial = True, cleanup_error = False
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81d0b1270>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[False-True-handler] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d07c310>
+failure = 'handler', partial = True, cleanup_error = False
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81d07d120>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[False-True-create] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d0b1390>
+failure = 'create', partial = True, cleanup_error = False
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81d0b1450>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[True-False-destroy] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d07e1d0>
+failure = 'destroy', partial = False, cleanup_error = True
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81d07d360>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[True-False-handler] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d0a3310>
+failure = 'handler', partial = False, cleanup_error = True
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81cf109d0>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[True-False-create] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81d0b1630>
+failure = 'create', partial = False, cleanup_error = True
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81d0b38b0>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[True-True-destroy] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81cf12380>
+failure = 'destroy', partial = True, cleanup_error = True
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81cf13730>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+__ test_workspace_construction_failure_unwinds_all_owners[True-True-handler] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81cf6b670>
+failure = 'handler', partial = True, cleanup_error = True
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81cf6b370>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+___ test_workspace_construction_failure_unwinds_all_owners[True-True-create] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa81cf12c80>
+failure = 'create', partial = True, cleanup_error = True
+
+    @pytest.mark.parametrize("failure", ["destroy", "handler", "create"])
+    @pytest.mark.parametrize("partial", [False, True])
+    @pytest.mark.parametrize("cleanup_error", [False, True])
+    def test_workspace_construction_failure_unwinds_all_owners(
+        monkeypatch, failure, partial, cleanup_error
+    ):
+        import warp_cudss.solver as implementation
+    
+        resources = NativeResources(failure, partial, cleanup_error)
+        monkeypatch.setattr(implementation, "get_library", lambda: resources)
+        monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
+        monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
+        solver = implementation.CudssSolver()
+        message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+        with pytest.raises(RuntimeError, match=message):
+            memory.Workspace(solver)
+>       assert solver._closed
+E       assert False
+E        +  where False = <warp_cudss.solver.CudssSolver object at 0x7fa81cf10e20>._closed
+
+tests/test_cudss_workspace_failure.py:68: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[False-False-destroy]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[False-False-handler]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[False-False-create]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[False-True-destroy]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[False-True-handler]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[False-True-create]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[True-False-destroy]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[True-False-handler]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[True-False-create]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[True-True-destroy]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[True-True-handler]
+FAILED tests/test_cudss_workspace_failure.py::test_workspace_construction_failure_unwinds_all_owners[True-True-create]
+12 failed in 0.73s
