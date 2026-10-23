@@ -110,3 +110,17 @@ def test_prototype_launch_interception_restores_global_callable(monkeypatch, fai
     assert wp.launch_tiled is original
     assert calls[0][0] == (replacement,)
     assert calls[0][1]["dim"] == (2, 2) and calls[0][1]["block_dim"] == 128
+
+
+@pytest.mark.parametrize("settings", [(8, 32, 8, 128), (8, 32, 32, 128), (16, 32, 32, 256)])
+@pytest.mark.parametrize("history", [False, True])
+def test_changed_coupled_problem_constraints_and_clusters(monkeypatch, tmp_path, settings, history):
+    from tests import test_certified_whitening, test_first_whitening
+
+    class Candidate(candidate.PairedRotationBlock):
+        _rotation_rows, _rotation_columns, _rotation_inner, _rotation_threads = settings
+
+    monkeypatch.setattr(test_first_whitening, "AllSizeInstalledWhitening", Candidate)
+    test_certified_whitening.test_coupled_mass_constraints_clusters_and_changed_problem(
+        tmp_path, "installed", history, problem_shape=(336, 20, 104)
+    )
