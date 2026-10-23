@@ -1,0 +1,314 @@
+...................FFFFF                                                 [100%]
+=================================== FAILURES ===================================
+_________ test_wide_scope_does_not_allocate_controls_outside_range[24] _________
+
+width = 24
+
+    @pytest.mark.parametrize("width", [24, 95, 96, 256, 257])
+    def test_wide_scope_does_not_allocate_controls_outside_range(width):
+        class WideOnly(MetricQRReuseBlock):
+            _metric_reuse_minimum = 96
+            _metric_reuse_maximum = 256
+    
+        operator = SparseOperator(matrix(sp.eye(width + 7, format="csr")))
+>       solver = WideOnly(operator, 4, width)
+
+tests/test_metric_qr_reuse.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/experimental/metric_qr_reuse.py:95: in __init__
+    super().__init__(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_metric_qr_reuse.test_wide_scope_does_not_allocate_controls_outside_range.<locals>.WideOnly object at 0x7f588abaa290>
+operator = <warpack.solver.SparseOperator object at 0x7f588abaa080>, k = 4
+width = 24, mass = None, preconditioner = None, initial_vectors = None
+constraints = None, tol = 1e-08, rank_tol = 1e-12, gram_chunk = 256
+symmetric_products = False, fused_updates = False, paired_rotation = False
+normalize_constraints = False, initial_perturbation = 0.0
+reuse_operator_images = False, search_bucket_size = 0, keep_history = True
+preconditioner_bucket_size = 0, compact_projected_graphs = False
+
+    def __init__(
+        self,
+        operator,
+        k,
+        width=None,
+        mass=None,
+        preconditioner=None,
+        initial_vectors=None,
+        constraints=None,
+        tol=1e-8,
+        rank_tol=1e-12,
+        gram_chunk=256,
+        symmetric_products=False,
+        fused_updates=False,
+        paired_rotation=False,
+        normalize_constraints=False,
+        initial_perturbation=0.0,
+        reuse_operator_images=False,
+        search_bucket_size=0,
+        keep_history=True,
+        preconditioner_bucket_size=0,
+        compact_projected_graphs=False,
+    ):
+        if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
+            raise ValueError("operator must expose n, device and apply")
+        self.op, self.n, self.device = operator, integer_index(operator.n), operator.device
+        self.k = k = integer_index(k)
+        self.b = integer_index(k if width is None else width)
+        if not 1 <= k <= self.b or 3 * self.b > self.n:
+>           raise ValueError("require 1 <= k <= width and 3*width <= n")
+E           ValueError: require 1 <= k <= width and 3*width <= n
+
+warpack/block.py:329: ValueError
+_________ test_wide_scope_does_not_allocate_controls_outside_range[95] _________
+
+width = 95
+
+    @pytest.mark.parametrize("width", [24, 95, 96, 256, 257])
+    def test_wide_scope_does_not_allocate_controls_outside_range(width):
+        class WideOnly(MetricQRReuseBlock):
+            _metric_reuse_minimum = 96
+            _metric_reuse_maximum = 256
+    
+        operator = SparseOperator(matrix(sp.eye(width + 7, format="csr")))
+>       solver = WideOnly(operator, 4, width)
+
+tests/test_metric_qr_reuse.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/experimental/metric_qr_reuse.py:95: in __init__
+    super().__init__(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_metric_qr_reuse.test_wide_scope_does_not_allocate_controls_outside_range.<locals>.WideOnly object at 0x7f5889b6b5e0>
+operator = <warpack.solver.SparseOperator object at 0x7f5889b6ba60>, k = 4
+width = 95, mass = None, preconditioner = None, initial_vectors = None
+constraints = None, tol = 1e-08, rank_tol = 1e-12, gram_chunk = 256
+symmetric_products = False, fused_updates = False, paired_rotation = False
+normalize_constraints = False, initial_perturbation = 0.0
+reuse_operator_images = False, search_bucket_size = 0, keep_history = True
+preconditioner_bucket_size = 0, compact_projected_graphs = False
+
+    def __init__(
+        self,
+        operator,
+        k,
+        width=None,
+        mass=None,
+        preconditioner=None,
+        initial_vectors=None,
+        constraints=None,
+        tol=1e-8,
+        rank_tol=1e-12,
+        gram_chunk=256,
+        symmetric_products=False,
+        fused_updates=False,
+        paired_rotation=False,
+        normalize_constraints=False,
+        initial_perturbation=0.0,
+        reuse_operator_images=False,
+        search_bucket_size=0,
+        keep_history=True,
+        preconditioner_bucket_size=0,
+        compact_projected_graphs=False,
+    ):
+        if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
+            raise ValueError("operator must expose n, device and apply")
+        self.op, self.n, self.device = operator, integer_index(operator.n), operator.device
+        self.k = k = integer_index(k)
+        self.b = integer_index(k if width is None else width)
+        if not 1 <= k <= self.b or 3 * self.b > self.n:
+>           raise ValueError("require 1 <= k <= width and 3*width <= n")
+E           ValueError: require 1 <= k <= width and 3*width <= n
+
+warpack/block.py:329: ValueError
+_________ test_wide_scope_does_not_allocate_controls_outside_range[96] _________
+
+width = 96
+
+    @pytest.mark.parametrize("width", [24, 95, 96, 256, 257])
+    def test_wide_scope_does_not_allocate_controls_outside_range(width):
+        class WideOnly(MetricQRReuseBlock):
+            _metric_reuse_minimum = 96
+            _metric_reuse_maximum = 256
+    
+        operator = SparseOperator(matrix(sp.eye(width + 7, format="csr")))
+>       solver = WideOnly(operator, 4, width)
+
+tests/test_metric_qr_reuse.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/experimental/metric_qr_reuse.py:95: in __init__
+    super().__init__(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_metric_qr_reuse.test_wide_scope_does_not_allocate_controls_outside_range.<locals>.WideOnly object at 0x7f588a3dbf10>
+operator = <warpack.solver.SparseOperator object at 0x7f588a3dbfd0>, k = 4
+width = 96, mass = None, preconditioner = None, initial_vectors = None
+constraints = None, tol = 1e-08, rank_tol = 1e-12, gram_chunk = 256
+symmetric_products = False, fused_updates = False, paired_rotation = False
+normalize_constraints = False, initial_perturbation = 0.0
+reuse_operator_images = False, search_bucket_size = 0, keep_history = True
+preconditioner_bucket_size = 0, compact_projected_graphs = False
+
+    def __init__(
+        self,
+        operator,
+        k,
+        width=None,
+        mass=None,
+        preconditioner=None,
+        initial_vectors=None,
+        constraints=None,
+        tol=1e-8,
+        rank_tol=1e-12,
+        gram_chunk=256,
+        symmetric_products=False,
+        fused_updates=False,
+        paired_rotation=False,
+        normalize_constraints=False,
+        initial_perturbation=0.0,
+        reuse_operator_images=False,
+        search_bucket_size=0,
+        keep_history=True,
+        preconditioner_bucket_size=0,
+        compact_projected_graphs=False,
+    ):
+        if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
+            raise ValueError("operator must expose n, device and apply")
+        self.op, self.n, self.device = operator, integer_index(operator.n), operator.device
+        self.k = k = integer_index(k)
+        self.b = integer_index(k if width is None else width)
+        if not 1 <= k <= self.b or 3 * self.b > self.n:
+>           raise ValueError("require 1 <= k <= width and 3*width <= n")
+E           ValueError: require 1 <= k <= width and 3*width <= n
+
+warpack/block.py:329: ValueError
+________ test_wide_scope_does_not_allocate_controls_outside_range[256] _________
+
+width = 256
+
+    @pytest.mark.parametrize("width", [24, 95, 96, 256, 257])
+    def test_wide_scope_does_not_allocate_controls_outside_range(width):
+        class WideOnly(MetricQRReuseBlock):
+            _metric_reuse_minimum = 96
+            _metric_reuse_maximum = 256
+    
+        operator = SparseOperator(matrix(sp.eye(width + 7, format="csr")))
+>       solver = WideOnly(operator, 4, width)
+
+tests/test_metric_qr_reuse.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/experimental/metric_qr_reuse.py:95: in __init__
+    super().__init__(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_metric_qr_reuse.test_wide_scope_does_not_allocate_controls_outside_range.<locals>.WideOnly object at 0x7f588973b760>
+operator = <warpack.solver.SparseOperator object at 0x7f588973b970>, k = 4
+width = 256, mass = None, preconditioner = None, initial_vectors = None
+constraints = None, tol = 1e-08, rank_tol = 1e-12, gram_chunk = 256
+symmetric_products = False, fused_updates = False, paired_rotation = False
+normalize_constraints = False, initial_perturbation = 0.0
+reuse_operator_images = False, search_bucket_size = 0, keep_history = True
+preconditioner_bucket_size = 0, compact_projected_graphs = False
+
+    def __init__(
+        self,
+        operator,
+        k,
+        width=None,
+        mass=None,
+        preconditioner=None,
+        initial_vectors=None,
+        constraints=None,
+        tol=1e-8,
+        rank_tol=1e-12,
+        gram_chunk=256,
+        symmetric_products=False,
+        fused_updates=False,
+        paired_rotation=False,
+        normalize_constraints=False,
+        initial_perturbation=0.0,
+        reuse_operator_images=False,
+        search_bucket_size=0,
+        keep_history=True,
+        preconditioner_bucket_size=0,
+        compact_projected_graphs=False,
+    ):
+        if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
+            raise ValueError("operator must expose n, device and apply")
+        self.op, self.n, self.device = operator, integer_index(operator.n), operator.device
+        self.k = k = integer_index(k)
+        self.b = integer_index(k if width is None else width)
+        if not 1 <= k <= self.b or 3 * self.b > self.n:
+>           raise ValueError("require 1 <= k <= width and 3*width <= n")
+E           ValueError: require 1 <= k <= width and 3*width <= n
+
+warpack/block.py:329: ValueError
+________ test_wide_scope_does_not_allocate_controls_outside_range[257] _________
+
+width = 257
+
+    @pytest.mark.parametrize("width", [24, 95, 96, 256, 257])
+    def test_wide_scope_does_not_allocate_controls_outside_range(width):
+        class WideOnly(MetricQRReuseBlock):
+            _metric_reuse_minimum = 96
+            _metric_reuse_maximum = 256
+    
+        operator = SparseOperator(matrix(sp.eye(width + 7, format="csr")))
+>       solver = WideOnly(operator, 4, width)
+
+tests/test_metric_qr_reuse.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/experimental/metric_qr_reuse.py:95: in __init__
+    super().__init__(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_metric_qr_reuse.test_wide_scope_does_not_allocate_controls_outside_range.<locals>.WideOnly object at 0x7f588a3d9f30>
+operator = <warpack.solver.SparseOperator object at 0x7f588a3d9960>, k = 4
+width = 257, mass = None, preconditioner = None, initial_vectors = None
+constraints = None, tol = 1e-08, rank_tol = 1e-12, gram_chunk = 256
+symmetric_products = False, fused_updates = False, paired_rotation = False
+normalize_constraints = False, initial_perturbation = 0.0
+reuse_operator_images = False, search_bucket_size = 0, keep_history = True
+preconditioner_bucket_size = 0, compact_projected_graphs = False
+
+    def __init__(
+        self,
+        operator,
+        k,
+        width=None,
+        mass=None,
+        preconditioner=None,
+        initial_vectors=None,
+        constraints=None,
+        tol=1e-8,
+        rank_tol=1e-12,
+        gram_chunk=256,
+        symmetric_products=False,
+        fused_updates=False,
+        paired_rotation=False,
+        normalize_constraints=False,
+        initial_perturbation=0.0,
+        reuse_operator_images=False,
+        search_bucket_size=0,
+        keep_history=True,
+        preconditioner_bucket_size=0,
+        compact_projected_graphs=False,
+    ):
+        if not all(hasattr(operator, attr) for attr in ("n", "device", "apply")):
+            raise ValueError("operator must expose n, device and apply")
+        self.op, self.n, self.device = operator, integer_index(operator.n), operator.device
+        self.k = k = integer_index(k)
+        self.b = integer_index(k if width is None else width)
+        if not 1 <= k <= self.b or 3 * self.b > self.n:
+>           raise ValueError("require 1 <= k <= width and 3*width <= n")
+E           ValueError: require 1 <= k <= width and 3*width <= n
+
+warpack/block.py:329: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_metric_qr_reuse.py::test_wide_scope_does_not_allocate_controls_outside_range[24]
+FAILED tests/test_metric_qr_reuse.py::test_wide_scope_does_not_allocate_controls_outside_range[95]
+FAILED tests/test_metric_qr_reuse.py::test_wide_scope_does_not_allocate_controls_outside_range[96]
+FAILED tests/test_metric_qr_reuse.py::test_wide_scope_does_not_allocate_controls_outside_range[256]
+FAILED tests/test_metric_qr_reuse.py::test_wide_scope_does_not_allocate_controls_outside_range[257]
+5 failed, 19 passed in 9.44s

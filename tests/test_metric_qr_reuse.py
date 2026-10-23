@@ -161,3 +161,16 @@ def test_custom_mass_retains_original_qr(wrapped):
     np.testing.assert_array_equal(solver.metric_reuse_usage.numpy(), [0, 0])
     x = solver.sx.numpy()
     assert np.linalg.norm(x @ x.T - np.eye(width)) < 1e-10
+
+
+@pytest.mark.parametrize("width", [24, 95, 96, 256, 257])
+def test_wide_scope_does_not_allocate_controls_outside_range(width):
+    class WideOnly(MetricQRReuseBlock):
+        _metric_reuse_minimum = 96
+        _metric_reuse_maximum = 256
+
+    operator = SparseOperator(matrix(sp.eye(3 * width + 7, format="csr")))
+    solver = WideOnly(operator, 4, width)
+    selected = 96 <= width <= 256
+    assert (solver.metric_reuse_usage is not None) == selected
+    assert (solver._ritz_qr_reuse is not None) == selected

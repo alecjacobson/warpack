@@ -19,6 +19,7 @@ def main():
     )
     parser.add_argument("--reference-cache", type=Path, required=True)
     parser.add_argument("--compact-graphs", action="store_true")
+    parser.add_argument("--wide-only", action="store_true")
     choice, remainder = parser.parse_known_args()
     destination_parser = argparse.ArgumentParser(add_help=False)
     destination_parser.add_argument("--out", type=Path, required=True)
@@ -37,6 +38,8 @@ def main():
 
     class Tracking(base):
         _metric_reuse_tolerance = choice.metric_defect
+        _metric_reuse_minimum = 96 if choice.wide_only else 1
+        _metric_reuse_maximum = 256 if choice.wide_only else 2147483647
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs, compact_projected_graphs=choice.compact_graphs)
@@ -49,8 +52,9 @@ def main():
         def tracked_check(*values, **options):
             quality = check(*values, **options)
             if instances and choice.metric_defect:
+                usage = instances[-1].metric_reuse_usage
                 quality["metric_qr_reuse_and_fallback"] = (
-                    instances[-1].metric_reuse_usage.numpy().tolist()
+                    None if usage is None else usage.numpy().tolist()
                 )
             return quality
 
@@ -78,6 +82,7 @@ def main():
             metric_defect=choice.metric_defect,
             compact_graphs=choice.compact_graphs,
             reference_cache=str(choice.reference_cache),
+            wide_only=choice.wide_only,
         )
         report["independent_reference_cache"] = cache.records
         report["metric_qr_scope"] = (
@@ -90,6 +95,8 @@ def main():
             "operators. Each worker owns its preconditioner/solver; only independently "
             "verified CPU references are reused outside timing. Counters are read "
             "during post-solve validation, outside compute timing."
+            " With --wide-only, widths outside96..256 retain original QR with "
+            "no added control arrays or graph nodes."
         )
         destination.out.write_text(json.dumps(report, indent=2) + "\n")
     if error is not None:

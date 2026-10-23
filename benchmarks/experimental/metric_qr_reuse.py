@@ -85,12 +85,18 @@ class MetricQRReuse:
 
 class MetricQRReuseBlock(BlockLOBPCG):
     _metric_reuse_tolerance = 1e-13
+    _metric_reuse_minimum = 1
+    _metric_reuse_maximum = 2147483647
 
     def __init__(self, *args, **kwargs):
         tolerance = float(self._metric_reuse_tolerance)
         if not math.isfinite(tolerance) or tolerance <= 0 or tolerance > 1e-12:
             raise ValueError("require an explicit finite metric-defect tolerance in (0, 1e-12]")
         super().__init__(*args, **kwargs)
+        self.metric_reuse_usage = None
+        self._ritz_qr_reuse = None
+        if not self._metric_reuse_minimum <= self.b <= self._metric_reuse_maximum:
+            return
         storage = [wp.zeros(1, dtype=wp.float64, device=self.device)] + [
             wp.zeros(n, dtype=wp.int32, device=self.device) for n in (1, 1, 2)
         ]
@@ -100,8 +106,13 @@ class MetricQRReuseBlock(BlockLOBPCG):
             branch._ritz_qr_reuse = MetricQRReuse(branch, storage, tolerance)
 
     def initialize(self, seed=42):
-        self.metric_reuse_usage.zero_()
+        if self.metric_reuse_usage is not None:
+            self.metric_reuse_usage.zero_()
         super().initialize(seed)
 
     def orthogonalize_x(self):
-        self._ritz_qr_reuse.apply()
+        helper = getattr(self, "_ritz_qr_reuse", None)
+        if helper is None:
+            super().orthogonalize_x()
+        else:
+            helper.apply()
