@@ -172,18 +172,18 @@ for the first 20 elastic modes. The longest rest extent is normalized to one
 metre, with illustrative material parameters `E = 100,000 Pa`, `ν = 0.3`,
 `ρ = 1,000 kg/m³`. Color follows instantaneous displacement.
 
-Measurements from 2026-10-21 on an NVIDIA L40 and Xeon Platinum 8362
+Measurements from 2026-10-23 on an NVIDIA L40 and Xeon Platinum 8362
 (four pinned CPU cores), using the [v0.2.0 overlay](docs/releases/v0.2.0.md)
 for the FSAI rows:
 
 | Solver | Setup (s) | Warm solve (s) | Max original residual, all 26 modes |
 |---|---:|---:|---:|
-| SciPy ARPACK + MKL PARDISO | 7.0520 | 11.8392 | 3.976e-9 |
-| Spectra + MKL PARDISO | 7.0642 | 6.9934 | 3.227e-9 |
-| CuPy eigsh + cuDSS | 2.1151 | 0.4593 | 2.841e-9 |
-| Warp + cuDSS | 2.3480 | 0.4663 | 2.863e-9 |
-| CuPy LOBPCG + Warp FSAI/CG | 1.3652 | 2.3754 | 1.929e-9 |
-| **Warp block + FSAI/CG** | **2.1296** | **1.8843** | **1.914e-8** |
+| SciPy ARPACK + MKL PARDISO | 7.0288 | 12.0792 | 4.040e-09 |
+| Spectra + MKL PARDISO | 7.0222 | 6.9091 | 9.068e-09 |
+| CuPy eigsh + cuDSS | 2.1396 | 0.4589 | 2.856e-09 |
+| Warp + cuDSS | 2.3825 | 0.4655 | 2.693e-09 |
+| CuPy LOBPCG + Warp FSAI/CG | 0.9617 | 2.3365 | 1.728e-09 |
+| **Warp block + FSAI/CG** | **1.3984** | **1.5432** | **1.943e-08** |
 
 Setup is the median of three independent constructions, including factorization
 or preconditioning, workspaces and graph capture where applicable. Solve is the
@@ -195,11 +195,10 @@ CuPy's cuDSS and Warp preconditioners are supplied by the benchmark. The pure-Wa
 block setting uses width 24, FSAI32 and FP32 CG capped at 25 iterations, with FP64
 outer work.
 
-The [current FSAI dependency](results/fsai_setup_regression/README.md) reduces
-setup cost and memory use in a separate matched Anvil comparison, with unchanged
-warm solve time.
+All rows use the same verified assembled matrices and reference. Each row
+includes independently constructed factors or preconditioners in its setup time.
 
-[Timing samples and accuracy checks](results/anvil_showcase_132/README.md)
+[Timing samples and accuracy checks](results/anvil_showcase_180/README.md)
 · [Current comparison setup](results/anvil_inputs_142/README.md)
 · [Rendering recipe and downloadable assets](docs/anvil.md)
 

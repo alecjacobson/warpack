@@ -1,0 +1,1062 @@
+{
+  "common_inputs": {
+    "fixture": {
+      "arrays": {
+        "columns": {
+          "dtype": "<i4",
+          "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+          "shape": [
+            1331499
+          ]
+        },
+        "mass": {
+          "dtype": "<f8",
+          "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+          "shape": [
+            94619
+          ]
+        },
+        "normalized": {
+          "dtype": "<f8",
+          "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+          "shape": [
+            1331499,
+            3,
+            3
+          ]
+        },
+        "offsets": {
+          "dtype": "<i4",
+          "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+          "shape": [
+            94620
+          ]
+        },
+        "positions": {
+          "dtype": "<f8",
+          "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+          "shape": [
+            94619,
+            3
+          ]
+        },
+        "rigid": {
+          "dtype": "<f8",
+          "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+          "shape": [
+            6,
+            283857
+          ]
+        },
+        "stiffness": {
+          "dtype": "<f8",
+          "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+          "shape": [
+            1331499,
+            3,
+            3
+          ]
+        }
+      },
+      "configuration": {
+        "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+        "energy": "stable Neo-Hookean rest Hessian",
+        "mass": "lumped per-vertex mass, repeated for xyz",
+        "material": {
+          "density": 1000.0,
+          "poisson": 0.3,
+          "young": 100000.0
+        },
+        "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+        "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+      },
+      "schema": 1
+    },
+    "reference": {
+      "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+      "values": {
+        "shape": [
+          26
+        ],
+        "dtype": "<f8",
+        "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+      },
+      "vectors": {
+        "shape": [
+          26,
+          283857
+        ],
+        "dtype": "<f8",
+        "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+      }
+    }
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+      "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+      "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+    }
+  },
+  "rows": [
+    {
+      "method": "arpack",
+      "inputs": {
+        "schema": 1,
+        "common": {
+          "fixture": {
+            "arrays": {
+              "columns": {
+                "dtype": "<i4",
+                "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+                "shape": [
+                  1331499
+                ]
+              },
+              "mass": {
+                "dtype": "<f8",
+                "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+                "shape": [
+                  94619
+                ]
+              },
+              "normalized": {
+                "dtype": "<f8",
+                "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              },
+              "offsets": {
+                "dtype": "<i4",
+                "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+                "shape": [
+                  94620
+                ]
+              },
+              "positions": {
+                "dtype": "<f8",
+                "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+                "shape": [
+                  94619,
+                  3
+                ]
+              },
+              "rigid": {
+                "dtype": "<f8",
+                "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+                "shape": [
+                  6,
+                  283857
+                ]
+              },
+              "stiffness": {
+                "dtype": "<f8",
+                "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              }
+            },
+            "configuration": {
+              "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+              "energy": "stable Neo-Hookean rest Hessian",
+              "mass": "lumped per-vertex mass, repeated for xyz",
+              "material": {
+                "density": 1000.0,
+                "poisson": 0.3,
+                "young": 100000.0
+              },
+              "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+              "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+            },
+            "schema": 1
+          },
+          "reference": {
+            "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+            "values": {
+              "shape": [
+                26
+              ],
+              "dtype": "<f8",
+              "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+            },
+            "vectors": {
+              "shape": [
+                26,
+                283857
+              ],
+              "dtype": "<f8",
+              "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+            }
+          }
+        },
+        "method": {
+          "initial": {
+            "shape": [
+              283857
+            ],
+            "dtype": "<f8",
+            "sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f"
+          },
+          "shifted_matrix": {
+            "shape": [
+              283857,
+              283857
+            ],
+            "offsets": {
+              "shape": [
+                283858
+              ],
+              "dtype": "<i8",
+              "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+            },
+            "columns": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<i8",
+              "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+            },
+            "values": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<f8",
+              "sha256": "6d39ca3459d4d394aebefe6bcf5c0fbf8a96e8bd1a90caadf04e25c8a1dcef10"
+            }
+          },
+          "constraints": null
+        }
+      },
+      "setup_median_seconds": 7.02876029536128,
+      "setup_samples_seconds": [
+        7.136205907911062,
+        7.02876029536128,
+        6.990360617637634
+      ],
+      "solve_median_seconds": 12.079175684601068,
+      "solve_min_seconds": 11.73228519782424,
+      "solve_max_seconds": 12.390230879187584,
+      "solve_batch_medians_seconds": [
+        12.087990302592516,
+        11.847562968730927,
+        12.079175684601068
+      ],
+      "solve_batch_median_spread_fraction": 0.019904283217611788,
+      "max_original_residual": 4.039924158954395e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "spectra",
+      "inputs": {
+        "schema": 1,
+        "common": {
+          "fixture": {
+            "arrays": {
+              "columns": {
+                "dtype": "<i4",
+                "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+                "shape": [
+                  1331499
+                ]
+              },
+              "mass": {
+                "dtype": "<f8",
+                "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+                "shape": [
+                  94619
+                ]
+              },
+              "normalized": {
+                "dtype": "<f8",
+                "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              },
+              "offsets": {
+                "dtype": "<i4",
+                "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+                "shape": [
+                  94620
+                ]
+              },
+              "positions": {
+                "dtype": "<f8",
+                "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+                "shape": [
+                  94619,
+                  3
+                ]
+              },
+              "rigid": {
+                "dtype": "<f8",
+                "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+                "shape": [
+                  6,
+                  283857
+                ]
+              },
+              "stiffness": {
+                "dtype": "<f8",
+                "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              }
+            },
+            "configuration": {
+              "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+              "energy": "stable Neo-Hookean rest Hessian",
+              "mass": "lumped per-vertex mass, repeated for xyz",
+              "material": {
+                "density": 1000.0,
+                "poisson": 0.3,
+                "young": 100000.0
+              },
+              "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+              "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+            },
+            "schema": 1
+          },
+          "reference": {
+            "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+            "values": {
+              "shape": [
+                26
+              ],
+              "dtype": "<f8",
+              "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+            },
+            "vectors": {
+              "shape": [
+                26,
+                283857
+              ],
+              "dtype": "<f8",
+              "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+            }
+          }
+        },
+        "method": {
+          "initial": {
+            "shape": [
+              283857
+            ],
+            "dtype": "<f8",
+            "sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f"
+          },
+          "shifted_matrix": {
+            "shape": [
+              283857,
+              283857
+            ],
+            "offsets": {
+              "shape": [
+                283858
+              ],
+              "dtype": "<i8",
+              "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+            },
+            "columns": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<i8",
+              "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+            },
+            "values": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<f8",
+              "sha256": "6d39ca3459d4d394aebefe6bcf5c0fbf8a96e8bd1a90caadf04e25c8a1dcef10"
+            }
+          },
+          "constraints": null
+        }
+      },
+      "setup_median_seconds": 7.022151421755552,
+      "setup_samples_seconds": [
+        7.022151421755552,
+        6.962164416909218,
+        7.036144610494375
+      ],
+      "solve_median_seconds": 6.909149471670389,
+      "solve_min_seconds": 6.692937284708023,
+      "solve_max_seconds": 7.302931115031242,
+      "solve_batch_medians_seconds": [
+        6.966025602072477,
+        6.85839868336916,
+        6.901733800768852
+      ],
+      "solve_batch_median_spread_fraction": 0.015594185723495742,
+      "max_original_residual": 9.067533937527862e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "cupy-direct",
+      "inputs": {
+        "schema": 1,
+        "common": {
+          "fixture": {
+            "arrays": {
+              "columns": {
+                "dtype": "<i4",
+                "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+                "shape": [
+                  1331499
+                ]
+              },
+              "mass": {
+                "dtype": "<f8",
+                "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+                "shape": [
+                  94619
+                ]
+              },
+              "normalized": {
+                "dtype": "<f8",
+                "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              },
+              "offsets": {
+                "dtype": "<i4",
+                "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+                "shape": [
+                  94620
+                ]
+              },
+              "positions": {
+                "dtype": "<f8",
+                "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+                "shape": [
+                  94619,
+                  3
+                ]
+              },
+              "rigid": {
+                "dtype": "<f8",
+                "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+                "shape": [
+                  6,
+                  283857
+                ]
+              },
+              "stiffness": {
+                "dtype": "<f8",
+                "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              }
+            },
+            "configuration": {
+              "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+              "energy": "stable Neo-Hookean rest Hessian",
+              "mass": "lumped per-vertex mass, repeated for xyz",
+              "material": {
+                "density": 1000.0,
+                "poisson": 0.3,
+                "young": 100000.0
+              },
+              "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+              "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+            },
+            "schema": 1
+          },
+          "reference": {
+            "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+            "values": {
+              "shape": [
+                26
+              ],
+              "dtype": "<f8",
+              "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+            },
+            "vectors": {
+              "shape": [
+                26,
+                283857
+              ],
+              "dtype": "<f8",
+              "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+            }
+          }
+        },
+        "method": {
+          "initial": {
+            "shape": [
+              283857
+            ],
+            "dtype": "<f8",
+            "sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f"
+          },
+          "shifted_matrix": {
+            "shape": [
+              283857,
+              283857
+            ],
+            "offsets": {
+              "shape": [
+                283858
+              ],
+              "dtype": "<i8",
+              "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+            },
+            "columns": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<i8",
+              "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+            },
+            "values": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<f8",
+              "sha256": "6d39ca3459d4d394aebefe6bcf5c0fbf8a96e8bd1a90caadf04e25c8a1dcef10"
+            }
+          },
+          "constraints": null
+        }
+      },
+      "setup_median_seconds": 2.1395923793315887,
+      "setup_samples_seconds": [
+        2.197460200637579,
+        2.1395923793315887,
+        2.1250492855906487
+      ],
+      "solve_median_seconds": 0.45889628306031227,
+      "solve_min_seconds": 0.4584000036120415,
+      "solve_max_seconds": 0.4593236930668354,
+      "solve_batch_medians_seconds": [
+        0.45895739644765854,
+        0.4587537795305252,
+        0.45856261253356934
+      ],
+      "solve_batch_median_spread_fraction": 0.0008605573004612907,
+      "max_original_residual": 2.856276854794568e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "warp-direct",
+      "inputs": {
+        "schema": 1,
+        "common": {
+          "fixture": {
+            "arrays": {
+              "columns": {
+                "dtype": "<i4",
+                "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+                "shape": [
+                  1331499
+                ]
+              },
+              "mass": {
+                "dtype": "<f8",
+                "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+                "shape": [
+                  94619
+                ]
+              },
+              "normalized": {
+                "dtype": "<f8",
+                "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              },
+              "offsets": {
+                "dtype": "<i4",
+                "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+                "shape": [
+                  94620
+                ]
+              },
+              "positions": {
+                "dtype": "<f8",
+                "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+                "shape": [
+                  94619,
+                  3
+                ]
+              },
+              "rigid": {
+                "dtype": "<f8",
+                "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+                "shape": [
+                  6,
+                  283857
+                ]
+              },
+              "stiffness": {
+                "dtype": "<f8",
+                "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              }
+            },
+            "configuration": {
+              "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+              "energy": "stable Neo-Hookean rest Hessian",
+              "mass": "lumped per-vertex mass, repeated for xyz",
+              "material": {
+                "density": 1000.0,
+                "poisson": 0.3,
+                "young": 100000.0
+              },
+              "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+              "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+            },
+            "schema": 1
+          },
+          "reference": {
+            "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+            "values": {
+              "shape": [
+                26
+              ],
+              "dtype": "<f8",
+              "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+            },
+            "vectors": {
+              "shape": [
+                26,
+                283857
+              ],
+              "dtype": "<f8",
+              "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+            }
+          }
+        },
+        "method": {
+          "initial": {
+            "shape": [
+              283857
+            ],
+            "dtype": "<f8",
+            "sha256": "c08f5502dd9be819fd671e5c9cd966a7340c679b6babd587f1afea6344e7696f"
+          },
+          "shifted_matrix": {
+            "shape": [
+              283857,
+              283857
+            ],
+            "offsets": {
+              "shape": [
+                283858
+              ],
+              "dtype": "<i8",
+              "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+            },
+            "columns": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<i8",
+              "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+            },
+            "values": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<f8",
+              "sha256": "6d39ca3459d4d394aebefe6bcf5c0fbf8a96e8bd1a90caadf04e25c8a1dcef10"
+            }
+          },
+          "constraints": null
+        }
+      },
+      "setup_median_seconds": 2.382508672773838,
+      "setup_samples_seconds": [
+        2.383428294211626,
+        2.382508672773838,
+        2.3604356572031975
+      ],
+      "solve_median_seconds": 0.46551910415291786,
+      "solve_min_seconds": 0.4650476388633251,
+      "solve_max_seconds": 0.46607863157987595,
+      "solve_batch_medians_seconds": [
+        0.46551910415291786,
+        0.46556331589818,
+        0.46530357375741005
+      ],
+      "solve_batch_median_spread_fraction": 0.0005579623659969841,
+      "max_original_residual": 2.6934868477118445e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "cupy-block",
+      "inputs": {
+        "schema": 1,
+        "common": {
+          "fixture": {
+            "arrays": {
+              "columns": {
+                "dtype": "<i4",
+                "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+                "shape": [
+                  1331499
+                ]
+              },
+              "mass": {
+                "dtype": "<f8",
+                "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+                "shape": [
+                  94619
+                ]
+              },
+              "normalized": {
+                "dtype": "<f8",
+                "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              },
+              "offsets": {
+                "dtype": "<i4",
+                "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+                "shape": [
+                  94620
+                ]
+              },
+              "positions": {
+                "dtype": "<f8",
+                "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+                "shape": [
+                  94619,
+                  3
+                ]
+              },
+              "rigid": {
+                "dtype": "<f8",
+                "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+                "shape": [
+                  6,
+                  283857
+                ]
+              },
+              "stiffness": {
+                "dtype": "<f8",
+                "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              }
+            },
+            "configuration": {
+              "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+              "energy": "stable Neo-Hookean rest Hessian",
+              "mass": "lumped per-vertex mass, repeated for xyz",
+              "material": {
+                "density": 1000.0,
+                "poisson": 0.3,
+                "young": 100000.0
+              },
+              "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+              "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+            },
+            "schema": 1
+          },
+          "reference": {
+            "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+            "values": {
+              "shape": [
+                26
+              ],
+              "dtype": "<f8",
+              "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+            },
+            "vectors": {
+              "shape": [
+                26,
+                283857
+              ],
+              "dtype": "<f8",
+              "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+            }
+          }
+        },
+        "method": {
+          "initial": {
+            "shape": [
+              283857,
+              24
+            ],
+            "dtype": "<f8",
+            "sha256": "648a5b9aa54b8e734cfac0a9bc3460902691aef2d8f4abc1fe4b65b8cab03de0"
+          },
+          "shifted_matrix": {
+            "shape": [
+              283857,
+              283857
+            ],
+            "offsets": {
+              "shape": [
+                283858
+              ],
+              "dtype": "<i8",
+              "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+            },
+            "columns": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<i8",
+              "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+            },
+            "values": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<f8",
+              "sha256": "a40c43e1a007daf56e21507e05239588c0630cdb9a0356e1d7f30d1858a8b6db"
+            }
+          },
+          "constraints": {
+            "shape": [
+              6,
+              283857
+            ],
+            "dtype": "<f8",
+            "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af"
+          }
+        }
+      },
+      "setup_median_seconds": 0.9617104679346085,
+      "setup_samples_seconds": [
+        0.9617104679346085,
+        0.9409790001809597,
+        1.02044016122818
+      ],
+      "solve_median_seconds": 2.3365049213171005,
+      "solve_min_seconds": 2.3091451823711395,
+      "solve_max_seconds": 2.506878726184368,
+      "solve_batch_medians_seconds": [
+        2.3427157066762447,
+        2.335169654339552,
+        2.34218942001462
+      ],
+      "solve_batch_median_spread_fraction": 0.003221794220488669,
+      "max_original_residual": 1.727787424361184e-09,
+      "timed_solves": 15,
+      "accepted": true
+    },
+    {
+      "method": "warp-block",
+      "inputs": {
+        "schema": 1,
+        "common": {
+          "fixture": {
+            "arrays": {
+              "columns": {
+                "dtype": "<i4",
+                "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+                "shape": [
+                  1331499
+                ]
+              },
+              "mass": {
+                "dtype": "<f8",
+                "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+                "shape": [
+                  94619
+                ]
+              },
+              "normalized": {
+                "dtype": "<f8",
+                "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              },
+              "offsets": {
+                "dtype": "<i4",
+                "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+                "shape": [
+                  94620
+                ]
+              },
+              "positions": {
+                "dtype": "<f8",
+                "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+                "shape": [
+                  94619,
+                  3
+                ]
+              },
+              "rigid": {
+                "dtype": "<f8",
+                "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+                "shape": [
+                  6,
+                  283857
+                ]
+              },
+              "stiffness": {
+                "dtype": "<f8",
+                "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+                "shape": [
+                  1331499,
+                  3,
+                  3
+                ]
+              }
+            },
+            "configuration": {
+              "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+              "energy": "stable Neo-Hookean rest Hessian",
+              "mass": "lumped per-vertex mass, repeated for xyz",
+              "material": {
+                "density": 1000.0,
+                "poisson": 0.3,
+                "young": 100000.0
+              },
+              "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+              "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+            },
+            "schema": 1
+          },
+          "reference": {
+            "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+            "values": {
+              "shape": [
+                26
+              ],
+              "dtype": "<f8",
+              "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+            },
+            "vectors": {
+              "shape": [
+                26,
+                283857
+              ],
+              "dtype": "<f8",
+              "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+            }
+          }
+        },
+        "method": {
+          "initial": {
+            "shape": [
+              283857,
+              24
+            ],
+            "dtype": "<f8",
+            "sha256": "648a5b9aa54b8e734cfac0a9bc3460902691aef2d8f4abc1fe4b65b8cab03de0"
+          },
+          "shifted_matrix": {
+            "shape": [
+              283857,
+              283857
+            ],
+            "offsets": {
+              "shape": [
+                283858
+              ],
+              "dtype": "<i8",
+              "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+            },
+            "columns": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<i8",
+              "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+            },
+            "values": {
+              "shape": [
+                11983107
+              ],
+              "dtype": "<f8",
+              "sha256": "a40c43e1a007daf56e21507e05239588c0630cdb9a0356e1d7f30d1858a8b6db"
+            }
+          },
+          "constraints": {
+            "shape": [
+              6,
+              283857
+            ],
+            "dtype": "<f8",
+            "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af"
+          },
+          "initial_pool": {
+            "shape": [
+              283857,
+              24
+            ],
+            "dtype": "<f8",
+            "sha256": "648a5b9aa54b8e734cfac0a9bc3460902691aef2d8f4abc1fe4b65b8cab03de0"
+          }
+        }
+      },
+      "setup_median_seconds": 1.3984416872262955,
+      "setup_samples_seconds": [
+        1.3984416872262955,
+        1.3971866816282272,
+        1.3993162102997303
+      ],
+      "solve_median_seconds": 1.5431936047971249,
+      "solve_min_seconds": 1.5337782613933086,
+      "solve_max_seconds": 1.5933868885040283,
+      "solve_batch_medians_seconds": [
+        1.5431936047971249,
+        1.5400888584554195,
+        1.5463004298508167
+      ],
+      "solve_batch_median_spread_fraction": 0.004025140705669129,
+      "max_original_residual": 1.9427004527750744e-08,
+      "timed_solves": 15,
+      "accepted": true
+    }
+  ],
+  "rounds": 3,
+  "repeats": 5,
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "thread_environment": {
+    "OPENBLAS_NUM_THREADS": "4",
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "MKL_THREADING_LAYER": "GNU"
+  },
+  "protocol": "Serial fresh-process setup repetitions; one outer solve warmup then synchronized solves from identical starts. Setup includes factor/preconditioner construction, solver workspaces and graph capture where applicable. Assembled inputs, imports/runtime initialization, reference loading, outer warmup and validation excluded. Existing compilation caches. CPU libraries allocate iteration workspaces inside their timed solve calls.",
+  "source_sha256": "6b71081798b97b5bd924946d0a00c18041254ed4504f54f95d09acbe3bd1cd16"
+}
