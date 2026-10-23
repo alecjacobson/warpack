@@ -1,0 +1,67 @@
+{
+  "command": [
+    "timeout",
+    "300",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.applications.force_covariance_compare",
+    "--side",
+    "10",
+    "--columns",
+    "32",
+    "--modes",
+    "20",
+    "--mass",
+    "lumped",
+    "--backend",
+    "cudss",
+    "--prior",
+    "mass",
+    "--repeats",
+    "3",
+    "--cycles",
+    "1",
+    "--fixed-cycles",
+    "--out",
+    "/home/horde/projects/warpack/results/force_covariance/qualified/mass-cudss-a1.json"
+  ],
+  "pid": 380558,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792715947.3701174,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792715948.4104445,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792715949.512897,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 210 MHz, 29",
+      "error": null
+    },
+    {
+      "time": 1792715950.6322508,
+      "other": [],
+      "gpu": "63 %, 664 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792715951.803929,
+      "other": [],
+      "gpu": "5 %, 716 MiB, 2490 MHz, 32",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
