@@ -1,0 +1,50 @@
+..........................F
+=================================== FAILURES ===================================
+_ test_original_equation_spectrum_padding_and_changed_input[rank_deficient-4-416] _
+
+n = 416, block_size = 4, kind = 'rank_deficient'
+
+    @pytest.mark.parametrize("n", [9, 48, 104, 208, 312, 416, 612])
+    @pytest.mark.parametrize("block_size", [4, 8, 16])
+    @pytest.mark.parametrize("kind", ["indefinite", "rank_deficient"])
+    def test_original_equation_spectrum_padding_and_changed_input(n, block_size, kind):
+        rng = np.random.default_rng(169)
+        a = rng.normal(size=(n, n))
+        if kind == "indefinite":
+            original = (a + a.T) * 0.5
+        else:
+            q, _ = la.qr(a)
+            diagonal = np.repeat(np.arange((n + 3) // 4), 4)[:n].astype(float)
+            diagonal[: n // 3] = 0
+            original = (q * diagonal) @ q.T
+        solver, stores = allocate(n, constructor=partial(BlockJacobi, block_size=block_size))
+        solver.h.assign(original)
+        solver.apply()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            solver.apply()
+        for shift, scale in [(0.0, 1.0), (0.0, 1e-80), (0.5, 1e80), (-0.25, 1.0)]:
+            matrix = original + shift * np.eye(n)
+            solver.h.assign(matrix * scale)
+            wp.capture_launch(capture.graph)
+            values = np.diag(solver.h.numpy()) / scale
+            vectors = solver.v.numpy()
+            np.testing.assert_allclose(np.sort(values), la.eigvalsh(matrix), atol=1e-10, rtol=1e-11)
+>           assert (
+                np.linalg.norm(matrix @ vectors - vectors * values) / max(np.linalg.norm(matrix), 1)
+                < 1e-11
+            )
+E           AssertionError: assert (np.float64(1.5736078365526746e-08) / np.float64(1194.0803993031625)) < 1e-11
+E            +  where np.float64(1.5736078365526746e-08) = <function norm at 0x7f4da21b1930>(((array([[46.19679158, -0.54953913, -0.16138099, ...,  0.10076166,\n         0.60956947,  0.61636986],\n       [-0.5495391...\n       [ 0.61636986,  0.29128369,  1.14937894, ..., -0.26355352,\n        -0.0774647 , 44.55186023]], shape=(416, 416)) @ array([[ 0.04177034, -0.10266801, -0.00684872, ...,  0.02669789,\n         0.03499083,  0.10663403],\n       [ 0.0028334...\n       [ 0.07093985,  0.02576822, -0.05527471, ..., -0.0347293 ,\n         0.09244003,  0.04825866]], shape=(416, 416))) - (array([[ 0.04177034, -0.10266801, -0.00684872, ...,  0.02669789,\n         0.03499083,  0.10663403],\n       [ 0.0028334...\n       [ 0.07093985,  0.02576822, -0.05527471, ..., -0.0347293 ,\n         0.09244003,  0.04825866]], shape=(416, 416)) * array([ 3.90000000e+01,  4.30000000e+01,  5.10000000e+01,  4.10000000e+01,\n        6.74837282e-15,  6.25718878e-15,  7...7367e-14,  7.50000000e+01,  2.12315504e-14,\n        3.45608025e-14,  5.70000000e+01,  6.50000000e+01,  6.80000000e+01]))))
+E            +    where <function norm at 0x7f4da21b1930> = <module 'numpy.linalg' from '/home/horde/.local/lib/python3.10/site-packages/numpy/linalg/__init__.py'>.norm
+E            +      where <module 'numpy.linalg' from '/home/horde/.local/lib/python3.10/site-packages/numpy/linalg/__init__.py'> = np.linalg
+E            +  and   np.float64(1194.0803993031625) = max(np.float64(1194.0803993031625), 1)
+E            +    where np.float64(1194.0803993031625) = <function norm at 0x7f4da21b1930>(array([[46.19679158, -0.54953913, -0.16138099, ...,  0.10076166,\n         0.60956947,  0.61636986],\n       [-0.5495391...\n       [ 0.61636986,  0.29128369,  1.14937894, ..., -0.26355352,\n        -0.0774647 , 44.55186023]], shape=(416, 416)))
+E            +      where <function norm at 0x7f4da21b1930> = <module 'numpy.linalg' from '/home/horde/.local/lib/python3.10/site-packages/numpy/linalg/__init__.py'>.norm
+E            +        where <module 'numpy.linalg' from '/home/horde/.local/lib/python3.10/site-packages/numpy/linalg/__init__.py'> = np.linalg
+
+tests/test_block_jacobi_experimental.py:40: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_block_jacobi_experimental.py::test_original_equation_spectrum_padding_and_changed_input[rank_deficient-4-416]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 26 passed in 18.38s
