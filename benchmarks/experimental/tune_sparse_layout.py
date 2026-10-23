@@ -11,6 +11,7 @@ import warp as wp
 import warp.optim.linear as linear
 import warp.sparse as ws
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.experimental.compare_block import prepare
 from benchmarks.experimental.sparse_layout import product
@@ -66,7 +67,7 @@ def main():
                 samples_seconds=times,
                 median_seconds=float(np.median(times)),
                 relative_frobenius_errors=errors,
-                accepted=max(errors) < 5e-6,
+                accepted=errors_below_tolerance(errors, 5e-6),
             )
         )
         print(rows[-1], flush=True)
@@ -84,7 +85,11 @@ def main():
                 timing_eligible=not (before or after),
                 source_sha256={
                     str(path): hashlib.sha256(path.read_bytes()).hexdigest()
-                    for path in (Path(__file__), Path("benchmarks/experimental/sparse_layout.py"))
+                    for path in (
+                        Path(__file__),
+                        Path("benchmarks/experimental/sparse_layout.py"),
+                        Path("benchmarks/acceptance.py"),
+                    )
                 },
             ),
             indent=2,

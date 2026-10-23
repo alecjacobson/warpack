@@ -9,6 +9,7 @@ import numpy as np
 import scipy.sparse as sp
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.anvil_inputs import array_identity, matrix_identity
 from benchmarks.applications.compare import timed
 from benchmarks.audit_profile import graph_summary
@@ -54,7 +55,10 @@ def main():
     rows = []
     for b in widths:
         solvers = []
-        backends = [("triangular", CanonicalTriangularBlock), ("inverse_rotate", TriangularRotateBlock)]
+        backends = [
+            ("triangular", CanonicalTriangularBlock),
+            ("inverse_rotate", TriangularRotateBlock),
+        ]
         if args.lower_triangular:
             backends.append(("inverse_lower_rotate", LowerTriangularRotateBlock))
         if args.blocked_triangular:
@@ -109,7 +113,8 @@ def main():
                         status=status,
                     )
                     check["accepted"] = bool(
-                        status == 0 and max(orthogonality, image_error, mass_error) < 1e-10
+                        status == 0
+                        and errors_below_tolerance([orthogonality, image_error, mass_error], 1e-10)
                     )
                     checks.append(check)
                     if trial:

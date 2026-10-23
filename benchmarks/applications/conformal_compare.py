@@ -13,7 +13,12 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
-from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+from benchmarks.acceptance import (
+    add_diagnostic_argument,
+    assess_comparison,
+    errors_below_tolerance,
+    require_accepted,
+)
 from benchmarks.audit_profile import graph_summary
 from benchmarks.runtime import warp_runtime_hashes
 
@@ -191,8 +196,10 @@ def run(args):
                 check["native_iterations"] = len(history)
                 check["native_history_max"] = float(np.max(history[-1].get()))
                 check["native_fresh_max"] = float(np.max(fresh.get()))
-                check["native_stopping_passed"] = (
-                    max(check["native_history_max"], check["native_fresh_max"]) <= row["cupy_tol"]
+                check["native_stopping_passed"] = errors_below_tolerance(
+                    [check["native_history_max"], check["native_fresh_max"]],
+                    row["cupy_tol"],
+                    inclusive=True,
                 )
                 if cupy_cg:
                     check["preconditioner_scheduled_stats"] = result[2][2].numpy().tolist()

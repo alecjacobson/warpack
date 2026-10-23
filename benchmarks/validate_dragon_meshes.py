@@ -17,6 +17,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperator
 
@@ -126,7 +127,7 @@ def validate(mesh, out):
         assert quality["max_original_residual"] < 1e-7
         assert quality["orthogonality_max_error"] < 1e-8
         assert comparison["minimum_elastic_mac"] > 0.99999
-        assert max(comparison["elastic_relative_eigenvalue_error"]) < 1e-7
+        assert errors_below_tolerance(comparison["elastic_relative_eigenvalue_error"], 1e-7)
         assert comparison["rigid_subspace_min_cosine"] > 0.99999
 
     save()

@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.upstream.adapters import matrix
 from warpack import CuDSSInverse
 
@@ -75,7 +76,7 @@ def main():
                             samples_seconds=samples,
                             solve_seconds=float(np.median(samples)),
                             relative_residuals=errors,
-                            accepted=bool(max(errors) < 1e-12),
+                            accepted=errors_below_tolerance(errors, 1e-12),
                             other_gpu_processes=sorted(processes),
                             timing_uncontended=not processes,
                             host_nodes=len(re.findall(r'label="\{\s*HOST\b', dot)),

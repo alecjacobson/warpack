@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.anvil_inputs import array_identity
 from benchmarks.applications.compare import timed
 from benchmarks.audit_profile import graph_summary
@@ -112,7 +113,9 @@ def main():
                         p_error=errors[1],
                         tails_intact=bool(tails),
                         inputs_unchanged=unchanged,
-                        accepted=bool(max(errors) < 5e-13 and tails and unchanged),
+                        accepted=bool(
+                            errors_below_tolerance(errors, 5e-13) and tails and unchanged
+                        ),
                     )
                 )
                 if trial:

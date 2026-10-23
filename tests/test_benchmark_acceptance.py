@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from benchmarks.acceptance import assess_comparison, require_accepted
+from benchmarks.acceptance import assess_comparison, errors_below_tolerance, require_accepted
 
 
 @pytest.mark.parametrize(
@@ -119,3 +119,38 @@ def test_parent_cli_preserves_requested_worker_result(monkeypatch, tmp_path, fai
 def test_success_flag_without_trial_evidence_is_rejected():
     report = {}
     assert not assess_comparison(report, [dict(accepted=True, outcome="passed")])
+
+
+@pytest.mark.parametrize("position", range(3))
+@pytest.mark.parametrize(
+    "invalid", [float("nan"), float("inf"), -float("inf"), -1e-30, 1e-12, 2e-12]
+)
+def test_error_vector_rejects_invalid_measurement_at_every_position(position, invalid):
+    errors = [0.0, 1e-15, 9e-13]
+    errors[position] = invalid
+    assert not errors_below_tolerance(errors, 1e-12)
+
+
+@pytest.mark.parametrize("tolerance", [float("nan"), float("inf"), -float("inf"), -1.0, 0.0])
+def test_error_vector_rejects_invalid_threshold(tolerance):
+    assert not errors_below_tolerance([0.0], tolerance)
+
+
+def test_error_vector_requires_evidence_and_keeps_strict_original_threshold():
+    assert not errors_below_tolerance([], 1e-12)
+    assert errors_below_tolerance([0.0, 1e-15, 9e-13], 1e-12)
+    assert errors_below_tolerance(iter([0.0, 1e-15]), 1e-12)
+    assert not errors_below_tolerance([0.0, 1e-12], 1e-12)
+
+
+@pytest.mark.parametrize("position", range(3))
+@pytest.mark.parametrize("invalid", [float("nan"), float("inf"), -float("inf"), -1e-30, 2e-12])
+def test_inclusive_error_vector_rejects_invalid_measurement(position, invalid):
+    errors = [0.0, 1e-15, 1e-12]
+    errors[position] = invalid
+    assert not errors_below_tolerance(errors, 1e-12, inclusive=True)
+
+
+def test_inclusive_error_vector_preserves_equality_and_rejects_missing_evidence():
+    assert errors_below_tolerance([0.0, 1e-12], 1e-12, inclusive=True)
+    assert not errors_below_tolerance([], 1e-12, inclusive=True)

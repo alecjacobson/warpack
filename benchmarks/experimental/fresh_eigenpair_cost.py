@@ -10,6 +10,7 @@ import numpy as np
 import scipy.sparse as sp
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.audit_profile import graph_summary
 from benchmarks.upstream.adapters import matrix
@@ -119,13 +120,15 @@ def main():
                     and row["status"] == 0
                     and row["fresh_residual"] <= 1e-10
                     and row["physical_residual"] <= 1e-9
-                    and max(
-                        row["returned_spectrum_error"],
-                        row["rayleigh_spectrum_error"],
-                        row["subspace_error"],
-                        row["orthogonality_error"],
+                    and errors_below_tolerance(
+                        [
+                            row["returned_spectrum_error"],
+                            row["rayleigh_spectrum_error"],
+                            row["subspace_error"],
+                            row["orthogonality_error"],
+                        ],
+                        1e-8,
                     )
-                    < 1e-8
                 )
                 report["rows"].append(row)
                 out.write_text(json.dumps(report, indent=2) + "\n")

@@ -13,6 +13,7 @@ import warp.optim.linear as linear
 import warp.sparse as ws
 
 from benchmarks import block_inputs
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.applications.fem_cases import make_fem_case
@@ -693,8 +694,12 @@ def cupy_trials(a, b, pre, initial, constraints, args, k, check, cg=None, comple
                     residual_history_length=len(history),
                     last_history_absolute_residuals=history[-1].get().tolist(),
                     returned_absolute_residuals=absolute_residuals,
-                    returned_k_absolute_tolerance_met=max(absolute_residuals[:k]) <= cupy_tol,
-                    full_block_absolute_tolerance_met=max(absolute_residuals) <= cupy_tol,
+                    returned_k_absolute_tolerance_met=errors_below_tolerance(
+                        absolute_residuals[:k], cupy_tol, inclusive=True
+                    ),
+                    full_block_absolute_tolerance_met=errors_below_tolerance(
+                        absolute_residuals, cupy_tol, inclusive=True
+                    ),
                     quality=quality,
                 )
             )

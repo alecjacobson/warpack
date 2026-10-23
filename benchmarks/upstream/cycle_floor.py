@@ -13,6 +13,7 @@ import mpmath as mp
 import numpy as np
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.upstream.adapters import matrix
 from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperator
 
@@ -127,8 +128,8 @@ def main():
                         row["physical_accepted"] = bool(
                             row["status"] == 0
                             and row["physical_count"] == k
-                            and max(row["physical_residuals"]) < 1e-9
-                            and max(row["returned_physical_residuals"]) < 1e-9
+                            and errors_below_tolerance(row["physical_residuals"], 1e-9)
+                            and errors_below_tolerance(row["returned_physical_residuals"], 1e-9)
                             and row["returned_spectrum_error"] < 1e-9
                             and row["spectrum_error"] < 1e-9
                             and row["subspace_error"] < 1e-9

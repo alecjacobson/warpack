@@ -9,6 +9,7 @@ import numpy as np
 import scipy.linalg as la
 import warp as wp
 
+from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.anvil_inputs import array_identity
 from benchmarks.applications.compare import timed
 from benchmarks.audit_profile import graph_summary
@@ -82,7 +83,7 @@ class Components:
                 rank=rank,
                 reference_rank=expected,
                 accepted=bool(
-                    max(residual, orthogonality, spectrum) < 1e-11
+                    errors_below_tolerance([residual, orthogonality, spectrum], 1e-11)
                     and self.status.numpy()[0] == 0
                     and rank == expected
                 ),

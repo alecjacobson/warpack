@@ -14,6 +14,8 @@ import cupyx.scipy.sparse as cs
 import cupyx.scipy.sparse.linalg as cl
 import numpy as np
 
+from benchmarks.acceptance import errors_below_tolerance
+
 from .negative_foundation import make_negative_foundation
 
 
@@ -109,7 +111,9 @@ def main():
                 requested_subspace_error=subspace,
                 spectrum_error=spectrum,
                 eigenvalues=w.tolist(),
-                physical_accepted=bool(max(scaled.max(), orthogonality, subspace, spectrum) < 1e-8),
+                physical_accepted=bool(
+                    errors_below_tolerance([scaled.max(), orthogonality, subspace, spectrum], 1e-8)
+                ),
                 history_maxima=[float(cp.asnumpy(item).max()) for item in history],
                 warnings=[str(item.message) for item in caught],
                 input_matrix_unchanged=bool(

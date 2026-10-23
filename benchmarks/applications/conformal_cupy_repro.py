@@ -18,6 +18,8 @@ import cupyx.scipy.sparse.linalg as linear
 import numpy as np
 import scipy.sparse.linalg as sla
 
+from benchmarks.acceptance import errors_below_tolerance
+
 from .conformal import boundary_reference, make_conformal_case, metrics
 
 
@@ -85,8 +87,8 @@ def run(side, scaled, repeats=2, host_factor=False):
                 native_fresh_max=float(fresh.max().get()),
                 iterations=len(history),
             )
-            check["native_stopping_passed"] = (
-                max(check["native_history_max"], check["native_fresh_max"]) <= tolerance
+            check["native_stopping_passed"] = errors_below_tolerance(
+                [check["native_history_max"], check["native_fresh_max"]], tolerance, inclusive=True
             )
             record["trials"].append(check)
         except Exception as error:

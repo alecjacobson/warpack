@@ -1,5 +1,27 @@
 """Process contracts for composite benchmarks; numerical evidence stays intact."""
 
+import math
+
+
+def errors_below_tolerance(errors, tolerance, *, inclusive=False):
+    """Require nonempty, finite, nonnegative errors below the declared bound.
+
+    A max reduction can hide a later NaN; validate each measurement instead.
+    This is host-side benchmark validation, outside solver execution/timing.
+    """
+    values = tuple(errors)
+    return (
+        bool(values)
+        and math.isfinite(tolerance)
+        and tolerance > 0
+        and all(
+            math.isfinite(error)
+            and error >= 0
+            and (error <= tolerance if inclusive else error < tolerance)
+            for error in values
+        )
+    )
+
 
 def add_diagnostic_argument(parser):
     parser.add_argument(
