@@ -80,3 +80,31 @@ and accuracy controls are required before considering production use.
 [Shared initializer raw evidence](shared-initializer/jacobi-a1.json),
 [occupancy](shared-initializer/jacobi-a1.occupancy.json),
 [log](shared-initializer/jacobi-a1.log).
+
+## Complete Anvil control: no useful improvement
+
+Fresh independent processes use exactly the same Anvil inputs, references,
+starts, source manifest and dependencies, with unchanged outer/native/physical
+criteria. Each worker has three measured Warp and three measured CuPy solves;
+all 18 pass. Occupancy is clean and captured graphs contain only device copies
+and kernels/conditionals. Setup includes each candidate's extra workspaces;
+graph capture is reported separately. All times below are seconds.
+
+| Projected backend | Warp setup | Capture | Warp replay median | CuPy replay median |
+| --- | ---: | ---: | ---: | ---: |
+| Default | 0.8428 | 0.8455 | 1.5903 | 2.3411 |
+| Shared FP32 start, 48–64 | 0.7851 | 0.9162 | 1.6078 | 2.3823 |
+| Shared FP32 start, 48–72 | 0.7905 | 0.9243 | 1.6113 | 2.3840 |
+
+Both candidates take 16–17 outer steps, as does the default. The 1.1–1.3%
+replay increase supplies no evidence of a whole-Anvil improvement, despite
+the isolated gains. Neither is promoted. The worst original residual across
+Warp runs is 1.99e-8 under the existing Anvil physical check; the returned-pair
+normalization and native 1e-8 stopping check also pass. CuPy keeps its existing
+1e-6 absolute stopping bound and passes fresh returned-vector checks.
+
+CuPy uses the same supplied Warp FSAI/CG preconditioner within each worker;
+its setup is not represented by the Warp setup column. These are controlled
+block-method experiments, not a replacement for the README's six-backend
+standalone setup/timing table. See [summary](anvil/summary.json) and the adjacent
+raw reports, logs and occupancy records for the full setup scopes and checks.
