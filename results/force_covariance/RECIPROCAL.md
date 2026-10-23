@@ -4,6 +4,7 @@
 · [implicit comparison](README.md#qualified-implicit-comparison)
 · [tracking issue #152](https://github.com/alecjacobson/warpack/issues/152)
 · [remaining explicit-reference conditioning issue #153](https://github.com/alecjacobson/warpack/issues/153)
+· [conditioning controls and CPU recovery diagnostic](conditioning/README.md)
 
 For invertible S, `Q = H S^-1 H` has covariance modes as its lowest generalized
 eigenvectors, with covariance values `lambda = 1/mu`. The GPU application keeps
