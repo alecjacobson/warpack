@@ -84,3 +84,120 @@ speedup is claimed or assumed. [Raw controls](lower-a1.json) and
 [test transcript](validation/lower-tests.log) preserve the result. The initial
 generic variant now calls a small overrideable application method; its algorithm
 is unchanged, and the original committed source is retained in32af963.
+
+## Direct blocked substitution
+
+A fourth candidate forms **no inverse**. Each CUDA block owns 32 physical columns;
+8-row panels use tiled products against completed panels and forward substitution
+inside the diagonal panel. Both QR passes and all other stage work remain.
+No new dense workspace is allocated. The summation order changes, so equality
+with the serial implementation is judged by the original triangular equations
+and physical subspace, not bitwise identity.
+
+Fourteen pinned tests pass ([transcript](validation/blocked-tests.log)), also
+passing on stock Warp. Coverage includes odd/partial tiles, strided storage and
+sentinels, changed factors and replay, scales 1e±80, both cached-image policies,
+coupled/changed mass, correlated inputs and equilibrated mass with scales 1e±6.
+All **48 first/measured full-stage outputs pass**, with clean continuous GPU
+occupancy, matched current source/input/dependency identities and device-only
+graphs. Same component protocol as above:
+
+| Width/input | Original triangular ms | Direct blocked triangular ms |
+|---|---:|---:|
+|104/random|6.541|5.922|
+|104/orthonormal|6.545|5.910|
+|204/random|26.171|23.171|
+|204/orthonormal|26.186|23.176|
+
+This is roughly 9–11.5% faster for this isolated stage. [Raw controls](blocked-a1.json)
+retain every output, sample and source identity. The whole-solve controls below
+measure the corresponding total effect. The candidate remains outside core.
+
+### Complete solves with the 8-row panels
+
+All **24 complete first/later outputs pass** for 100 modes, 200 modes, and 200
+modes with compact projected graphs. Matched current source/input/dependency
+and independently verified CPU reference identities, clean occupancy, unchanged
+native stopping and original spectrum/subspace/rigid-mode gates. Both methods
+use the installed first-whitening certificate. Each worker constructs its own
+preconditioner and solver; the reference-only cache is outside backend timers.
+The triangular candidate is enabled only for block widths 96–256.
+
+| Problem | Application | Setup s | Capture s | First-use compute s | Warm median s |
+|---|---|---:|---:|---:|---:|
+|100|Original triangular|0.4409|1.4382|4.5088|2.5132|
+|100|Direct blocked|0.4715|1.5769|4.6672|2.4659|
+|200|Original triangular|0.6304|3.9207|13.3907|8.4010|
+|200|Direct blocked|0.6380|4.0451|13.3750|8.2219|
+|200-compact|Original triangular|0.6501|1.7013|10.8333|8.4780|
+|200-compact|Direct blocked|0.6486|1.7535|10.7931|8.2553|
+
+First-use compute includes setup, capture/eager preparation and the first
+captured solve; it excludes matrix assembly, CPU reference preparation, imports
+and host validation. Warm medians use three later replays, with every output
+checked. Setup/capture are individual observations with cached compilation where
+available. This is not process wall time.
+
+Warm improvements are about 1.9%, 2.1%, and 2.6%, respectively. Iteration counts
+are 54/55/54→54/54/54, 58/57/58→57/58/57, and 58/58/58→57/57/57;
+the observed gain includes floating-point trajectory changes. First-use time
+does not improve consistently. [All six raw controls](whole/) include commands,
+source identities, full quality measurements and occupancy. The broader FEM-family and panel-size controls below determine whether this
+gain carries across work shapes.
+
+### Broader controls and the remaining regression
+
+All 24 additional free/disconnected/heterogeneous first/later outputs pass
+unchanged native/original requested-space checks, matched source/input/dependency/
+reference identities and clean occupancy. Medians:
+
+| Family | Original triangular s | Direct blocked s |
+|---|---:|---:|
+|free|2.39867|2.36478|
+|disconnected|4.41630|4.45410|
+|heterogeneous|2.75561|2.71112|
+
+Free and heterogeneous improve about 1.4%/1.6%, but disconnected is **0.9% slower**.
+Both disconnected variants take 32 outer steps on every measured replay. The
+[reverse-order recheck](recheck/) also passes all eight outputs, with clean
+occupancy and matched identities, and confirms the slowdown:
+original 4.40025s versus blocked4.43593s. The first rejected performance result
+is retained; the repeat does not replace it.
+
+A separate [component control at the disconnected shape](blocked120-large-a1.json),
+70,656 rows and width 120, passes all24 first/measured outputs but confirms a
+stage regression: 14.736→15.801ms for random inputs and 14.789→15.823ms for already
+mass-orthonormal inputs. This supports a work-shape-dependent cost, rather than
+attributing the whole result solely to convergence variability. **The direct
+blocked implementation is not promoted to the library.** Further blocking or
+principled dispatch qualification is needed; correctness alone is insufficient.
+
+### Larger row panels
+
+Two further component screens retain both full QR passes and use 16 or 32 row
+panels. All 96 first/measured outputs pass with clean occupancy; these remain
+benchmark-only variants. Each row has its own fresh serial control:
+
+| Row panel | Width/input | Original stage ms | Blocked stage ms |
+|---|---|---:|---:|
+|16|104/random|6.541|6.223|
+|16|104/near_orthogonal|6.540|6.156|
+|16|204/random|26.187|22.780|
+|16|204/near_orthogonal|26.210|22.795|
+|32|104/random|6.533|7.447|
+|32|104/near_orthogonal|6.533|7.503|
+|32|204/random|26.107|25.595|
+|32|204/near_orthogonal|26.118|25.612|
+
+The 16-row panel slightly helps the 204-width stage but loses to 8 rows at 104;
+32 rows are worse at both sizes. No whole-solve gain is claimed for these
+variants. [16-row](panel16-a1.json) and [32-row](panel32-a1.json) controls preserve
+samples, source and input identities, commands and occupancy.
+
+Expanded validation: **47 pinned passes**, **37 stock passes/10 expected FSAI
+feature skips** ([pinned](validation/combined-tests.log),
+[stock](validation/combined-stock-tests.log)). These include the panel variants,
+unread NaN-poisoned upper factor triangles, complete small FEM families with
+both history policies, and changed coupled mass/constraints/clustered modes.
+The original triangular path, both whitening passes and all stopping thresholds
+remain unchanged in the installed library.

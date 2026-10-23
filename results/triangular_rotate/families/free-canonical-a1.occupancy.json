@@ -1,0 +1,158 @@
+{
+  "command": [
+    "timeout",
+    "900",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_blocked_triangular",
+    "--reference-cache",
+    "/run/openclaw/horde/warpack-fem-reference-cache-175",
+    "--triangular",
+    "canonical",
+    "--case",
+    "free",
+    "--side",
+    "15",
+    "--modes",
+    "100",
+    "--width",
+    "112",
+    "--steps",
+    "300",
+    "--shift",
+    "0.01",
+    "--fsai-width",
+    "32",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--preconditioner",
+    "fsai",
+    "--repeats",
+    "3",
+    "--tol",
+    "1e-11",
+    "--cupy-tol",
+    "1e-10",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--active-search-bucket-size",
+    "4",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--out",
+    "results/triangular_rotate/families/free-canonical-a1.json"
+  ],
+  "pid": 504363,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792759667.079692,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792759668.1574314,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792759669.233591,
+      "other": [],
+      "gpu": "8 %, 1438 MiB, 2490 MHz, 33",
+      "error": null
+    },
+    {
+      "time": 1792759670.3095913,
+      "other": [],
+      "gpu": "7 %, 3328 MiB, 2490 MHz, 31",
+      "error": null
+    },
+    {
+      "time": 1792759671.4602897,
+      "other": [],
+      "gpu": "0 %, 3340 MiB, 2490 MHz, 30",
+      "error": null
+    },
+    {
+      "time": 1792759672.5324974,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2475 MHz, 37",
+      "error": null
+    },
+    {
+      "time": 1792759673.629335,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2490 MHz, 37",
+      "error": null
+    },
+    {
+      "time": 1792759674.6908998,
+      "other": [],
+      "gpu": "0 %, 3642 MiB, 2490 MHz, 32",
+      "error": null
+    },
+    {
+      "time": 1792759675.78509,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2490 MHz, 37",
+      "error": null
+    },
+    {
+      "time": 1792759676.8806355,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2490 MHz, 38",
+      "error": null
+    },
+    {
+      "time": 1792759677.957394,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2475 MHz, 41",
+      "error": null
+    },
+    {
+      "time": 1792759679.0571733,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2490 MHz, 39",
+      "error": null
+    },
+    {
+      "time": 1792759680.1540282,
+      "other": [],
+      "gpu": "35 %, 3642 MiB, 2460 MHz, 37",
+      "error": null
+    },
+    {
+      "time": 1792759681.2289329,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2490 MHz, 39",
+      "error": null
+    },
+    {
+      "time": 1792759682.3503053,
+      "other": [],
+      "gpu": "100 %, 3642 MiB, 2490 MHz, 39",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}
