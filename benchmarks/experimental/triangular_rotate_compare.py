@@ -13,6 +13,7 @@ from benchmarks.anvil_inputs import array_identity, matrix_identity
 from benchmarks.applications.compare import timed
 from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
+from benchmarks.experimental.lower_triangular_rotate import LowerTriangularRotateBlock
 from benchmarks.experimental.triangular_block_size import TriangularBlockSize
 from benchmarks.experimental.triangular_rotate import TriangularRotateBlock
 from benchmarks.source_provenance import source_manifest
@@ -22,7 +23,9 @@ from warpack import BlockLOBPCG, SparseOperator
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--block-sizes", action="store_true")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--block-sizes", action="store_true")
+    group.add_argument("--lower-triangular", action="store_true")
     parser.add_argument("--widths", default="104,204")
     parser.add_argument("--n", type=int, default=34560)
     parser.add_argument("--repeats", type=int, default=5)
@@ -45,6 +48,8 @@ def main():
     for b in widths:
         solvers = []
         backends = [("triangular", BlockLOBPCG), ("inverse_rotate", TriangularRotateBlock)]
+        if args.lower_triangular:
+            backends.append(("inverse_lower_rotate", LowerTriangularRotateBlock))
         if args.block_sizes:
             backends = [("triangular256", BlockLOBPCG)] + [
                 (f"triangular{size}", partial(TriangularBlockSize, triangular_block_dim=size))
@@ -126,7 +131,7 @@ def main():
         inputs={"operator": matrix_identity(a), "mass": matrix_identity(mass)},
         source_sha256=source_manifest(__file__),
         dependency=warp_dependencies(),
-        protocol="Synthetic sparse coupled SPD mass, fixed random and already orthonormal bases. Both complete CholeskyQR passes, cached AX transforms and final M X retained. Stage timing includes resetting X and AX from device copies. Allocation/module preparation/capture/host validation excluded. Fixed baseline-then-candidate order with cached compilation. Every first/measured output checks M-orthogonality, fresh AX and MX, and status; no whole-eigensolve speed claim. External occupancy required. Inverse candidate uses existing gx/bx scratch without adding dense buffers. With --block-sizes, only the existing triangular kernel thread grouping changes; scalar arithmetic and both passes remain identical.",
+        protocol="Synthetic sparse coupled SPD mass, fixed random and already orthonormal bases. Both complete CholeskyQR passes, cached AX transforms and final M X retained. Stage timing includes resetting X and AX from device copies. Allocation/module preparation/capture/host validation excluded. Fixed baseline-then-candidate order with cached compilation. Every first/measured output checks M-orthogonality, fresh AX and MX, and status; no whole-eigensolve speed claim. External occupancy required. Inverse candidate uses existing gx/bx scratch without adding dense buffers. With --block-sizes, only the existing triangular kernel thread grouping changes; scalar arithmetic and both passes remain identical. With --lower-triangular, the extra inverse application skips only zero upper-triangle tiles.",
     )
     args.out.write_text(json.dumps(report, indent=2) + "\n")
     if not report["accepted"]:

@@ -62,3 +62,25 @@ is about0.09ms for this stage, not a demonstrated whole-solve improvement.
 512threads loses. This does not justify a production policy or expensive
 whole-FEM tuning runs. [Raw controls](block-size-a1.json) and
 [exact-output tests](validation/block-size-tests.log) retain the experiment.
+
+## Skipping the inverse's zero upper triangle
+
+The next variant skips coefficient tiles strictly above the inverse's lower
+triangle. It preserves both orthogonalization passes and reuses the same scratch.
+Twenty-one tests pass, including odd/partial tiles, strides/sentinels, exact
+agreement with the dense product, coupled/scaled/changed mass and cached images.
+All72 first/measured stage outputs pass; continuous occupancy is clean.
+
+| Width/input | Original triangular ms | Dense inverse application ms | Lower-triangular inverse application ms |
+|---|---:|---:|---:|
+|104/random|6.539|9.838|7.614|
+|104/orthonormal|6.534|9.837|7.617|
+|204/random|26.095|39.717|29.905|
+|204/orthonormal|26.064|39.733|29.907|
+
+Avoiding zero work helps but still leaves the full stage roughly15–17% slower
+than the original solve. This version is also **not promoted**; no whole-FEM
+speedup is claimed or assumed. [Raw controls](lower-a1.json) and
+[test transcript](validation/lower-tests.log) preserve the result. The initial
+generic variant now calls a small overrideable application method; its algorithm
+is unchanged, and the original committed source is retained in32af963.

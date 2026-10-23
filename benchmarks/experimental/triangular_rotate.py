@@ -16,6 +16,9 @@ from warpack.block import normalize_gram, rotate, scale_rows, scales
 class TriangularRotateBlock(BlockLOBPCG):
     _inverse_minimum = 96
 
+    def _apply_inverse(self, source, out):
+        rotate(source, self.gx, out)
+
     def orthogonalize_x(self):
         if self.b < self._inverse_minimum:
             return super().orthogonalize_x()
@@ -38,9 +41,9 @@ class TriangularRotateBlock(BlockLOBPCG):
                 block_dim=32,
                 device=self.device,
             )
-            rotate(self.sx, self.gx, self.bx)
+            self._apply_inverse(self.sx, self.bx)
             wp.copy(self.sx, self.bx)
             if self._image_reuse_active:
-                rotate(self._image_x, self.gx, self.bx)
+                self._apply_inverse(self._image_x, self.bx)
                 wp.copy(self._image_x, self.bx)
         self.mass.apply(self.sx, self.bx)

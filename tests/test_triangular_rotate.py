@@ -6,6 +6,7 @@ import scipy.linalg as la
 import scipy.sparse as sp
 import warp as wp
 
+from benchmarks.experimental.lower_triangular_rotate import LowerTriangularRotateBlock
 from benchmarks.experimental.triangular_rotate import TriangularRotateBlock
 from benchmarks.upstream.adapters import matrix
 from warpack import BlockLOBPCG, SparseOperator
@@ -15,9 +16,14 @@ class AllSizes(TriangularRotateBlock):
     _inverse_minimum = 2
 
 
+class AllSizesLower(LowerTriangularRotateBlock):
+    _inverse_minimum = 2
+
+
+@pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
 @pytest.mark.parametrize("width", [8, 52, 104, 204])
 @pytest.mark.parametrize("cached", [False, True])
-def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached):
+def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
     n = 3 * width + 7
     rng = np.random.default_rng(173)
     source = rng.normal(size=(width, n))
@@ -31,7 +37,7 @@ def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, ca
     mass = matrix(mass_host)
     solvers = []
     graphs = []
-    for constructor in [BlockLOBPCG, AllSizes]:
+    for constructor in [BlockLOBPCG, candidate]:
         solver = constructor(
             SparseOperator(matrix(a)),
             4,
