@@ -80,6 +80,11 @@ RHS calls. Unfinished truncated preconditioner solves are distinct from failed
 outer eigensolves. The [Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
 provides a tested configuration and the required runtime.
 
+Device-selected CG buckets share maximum-width RHS/output packing storage.
+Their upstream CG workspaces remain independent. This reduces memory without
+changing stopping tests or the public `for_width` behavior;
+[allocation controls](../results/cg_packing/README.md) quantify the savings.
+
 The current pinned FSAI supports `reuse_pattern=True` and captured `update()`.
 After changing matrix values at stable storage addresses, enqueue the update
 before the solve on the same stream. Check `update_status` after replay:

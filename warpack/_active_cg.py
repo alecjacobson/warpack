@@ -73,7 +73,8 @@ class DeviceBucketedCG:
     """Wrap a BatchedCGPreconditioner and the solver's freshly recomputed row errors.
 
     Arrays keep fixed identities. Factors/working matrix are shared; packed
-    buffers and upstream CG workspaces are distinct per bucket. Stats count
+    RHS/output buffers share maximum-width storage across mutually exclusive
+    branches. Upstream CG workspaces remain distinct per bucket. Stats count
     scheduled vector iterations, including padding within the selected bucket.
     `usage[:-1]` counts calls per bucket; `usage[-1]` sums active RHSs. Omitted
     rows receive zero correction, but remain in the outer Ritz basis. This is
@@ -81,6 +82,7 @@ class DeviceBucketedCG:
     """
 
     requires_static_outer_capture = False
+    _share_packing_storage = True
 
     def __init__(self, inverse, errors, tolerance, bucket_size=4):
         bucket_size = index(bucket_size)
@@ -109,10 +111,18 @@ class DeviceBucketedCG:
         self.stats = wp.zeros(4, dtype=wp.int32, device=self.device)
         self.usage = wp.zeros(len(sizes) + 1, dtype=wp.int32, device=self.device)
         self.states, self.rhs, self.outputs = [], [], []
+        self._packing_storage = None
+        if self._share_packing_storage:
+            rhs = wp.zeros((self.width, self.n), dtype=wp.float64, device=self.device)
+            self._packing_storage = (rhs, wp.empty_like(rhs))
         for width in sizes:
             state = inverse if width == self.width else inverse.for_width(width)
-            rhs = wp.zeros((width, self.n), dtype=wp.float64, device=self.device)
-            out = wp.empty_like(rhs)
+            if self._packing_storage is None:
+                # Benchmark controls can retain the previous allocation policy.
+                rhs = wp.zeros((width, self.n), dtype=wp.float64, device=self.device)
+                out = wp.empty_like(rhs)
+            else:
+                rhs, out = (array[:width] for array in self._packing_storage)
             state.apply(rhs, out)  # Compile every state before conditional capture.
             self.states.append(state)
             self.rhs.append(rhs)

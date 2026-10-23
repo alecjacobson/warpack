@@ -1,0 +1,872 @@
+{
+  "inputs": {
+    "schema": 1,
+    "common": {
+      "fixture": {
+        "arrays": {
+          "columns": {
+            "dtype": "<i4",
+            "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+            "shape": [
+              1331499
+            ]
+          },
+          "mass": {
+            "dtype": "<f8",
+            "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+            "shape": [
+              94619
+            ]
+          },
+          "normalized": {
+            "dtype": "<f8",
+            "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+            "shape": [
+              1331499,
+              3,
+              3
+            ]
+          },
+          "offsets": {
+            "dtype": "<i4",
+            "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+            "shape": [
+              94620
+            ]
+          },
+          "positions": {
+            "dtype": "<f8",
+            "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+            "shape": [
+              94619,
+              3
+            ]
+          },
+          "rigid": {
+            "dtype": "<f8",
+            "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+            "shape": [
+              6,
+              283857
+            ]
+          },
+          "stiffness": {
+            "dtype": "<f8",
+            "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+            "shape": [
+              1331499,
+              3,
+              3
+            ]
+          }
+        },
+        "configuration": {
+          "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+          "energy": "stable Neo-Hookean rest Hessian",
+          "mass": "lumped per-vertex mass, repeated for xyz",
+          "material": {
+            "density": 1000.0,
+            "poisson": 0.3,
+            "young": 100000.0
+          },
+          "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+          "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+        },
+        "schema": 1
+      },
+      "reference": {
+        "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+        "values": {
+          "shape": [
+            26
+          ],
+          "dtype": "<f8",
+          "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+        },
+        "vectors": {
+          "shape": [
+            26,
+            283857
+          ],
+          "dtype": "<f8",
+          "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+        }
+      }
+    },
+    "method": {
+      "initial": {
+        "shape": [
+          283857,
+          24
+        ],
+        "dtype": "<f8",
+        "sha256": "648a5b9aa54b8e734cfac0a9bc3460902691aef2d8f4abc1fe4b65b8cab03de0"
+      },
+      "shifted_matrix": {
+        "shape": [
+          283857,
+          283857
+        ],
+        "offsets": {
+          "shape": [
+            283858
+          ],
+          "dtype": "<i8",
+          "sha256": "a760cedd6f2bdcfe68298df67a664d89b7e0b144106e6d66ebbb9dc002e77dd9"
+        },
+        "columns": {
+          "shape": [
+            11983107
+          ],
+          "dtype": "<i8",
+          "sha256": "f87397fbbeed87836a5524753f9dad519581f3b7cabc4c6ec94d854e40aaac80"
+        },
+        "values": {
+          "shape": [
+            11983107
+          ],
+          "dtype": "<f8",
+          "sha256": "a40c43e1a007daf56e21507e05239588c0630cdb9a0356e1d7f30d1858a8b6db"
+        }
+      },
+      "constraints": {
+        "shape": [
+          6,
+          283857
+        ],
+        "dtype": "<f8",
+        "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af"
+      },
+      "initial_pool": {
+        "shape": [
+          283857,
+          24
+        ],
+        "dtype": "<f8",
+        "sha256": "648a5b9aa54b8e734cfac0a9bc3460902691aef2d8f4abc1fe4b65b8cab03de0"
+      }
+    }
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "args": {
+    "case": "anvil",
+    "side": 6,
+    "modes": 6,
+    "width": 24,
+    "initial_pool_width": null,
+    "steps": 200,
+    "shift": 100.0,
+    "fsai_width": 32,
+    "fsai_layout": "columns",
+    "matrix_layout": "columns",
+    "preconditioner": "fsai",
+    "repeats": 3,
+    "tol": 1e-08,
+    "cupy": false,
+    "cupy_width": 20,
+    "cupy_tol": 1e-06,
+    "cupy_padding": false,
+    "cupy_partitioned": false,
+    "profile": false,
+    "public_api": true,
+    "keep_graph": false,
+    "gram_chunk": 4096,
+    "symmetric_products": true,
+    "fused_updates": true,
+    "paired_rotation": true,
+    "reuse_x_image": true,
+    "active_search_bucket_size": 4,
+    "active_search_keep_history": true,
+    "native_products": false,
+    "batched_products": true,
+    "inner_cg": 25,
+    "batched_cg": true,
+    "active_cg_bucket_size": 4,
+    "fixed_outer": false,
+    "inner_fp32": true,
+    "inner_tol": 0.01,
+    "out": "/home/horde/projects/warpack/results/cg_packing/full/anvil-separate-a1.json",
+    "packing_backend": "separate"
+  },
+  "n": 283857,
+  "k": 20,
+  "fixture": {
+    "anvil_fixture": {
+      "arrays": {
+        "columns": {
+          "dtype": "<i4",
+          "sha256": "c8ca993afed99c6aeeb409d0131ac16782e4bc393d7f60e6c3bb6bf5ba7cca05",
+          "shape": [
+            1331499
+          ]
+        },
+        "mass": {
+          "dtype": "<f8",
+          "sha256": "32d72a866db011acde3358d7f4f933e62ce84dec5c19bb720ae24404e386f63a",
+          "shape": [
+            94619
+          ]
+        },
+        "normalized": {
+          "dtype": "<f8",
+          "sha256": "ad615bee5eef47e85b3aeef73310f12554e752b61b4f2ec94d74bbd630a4a77c",
+          "shape": [
+            1331499,
+            3,
+            3
+          ]
+        },
+        "offsets": {
+          "dtype": "<i4",
+          "sha256": "933bca5a7822a6c88a854182ecdb3fe3ff64cbf816c4a30d58414cc28138ed22",
+          "shape": [
+            94620
+          ]
+        },
+        "positions": {
+          "dtype": "<f8",
+          "sha256": "516f64993bd5477409797652937b4d93ed962754439feabc3e0512f689c76b2a",
+          "shape": [
+            94619,
+            3
+          ]
+        },
+        "rigid": {
+          "dtype": "<f8",
+          "sha256": "97a422f31c522dccdf497759bce33659e14b7a4bc6cd5a7e5ad221fadf7957af",
+          "shape": [
+            6,
+            283857
+          ]
+        },
+        "stiffness": {
+          "dtype": "<f8",
+          "sha256": "2e578d552db5eadfc72a1e52a5b8a9910f5021617a0b1c7b5d6f2789d3eb1899",
+          "shape": [
+            1331499,
+            3,
+            3
+          ]
+        }
+      },
+      "configuration": {
+        "assembly_source_sha256": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+        "energy": "stable Neo-Hookean rest Hessian",
+        "mass": "lumped per-vertex mass, repeated for xyz",
+        "material": {
+          "density": 1000.0,
+          "poisson": 0.3,
+          "young": 100000.0
+        },
+        "mesh_sha256": "ce9c0f0b58e2d61e8a78f0dad43fbdebbae78cfe0a9836d360538573172972fb",
+        "normalization": "(x - arithmetic vertex mean) / longest rest extent"
+      },
+      "schema": 1
+    },
+    "reference": {
+      "file_sha256": "7e10e8e47cd0020b476e10714c6fd665e167f3cd45c3b8b7def64f4eca28a898",
+      "values": {
+        "shape": [
+          26
+        ],
+        "dtype": "<f8",
+        "sha256": "b1d2b511d0bf442a16ee0cf8213a245ca5aeaa87bfb6c5ed554c9437eee29e6a"
+      },
+      "vectors": {
+        "shape": [
+          26,
+          283857
+        ],
+        "dtype": "<f8",
+        "sha256": "7ae360a66b7c43233cce3ee1734fdedaca79bd6a07eac5f9fad406cdd5fc97b5"
+      }
+    }
+  },
+  "setup_seconds": 0.623820424079895,
+  "preconditioner_setup_seconds": 0.623820424079895,
+  "solver_setup_seconds": 0.14658743515610695,
+  "total_setup_seconds": 0.770407859236002,
+  "setup_scope": "Preconditioner construction plus solver/operator/CG workspaces, input upload, and optional FP32 matrix copy. Excludes mesh assembly, reference loading, host random-start generation/input fingerprinting, graph capture and warmup. JIT work is included where encountered; these are not warmed setup measurements. Historical setup_seconds is an alias for preconditioner_setup_seconds.",
+  "setup_capture_device_free_memory_decrease_bytes": 3724541952,
+  "memory_scope": "Device free-memory decrease from after fixture preparation through preconditioner/workspace setup and capture. Includes allocator pools/runtime/JIT allocations; excludes original fixture storage and CuPy adapter. Not peak memory or a pure live-workspace count.",
+  "memory_snapshots": {
+    "before_setup": {
+      "device_free_bytes": 50139627520,
+      "warp_pool_used_bytes": 216769944,
+      "warp_pool_high_bytes": 246873763
+    },
+    "after_preconditioner": {
+      "device_free_bytes": 49101537280,
+      "warp_pool_used_bytes": 323051280,
+      "warp_pool_high_bytes": 688105871
+    },
+    "after_capture": {
+      "device_free_bytes": 46415085568,
+      "warp_pool_used_bytes": 2998819740,
+      "warp_pool_high_bytes": 2998819740
+    }
+  },
+  "pool_memory_scope": "Warp CUDA pool counters only, excluding driver/context allocations. The high-water counter covers the whole process, including fixture preparation; it is not the setup interval peak. Missing counters are null. Upstream FSAI can consume substantial device memory outside this pool.",
+  "capture_seconds": 0.8151312358677387,
+  "warmup_seconds": 1.65873371809721,
+  "graph": {
+    "node_types_including_conditional_body": {
+      "MEMSET": 183,
+      "MEMCPY": 110,
+      "KERNEL": 2002,
+      "CONDITIONAL": 30
+    },
+    "memcpy_kinds": {
+      "DtoD (DEVICE to DEVICE)": 110
+    },
+    "method": "CUDA graph DOT inspection; not a CUDA API trace"
+  },
+  "rows": [
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 1.6068630889058113,
+      "iterations": 16,
+      "quality": {
+        "eigenvalues": [
+          7.342026793467515e-13,
+          7.471339741356054e-13,
+          1.26781888405861e-12,
+          3.74340354303717e-12,
+          4.298319702305018e-12,
+          6.007218211621923e-12,
+          129.53656330770195,
+          147.37679501009944,
+          184.8186317371361,
+          253.27406419090826,
+          560.2701334618957,
+          607.3935917630985,
+          792.1583656154199,
+          975.6634166176055,
+          1156.1426495860942,
+          1289.4712956372716,
+          1337.0504142420023,
+          1418.9213888704498,
+          1935.5568447576347,
+          1949.6753874245069,
+          2241.017931913611,
+          2302.4355924284723,
+          2743.4158894488755,
+          3047.7081815970473,
+          3191.821493229357,
+          3316.495954617428
+        ],
+        "frequencies_hz": [
+          1.8114081483266673,
+          1.93212262239211,
+          2.163679881981387,
+          2.532885112363383,
+          3.767201649826096,
+          3.9224302942884797,
+          4.479464902093054,
+          4.9713019473831785,
+          5.411601928159804,
+          5.7151281251339245,
+          5.8196118977230284,
+          5.995139585860028,
+          7.002015968952659,
+          7.027506989896639,
+          7.534298066595039,
+          7.636843253025101,
+          8.336158364950803,
+          8.78631607039961,
+          8.991650733723098,
+          9.165578209622986
+        ],
+        "original_residuals": [
+          1.2772047019010639e-09,
+          1.4746943144494835e-09,
+          1.6047203966218636e-09,
+          1.281695825331776e-09,
+          1.2759282750110886e-09,
+          1.5488524312545116e-09,
+          7.440845932669458e-09,
+          7.903058161537964e-09,
+          5.157196335955641e-09,
+          4.690509854404936e-09,
+          3.928893874185328e-09,
+          1.7198475801774412e-09,
+          2.0082068174069728e-09,
+          1.9825039192827916e-09,
+          2.185350978865026e-09,
+          2.2215391676526856e-09,
+          1.6421424557104966e-09,
+          8.17513840243746e-10,
+          1.8095439579386012e-09,
+          5.219372865725949e-10,
+          1.7150830457837746e-09,
+          1.3649829372419476e-09,
+          4.094571272091909e-09,
+          2.7638068667406455e-09,
+          9.732270767597326e-09,
+          1.556842613799484e-08
+        ],
+        "max_original_residual": 1.556842613799484e-08,
+        "max_elastic_residual": 1.556842613799484e-08,
+        "orthogonality_max_error": 1.4432899320127035e-15,
+        "max_relative_elastic_eigenvalue_error": 7.538414337204813e-14,
+        "max_relative_elastic_frequency_error": 3.774758283725532e-14,
+        "minimum_elastic_mac": 0.9999999999999993,
+        "rigid_subspace_min_cosine": 0.9999999999999998,
+        "accepted": true,
+        "returned_eigenvalue_error": 4.929390229335695e-14,
+        "returned_pair_residual": 7.784213069044192e-09,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          7800,
+          25,
+          304,
+          312
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          3,
+          1,
+          1,
+          1,
+          10,
+          304
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          3,
+          1,
+          1,
+          1,
+          10
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 1.6577590480446815,
+      "iterations": 17,
+      "quality": {
+        "eigenvalues": [
+          7.342026793467515e-13,
+          7.471339741356054e-13,
+          1.26781888405861e-12,
+          3.74340354303717e-12,
+          4.298319702305018e-12,
+          6.007218211621923e-12,
+          129.5365633077102,
+          147.37679501010834,
+          184.81863173713825,
+          253.27406419090698,
+          560.270133461911,
+          607.3935917631014,
+          792.1583656154246,
+          975.6634166176143,
+          1156.1426495860458,
+          1289.4712956373162,
+          1337.050414242018,
+          1418.9213888704458,
+          1935.5568447576018,
+          1949.6753874245005,
+          2241.0179319136037,
+          2302.4355924284205,
+          2743.4158894490165,
+          3047.708181596971,
+          3191.8214932293276,
+          3316.4959546173627
+        ],
+        "frequencies_hz": [
+          1.811408148326725,
+          1.9321226223921681,
+          2.1636798819814,
+          2.532885112363376,
+          3.767201649826147,
+          3.9224302942884894,
+          4.479464902093067,
+          4.971301947383201,
+          5.411601928159691,
+          5.715128125134023,
+          5.819611897723062,
+          5.99513958586002,
+          7.0020159689526,
+          7.0275069898966285,
+          7.534298066595027,
+          7.636843253025015,
+          8.336158364951018,
+          8.786316070399499,
+          8.991650733723056,
+          9.165578209622895
+        ],
+        "original_residuals": [
+          1.2772047019010639e-09,
+          1.4746943144494835e-09,
+          1.6047203966218636e-09,
+          1.281695825331776e-09,
+          1.2759282750110886e-09,
+          1.5488524312545116e-09,
+          7.485378894361837e-09,
+          7.9873545644027e-09,
+          5.130188613838882e-09,
+          4.710386211182355e-09,
+          3.933568191840766e-09,
+          1.7251954332558353e-09,
+          2.0075712600370914e-09,
+          1.9676030003488996e-09,
+          2.209996520764191e-09,
+          2.152571070741509e-09,
+          1.6076892297783406e-09,
+          8.160820867627452e-10,
+          1.8000453087581382e-09,
+          5.526110112150535e-10,
+          1.848430631280661e-09,
+          1.5512778444768058e-09,
+          4.1386579467888e-09,
+          1.398592689071334e-09,
+          2.612521309919018e-09,
+          5.582812945067965e-09
+        ],
+        "max_original_residual": 7.9873545644027e-09,
+        "max_elastic_residual": 7.9873545644027e-09,
+        "orthogonality_max_error": 1.9984014443252818e-15,
+        "max_relative_elastic_eigenvalue_error": 6.361577931102147e-14,
+        "max_relative_elastic_frequency_error": 3.186340080674199e-14,
+        "minimum_elastic_mac": 0.9999999999999989,
+        "rigid_subspace_min_cosine": 0.9999999999999998,
+        "accepted": true,
+        "returned_eigenvalue_error": 5.162537064506978e-14,
+        "returned_pair_residual": 3.993677282139125e-09,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          8000,
+          25,
+          309,
+          320
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          4,
+          1,
+          1,
+          1,
+          10,
+          309
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          4,
+          1,
+          1,
+          1,
+          10
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    },
+    {
+      "method": "Warp BlockLOBPCG + device-bucketed CG + cached A X + device-bucketed search",
+      "seconds": 1.6630529537796974,
+      "iterations": 17,
+      "quality": {
+        "eigenvalues": [
+          7.342026793467515e-13,
+          7.471339741356054e-13,
+          1.26781888405861e-12,
+          3.74340354303717e-12,
+          4.298319702305018e-12,
+          6.007218211621923e-12,
+          129.53656330770596,
+          147.37679501010672,
+          184.8186317371465,
+          253.27406419090755,
+          560.2701334618957,
+          607.3935917631028,
+          792.1583656154043,
+          975.6634166176156,
+          1156.1426495860674,
+          1289.4712956372985,
+          1337.0504142419825,
+          1418.921388870434,
+          1935.5568447575777,
+          1949.675387424446,
+          2241.0179319135614,
+          2302.4355924284614,
+          2743.4158894488282,
+          3047.7081815970228,
+          3191.821493229401,
+          3316.4959546174778
+        ],
+        "frequencies_hz": [
+          1.8114081483266953,
+          1.9321226223921577,
+          2.1636798819814484,
+          2.5328851123633793,
+          3.767201649826096,
+          3.922430294288494,
+          4.479464902093009,
+          4.971301947383203,
+          5.411601928159741,
+          5.715128125133983,
+          5.819611897722986,
+          5.995139585859995,
+          7.002015968952556,
+          7.02750698989653,
+          7.534298066594956,
+          7.6368432530250825,
+          8.33615836495073,
+          8.786316070399574,
+          8.991650733723159,
+          9.165578209623055
+        ],
+        "original_residuals": [
+          1.2772047019010639e-09,
+          1.4746943144494835e-09,
+          1.6047203966218636e-09,
+          1.281695825331776e-09,
+          1.2759282750110886e-09,
+          1.5488524312545116e-09,
+          7.49848653224251e-09,
+          7.977283058702743e-09,
+          5.166324489922075e-09,
+          4.712341602517324e-09,
+          3.9496998681232196e-09,
+          1.7195731050747943e-09,
+          2.0116118344053145e-09,
+          1.9608201145142614e-09,
+          2.1804483559278118e-09,
+          2.1792381317201177e-09,
+          1.6167544582471317e-09,
+          8.147682313055634e-10,
+          1.8042015940222812e-09,
+          5.30046040682382e-10,
+          1.8036264977531242e-09,
+          1.4293000933268528e-09,
+          4.008335107526279e-09,
+          1.5335439341431806e-09,
+          2.9342867903707454e-09,
+          5.1825702603445945e-09
+        ],
+        "max_original_residual": 7.977283058702743e-09,
+        "max_elastic_residual": 7.977283058702743e-09,
+        "orthogonality_max_error": 1.5543122344752192e-15,
+        "max_relative_elastic_eigenvalue_error": 4.929390229335695e-14,
+        "max_relative_elastic_frequency_error": 2.4646951146678475e-14,
+        "minimum_elastic_mac": 0.9999999999999991,
+        "rigid_subspace_min_cosine": 0.9999999999999998,
+        "accepted": true,
+        "returned_eigenvalue_error": 5.084821452783217e-14,
+        "returned_pair_residual": 3.9886415294341675e-09,
+        "status": 0,
+        "converged": 20,
+        "preconditioner_cg_stats": [
+          8000,
+          25,
+          309,
+          320
+        ],
+        "cg_iteration_accounting": "Scheduled vector iterations in device-selected buckets, including within-bucket padding; fresh residuals may reactivate rows. Usage stores calls per bucket followed by total active RHSs.",
+        "preconditioner_cg_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "preconditioner_cg_bucket_usage": [
+          0,
+          4,
+          1,
+          1,
+          1,
+          10,
+          309
+        ],
+        "search_bucket_widths": [
+          4,
+          8,
+          12,
+          16,
+          20,
+          24
+        ],
+        "search_bucket_usage": [
+          0,
+          4,
+          1,
+          1,
+          1,
+          10
+        ]
+      },
+      "physical_and_outer_accepted": true,
+      "native_stopping_accepted": true,
+      "accepted": true
+    }
+  ],
+  "versions": {
+    "warp-lang": "1.18.0+cu12",
+    "numpy": "2.2.6",
+    "scipy": "1.15.0",
+    "cupy-cuda12x": "14.2.0"
+  },
+  "source_sha256": {
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3",
+    "benchmarks/anvil.py": "8363ea50f17006f68093c15e254d40b9942d2aaa9080b559c26188e545bf41b1",
+    "benchmarks/anvil_inputs.py": "00c5eb4a1cb36337984761d93da1c367b1c1761003bd94780dd8b6186ef29e9c",
+    "benchmarks/applications/__init__.py": "a517d73e69ebb3dc905b95b63eac4e34625df802a48ed523516f1c030f388b0d",
+    "benchmarks/applications/compare.py": "a08b4704ba1caeb7558878d71bf416a600827fa8349ebfc2cd439c6848baea79",
+    "benchmarks/applications/diagonal_mass.py": "e617a6d21a5e97b2b8bb42f7f35a28822dce2632abb43d06f2921ac9ed9aa684",
+    "benchmarks/applications/fem_cases.py": "22e7a4aa690e85e0b1e868151f6a80796a481568e253201811471c67cda982da",
+    "benchmarks/applications/hodge.py": "4ba553ad4b944fb28c1c0d65bc5f0c3488e609251dbcf57447066aaaac540e3c",
+    "benchmarks/applications/problems.py": "15e5d47aecf81b772f79aeba0dd8c445071b03c0317ff73cc94ced78986a9ab8",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/applications/runner.py": "1293eb027f38080c247e5e92d13016f6b7120927abdbd57fdeb40bfc2e8ca22a",
+    "benchmarks/applications/skinning_cases.py": "381b597e6e97ee0db83f7ba7fbd6b33eeae681054d115deb4714692c60efa462",
+    "benchmarks/applications/skinning_profile.py": "3796ce8748c33f6ec65064dfe1006f2170ad4d6f6a2e066e0db33a930221bc50",
+    "benchmarks/audit_profile.py": "e718c8c407aca6ea39faf38681cb63f25243f2acf261648ddd387ff0913760ee",
+    "benchmarks/block_inputs.py": "4ddece4c705750eb58c0947f94940c2278a6b4b323d048764fd1585e21f31267",
+    "benchmarks/compare.py": "70218c8e5dcb12c1bac86de5757aa4407a1dfc791f54c48fb1fb3e267b95fc4f",
+    "benchmarks/dependency_provenance.py": "390309b2bf1d6dc5eec41960047eb5ae79a89aeee50c164df9811ecaf4f50e6e",
+    "benchmarks/experimental/active_cg.py": "8b26f68e144b8b2387182b34d9888d05f7483316022e311793ad4bf955d35863",
+    "benchmarks/experimental/active_search.py": "5be7e186d32331886de833fbd33bfcba17f595e91eb82c0d584f1e991e3df0b5",
+    "benchmarks/experimental/batched_cg.py": "b121520fe8dbdd5a892df8e1bebb3989419c8a860f07dcd33c8325ad4eeac0f6",
+    "benchmarks/experimental/block_kernels.py": "eaab62a6274e995e710f4b3b3666520ec6eb50449e104babec883ef0aa289a8f",
+    "benchmarks/experimental/block_lobpcg.py": "1853838759eaf90a9fec6d775ac01221f06d7b7729e83332950bcafe6384d33e",
+    "benchmarks/experimental/cached_x_image.py": "d9ce02e7ec77fd6c68f18754b2def83d5c30e2101a4cf6862702b7d15816b239",
+    "benchmarks/experimental/compare_block.py": "732b8df53a25875d0df94e48133791ef6846e4aaa3b986927f395f565f327479",
+    "benchmarks/experimental/compare_cg_packing.py": "e0adeb73afc10de245c5584afb0e76dde00d7976e1afdfc886f43243d5674109",
+    "benchmarks/source_provenance.py": "3267e866bbbc1c32957ad350e2889285e9703fd8279ddc884d9728bb71c41062",
+    "benchmarks/upstream/__init__.py": "efeb32afe41f0a6d8385b636de39cd4e9c6e8c8d7f2d45c84028391895705377",
+    "benchmarks/upstream/adapters.py": "d3f2f4eb10cf88d5067595b6db4badc3881cb6006b517dce0ba4e9f06abd245c",
+    "benchmarks/validate_dragon_meshes.py": "955ddde4a30fd92a471055079e6d4bbc6d1f3afc4e55113d1eb67976cfd00e64",
+    "examples/__init__.py": "225a557796620a17a0f23488f0edce3b4019dfd97b5bb905371a483c7f87a6ec",
+    "examples/problems/__init__.py": "408f45e3a66bdebbe67e7e38ae9edb17b6e57b01abdcc7589b814984f4e64a43",
+    "examples/problems/elasticity.py": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "82b8c1bb7ccb782870ca056452e16f9cd2d473ff73f9ea03aab3999a4e913e49",
+    "warpack/_block_search.py": "0a2f5e190cf36fa173ed47998774a7db9c984215897b5e34cb25d2eb52606fa2",
+    "warpack/_block_whitening.py": "007ce2b730091138d09644ac2dda227be84db81669d228b4582c49bfad0ae523",
+    "warpack/_coalesced_fsai.py": "8ec706fef7c8bb20274e3b57d6dfda6db41c77c598de6661d4bcea696169bc6c",
+    "warpack/_coalesced_operator.py": "c12914049fb2dba837ce1526f20c1bdcc170d0680348e8256184f0e8e07686b3",
+    "warpack/_projected_cholesky.py": "8b9ea32c35bac2d7c942ca7d201770cf43ad02982d59a658d4eab2352721fd88",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "38b5c7bb8320a682ee9aa6c64403dddc6adf78b20bbadf27232aacfde17f2f6c",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "bd74142d7668b8671b6fbcd161ddba7af539069bd39633bb0db353ee76c574fd",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "db470884bc318522654eb558088c44c19f861d9cfdf52d76c91e8f771f4dcb0a",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "58f62d156207f0778123891f82a66c8d253bc722aafa2c6817fb7c4ec5406ca0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "other_gpu_processes_before": [],
+  "other_gpu_processes_after": [],
+  "timing_eligible": true,
+  "timing_note": "Warm replay wall times; setup/capture separate. CuPy converges its entire starting block; Warp stops on the first k. Contended or numerically rejected runs are not performance evidence.",
+  "accepted": true,
+  "packing_allocations": [
+    {
+      "unique_allocations": 12,
+      "requested_packing_bytes": 381503808,
+      "width": 24,
+      "n": 283857,
+      "bucket_widths": [
+        4,
+        8,
+        12,
+        16,
+        20,
+        24
+      ]
+    }
+  ],
+  "packing_scope": "Only external per-bucket FP64 RHS/output buffers change allocation. Shared uses two maximum-width arrays and prefix views; separate retains old individual allocations. Upstream CG workspaces, factors, arithmetic, width selection, stopping, statistics and solver defaults unchanged. Requested packing bytes deduplicate backing addresses and are not total/peak/context memory. All setup allocations are charged."
+}

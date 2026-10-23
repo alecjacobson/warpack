@@ -56,6 +56,14 @@ def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
         pytest.skip("upstream CG lacks preallocated loop control")
     errors = wp.zeros(width, dtype=wp.float64)
     solver = DeviceBucketedCG(inverse, errors, tolerance=1e-9, bucket_size=3)
+    # Packing uses two maximum-width allocations; upstream states stay independent.
+    rhs_store, out_store = solver._packing_storage
+    assert rhs_store.shape == out_store.shape == (width, n)
+    assert rhs_store.ptr != out_store.ptr
+    assert {rhs.ptr for rhs in solver.rhs} == {rhs_store.ptr}
+    assert {out.ptr for out in solver.outputs} == {out_store.ptr}
+    assert len({state.b.ptr for state in solver.states}) == len(solver.states)
+    assert len({state.x.ptr for state in solver.states}) == len(solver.states)
     x = wp.zeros((width, n), dtype=wp.float64)
     y = x if in_place else wp.empty_like(x)
     solver.apply(x, y)
