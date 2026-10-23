@@ -6,6 +6,10 @@ import scipy.linalg as la
 import warp as wp
 
 from benchmarks.experimental.paired_jacobi import PairedOutputJacobi, paired_update
+from benchmarks.experimental.paired_jacobi_runtime import (
+    RuntimePairedCompact,
+    RuntimePairedJacobi,
+)
 from warpack import kernels as K
 from warpack.projected import GlobalJacobi
 
@@ -86,15 +90,18 @@ def test_complete_solver_exact_control_and_independent_accuracy(n, kind):
             )
 
 
+@pytest.mark.parametrize(
+    "constructor", [PairedOutputJacobi, RuntimePairedJacobi, RuntimePairedCompact]
+)
 @pytest.mark.parametrize("n", [104, 408])
-def test_nonfinite_bounded_loop_and_changed_input_recovery(n, tmp_path):
+def test_nonfinite_bounded_loop_and_changed_input_recovery(n, tmp_path, constructor):
     from benchmarks.audit_profile import graph_summary
 
     rng = np.random.default_rng(172 + n)
     a = rng.normal(size=(n, n))
     a = (a + a.T) * 0.5
     source = wp.array(a, dtype=wp.float64)
-    eig = solver(PairedOutputJacobi, n)
+    eig = solver(constructor, n)
     wp.copy(eig.h, source)
     eig.apply()
     wp.synchronize()

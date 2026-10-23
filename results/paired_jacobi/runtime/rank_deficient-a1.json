@@ -1,0 +1,1854 @@
+{
+  "arguments": {
+    "sizes": "208,256,312,408,612,1024",
+    "round_policy": "runtime",
+    "repeats": 3,
+    "kind": "rank_deficient",
+    "out": "results/paired_jacobi/runtime/rank_deficient-a1.json"
+  },
+  "rows": [
+    {
+      "n": 208,
+      "backend": "global",
+      "input": {
+        "shape": [
+          208,
+          208
+        ],
+        "dtype": "<f8",
+        "sha256": "dd30496226a254dfdcfc30ea3050e98e8270ce0ce798b77dbf360237ed722603"
+      },
+      "setup_seconds": 0.00021580234169960022,
+      "eager_graph_preparation_and_solve_seconds": 0.05733565241098404,
+      "outer_capture_seconds": 0.01173023134469986,
+      "first_captured_replay_seconds": 0.022862311452627182,
+      "seconds": [
+        0.021150141954421997,
+        0.021148215979337692,
+        0.02114855870604515
+      ],
+      "median_seconds": 0.02114855870604515,
+      "warmup": {
+        "residual": 5.841372935390913e-14,
+        "orthogonality": 8.80257641351582e-13,
+        "spectrum_error": 9.133374086899453e-15,
+        "sweeps": 18,
+        "max_off": 9.636303945841794e-15,
+        "stopping_bound": 1.020000000000077e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 420,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "backend": "paired-runtime",
+      "input": {
+        "shape": [
+          208,
+          208
+        ],
+        "dtype": "<f8",
+        "sha256": "dd30496226a254dfdcfc30ea3050e98e8270ce0ce798b77dbf360237ed722603"
+      },
+      "setup_seconds": 0.00017584487795829773,
+      "eager_graph_preparation_and_solve_seconds": 0.03519664332270622,
+      "outer_capture_seconds": 0.01120872050523758,
+      "first_captured_replay_seconds": 0.022188764065504074,
+      "seconds": [
+        0.02136552706360817,
+        0.02137026935815811,
+        0.021366838365793228
+      ],
+      "median_seconds": 0.021366838365793228,
+      "warmup": {
+        "residual": 5.841372935390913e-14,
+        "orthogonality": 8.80257641351582e-13,
+        "spectrum_error": 9.133374086899453e-15,
+        "sweeps": 18,
+        "max_off": 9.636303945841794e-15,
+        "stopping_bound": 1.020000000000077e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 420,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "backend": "compact16",
+      "input": {
+        "shape": [
+          208,
+          208
+        ],
+        "dtype": "<f8",
+        "sha256": "dd30496226a254dfdcfc30ea3050e98e8270ce0ce798b77dbf360237ed722603"
+      },
+      "setup_seconds": 0.001399807631969452,
+      "eager_graph_preparation_and_solve_seconds": 0.02479580044746399,
+      "outer_capture_seconds": 0.001985859125852585,
+      "first_captured_replay_seconds": 0.022523947060108185,
+      "seconds": [
+        0.02232237160205841,
+        0.022313803434371948,
+        0.02231534942984581
+      ],
+      "median_seconds": 0.02231534942984581,
+      "warmup": {
+        "residual": 5.841372935390913e-14,
+        "orthogonality": 8.80257641351582e-13,
+        "spectrum_error": 9.133374086899453e-15,
+        "sweeps": 18,
+        "max_off": 9.636303945841794e-15,
+        "stopping_bound": 1.020000000000077e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 71,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "backend": "paired-compact16",
+      "input": {
+        "shape": [
+          208,
+          208
+        ],
+        "dtype": "<f8",
+        "sha256": "dd30496226a254dfdcfc30ea3050e98e8270ce0ce798b77dbf360237ed722603"
+      },
+      "setup_seconds": 0.000262238085269928,
+      "eager_graph_preparation_and_solve_seconds": 0.024935416877269745,
+      "outer_capture_seconds": 0.0020090602338314056,
+      "first_captured_replay_seconds": 0.022640999406576157,
+      "seconds": [
+        0.022474762052297592,
+        0.02247639372944832,
+        0.022474389523267746
+      ],
+      "median_seconds": 0.022474762052297592,
+      "warmup": {
+        "residual": 5.841372935390913e-14,
+        "orthogonality": 8.80257641351582e-13,
+        "spectrum_error": 9.133374086899453e-15,
+        "sweeps": 18,
+        "max_off": 9.636303945841794e-15,
+        "stopping_bound": 1.020000000000077e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        },
+        {
+          "residual": 5.841372935390913e-14,
+          "orthogonality": 8.80257641351582e-13,
+          "spectrum_error": 9.133374086899453e-15,
+          "sweeps": 18,
+          "max_off": 9.636303945841794e-15,
+          "stopping_bound": 1.020000000000077e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 71,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 256,
+      "backend": "global",
+      "input": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "<f8",
+        "sha256": "0619e56917bf8f212a8f1b385273eeda147a25f24659038d11b971e8d3d8aee0"
+      },
+      "setup_seconds": 0.00016814470291137695,
+      "eager_graph_preparation_and_solve_seconds": 0.04158848524093628,
+      "outer_capture_seconds": 0.03370434045791626,
+      "first_captured_replay_seconds": 0.027957476675510406,
+      "seconds": [
+        0.026723138988018036,
+        0.02672303467988968,
+        0.0267217718064785
+      ],
+      "median_seconds": 0.02672303467988968,
+      "warmup": {
+        "residual": 8.08853305857262e-14,
+        "orthogonality": 1.3756481385727292e-13,
+        "spectrum_error": 1.0621343151185053e-14,
+        "sweeps": 17,
+        "max_off": 6.29301014042673e-14,
+        "stopping_bound": 1.260000000000109e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 517,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 256,
+      "backend": "paired-runtime",
+      "input": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "<f8",
+        "sha256": "0619e56917bf8f212a8f1b385273eeda147a25f24659038d11b971e8d3d8aee0"
+      },
+      "setup_seconds": 0.00016029179096221924,
+      "eager_graph_preparation_and_solve_seconds": 0.04038313403725624,
+      "outer_capture_seconds": 0.01395322009921074,
+      "first_captured_replay_seconds": 0.026480846107006073,
+      "seconds": [
+        0.02550213411450386,
+        0.02550315111875534,
+        0.02550317719578743
+      ],
+      "median_seconds": 0.02550315111875534,
+      "warmup": {
+        "residual": 8.08853305857262e-14,
+        "orthogonality": 1.3756481385727292e-13,
+        "spectrum_error": 1.0621343151185053e-14,
+        "sweeps": 17,
+        "max_off": 6.29301014042673e-14,
+        "stopping_bound": 1.260000000000109e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 517,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 256,
+      "backend": "compact16",
+      "input": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "<f8",
+        "sha256": "0619e56917bf8f212a8f1b385273eeda147a25f24659038d11b971e8d3d8aee0"
+      },
+      "setup_seconds": 0.000208389014005661,
+      "eager_graph_preparation_and_solve_seconds": 0.03031957522034645,
+      "outer_capture_seconds": 0.0019908100366592407,
+      "first_captured_replay_seconds": 0.028219208121299744,
+      "seconds": [
+        0.02805010974407196,
+        0.028048940002918243,
+        0.02980208396911621
+      ],
+      "median_seconds": 0.02805010974407196,
+      "warmup": {
+        "residual": 8.08853305857262e-14,
+        "orthogonality": 1.3756481385727292e-13,
+        "spectrum_error": 1.0621343151185053e-14,
+        "sweeps": 17,
+        "max_off": 6.29301014042673e-14,
+        "stopping_bound": 1.260000000000109e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 72,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 256,
+      "backend": "paired-compact16",
+      "input": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "<f8",
+        "sha256": "0619e56917bf8f212a8f1b385273eeda147a25f24659038d11b971e8d3d8aee0"
+      },
+      "setup_seconds": 0.00021825730800628662,
+      "eager_graph_preparation_and_solve_seconds": 0.029365476220846176,
+      "outer_capture_seconds": 0.0020298995077610016,
+      "first_captured_replay_seconds": 0.027179613709449768,
+      "seconds": [
+        0.027011293917894363,
+        0.027007989585399628,
+        0.027009785175323486
+      ],
+      "median_seconds": 0.027009785175323486,
+      "warmup": {
+        "residual": 8.08853305857262e-14,
+        "orthogonality": 1.3756481385727292e-13,
+        "spectrum_error": 1.0621343151185053e-14,
+        "sweeps": 17,
+        "max_off": 6.29301014042673e-14,
+        "stopping_bound": 1.260000000000109e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        },
+        {
+          "residual": 8.08853305857262e-14,
+          "orthogonality": 1.3756481385727292e-13,
+          "spectrum_error": 1.0621343151185053e-14,
+          "sweeps": 17,
+          "max_off": 6.29301014042673e-14,
+          "stopping_bound": 1.260000000000109e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 72,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "backend": "global",
+      "input": {
+        "shape": [
+          312,
+          312
+        ],
+        "dtype": "<f8",
+        "sha256": "44f721532d716947c8cea5cd5f7e1a80cfe4f350ab627ee24da6ee44af139aee"
+      },
+      "setup_seconds": 0.0001430325210094452,
+      "eager_graph_preparation_and_solve_seconds": 0.06537190452218056,
+      "outer_capture_seconds": 0.016446132212877274,
+      "first_captured_replay_seconds": 0.04499409347772598,
+      "seconds": [
+        0.04353471100330353,
+        0.04353473335504532,
+        0.043535877019166946
+      ],
+      "median_seconds": 0.04353473335504532,
+      "warmup": {
+        "residual": 9.032145159409333e-14,
+        "orthogonality": 1.6695478524597892e-13,
+        "spectrum_error": 1.1315182890943587e-14,
+        "sweeps": 19,
+        "max_off": 1.435613844370338e-14,
+        "stopping_bound": 1.5400000000001747e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 629,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "backend": "paired-runtime",
+      "input": {
+        "shape": [
+          312,
+          312
+        ],
+        "dtype": "<f8",
+        "sha256": "44f721532d716947c8cea5cd5f7e1a80cfe4f350ab627ee24da6ee44af139aee"
+      },
+      "setup_seconds": 0.00016136467456817627,
+      "eager_graph_preparation_and_solve_seconds": 0.057298075407743454,
+      "outer_capture_seconds": 0.016784068197011948,
+      "first_captured_replay_seconds": 0.04051271453499794,
+      "seconds": [
+        0.039342258125543594,
+        0.03933879733085632,
+        0.03934568166732788
+      ],
+      "median_seconds": 0.039342258125543594,
+      "warmup": {
+        "residual": 9.032145159409333e-14,
+        "orthogonality": 1.6695478524597892e-13,
+        "spectrum_error": 1.1315182890943587e-14,
+        "sweeps": 19,
+        "max_off": 1.435613844370338e-14,
+        "stopping_bound": 1.5400000000001747e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 629,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "backend": "compact16",
+      "input": {
+        "shape": [
+          312,
+          312
+        ],
+        "dtype": "<f8",
+        "sha256": "44f721532d716947c8cea5cd5f7e1a80cfe4f350ab627ee24da6ee44af139aee"
+      },
+      "setup_seconds": 0.00021811947226524353,
+      "eager_graph_preparation_and_solve_seconds": 0.04626242816448212,
+      "outer_capture_seconds": 0.0016212984919548035,
+      "first_captured_replay_seconds": 0.04453270882368088,
+      "seconds": [
+        0.044379822909832,
+        0.04438180476427078,
+        0.0443819984793663
+      ],
+      "median_seconds": 0.04438180476427078,
+      "warmup": {
+        "residual": 9.032145159409333e-14,
+        "orthogonality": 1.6695478524597892e-13,
+        "spectrum_error": 1.1315182890943587e-14,
+        "sweeps": 19,
+        "max_off": 1.435613844370338e-14,
+        "stopping_bound": 1.5400000000001747e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 56,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "backend": "paired-compact16",
+      "input": {
+        "shape": [
+          312,
+          312
+        ],
+        "dtype": "<f8",
+        "sha256": "44f721532d716947c8cea5cd5f7e1a80cfe4f350ab627ee24da6ee44af139aee"
+      },
+      "setup_seconds": 0.0002116188406944275,
+      "eager_graph_preparation_and_solve_seconds": 0.04304415360093117,
+      "outer_capture_seconds": 0.0016186796128749847,
+      "first_captured_replay_seconds": 0.041320543736219406,
+      "seconds": [
+        0.041179362684488297,
+        0.04117276519536972,
+        0.041173532605171204
+      ],
+      "median_seconds": 0.041173532605171204,
+      "warmup": {
+        "residual": 9.032145159409333e-14,
+        "orthogonality": 1.6695478524597892e-13,
+        "spectrum_error": 1.1315182890943587e-14,
+        "sweeps": 19,
+        "max_off": 1.435613844370338e-14,
+        "stopping_bound": 1.5400000000001747e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        },
+        {
+          "residual": 9.032145159409333e-14,
+          "orthogonality": 1.6695478524597892e-13,
+          "spectrum_error": 1.1315182890943587e-14,
+          "sweeps": 19,
+          "max_off": 1.435613844370338e-14,
+          "stopping_bound": 1.5400000000001747e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 56,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 408,
+      "backend": "global",
+      "input": {
+        "shape": [
+          408,
+          408
+        ],
+        "dtype": "<f8",
+        "sha256": "6a3d9ab0d9ae35f58771387489b5d4d41236624a0e71ca22e47f77a9ca9ad0a1"
+      },
+      "setup_seconds": 0.00015112757682800293,
+      "eager_graph_preparation_and_solve_seconds": 0.09319676458835602,
+      "outer_capture_seconds": 0.021512877196073532,
+      "first_captured_replay_seconds": 0.0715271569788456,
+      "seconds": [
+        0.0696219690144062,
+        0.06961913779377937,
+        0.06962427496910095
+      ],
+      "median_seconds": 0.0696219690144062,
+      "warmup": {
+        "residual": 1.245378112461323e-13,
+        "orthogonality": 2.215554308817036e-13,
+        "spectrum_error": 1.361822190270484e-14,
+        "sweeps": 19,
+        "max_off": 1.948784637822267e-14,
+        "stopping_bound": 2.0200000000003168e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 821,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 408,
+      "backend": "paired-runtime",
+      "input": {
+        "shape": [
+          408,
+          408
+        ],
+        "dtype": "<f8",
+        "sha256": "6a3d9ab0d9ae35f58771387489b5d4d41236624a0e71ca22e47f77a9ca9ad0a1"
+      },
+      "setup_seconds": 0.00016668438911437988,
+      "eager_graph_preparation_and_solve_seconds": 0.08707069605588913,
+      "outer_capture_seconds": 0.021858587861061096,
+      "first_captured_replay_seconds": 0.0649501420557499,
+      "seconds": [
+        0.06335939466953278,
+        0.06343595683574677,
+        0.06337964162230492
+      ],
+      "median_seconds": 0.06337964162230492,
+      "warmup": {
+        "residual": 1.245378112461323e-13,
+        "orthogonality": 2.215554308817036e-13,
+        "spectrum_error": 1.361822190270484e-14,
+        "sweeps": 19,
+        "max_off": 1.948784637822267e-14,
+        "stopping_bound": 2.0200000000003168e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 821,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 408,
+      "backend": "compact16",
+      "input": {
+        "shape": [
+          408,
+          408
+        ],
+        "dtype": "<f8",
+        "sha256": "6a3d9ab0d9ae35f58771387489b5d4d41236624a0e71ca22e47f77a9ca9ad0a1"
+      },
+      "setup_seconds": 0.0003211013972759247,
+      "eager_graph_preparation_and_solve_seconds": 0.07476935163140297,
+      "outer_capture_seconds": 0.0016608834266662598,
+      "first_captured_replay_seconds": 0.0727289617061615,
+      "seconds": [
+        0.07254832610487938,
+        0.07254578545689583,
+        0.0725424587726593
+      ],
+      "median_seconds": 0.07254578545689583,
+      "warmup": {
+        "residual": 1.245378112461323e-13,
+        "orthogonality": 2.215554308817036e-13,
+        "spectrum_error": 1.361822190270484e-14,
+        "sweeps": 19,
+        "max_off": 1.948784637822267e-14,
+        "stopping_bound": 2.0200000000003168e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 56,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 408,
+      "backend": "paired-compact16",
+      "input": {
+        "shape": [
+          408,
+          408
+        ],
+        "dtype": "<f8",
+        "sha256": "6a3d9ab0d9ae35f58771387489b5d4d41236624a0e71ca22e47f77a9ca9ad0a1"
+      },
+      "setup_seconds": 0.0002300553023815155,
+      "eager_graph_preparation_and_solve_seconds": 0.06779376789927483,
+      "outer_capture_seconds": 0.0016429908573627472,
+      "first_captured_replay_seconds": 0.0658988319337368,
+      "seconds": [
+        0.06574902310967445,
+        0.06575904414057732,
+        0.06575575843453407
+      ],
+      "median_seconds": 0.06575575843453407,
+      "warmup": {
+        "residual": 1.245378112461323e-13,
+        "orthogonality": 2.215554308817036e-13,
+        "spectrum_error": 1.361822190270484e-14,
+        "sweeps": 19,
+        "max_off": 1.948784637822267e-14,
+        "stopping_bound": 2.0200000000003168e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.245378112461323e-13,
+          "orthogonality": 2.215554308817036e-13,
+          "spectrum_error": 1.361822190270484e-14,
+          "sweeps": 19,
+          "max_off": 1.948784637822267e-14,
+          "stopping_bound": 2.0200000000003168e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 56,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 612,
+      "backend": "global",
+      "input": {
+        "shape": [
+          612,
+          612
+        ],
+        "dtype": "<f8",
+        "sha256": "a8e62c6ceb18a4a822ff73e989a5f5ca851ef2cdeb077f9a71eb998009f7b2a1"
+      },
+      "setup_seconds": 0.000224333256483078,
+      "eager_graph_preparation_and_solve_seconds": 0.1922079361975193,
+      "outer_capture_seconds": 0.03315220773220062,
+      "first_captured_replay_seconds": 0.1593446247279644,
+      "seconds": [
+        0.15466786175966263,
+        0.15465547144412994,
+        0.1546778678894043
+      ],
+      "median_seconds": 0.15466786175966263,
+      "warmup": {
+        "residual": 1.892802236848452e-13,
+        "orthogonality": 3.658692447826977e-13,
+        "spectrum_error": 1.5630678296127147e-14,
+        "sweeps": 20,
+        "max_off": 2.91950721274487e-14,
+        "stopping_bound": 3.0400000000006217e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 1229,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 612,
+      "backend": "paired-runtime",
+      "input": {
+        "shape": [
+          612,
+          612
+        ],
+        "dtype": "<f8",
+        "sha256": "a8e62c6ceb18a4a822ff73e989a5f5ca851ef2cdeb077f9a71eb998009f7b2a1"
+      },
+      "setup_seconds": 0.0001841410994529724,
+      "eager_graph_preparation_and_solve_seconds": 0.1746772602200508,
+      "outer_capture_seconds": 0.03458030894398689,
+      "first_captured_replay_seconds": 0.1418105512857437,
+      "seconds": [
+        0.13900260254740715,
+        0.13900065049529076,
+        0.13901163637638092
+      ],
+      "median_seconds": 0.13900260254740715,
+      "warmup": {
+        "residual": 1.892802236848452e-13,
+        "orthogonality": 3.658692447826977e-13,
+        "spectrum_error": 1.5630678296127147e-14,
+        "sweeps": 20,
+        "max_off": 2.91950721274487e-14,
+        "stopping_bound": 3.0400000000006217e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 1229,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 612,
+      "backend": "compact16",
+      "input": {
+        "shape": [
+          612,
+          612
+        ],
+        "dtype": "<f8",
+        "sha256": "a8e62c6ceb18a4a822ff73e989a5f5ca851ef2cdeb077f9a71eb998009f7b2a1"
+      },
+      "setup_seconds": 0.000262971967458725,
+      "eager_graph_preparation_and_solve_seconds": 0.15640509873628616,
+      "outer_capture_seconds": 0.0014987774193286896,
+      "first_captured_replay_seconds": 0.15472885593771935,
+      "seconds": [
+        0.15454325452446938,
+        0.15456147864460945,
+        0.15461450070142746
+      ],
+      "median_seconds": 0.15456147864460945,
+      "warmup": {
+        "residual": 1.892802236848452e-13,
+        "orthogonality": 3.658692447826977e-13,
+        "spectrum_error": 1.5630678296127147e-14,
+        "sweeps": 20,
+        "max_off": 2.91950721274487e-14,
+        "stopping_bound": 3.0400000000006217e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 48,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 612,
+      "backend": "paired-compact16",
+      "input": {
+        "shape": [
+          612,
+          612
+        ],
+        "dtype": "<f8",
+        "sha256": "a8e62c6ceb18a4a822ff73e989a5f5ca851ef2cdeb077f9a71eb998009f7b2a1"
+      },
+      "setup_seconds": 0.00036082416772842407,
+      "eager_graph_preparation_and_solve_seconds": 0.1445658840239048,
+      "outer_capture_seconds": 0.0014860592782497406,
+      "first_captured_replay_seconds": 0.1426299251616001,
+      "seconds": [
+        0.14246196672320366,
+        0.1424672231078148,
+        0.14245380833745003
+      ],
+      "median_seconds": 0.14246196672320366,
+      "warmup": {
+        "residual": 1.892802236848452e-13,
+        "orthogonality": 3.658692447826977e-13,
+        "spectrum_error": 1.5630678296127147e-14,
+        "sweeps": 20,
+        "max_off": 2.91950721274487e-14,
+        "stopping_bound": 3.0400000000006217e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        },
+        {
+          "residual": 1.892802236848452e-13,
+          "orthogonality": 3.658692447826977e-13,
+          "spectrum_error": 1.5630678296127147e-14,
+          "sweeps": 20,
+          "max_off": 2.91950721274487e-14,
+          "stopping_bound": 3.0400000000006217e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 48,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 1024,
+      "backend": "global",
+      "input": {
+        "shape": [
+          1024,
+          1024
+        ],
+        "dtype": "<f8",
+        "sha256": "e3b7087290021e4e0d861e4a636adfe44a6dafb8902280331bc5af11394c83a7"
+      },
+      "setup_seconds": 0.000367041677236557,
+      "eager_graph_preparation_and_solve_seconds": 0.5424660593271255,
+      "outer_capture_seconds": 0.054850805550813675,
+      "first_captured_replay_seconds": 0.48384300619363785,
+      "seconds": [
+        0.48046646267175674,
+        0.47780581563711166,
+        0.4780389405786991
+      ],
+      "median_seconds": 0.4780389405786991,
+      "warmup": {
+        "residual": 3.5553324484239793e-13,
+        "orthogonality": 7.846301639001795e-13,
+        "spectrum_error": 2.399515214434011e-14,
+        "sweeps": 21,
+        "max_off": 4.9371275206876734e-14,
+        "stopping_bound": 5.100000000001857e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 2053,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 1024,
+      "backend": "paired-runtime",
+      "input": {
+        "shape": [
+          1024,
+          1024
+        ],
+        "dtype": "<f8",
+        "sha256": "e3b7087290021e4e0d861e4a636adfe44a6dafb8902280331bc5af11394c83a7"
+      },
+      "setup_seconds": 0.0004477985203266144,
+      "eager_graph_preparation_and_solve_seconds": 0.46330487728118896,
+      "outer_capture_seconds": 0.05617866665124893,
+      "first_captured_replay_seconds": 0.40631112083792686,
+      "seconds": [
+        0.401632335036993,
+        0.4016370251774788,
+        0.40168265253305435
+      ],
+      "median_seconds": 0.4016370251774788,
+      "warmup": {
+        "residual": 3.5553324484239793e-13,
+        "orthogonality": 7.846301639001795e-13,
+        "spectrum_error": 2.399515214434011e-14,
+        "sweeps": 21,
+        "max_off": 4.9371275206876734e-14,
+        "stopping_bound": 5.100000000001857e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 2053,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 1024,
+      "backend": "compact16",
+      "input": {
+        "shape": [
+          1024,
+          1024
+        ],
+        "dtype": "<f8",
+        "sha256": "e3b7087290021e4e0d861e4a636adfe44a6dafb8902280331bc5af11394c83a7"
+      },
+      "setup_seconds": 0.0002732984721660614,
+      "eager_graph_preparation_and_solve_seconds": 0.4869734048843384,
+      "outer_capture_seconds": 0.0022754035890102386,
+      "first_captured_replay_seconds": 0.4877140074968338,
+      "seconds": [
+        0.4853564500808716,
+        0.48768506944179535,
+        0.48712659254670143
+      ],
+      "median_seconds": 0.48712659254670143,
+      "warmup": {
+        "residual": 3.5553324484239793e-13,
+        "orthogonality": 7.846301639001795e-13,
+        "spectrum_error": 2.399515214434011e-14,
+        "sweeps": 21,
+        "max_off": 4.9371275206876734e-14,
+        "stopping_bound": 5.100000000001857e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 72,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 1024,
+      "backend": "paired-compact16",
+      "input": {
+        "shape": [
+          1024,
+          1024
+        ],
+        "dtype": "<f8",
+        "sha256": "e3b7087290021e4e0d861e4a636adfe44a6dafb8902280331bc5af11394c83a7"
+      },
+      "setup_seconds": 0.001207154244184494,
+      "eager_graph_preparation_and_solve_seconds": 0.4102654345333576,
+      "outer_capture_seconds": 0.0024050064384937286,
+      "first_captured_replay_seconds": 0.40708615630865097,
+      "seconds": [
+        0.40682410448789597,
+        0.40678009018301964,
+        0.40683965384960175
+      ],
+      "median_seconds": 0.40682410448789597,
+      "warmup": {
+        "residual": 3.5553324484239793e-13,
+        "orthogonality": 7.846301639001795e-13,
+        "spectrum_error": 2.399515214434011e-14,
+        "sweeps": 21,
+        "max_off": 4.9371275206876734e-14,
+        "stopping_bound": 5.100000000001857e-13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        },
+        {
+          "residual": 3.5553324484239793e-13,
+          "orthogonality": 7.846301639001795e-13,
+          "spectrum_error": 2.399515214434011e-14,
+          "sweeps": 21,
+          "max_off": 4.9371275206876734e-14,
+          "stopping_bound": 5.100000000001857e-13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 72,
+          "MEMSET": 2,
+          "CONDITIONAL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    }
+  ],
+  "accepted": true,
+  "source_sha256": {
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3",
+    "benchmarks/anvil_inputs.py": "00c5eb4a1cb36337984761d93da1c367b1c1761003bd94780dd8b6186ef29e9c",
+    "benchmarks/applications/__init__.py": "a517d73e69ebb3dc905b95b63eac4e34625df802a48ed523516f1c030f388b0d",
+    "benchmarks/applications/compare.py": "a08b4704ba1caeb7558878d71bf416a600827fa8349ebfc2cd439c6848baea79",
+    "benchmarks/applications/diagonal_mass.py": "e617a6d21a5e97b2b8bb42f7f35a28822dce2632abb43d06f2921ac9ed9aa684",
+    "benchmarks/applications/problems.py": "15e5d47aecf81b772f79aeba0dd8c445071b03c0317ff73cc94ced78986a9ab8",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/applications/runner.py": "1293eb027f38080c247e5e92d13016f6b7120927abdbd57fdeb40bfc2e8ca22a",
+    "benchmarks/audit_profile.py": "e718c8c407aca6ea39faf38681cb63f25243f2acf261648ddd387ff0913760ee",
+    "benchmarks/compare.py": "70218c8e5dcb12c1bac86de5757aa4407a1dfc791f54c48fb1fb3e267b95fc4f",
+    "benchmarks/dependency_provenance.py": "390309b2bf1d6dc5eec41960047eb5ae79a89aeee50c164df9811ecaf4f50e6e",
+    "benchmarks/experimental/paired_jacobi.py": "6f2fc794169ac6b147f71adde270f9e0c1059ee769d4712f1a32268e1521169e",
+    "benchmarks/experimental/paired_jacobi_compare.py": "033e5c985ee55b3f7be2499ba023f7d5a83332b53cd6f8875c3a32046bf825e8",
+    "benchmarks/experimental/paired_jacobi_runtime.py": "3349564bf46069bc19e568e13008e121920335154c4b2a586855e6bfa6247bcc",
+    "benchmarks/source_provenance.py": "3267e866bbbc1c32957ad350e2889285e9703fd8279ddc884d9728bb71c41062",
+    "benchmarks/upstream/__init__.py": "efeb32afe41f0a6d8385b636de39cd4e9c6e8c8d7f2d45c84028391895705377",
+    "benchmarks/upstream/adapters.py": "d3f2f4eb10cf88d5067595b6db4badc3881cb6006b517dce0ba4e9f06abd245c",
+    "examples/__init__.py": "225a557796620a17a0f23488f0edce3b4019dfd97b5bb905371a483c7f87a6ec",
+    "examples/problems/__init__.py": "408f45e3a66bdebbe67e7e38ae9edb17b6e57b01abdcc7589b814984f4e64a43",
+    "examples/problems/elasticity.py": "0301ca48b62d1a261728bb1b4f5c05ca5a532d06cc144a2e5ddd1295d3389f38",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "b2cc3e17c9355eff9d3524e17fb9cd93016aaebf2a4a5c33672380c2a539b1d0",
+    "warpack/_block_search.py": "3e5004a0bc110c35fbe4bd73ee29538789469d617a6f83b0780f4b3f73719448",
+    "warpack/_block_whitening.py": "007ce2b730091138d09644ac2dda227be84db81669d228b4582c49bfad0ae523",
+    "warpack/_coalesced_fsai.py": "d1267039b1b3f15a63ee4c4f6e6c0db6483d403b9cff0e7549dad7628703409c",
+    "warpack/_coalesced_operator.py": "bb6b34a7aa62dd19502ae5c28861785ab6230d17b1b05faac4e20be4d869d132",
+    "warpack/_compact_jacobi.py": "bc3887aa8074cfc1cff2a37b255e514c1d2582d8b7c77a4a3639e0bf6577bafb",
+    "warpack/_projected_cholesky.py": "8b9ea32c35bac2d7c942ca7d201770cf43ad02982d59a658d4eab2352721fd88",
+    "warpack/_scratch.py": "153c260b5a6b84d1f4346ba5ebd6805e7a6c06261f35cd755cfee994f9cb1e50",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "d492a54956d7043ca39477663e60d11bbf32ddcdbb143c04419f1a42e3659871",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "0c85c09b5964b6ee57ba6a0e7ffbe23c1099cddcc94539f437b33306721cf1be",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "db470884bc318522654eb558088c44c19f861d9cfdf52d76c91e8f771f4dcb0a",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "6cf64f8c35f7dbc6d8cc7124b295904eef6dacfcab86b7b40b05e4143f530802",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "58f62d156207f0778123891f82a66c8d253bc722aafa2c6817fb7c4ec5406ca0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "protocol": "Isolated even-dimensional symmetric projected eigensolves, including device input reset. Original equation, full orthogonality and independent SciPy spectrum checked after one warmup and every measured replay. Same matrix per dimension/backend, with exact identity. Setup includes scratch allocation/construction/module loading where encountered, after input upload. Eager graph preparation plus first solve, subsequent outer capture, first captured replay and warmed replay are reported separately. Same process, cached compilation, fixed backend order as recorded in rows; setup is not a cold-install comparison. No complete FEM speed claim. External occupancy required. Every backend retains the30-sweep bound, per-sweep symmetry restoration and2e-15 diagonal-scaled stopping criterion. Paired variants change only output ownership/reuse within each parallel round, preserving each output expression. Family and round policy selected in arguments. Runtime variants derive the round from immutable partners, including compact device loops of16 rounds. Production dispatch unchanged."
+}

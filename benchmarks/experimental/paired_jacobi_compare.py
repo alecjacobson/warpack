@@ -14,13 +14,16 @@ from benchmarks.applications.compare import timed
 from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.paired_jacobi import PairedOutputJacobi
+from benchmarks.experimental.paired_jacobi_runtime import RuntimePairedCompact, RuntimePairedJacobi
 from benchmarks.source_provenance import source_manifest
+from warpack._compact_jacobi import CompactJacobi
 from warpack.projected import GlobalJacobi
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sizes", default="48,104,208,408,612")
+    parser.add_argument("--round-policy", choices=("static", "runtime"), default="static")
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--kind", choices=("indefinite", "rank_deficient"), default="indefinite")
     parser.add_argument("--out", type=Path, required=True)
@@ -48,6 +51,13 @@ def main():
             ("paired128", partial(PairedOutputJacobi, block_dim=128)),
             ("paired256", partial(PairedOutputJacobi, block_dim=256)),
         ]
+        if args.round_policy == "runtime":
+            backends = [
+                ("global", GlobalJacobi),
+                ("paired-runtime", RuntimePairedJacobi),
+                ("compact16", partial(CompactJacobi, rounds_per_loop=16)),
+                ("paired-compact16", partial(RuntimePairedCompact, rounds_per_loop=16)),
+            ]
         for backend, constructor in backends:
 
             def setup():
@@ -137,7 +147,7 @@ def main():
         accepted=all(r["accepted"] for r in rows),
         source_sha256=source_manifest(__file__),
         dependency=warp_dependencies(),
-        protocol="Isolated even-dimensional symmetric projected eigensolves, including device input reset. Original equation, full orthogonality and independent SciPy spectrum checked after one warmup and every measured replay. Same matrix per dimension/backend, with exact identity. Setup includes scratch allocation/construction/module loading where encountered, after input upload. Eager graph preparation plus first solve, subsequent outer capture, first captured replay and warmed replay are reported separately. Same process, cached compilation, fixed global-then-paired64/128/256 order; setup is not a cold-install comparison. No complete FEM speed claim. External occupancy required. Every backend retains the30-sweep bound, per-sweep symmetry restoration and2e-15 diagonal-scaled stopping criterion. Paired variants change only output ownership/reuse within each parallel round, preserving each output expression. Family selected in arguments. Production dispatch unchanged.",
+        protocol="Isolated even-dimensional symmetric projected eigensolves, including device input reset. Original equation, full orthogonality and independent SciPy spectrum checked after one warmup and every measured replay. Same matrix per dimension/backend, with exact identity. Setup includes scratch allocation/construction/module loading where encountered, after input upload. Eager graph preparation plus first solve, subsequent outer capture, first captured replay and warmed replay are reported separately. Same process, cached compilation, fixed backend order as recorded in rows; setup is not a cold-install comparison. No complete FEM speed claim. External occupancy required. Every backend retains the30-sweep bound, per-sweep symmetry restoration and2e-15 diagonal-scaled stopping criterion. Paired variants change only output ownership/reuse within each parallel round, preserving each output expression. Family and round policy selected in arguments. Runtime variants derive the round from immutable partners, including compact device loops of16 rounds. Production dispatch unchanged.",
     )
     args.out.write_text(json.dumps(report, indent=2) + "\n")
     if not report["accepted"]:
