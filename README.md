@@ -173,8 +173,10 @@ metre, with illustrative material parameters `E = 100,000 Pa`, `ν = 0.3`,
 `ρ = 1,000 kg/m³`. Color follows instantaneous displacement.
 
 Measurements from 2026-10-23 on an NVIDIA L40 and Xeon Platinum 8362
-(four pinned CPU cores), using the [v0.2.0 overlay](docs/releases/v0.2.0.md)
-for the FSAI rows:
+(four pinned CPU cores), using source revision
+[`8a8c769`](https://github.com/alecjacobson/warpack/commit/8a8c769) and the
+[pinned dependency overlay](docs/releases/v0.2.0.md) for the FSAI rows.
+This revision includes optimizations added after the released v0.2.0 wheel:
 
 | Solver | Setup (s) | Warm solve (s) | Max original residual, all 26 modes |
 |---|---:|---:|---:|
@@ -187,8 +189,8 @@ for the FSAI rows:
 
 Setup is the median of three independent constructions, including factorization
 or preconditioning, workspaces and graph capture where applicable. Solve is the
-median of 15 warm runs. Mesh assembly, process startup and validation are
-excluded; compiled kernels are cached. All 90 timed solves passed the accuracy
+median of 15 warm runs. Mesh assembly and mass normalization, process startup
+and validation are excluded; compiled kernels are cached. All 90 timed solves passed the accuracy
 checks, with run-to-run solve medians varying by less than 2%.
 
 CuPy's cuDSS and Warp preconditioners are supplied by the benchmark. The pure-Warp
