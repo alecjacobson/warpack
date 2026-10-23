@@ -115,7 +115,17 @@ without `first_captured_solve_quality` remain uncertified for first-use accuracy
 
 `python -m build` builds the wheel from the source distribution. Verify installed
 APIs outside the source checkout so benchmark imports cannot accidentally mask
-missing package files. [`scripts/verify_release_wheel.py`](../scripts/verify_release_wheel.py)
+missing package files. Before numerical smoke tests, run
+[`scripts/audit_release_wheel.py`](../scripts/audit_release_wheel.py) with the wheel
+path, `--source .`, `--installed` pointing to a clean installation directory,
+and `--out` pointing to a new JSON report. It requires the exact current core
+Python module inventory and bytes in both the wheel and installation, and
+rejects duplicate archive entries. Direct wheel builds in an old checkout can
+pick up retired modules from stale `build/lib`; the audit catches that case.
+Use a clean source staging directory or the source-distribution build path,
+and retain rejected audit reports alongside successful ones.
+
+[`scripts/verify_release_wheel.py`](../scripts/verify_release_wheel.py)
 imports all core modules and exercises changed-matrix replays while rejecting
 application/reference/optional-cuDSS imports. Its header documents the required
 installed-wheel path; `--require-fast` additionally checks the pinned fast path.
