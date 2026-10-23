@@ -31,9 +31,9 @@ from benchmarks.applications.force_dual import SnapshotROM
 # H and M: Warp sparse SPD matrices; forces: Warp FP64 array (r,n).
 # diagonal_mass: Warp FP64 array (n,), containing the positive diagonal of M.
 rom = SnapshotROM(H, M, forces, k=20, backend="cg", diagonal_mass=diagonal_mass)
-rom.capture()                       # setup, including graph initialization
+rom.capture()  # setup, including graph initialization
 wp.capture_launch(rom.response_graph)
-rom.solve_modes()                   # no inter-stage host synchronization
+rom.solve_modes()  # no inter-stage host synchronization
 # rom.vectors is (k,n); rom.svd.values are covariance eigenvalues.
 # Check source-solve quality and original physical covariance equations.
 ```

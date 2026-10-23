@@ -214,8 +214,8 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [current full-suite validation](results/parallel_cholesky/README.md#production-dispatch)
-records 1,987 passes and five skips, with separate focused and stock-Warp checks.
+The [current full-suite validation](results/global_cholesky/README.md#production-integration)
+records 2,083 passes and five skips, with separate focused and stock-Warp checks.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.
 

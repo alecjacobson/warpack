@@ -144,8 +144,7 @@ class GeneralizedKrylovSchur(KrylovSchur):
         # Preserve every operand's restriction, including implicit operators
         # that contain sparse solves and the two operands of the Cayley RHS.
         iteration.requires_static_outer_capture = any(
-            getattr(op, "requires_static_outer_capture", False)
-            for op in (operator, mass, inverse)
+            getattr(op, "requires_static_outer_capture", False) for op in (operator, mass, inverse)
         )
         super().__init__(iteration, k, ncv=ncv, which=which, tol=tol, initial_vector=initial_vector)
         self.metric_vector = wp.empty((1, self.n), dtype=wp.float64, device=self.device)

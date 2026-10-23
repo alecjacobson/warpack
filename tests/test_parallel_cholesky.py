@@ -140,7 +140,12 @@ def test_late_pivot_preserves_serial_containment_and_sticky_status(pivot):
         (104, True, 49152, "cooperative"),
         (128, True, 100000, "cooperative"),
         (128, True, 49152, "serial"),
-        (129, True, 100000, "serial"),
+        (129, True, 100000, "global"),
+        (204, True, 49152, "global"),
+        (256, True, 49152, "global"),
+        (512, True, 49152, "global"),
+        (513, True, 100000, "serial"),
+        (204, False, None, "serial"),
         (104, True, 44711, "serial"),
         (104, True, 44712, "cooperative"),
         (104, False, None, "serial"),
@@ -154,11 +159,16 @@ def test_production_factor_dispatch_and_capacity_fallback(
     device = SimpleNamespace(is_cuda=cuda)
     if shared is not None:
         device.max_shared_memory_per_block = shared
-    owner = SimpleNamespace(device=device)
+    work = object() if cuda and 129 <= size <= 512 else None
+    owner = SimpleNamespace(device=device, _global_factor_workspace=work)
     arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
     calls = []
     monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
-    monkeypatch.setattr(wp, "launch_tiled", lambda *a, **kw: calls.append(("cooperative", a, kw)))
+    monkeypatch.setattr(
+        wp,
+        "launch_tiled",
+        lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+    )
     BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
     assert len(calls) == 1 and calls[0][0] == expected
     assert calls[0][2]["device"] is device
@@ -166,6 +176,13 @@ def test_production_factor_dispatch_and_capacity_fallback(
         assert calls[0][1][0] is packed_cholesky_kernel(size)
         assert calls[0][2]["inputs"] is arguments
         assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+    elif expected == "global":
+        from warpack._projected_cholesky import global_cholesky
+
+        assert calls[0][1][0] is global_cholesky
+        assert calls[0][2]["inputs"] == [*arguments, work]
+        assert calls[0][2]["dim"] == 1
+        assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
     else:
         assert calls[0][1] == (K.cholesky, 1, arguments)
     # Other operations must continue through the original launch path.

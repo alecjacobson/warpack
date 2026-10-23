@@ -260,6 +260,12 @@ replay gap against CuPy.
 The [projected-factor follow-up](../results/parallel_cholesky/README.md) measures
 a faster pure-Warp Cholesky path for wide blocks, while retaining the existing
 small-block path used by Anvil. CuPy's iteration variability remains explicit.
+The [200-mode qualification](../results/global_cholesky/README.md) extends that
+factor to CUDA widths 129–512 with a setup-time device workspace of
+`8 * width**2` bytes, shared by active-search branches. Widths 48–128 retain the
+qualified packed shared-memory path when capacity permits; other widths and
+non-CUDA devices retain the serial fallback. No allocation or host convergence
+decision is added to replay.
 The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
 measures that tradeoff while holding final fine-grid accuracy fixed.
 

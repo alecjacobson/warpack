@@ -1,10 +1,10 @@
-# Global-workspace projected Cholesky prototype (#155)
+# Global-workspace projected Cholesky qualification (#155)
 
 The [qualified production factor](../parallel_cholesky/README.md) uses shared
-memory for CUDA widths 48–128 when capacity permits. Larger blocks retain the
-serial fallback. This experiment investigates a cooperative factor that stores
-its lower triangle in a transposed device workspace, so capacity no longer
-scales with shared memory. **Production dispatch is unchanged.**
+memory for CUDA widths 48–128 when capacity permits. Production now extends the
+cooperative factor to CUDA widths 129–512 using a preallocated transposed device
+workspace. Other widths and non-CUDA devices retain the serial fallback. The
+prototype evidence below qualified this extension before integration.
 
 The prototype computes independent column entries in parallel with the serial
 kernel's subtraction order, pivot-status flag and 1e-30 diagonal containment.
@@ -33,9 +33,9 @@ pivots, sticky status and recovery; and complete coupled/free/heterogeneous FEM
 replays with the active branches sharing setup workspace. Stock Warp 1.15
 passes 24 direct tests and skips three upstream-FSAI-dependent FEM cases.
 
-These tests do not establish a speedup. Isolated serial/packed/global factors
-and then full larger-mode FEM controls must qualify before any production
-change. All failed or contended measurements will be retained.
+These prototype tests do not establish a speedup. The isolated and complete
+FEM measurements below supply the performance evidence. Failed or contended
+measurements are retained.
 
 The first [isolated run](isolated/factor-a1.json) passes every factor equation
 and graph-residency check through width 512, but its
@@ -76,7 +76,7 @@ three measured Warp and three CuPy solves, with no observed GPU contention.
 
 | Factor | Warp construction + capture (s) | Warp warm median (s) | CuPy warm median (s) |
 | --- | ---: | ---: | ---: |
-| Current default (serial at 204) | 25.0774 | 15.6365 | 6.4890 |
+| Pre-promotion default (serial at 204) | 25.0774 | 15.6365 | 6.4890 |
 | Global-workspace candidate | 18.7342 | 11.2677 | 6.3294 |
 
 The candidate reduces complete Warp warm solve time by **27.9%**. It remains
@@ -96,8 +96,33 @@ workspace is 332,928 bytes at this width.
 [Default](full/default-a1.json), [candidate](full/global-a1.json),
 [accuracy screen](full/global-accuracy-a1.json),
 [controlled comparison](full/comparison.json), and adjacent occupancy/summary
-records preserve the full evidence. Production promotion still requires
-dispatch/fallback integration tests and fresh public-default regression controls.
+records preserve the full evidence.
+
+## Production integration
+
+The core allocates one `width × width` FP64 workspace at construction for CUDA
+widths 129–512, before active-search branches copy the owner. Branches share the
+same array; replay neither allocates nor transfers numerical data to the host.
+Widths 48–128 retain the qualified packed-shared dispatch when capacity permits.
+The width 24 Anvil path, undersized/shared-capacity fallbacks and non-CUDA paths
+are unchanged. Larger dimensions retain the serial fallback. There is no new
+public API parameter.
+
+The full pinned-overlay suite passes **2,083 tests, five skipped**, in 706.95 s
+([log](full-suite.log)). The [focused production suite](production-focused-tests.log)
+passes 78 tests, including exact factors, bad pivots/status containment, strided
+changed-input replay, dimension/capacity/device dispatch, and coupled/free/
+heterogeneous FEM solves with width 132 and shared active-branch workspaces.
+An additional [workspace ownership test](workspace-reuse-test.log) passes after
+the full-suite run: the benchmark override reuses the production workspace
+instead of allocating a duplicate. This additional test is not included in 2,083.
+
+The [stock Warp 1.15 check](stock-tests.log) passes 82 tests and skips 12 requiring
+the pinned upstream preconditioners. This run also includes the separate
+persistent-Jacobi prototype tests (#159), which remain benchmark-only.
+Full repository lint/format checks pass. Fresh public-default timing controls
+for 200/100 modes and the unchanged Anvil path are running separately; these
+correctness-test durations are not performance claims.
 
 ## Drivers
 

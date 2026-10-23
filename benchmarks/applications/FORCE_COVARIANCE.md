@@ -79,8 +79,15 @@ It cannot replace the singular-prior covariance or snapshot routes.
 from benchmarks.applications.force_reciprocal import ForceReciprocalSolver
 
 driver = ForceReciprocalSolver(
-    H, M, S, S_inverse, k=20, backend="cg", ncv=64,
-    tol=1e-9, polish_steps=1,
+    H,
+    M,
+    S,
+    S_inverse,
+    k=20,
+    backend="cg",
+    ncv=64,
+    tol=1e-9,
+    polish_steps=1,
 )
 try:
     stages = driver.capture(cycles=4, adaptive=False)

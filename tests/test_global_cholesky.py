@@ -12,7 +12,9 @@ from warp.optim import linear
 
 from benchmarks.experimental import profile_active_block
 from benchmarks.experimental.global_cholesky import GlobalCholeskyBlock, global_cholesky
+from warpack import BlockLOBPCG
 from warpack import kernels as K
+from warpack.block import Identity
 
 
 @pytest.mark.parametrize("n", [1, 7, 48, 104, 128, 204, 256, 512])
@@ -82,19 +84,42 @@ def test_global_factor_invalid_pivot_sticky_status_and_recovery(pivot, value):
 
 
 @pytest.mark.parametrize("case", ["clamped_consistent", "free", "heterogeneous"])
-def test_global_factor_workspace_shared_with_active_branches(case, monkeypatch):
+@pytest.mark.parametrize("production", [False, True])
+def test_global_factor_workspace_shared_with_active_branches(case, production, monkeypatch):
     if not hasattr(linear, "FSAI"):
         pytest.skip("pinned upstream FSAI required")
     config = json.loads(Path("results/cg_partitioned/final/exact-a1.json").read_text())["args"]
-    config.update(case=case, side=3, modes=6, width=48)
-    monkeypatch.setattr(profile_active_block, "BlockLOBPCG", GlobalCholeskyBlock)
-    solver, check, _, _ = profile_active_block.create_solver(SimpleNamespace(**config))
-    assert all(
-        branch._factor_workspace is solver._factor_workspace for branch in solver._search.buckets
+    config.update(case=case, side=3, modes=6, width=132 if production else 48)
+    monkeypatch.setattr(
+        profile_active_block, "BlockLOBPCG", BlockLOBPCG if production else GlobalCholeskyBlock
     )
+    solver, check, _, _ = profile_active_block.create_solver(SimpleNamespace(**config))
+    attribute = "_global_factor_workspace" if production else "_factor_workspace"
+    assert all(
+        getattr(branch, attribute) is getattr(solver, attribute)
+        for branch in solver._search.buckets
+    )
+    if production:
+        assert solver._global_factor_workspace.shape == (132, 132)
     graph = solver.capture(300)
     for _ in range(2):
         wp.capture_launch(graph)
         result = check(solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T)
         assert result["accepted"], result
         assert solver.status.numpy()[0] == 0 and solver.converged.numpy()[0] == solver.k
+
+
+def test_forced_global_control_reuses_production_workspace_for_wide_blocks():
+    solver = GlobalCholeskyBlock(
+        Identity(400, wp.get_device("cuda:0")),
+        6,
+        width=132,
+        reuse_operator_images=True,
+        search_bucket_size=64,
+    )
+    assert solver._factor_workspace[0] is solver._global_factor_workspace
+    assert solver._global_factor_workspace.shape == (132, 132)
+    assert all(
+        branch._factor_workspace[0] is solver._global_factor_workspace
+        for branch in solver._search.buckets
+    )

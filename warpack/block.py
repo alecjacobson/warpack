@@ -407,6 +407,13 @@ class BlockLOBPCG:
         self.transform = empty((2 * self.b, 2 * self.b))
         self.coeff = empty((self.b, self.m))
         self.gx, self.lx = [empty((self.b, self.b)) for _ in range(2)]
+        # Allocate before active-search branches shallow-copy this owner, so
+        # every branch shares one setup-time workspace and replay allocates none.
+        self._global_factor_workspace = (
+            wp.empty((self.b, self.b), dtype=wp.float64, device=self.device)
+            if self.device.is_cuda and 129 <= self.b <= 512
+            else None
+        )
         self.projection_x = empty((2 * self.b, self.b))
         self.scale = empty(2 * self.b)
         self.xscale = self.scale[: self.b]
@@ -467,7 +474,7 @@ class BlockLOBPCG:
             size = args[0].shape[0]
             # Tiny factors are not a meaningful whole-solve cost (including
             # Anvil's width 24). Keep their existing path, and only specialize
-            # qualified wide blocks when the packed factor fits on device.
+            # qualified wide blocks with shared or preallocated global storage.
             required_shared = 8 * (size * (size + 1) // 2 + 1)
             if (
                 self.device.is_cuda
@@ -481,6 +488,18 @@ class BlockLOBPCG:
                     dim=1,
                     inputs=args,
                     block_dim=128,
+                    device=self.device,
+                )
+                return
+            work = getattr(self, "_global_factor_workspace", None)
+            if self.device.is_cuda and 129 <= size <= 512 and work is not None:
+                from ._projected_cholesky import global_cholesky
+
+                wp.launch_tiled(
+                    global_cholesky,
+                    dim=1,
+                    inputs=[*args, work],
+                    block_dim=256 if size <= 256 else 512,
                     device=self.device,
                 )
                 return
