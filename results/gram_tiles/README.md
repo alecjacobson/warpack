@@ -27,3 +27,5 @@ The initial kernel used a constant-length `for` loop. With reduction chunk 256, 
 ## Reproduction
 
 `python -m benchmarks.experimental.compare_gram_tiles --out NEW.json` reproduces the component protocol; use `--reverse` for reverse configuration order. `--chunk 256` screens short reduction chunks; the default is 4096. Complete comparisons use `python -m benchmarks.experimental.compare_gram_whole --gram-tile 0|16 --reference-cache CACHE --public-api ...`, with exact FEM arguments recorded in each output. Only verified CPU reference arrays are reused outside backend setup timers; every complete worker builds its own preconditioner and solver.
+
+[Complete prototype controls](WHOLE.md): all 88 outputs pass; measured full-solve savings are 3.5–14.6%. Installed promotion is validated separately.

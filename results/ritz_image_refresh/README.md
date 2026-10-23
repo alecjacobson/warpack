@@ -4,9 +4,9 @@
 
 Measured on L40 / Xeon 8362 with the pinned Warp 1.18 FSAI/CG overlay and four CPU threads. Each worker constructs its own solver and preconditioner. Only verified CPU reference arrays are cached outside backend timers. Both backends retain installed register-triangular dispatch, certified whitening, two QR passes, rank handling, constraints and all original stopping/accuracy gates.
 
-Each cell below is **transform / refresh**, in seconds. Setup excludes capture and first compute, which are separate columns. Later compute is the median of three fully checked replays. Allocation/module preparation is outside replay timing; compilation was cached.
+Each cell below is **transform / refresh**, in seconds. Setup and capture are separate phases; first-use compute is their sum plus the first captured solve. Later compute is the median of three fully checked replays. Allocation/module preparation is outside replay timing; compilation was cached.
 
-| Case | Setup | Capture | First compute | Later compute | Later change |
+| Case | Setup | Capture | First-use compute | Later compute | Later change |
 |---|---:|---:|---:|---:|---:|
 | pilot/100 | 0.4600 / 0.4325 | 1.4570 / 1.4263 | 4.5001 / 4.4108 | 2.4426 / 2.4371 | -0.23% |
 | pilot/200 | 0.6467 / 0.6335 | 3.9681 / 3.9174 | 13.2409 / 13.0980 | 8.1351 / 8.0633 | -0.88% |
