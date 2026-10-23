@@ -10,6 +10,7 @@ import math
 import statistics
 from pathlib import Path
 
+from benchmarks.block_inputs import signature as input_signature
 from benchmarks.dependency_provenance import signature
 
 FIELDS = (
@@ -30,6 +31,7 @@ def summarize(raw, occupancy):
     ):
         raise ValueError("failed or contended worker")
     args, fixture = raw["args"], raw["fixture"]
+    inputs = input_signature(raw.get("inputs"))
     if not args["public_api"] or not args["cupy"] or args["repeats"] < 3:
         raise ValueError("public paired comparison needs three repeats")
     if (
@@ -51,6 +53,15 @@ def summarize(raw, occupancy):
     ):
         raise ValueError("non-device graph")
     adapter = raw["cupy_adapter"]
+    if (
+        inputs["operators"]["operator"]["shape"] != [raw["n"], raw["n"]]
+        or inputs["reference"]["requested_count"] != raw["k"]
+        or inputs["reference"]["nullity"] != fixture["retained_rigid_modes"]
+        or inputs["initial"]["warp"]["shape"] != [raw["n"], args["width"]]
+        or inputs["initial"]["cupy"] is None
+        or inputs["initial"]["cupy"]["shape"] != [raw["n"], adapter["width"]]
+    ):
+        raise ValueError("input identities disagree with the reported problem or starting widths")
     groups = {"warp": [], "cupy": []}
     for row in raw["rows"]:
         if row["method"].startswith("Warp BlockLOBPCG"):
@@ -97,6 +108,7 @@ def summarize(raw, occupancy):
     if any(not math.isfinite(x) or x <= 0 for x in setup.values()):
         raise ValueError("invalid setup")
     return dict(
+        inputs=inputs,
         arguments=args,
         n=raw["n"],
         k=raw["k"],
@@ -123,6 +135,8 @@ def summarize(raw, occupancy):
 def compare(current, baseline, limit=1.25):
     if not math.isfinite(limit) or limit < 1:
         raise ValueError("invalid regression limit")
+    if input_signature(current.get("inputs")) != input_signature(baseline.get("inputs")):
+        raise ValueError("incompatible input identities")
     if signature(current["dependency"]) != signature(baseline["dependency"]):
         raise ValueError("incompatible dependency")
     for key in ("environment", "source_sha256", "versions", "fixture", "n", "k"):

@@ -40,7 +40,7 @@ change. All failed or contended measurements will be retained.
 The first [isolated run](isolated/factor-a1.json) passes every factor equation
 and graph-residency check through width 512, but its
 [occupancy record](isolated/factor-a1.occupancy.json) shows contention. Its times
-are excluded from performance conclusions; uncontended qualification is pending.
+are excluded from performance conclusions.
 
 The subsequent [uncontended isolated control](isolated/factor-a2.json) passes
 all reconstruction/status and device-only graph checks. Medians below are

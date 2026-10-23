@@ -1,10 +1,15 @@
 """Wide-FEM timing claims require complete spectra and both native stopping gates."""
 
 import copy
+from types import SimpleNamespace
 
+import numpy as np
 import pytest
+import scipy.sparse as sp
 
+from benchmarks.anvil_inputs import array_identity, matrix_identity
 from benchmarks.applications.fem_wide_report import FIELDS, compare, summarize
+from benchmarks.block_inputs import identities, initial_block, reference_identity
 from benchmarks.source_provenance import source_manifest
 
 
@@ -27,11 +32,28 @@ def fixture():
         returned_k_absolute_tolerance_met=True,
     )
     raw = dict(
+        inputs=identities(
+            sp.diags(np.arange(1, 41, dtype=float)),
+            None,
+            sp.diags(np.arange(1, 41, dtype=float) + 0.01),
+            reference_identity(
+                SimpleNamespace(
+                    expected=np.arange(1, 4, dtype=float),
+                    requested_basis=np.eye(40)[:, :3],
+                    null_basis=np.empty((40, 0)),
+                    nullity=0,
+                    k=3,
+                    require_positive_guard=False,
+                )
+            ),
+            initial_block(40, 4),
+            cupy_width=4,
+        ),
         accepted=True,
         timing_eligible=True,
         n=40,
         k=3,
-        args=dict(public_api=True, cupy=True, repeats=3, modes=3, tol=1e-11, out="a"),
+        args=dict(public_api=True, cupy=True, repeats=3, modes=3, width=4, tol=1e-11, out="a"),
         fixture=dict(
             boundary_cluster_complete=True,
             actual_nontrivial_modes=3,
@@ -143,7 +165,17 @@ def test_failed_evidence_cannot_be_promoted(failure):
 
 @pytest.mark.parametrize(
     "key",
-    ["source_sha256", "environment", "versions", "fixture", "n", "k", "arguments", "dependency"],
+    [
+        "source_sha256",
+        "environment",
+        "versions",
+        "fixture",
+        "n",
+        "k",
+        "arguments",
+        "dependency",
+        "inputs",
+    ],
 )
 def test_incompatible_baselines_rejected(key):
     raw, occ = fixture()
@@ -172,3 +204,49 @@ def test_imported_fixture_adapter_or_validation_edit_rejects_baseline(helper, tm
     current = summarize(raw, occ) | dict(environment={"gpu": "same"})
     with pytest.raises(ValueError, match="source_sha256"):
         compare(current, baseline)
+
+
+@pytest.mark.parametrize(
+    "part",
+    [
+        "operator",
+        "mass",
+        "shifted",
+        "values",
+        "requested_basis",
+        "null_basis",
+        "guard",
+        "warp",
+        "cupy",
+        "pool",
+    ],
+)
+def test_changed_input_bytes_rejected_despite_unchanged_convergence(part):
+    raw, occ = fixture()
+    baseline = summarize(raw, occ) | dict(environment={"gpu": "same"})
+    changed = copy.deepcopy(baseline)
+    inputs = changed["inputs"]
+    if part == "mass":
+        inputs["operators"]["mass"] = matrix_identity(2 * sp.eye(40))
+    elif part in ("operator", "shifted"):
+        inputs["operators"][part]["values"]["sha256"] = "0" * 64
+    elif part == "guard":
+        inputs["reference"]["guard"] = array_identity(np.array([5.0]))
+    elif part in ("values", "requested_basis", "null_basis"):
+        inputs["reference"][part]["sha256"] = "0" * 64
+    else:
+        inputs["initial"][part]["sha256"] = "0" * 64
+    with pytest.raises(ValueError, match="incompatible input"):
+        compare(changed, baseline)
+
+
+def test_historical_missing_inputs_are_not_backfilled():
+    raw, occ = fixture()
+    current = summarize(raw, occ) | dict(environment={"gpu": "same"})
+    raw["inputs"] = None
+    with pytest.raises(ValueError, match="Missing verified procedural input"):
+        summarize(raw, occ)
+    old_summary = copy.deepcopy(current)
+    del old_summary["inputs"]
+    with pytest.raises(ValueError, match="Missing verified procedural input"):
+        compare(current, old_summary)

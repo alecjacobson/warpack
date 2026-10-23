@@ -12,6 +12,7 @@ import warp as wp
 import warp.optim.linear as linear
 import warp.sparse as ws
 
+from benchmarks import block_inputs
 from benchmarks.anvil import validate
 from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.applications.fem_cases import make_fem_case
@@ -86,6 +87,11 @@ def prepare(args, *, metadata=None):
     if args.case.startswith("hodge_"):
         c = make_hodge_case(args.case.removeprefix("hodge_"), args.side)
         p = c.problem
+        if metadata is not None:
+            metadata.update(
+                reference=c.reference,
+                reference_identity=block_inputs.reference_identity(p, c.spectrum[p.k :]),
+            )
         identity_mass = (p.b - sp.eye(p.n, format="csr")).nnz == 0
         return (
             matrix(p.a),
@@ -116,6 +122,7 @@ def prepare(args, *, metadata=None):
     if metadata is not None:
         metadata.update(
             reference=c.reference,
+            reference_identity=block_inputs.reference_identity(p, c.spectrum[p.k :]),
             requested_nontrivial_modes=args.modes,
             actual_nontrivial_modes=c.nontrivial_modes,
             retained_rigid_modes=p.nullity,
@@ -176,6 +183,11 @@ def main():
     p.add_argument("--side", type=int, default=6)
     p.add_argument("--modes", type=int, default=6)
     p.add_argument("--width", type=int, default=12)
+    p.add_argument(
+        "--initial-pool-width",
+        type=int,
+        help="generate a common start pool and take its first width columns; default equals width",
+    )
     p.add_argument("--steps", type=int, default=300)
     p.add_argument("--shift", type=float, default=0.01)
     p.add_argument("--fsai-width", type=int, default=64)
@@ -224,6 +236,8 @@ def main():
     p.add_argument("--inner-tol", type=float, default=0.01)
     p.add_argument("--out", required=True)
     args = p.parse_args()
+    if args.initial_pool_width is not None and args.initial_pool_width < args.width:
+        p.error("initial-pool-width must be at least width")
     if args.cupy_partitioned and (
         args.cupy_padding or not args.cupy or not args.batched_cg or not args.inner_cg
     ):
@@ -277,7 +291,8 @@ def main():
     )
     memory_after_preconditioner = memory_snapshot()
     print("Preconditioner ready", setup_seconds, flush=True)
-    initial = np.random.default_rng(42).normal(size=(a.shape[0], args.width))
+    initial_pool = block_inputs.initial_pool(a.shape[0], args.width, args.initial_pool_width)
+    initial = np.ascontiguousarray(initial_pool[:, : args.width])
     input_identity = None
     if args.case == "anvil":
         from benchmarks import anvil_inputs
@@ -288,6 +303,20 @@ def main():
             initial,
             anvil_inputs.host_device_matrix(shifted),
             constraints=constraints.numpy(),
+        )
+        input_identity["method"]["initial_pool"] = anvil_inputs.array_identity(initial_pool)
+    else:
+        input_identity = block_inputs.collect(
+            a,
+            mass,
+            shifted,
+            sa,
+            sb,
+            args.shift,
+            fixture["reference_identity"],
+            initial,
+            (args.width if args.cupy_width is None else args.cupy_width) if args.cupy else None,
+            initial_pool,
         )
 
     def create_solver():
@@ -395,7 +424,7 @@ def main():
         setup_scope=(
             "Preconditioner construction plus solver/operator/CG workspaces, input upload, "
             "and optional FP32 matrix copy. Excludes mesh assembly, reference loading, "
-            "host random-start generation, graph capture and warmup. JIT work is included "
+            "host random-start generation/input fingerprinting, graph capture and warmup. JIT work is included "
             "where encountered; these are not warmed setup measurements. "
             "Historical setup_seconds is an alias for preconditioner_setup_seconds."
         ),

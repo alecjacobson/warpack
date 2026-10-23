@@ -28,7 +28,9 @@ def array_identity(array):
     return dict(
         shape=list(a.shape),
         dtype=a.dtype.str,
-        sha256=hashlib.sha256(memoryview(a).cast("B")).hexdigest(),
+        # A contiguous NumPy buffer also handles empty (n, 0) nullspace bases;
+        # memoryview.cast rejects multidimensional views with a zero extent.
+        sha256=hashlib.sha256(a).hexdigest(),
     )
 
 
@@ -150,6 +152,9 @@ def device_matrix(arrays, name="normalized", device="cuda:0"):
     a.columns = wp.array(arrays["columns"], dtype=wp.int32, device=device)
     a.values = wp.array(arrays[name], dtype=wp.mat33d, device=device)
     a.nnz = len(arrays["columns"])
+    # Replacing offsets invalidates the empty matrix's cached nnz transfer.
+    # Stock Warp may otherwise reuse that stale zero on the next nnz_sync().
+    a.notify_nnz_changed(nnz=a.nnz)
     return a
 
 
