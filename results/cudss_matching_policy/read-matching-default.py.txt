@@ -1,0 +1,18 @@
+import ctypes as ct
+import json
+import os
+from pathlib import Path
+from warp_cudss._bindings import get_library, cudssConfig_t, CUDSS_CONFIG_MATCHING_ALG, _check
+lib=get_library()
+config=cudssConfig_t()
+_check(lib.cudssConfigCreate(ct.byref(config)), 'cudssConfigCreate')
+try:
+ value=ct.c_int(-1);size=ct.c_size_t()
+ _check(lib.cudssConfigGet(config,CUDSS_CONFIG_MATCHING_ALG,ct.byref(value),ct.sizeof(value),ct.byref(size)),'cudssConfigGet')
+ version=[]
+ for index in range(3):
+  v=ct.c_int();_check(lib.cudssGetProperty(index,ct.byref(v)),'cudssGetProperty');version.append(v.value)
+ result=dict(version=version,matching_default=value.value,bytes_written=size.value,explicit_library=os.environ.get('CUDSS_LIBRARY_PATH'),allocated_gpu_arrays=False)
+ print(json.dumps(result,indent=2))
+finally:
+ _check(lib.cudssConfigDestroy(config),'cudssConfigDestroy')

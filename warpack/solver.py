@@ -52,7 +52,8 @@ class CuDSSInverse:
     symmetric-indefinite factorizations use one Warp residual-correction step
     by default; SPD factorizations use none. ``matching=True`` enables cuDSS's
     column matching/scaling for general factors and defaults to zero correction
-    steps. Matching is setup work, not a replay convergence decision.
+    steps. ``matching=False`` explicitly disables matching across backend
+    versions. Matching is setup work, not a replay convergence decision.
     ``refinement_steps`` overrides this fixed budget. ``reordering`` selects a
     cuDSS factorization strategy; global
     pivoting with ``colamd``/``btf_colamd`` should use ``mtype="general"``.
@@ -106,22 +107,22 @@ class CuDSSInverse:
         # The optional wrapper expands exactly nnz blocks, so finalize it at setup.
         matrix.nnz_sync()
         try:
-            if matching:
-                import ctypes
+            import ctypes
 
-                from warp_cudss._bindings import CUDSS_CONFIG_MATCHING_ALG, _check
+            from warp_cudss._bindings import CUDSS_CONFIG_MATCHING_ALG, _check
 
-                # cuDSS 0.8: MC64 maximum diagonal product, including scaling.
-                value = ctypes.c_int(5)
-                _check(
-                    self.solver._lib.cudssConfigSet(
-                        self.solver._config,
-                        CUDSS_CONFIG_MATCHING_ALG,
-                        ctypes.byref(value),
-                        ctypes.sizeof(value),
-                    ),
-                    "cudssConfigSet(MATCHING_ALG)",
-                )
+            # Explicit NONE is required: cuDSS 1.0 defaults to AUTO matching.
+            # True requests MC64 maximum diagonal product, including scaling.
+            value = ctypes.c_int(5 if matching else 0)
+            _check(
+                self.solver._lib.cudssConfigSet(
+                    self.solver._config,
+                    CUDSS_CONFIG_MATCHING_ALG,
+                    ctypes.byref(value),
+                    ctypes.sizeof(value),
+                ),
+                "cudssConfigSet(MATCHING_ALG)",
+            )
             self.solver.setup(matrix, self.x, self.b, nrhs=width)
         except Exception:
             if self.workspace.error:
