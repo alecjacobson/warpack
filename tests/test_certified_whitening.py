@@ -144,7 +144,8 @@ def test_complete_fem_spectrum_with_certified_second_pass(case, monkeypatch):
         assert solver.whitening_usage.numpy()[0] > 0
 
 
-def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path):
+@pytest.mark.parametrize("first_pass", [False, True])
+def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_pass):
     import scipy.sparse as sp
 
     from benchmarks.upstream.adapters import matrix
@@ -168,7 +169,15 @@ def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path):
         SparseOperator(matrix(sp.csr_matrix(x))) for x in (a, mass, la.inv(a + mass))
     ]
     basis = wp.array(constraints, dtype=wp.float64)
-    solver = CertifiedWhiteningBlock(
+    solver_type = CertifiedWhiteningBlock
+    if first_pass:
+        from benchmarks.experimental.first_whitening import FirstWhiteningBlock
+
+        class FirstCertified(FirstWhiteningBlock):
+            _first_metric_minimum = 2
+
+        solver_type = FirstCertified
+    solver = solver_type(
         op,
         k,
         width=width,
@@ -195,7 +204,8 @@ def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path):
         wp.capture_launch(graph)
         result, vectors = solver.eigenvalues.numpy(), solver.eigenvectors.numpy().T
         assert solver.status.numpy()[0] == 0 and solver.converged.numpy()[0] == k
-        assert solver.whitening_usage.numpy()[0] > 0
+        usage = solver._first_whitening_usage if first_pass else solver.whitening_usage
+        assert usage.numpy()[0] > 0
         np.testing.assert_allclose(result, values[2 : 2 + k], atol=1e-10)
         assert np.linalg.norm(vectors.T @ mass @ vectors - np.eye(k)) < 1e-10
         assert np.linalg.norm(a @ vectors - (mass @ vectors) * result) < 1e-8

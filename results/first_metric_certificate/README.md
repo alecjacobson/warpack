@@ -1,6 +1,6 @@
 # First-metric certificate investigation (#171)
 
-This is a component experiment, not a changed library path. The production
+This is an experimental investigation, not a changed library path. The production
 first whitening still reveals rank with canonical eigendecomposition. All
 experimental numerical kernels are Warp; NumPy/SciPy are independent checks
 outside the solver. Cholesky success alone never certifies rank.
@@ -33,9 +33,10 @@ future integration must enforce that input scale as well as the certificate.
 This is experimental numerical analysis plus testing, not a formal verification
 of generated device instructions. No shifts or tolerance changes are allowed.
 
-The component currently owns five dense scratch matrices. Storage sharing,
-canonical fallback dispatch and whole-solve trajectory effects remain to be
-qualified before any core integration.
+The standalone component can own five dense scratch matrices. The later
+[guarded composition](whole/README.md) shares storage with the existing second
+pass and retains canonical fallback. Its complete-solve controls show modest
+wide replay gains; the production path remains unchanged.
 
 ## Initial regression coverage
 
@@ -98,5 +99,5 @@ of the complete 200-mode solve remains elsewhere.
 Raw samples, checks, exact source/dependency identities and graph audits are in
 [components](components/). Reproduce with `sample_first_metrics` followed by
 `profile_first_metric` under `benchmarks.experimental`; use the exact commands
-in each occupancy JSON. The next step is a guarded experimental composition
-with unchanged canonical fallback and complete first/later solve comparisons.
+in each occupancy JSON. The [guarded composition](whole/README.md) now provides unchanged canonical
+fallback and complete first/later solve comparisons.

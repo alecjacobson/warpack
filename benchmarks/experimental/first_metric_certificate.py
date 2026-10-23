@@ -123,7 +123,7 @@ def certify(
 class FirstMetricCertificate:
     """Preallocated component experiment; accepts a fixed normalized FP64 Gram."""
 
-    def __init__(self, g, rank_tol=1e-12):
+    def __init__(self, g, rank_tol=1e-12, *, storage=None):
         n = g.shape[0]
         if g.ndim != 2 or g.shape != (n, n) or g.dtype != wp.float64:
             raise ValueError("a square FP64 Gram is required")
@@ -131,9 +131,15 @@ class FirstMetricCertificate:
             raise ValueError("CUDA dimension2..512 required")
         self.g, self.gt, self.rank_tol = g, g.transpose(), float(rank_tol)
         self.device, self.n = g.device, n
-        self.factor, self.work, self.inverse, self.image, self.transformed = (
-            wp.empty((n, n), dtype=wp.float64, device=self.device) for _ in range(5)
-        )
+        if storage is None:
+            storage = tuple(
+                wp.empty((n, n), dtype=wp.float64, device=self.device) for _ in range(5)
+            )
+        if len(storage) != 5 or any(
+            a.shape != (n, n) or a.dtype != wp.float64 or a.device != self.device for a in storage
+        ):
+            raise ValueError("five matching FP64 scratch matrices required")
+        self.factor, self.work, self.inverse, self.image, self.transformed = storage
         self.status = wp.zeros(1, dtype=wp.int32, device=self.device)
         self.accepted = wp.zeros_like(self.status)
         self.diagnostic = wp.empty(4, dtype=wp.float64, device=self.device)
