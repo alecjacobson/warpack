@@ -16,6 +16,8 @@ def main():
     parser.add_argument("--width", type=int, default=52)
     parser.add_argument("--modes", type=int, default=20)
     parser.add_argument("--require-register-triangular", action="store_true")
+    parser.add_argument("--gram-chunk", type=int, default=256)
+    parser.add_argument("--require-wide-gram", action="store_true")
     args = parser.parse_args()
     sys.meta_path.insert(0, RejectNonCore())
     import numpy as np
@@ -59,6 +61,7 @@ def main():
             search_bucket_size=4,
             keep_history=history,
             compact_projected_graphs=compact,
+            gram_chunk=args.gram_chunk,
         )
         graph = solver.capture(200)
         for scale in [1.0, 1.25, 1.0]:
@@ -99,6 +102,8 @@ def main():
         assert not any(kind in dot.read_text() for kind in ("HOST", "HtoD", "DtoH"))
         if args.require_register_triangular:
             assert "register_triangular" in dot.read_text()
+        if args.require_wide_gram:
+            assert "wide_gram_kernel__locals__compute" in dot.read_text()
         dot.unlink()
     report = dict(
         installed=str(args.installed.resolve()),
@@ -106,6 +111,8 @@ def main():
         width=width,
         modes=k,
         require_register_triangular=args.require_register_triangular,
+        gram_chunk=args.gram_chunk,
+        require_wide_gram=args.require_wide_gram,
         replays=records,
         forbidden_imports=["benchmarks", "examples", "cupy", "scipy", "warp_cudss"],
     )

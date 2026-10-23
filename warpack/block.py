@@ -616,6 +616,17 @@ class BlockLOBPCG:
         wp.launch(kernel, shape, args, device=self.device)
 
     def gram(self, x, y, out, symmetric=False):
+        if (
+            getattr(self, "_wide_gram_enabled", True)
+            and self.device.is_cuda
+            and self.device.arch == 89
+            and 24 <= self.b <= 256
+            and self.gram_chunk == 4096
+        ):
+            from ._gram import gram as wide_gram
+
+            wide_gram(x, y, out, symmetric=symmetric and self.symmetric_products)
+            return
         gram(x, y, out, chunk=self.gram_chunk, symmetric=symmetric and self.symmetric_products)
 
     def subtract(self, basis, coeff, target, scratch):

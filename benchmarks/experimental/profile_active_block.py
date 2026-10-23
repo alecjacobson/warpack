@@ -134,7 +134,7 @@ def capture_profile(solver, index):
     branch = search.buckets[index]
     events, saved = Events(), []
     wrappers = [
-        (implementation, "gram", "gram"),
+        (branch, "gram", "gram"),
         (implementation, "rotate", "rotate"),
         (solver.preconditioner, "apply", "preconditioner"),
         (branch.op, "apply", "operator"),

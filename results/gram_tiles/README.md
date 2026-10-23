@@ -1,6 +1,6 @@
 # Gram output tile investigation (#180)
 
-Benchmark-only FP64 Gram alternatives; **no installed default change**. The first component screen passes every output. Complete-eigensolve qualification is required before choosing an installed path.
+These measurements describe the independent FP64 Gram prototypes at commit `5f1d649`. All component outputs pass. The subsequently promoted path and its full regression/package/workflow evidence are documented in [installed qualification](VALIDATION.md).
 
 L40 / Xeon 8362, pinned Warp 1.18 overlay, four CPU threads, reduction chunk 4096. All kernels use Warp FP64 arithmetic. No vendor matrix product is called. Setup/allocation, compilation, capture and CPU reference computation are excluded from component timing. First replay and five measured replays are recorded and checked separately. Every configuration uses identical strided input and output views.
 
@@ -28,4 +28,4 @@ The initial kernel used a constant-length `for` loop. With reduction chunk 256, 
 
 `python -m benchmarks.experimental.compare_gram_tiles --out NEW.json` reproduces the component protocol; use `--reverse` for reverse configuration order. `--chunk 256` screens short reduction chunks; the default is 4096. Complete comparisons use `python -m benchmarks.experimental.compare_gram_whole --gram-tile 0|16 --reference-cache CACHE --public-api ...`, with exact FEM arguments recorded in each output. Only verified CPU reference arrays are reused outside backend setup timers; every complete worker builds its own preconditioner and solver.
 
-[Complete prototype controls](WHOLE.md): all 88 outputs pass; measured full-solve savings are 3.5–14.6%. Installed promotion is validated separately.
+[Complete prototype controls](WHOLE.md): all 88 outputs pass; measured full-solve savings are 3.5–14.6%. [Installed promotion is validated separately](VALIDATION.md).

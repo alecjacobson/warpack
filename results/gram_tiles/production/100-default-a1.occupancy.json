@@ -1,0 +1,153 @@
+{
+  "command": [
+    "timeout",
+    "900",
+    "taskset",
+    "-c",
+    "8-11",
+    "/usr/local/bin/python",
+    "-m",
+    "benchmarks.experimental.compare_gram_whole",
+    "--reference-cache",
+    "/run/openclaw/horde/warpack-fem-reference-cache-175",
+    "--gram-tile",
+    "0",
+    "--installed-default",
+    "--case",
+    "clamped_consistent",
+    "--side",
+    "15",
+    "--modes",
+    "100",
+    "--width",
+    "104",
+    "--steps",
+    "300",
+    "--shift",
+    "0.01",
+    "--fsai-width",
+    "32",
+    "--fsai-layout",
+    "columns",
+    "--matrix-layout",
+    "columns",
+    "--preconditioner",
+    "fsai",
+    "--repeats",
+    "3",
+    "--tol",
+    "1e-11",
+    "--cupy-tol",
+    "1e-10",
+    "--public-api",
+    "--gram-chunk",
+    "4096",
+    "--symmetric-products",
+    "--fused-updates",
+    "--paired-rotation",
+    "--reuse-x-image",
+    "--active-search-bucket-size",
+    "4",
+    "--batched-products",
+    "--inner-cg",
+    "25",
+    "--batched-cg",
+    "--active-cg-bucket-size",
+    "4",
+    "--inner-fp32",
+    "--inner-tol",
+    "0.01",
+    "--out",
+    "results/gram_tiles/production/100-default-a1.json"
+  ],
+  "pid": 522704,
+  "exit_code": 0,
+  "timing_eligible": true,
+  "samples": [
+    {
+      "time": 1792770706.5047693,
+      "other": [],
+      "gpu": "57 %, 1 MiB, 2490 MHz, 46",
+      "error": null
+    },
+    {
+      "time": 1792770707.623248,
+      "other": [],
+      "gpu": "0 %, 1 MiB, 2490 MHz, 45",
+      "error": null
+    },
+    {
+      "time": 1792770708.7208364,
+      "other": [],
+      "gpu": "28 %, 1438 MiB, 2490 MHz, 48",
+      "error": null
+    },
+    {
+      "time": 1792770709.79793,
+      "other": [],
+      "gpu": "26 %, 3108 MiB, 2490 MHz, 45",
+      "error": null
+    },
+    {
+      "time": 1792770710.9183772,
+      "other": [],
+      "gpu": "0 %, 3380 MiB, 2490 MHz, 44",
+      "error": null
+    },
+    {
+      "time": 1792770712.0138009,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 50",
+      "error": null
+    },
+    {
+      "time": 1792770713.149238,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 50",
+      "error": null
+    },
+    {
+      "time": 1792770714.2255974,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2475 MHz, 50",
+      "error": null
+    },
+    {
+      "time": 1792770715.3170311,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 50",
+      "error": null
+    },
+    {
+      "time": 1792770716.4131901,
+      "other": [],
+      "gpu": "23 %, 3380 MiB, 2385 MHz, 48",
+      "error": null
+    },
+    {
+      "time": 1792770717.4889753,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 51",
+      "error": null
+    },
+    {
+      "time": 1792770718.5859184,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 47",
+      "error": null
+    },
+    {
+      "time": 1792770719.7011645,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 52",
+      "error": null
+    },
+    {
+      "time": 1792770720.7774944,
+      "other": [],
+      "gpu": "100 %, 3380 MiB, 2490 MHz, 50",
+      "error": null
+    }
+  ],
+  "note": "Approximately one-second all-GPU process sampling; benchmark descendants excluded. Numerical acceptance must be checked separately."
+}

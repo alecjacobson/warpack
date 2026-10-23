@@ -312,7 +312,13 @@ application, retaining each row's subtraction order and both complete QR passes.
 It adds no global workspace, inverse or replay synchronization. Other widths and
 architectures retain the scalar application. The [installed qualification](../results/register_triangular/VALIDATION.md)
 includes changed-input/failure recovery, clean-wheel replay and complete FEM
-controls; the smaller Anvil path is unchanged.
+controls; Anvil uses the original triangular kernel.
+
+With `gram_chunk=4096`, Ada devices use 16×16 FP64 Gram output tiles for block
+widths 24–256. This path adds no global workspace or replay synchronization;
+both full QR passes and all rank/stopping thresholds remain. Other settings
+retain the original Gram implementation. The [Gram qualification](../results/gram_tiles/VALIDATION.md)
+records complete FEM comparisons and original-equation/replay checks.
 
 For Ada CUDA devices, search metrics of size 96–512 use certified Cholesky
 whitening during capture. Both whitening passes remain. Each fast path must

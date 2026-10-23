@@ -56,9 +56,45 @@ def test_controls_and_rejected_report(monkeypatch, tmp_path, tile, threads, reje
     assert driver.warpack.BlockLOBPCG is DummyBlock
     assert driver.compare_block.source_manifest is original_manifest and sys.argv is argv
     assert isinstance(instances[0], DummyPrototype) == bool(tile)
+    assert instances[0]._wide_gram_enabled is False
     assert instances[0]._gram_output_tile == tile and instances[0]._gram_threads == threads
     assert instances[0].options == {"compact_projected_graphs": True}
     report = json.loads(destination.read_text())
     assert report["args"]["gram_tile"] == tile and report["args"]["gram_threads"] == threads
     assert report["args"]["compact_graphs"] and report["accepted"] == (not rejected)
     assert report["independent_reference_cache"] == []
+
+
+def test_installed_default_is_explicit(monkeypatch, tmp_path):
+    instances = []
+
+    class DummyBlock:
+        def __init__(self, **kwargs):
+            instances.append(self)
+
+    destination = tmp_path / "default.json"
+
+    def compare():
+        driver.warpack.BlockLOBPCG()
+        destination.write_text(json.dumps({"args": {}}))
+
+    monkeypatch.setattr(driver.warpack, "BlockLOBPCG", DummyBlock)
+    monkeypatch.setattr(driver.compare_block, "main", compare)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "compare",
+            "--gram-tile",
+            "0",
+            "--installed-default",
+            "--public-api",
+            "--out",
+            str(destination),
+            "--reference-cache",
+            str(tmp_path / "cache"),
+        ],
+    )
+    driver.main()
+    assert instances[0]._wide_gram_enabled is True
+    assert json.loads(destination.read_text())["args"]["installed_default"] is True

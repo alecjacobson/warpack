@@ -47,6 +47,7 @@ def test_selected_branch_profiles_preserve_solver_and_restore_wrappers():
         assert row["events_ms"]["selected_step"] > 0
         assert row["events_ms"]["cholesky"] > 0
         assert row["events_ms"]["triangular"] > 0
+        assert row["events_ms"]["gram"] > 0
         assert all(np.isfinite(v) and v >= 0 for v in row["events_ms"].values())
 
 
@@ -62,9 +63,11 @@ def test_conditional_second_whitening_is_timed_outside_child_graphs(monkeypatch)
     solver, check, _, _ = create_solver(SimpleNamespace(**config))
     helpers = [branch._second_whitener for branch in solver._search.buckets]
     original = [helper.apply for helper in helpers]
+    original_grams = [branch.gram for branch in solver._search.buckets]
     result, _ = profile(solver, check, 300, [0, 1], 2)
     assert result["before"]["accepted"] and result["after"]["accepted"]
     assert [helper.apply for helper in helpers] == original
+    assert [branch.gram for branch in solver._search.buckets] == original_grams
     for sample in result["samples"]:
         assert sample["events_ms"]["second_metric_whitening"] > 0
         assert sample["events_ms"]["metric_eigh"] > 0
@@ -101,6 +104,7 @@ def test_installed_first_and_second_whitening_events_stay_outside_conditionals(k
     assert [helper.apply for helper in helpers] == original
     for sample in result["samples"]:
         times = sample["events_ms"]
+        assert times["gram"] > 0
         if sample["checkpoint"] == 0:
             assert times["first_metric_whitening"] > 0
             assert times["second_metric_whitening"] > 0
