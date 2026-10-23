@@ -68,14 +68,39 @@ python -m benchmarks.experimental.block_jacobi_compare \
 ```
 
 Use `benchmarks.monitor_gpu` and the pinned runtime for comparable measurements.
-Omit `--polish` to reproduce the rejected standalone policy. Whole-FEM controls
-are being run separately with `compare_block_jacobi`, selecting existing even
-projected sizes 208..1024, four initializer sweeps and block size eight. Smaller
-paths, including the Anvil projected sizes, stay unchanged. Those complete
-first/later solves must pass physical/spectrum/subspace/native gates before any
-promotion or whole-solve claim.
+Omit `--polish` to reproduce the rejected standalone policy. Whole-FEM controls use `compare_block_jacobi`, selecting existing even projected
+sizes 208..1024, four initializer sweeps and block size eight. Smaller paths,
+including the Anvil projected sizes, stay unchanged.
 
 Primary background: [parallel block Jacobi algorithms](https://www.sciencedirect.com/science/article/pii/002437958690176X)
 and [combinatorial ordering for parallel block Jacobi](https://doi.org/10.14495/jsiaml.13.56).
 This prototype uses fixed cyclic pairs; it does not implement the latter paper's
 permutation strategy or Saad's distinct Riccati-based subspace rotations.
+
+
+## Complete FEM result: no promotion
+
+All six fresh workers in `fem/` pass the first output and three subsequent
+replays: **24 complete accepted solves**. Native stopping, original physical
+residuals, eigenvalues, mass orthogonality and requested subspaces pass. Within
+each pair input/source/dependency identities match, and external occupancy is
+clean. The Anvil pair has identical graph summaries and no eligible projected
+sizes, as expected.
+
+| Problem | Capture s, default / candidate | First-solve compute s, default / candidate | Warm replay median s, default / candidate |
+|---|---:|---:|---:|
+| 100 modes | 1.6109 / 2.1289 | 5.1962 / 5.7264 | 2.9809 / 3.0101 |
+| 200 modes | 4.6936 / 8.1294 | 16.5545 / 20.5932 | 10.6462 / 10.6519 |
+| Anvil, unchanged path | 0.6096 / 0.6120 | 2.9965 / 3.0596 | 1.6572 / 1.6628 |
+
+The candidate offers no useful warm-replay gain and substantially increases
+capture and first-solve work. It is **not promoted**. Component gains on selected
+dense matrices did not translate into a faster complete FEM mode solve.
+[Issue #169](https://github.com/alecjacobson/warpack/issues/169) is closed as not
+planned for this implementation; the broader wide-mode gap remains in #147.
+
+First-solve compute includes solver/preconditioner setup, capture and a validated
+first captured solve, excluding mesh/reference work, host validation and imports.
+Compilation is cached; setup/capture are single observations per fresh worker.
+This is not total process wall time and does not replace the six-backend Anvil
+table or establish any new CuPy speed ratio.
