@@ -129,9 +129,11 @@ def select_branch(solver):
     return int(selected[0]), count
 
 
-def capture_profile(solver, index):
+def capture_profile(solver, index=None):
     search = solver._search
-    branch = search.buckets[index]
+    if (search is None) != (index is None):
+        raise ValueError("provide a branch index exactly when active search is enabled")
+    branch = solver if search is None else search.buckets[index]
     events, saved = Events(), []
     wrappers = [
         (branch, "gram", "gram"),
@@ -154,6 +156,9 @@ def capture_profile(solver, index):
     ]
 
     def step():
+        if search is None:
+            solver.step()
+            return
         wp.launch(
             select_search,
             1,
@@ -164,6 +169,17 @@ def capture_profile(solver, index):
         search.step_bucket(branch, index)
 
     try:
+        from warpack.block_products import paired_ritz_rotation
+
+        original_tiled = wp.launch_tiled
+
+        def instrument_tiled(kernel, *args, **kwargs):
+            if kernel is paired_ritz_rotation:
+                return events.wrap("paired_ritz_rotation", original_tiled)(kernel, *args, **kwargs)
+            return original_tiled(kernel, *args, **kwargs)
+
+        saved.append((wp, "launch_tiled", original_tiled))
+        wp.launch_tiled = instrument_tiled
         for obj, attribute, label in wrappers:
             original = getattr(obj, attribute)
             saved.append((obj, attribute, original))

@@ -1,0 +1,15 @@
+import ast,subprocess
+import warp as wp
+from benchmarks.experimental import compare_block
+from benchmarks.experimental.profile_active_block import checked
+from tests.test_legacy_block_profile import fixture
+source=subprocess.check_output(['git','show','d5f5b1e:benchmarks/experimental/compare_block.py'],text=True)
+tree=ast.parse(source)
+function=next(node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name=='profile_step')
+namespace=vars(compare_block).copy()
+exec(compile(ast.Module(body=[function],type_ignores=[]),'d5f5b1e/profile_step','exec'),namespace)
+solver,check=fixture(52,False)
+graph=solver.capture(300);wp.capture_launch(graph)
+assert checked(solver,check)['accepted']
+print('Static uninstrumented solve accepted; executing exact old profiler function AST',flush=True)
+namespace['profile_step'](solver)

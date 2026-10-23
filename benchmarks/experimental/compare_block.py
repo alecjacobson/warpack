@@ -554,54 +554,35 @@ def main():
 
 
 def profile_step(solver):
-    from benchmarks.applications.skinning_profile import Events
-    from warpack import block as implementation
+    from benchmarks.experimental.profile_active_block import capture_profile, select_branch
 
-    events = Events()
-    saved = []
-    for obj, attribute, label in (
-        (implementation, "gram", "gram"),
-        (implementation, "rotate", "rotate"),
-        (solver.preconditioner, "apply", "preconditioner"),
-        *(
-            [(solver.preconditioner, "refresh", "working_matrix_refresh")]
-            if hasattr(solver.preconditioner, "refresh")
-            else []
-        ),
-        (solver.op, "apply", "operator"),
-        (solver.mass, "apply", "mass"),
-        (solver.small, "diagonalize", "rayleigh_ritz_eigh"),
-        (solver.metric, "diagonalize", "metric_eigh"),
-        *[
-            (solver, name, name)
-            for name in (
-                "project",
-                "orthogonalize_x",
-                "orthogonalize_search",
-                "whiten",
-                "finalize",
-                "step",
-            )
-        ],
-    ):
-        original = getattr(obj, attribute)
-        saved.append((obj, attribute, original))
-        setattr(obj, attribute, events.wrap(label, original))
-    try:
-        with wp.ScopedCapture() as capture:
-            solver.step()  # Events are legal here: this graph has no conditional body.
-    finally:
-        for obj, attribute, original in saved:
-            setattr(obj, attribute, original)
-    samples = []
+    samples, selections, profiles = [], [], {}
     for _ in range(5):
-        wp.capture_launch(capture.graph)
-        wp.synchronize()
+        # Host selection is diagnostic setup, outside every timed graph. Capture
+        # the selected branch directly: external events are forbidden inside
+        # the outer active-search conditional. Re-select after each state update.
+        index, count = (None, solver.b) if solver._search is None else select_branch(solver)
+        if index not in profiles:
+            profiles[index] = capture_profile(solver, index)
+        graph, events = profiles[index]
+        wp.capture_launch(graph)
+        wp.synchronize_device(solver.device)
         samples.append(events.totals())
+        selections.append(dict(bucket_index=index, active_rows=count))
+    labels = sorted({label for row in samples for label in row})
     return dict(
         samples_ms=samples,
-        medians_ms={key: float(np.median([row[key] for row in samples])) for key in samples[0]},
-        note="Instrumented fixed single-step graph, continued from last solve. Nested totals overlap; not additive or equivalent to adaptive whole-solve timings.",
+        selections=selections,
+        medians_ms={
+            key: float(np.median([row.get(key, 0.0) for row in samples])) for key in labels
+        },
+        note=(
+            "Five instrumented continued steps; selected branches are captured directly, "
+            "with conditional helpers timed at their boundaries. Host branch selection is "
+            "outside timing. These graphs omit outer conditional-dispatch overhead and "
+            "can change active width between samples; they are not whole-solve timings. "
+            "Nested spans overlap and must not be added. Absent categories count as zero."
+        ),
     )
 
 

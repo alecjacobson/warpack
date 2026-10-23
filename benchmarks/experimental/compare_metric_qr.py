@@ -25,19 +25,23 @@ def main():
     destination_parser = argparse.ArgumentParser(add_help=False)
     destination_parser.add_argument("--out", type=Path, required=True)
     destination, _ = destination_parser.parse_known_args(remainder)
-    if "--public-api" not in remainder or "--cupy" in remainder:
-        parser.error("this control requires the public Warp composition without a CuPy row")
+    if "--public-api" not in remainder:
+        parser.error("this control requires the public Warp composition")
+    if "--cupy" in remainder and not choice.installed_default:
+        parser.error("CuPy reference requires --installed-default")
     if choice.installed_default and choice.metric_defect:
         parser.error("--installed-default requires --metric-defect 0")
-    original, manifest, prepare, argv = (
+    original, manifest, prepare, reference, argv = (
         warpack.BlockLOBPCG,
         compare_block.source_manifest,
         compare_block.prepare,
+        compare_block.cupy_trials,
         sys.argv,
     )
     base = MetricQRReuseBlock if choice.metric_defect else original
     instances = []
     error = None
+    reference_active = False
 
     class Tracking(base):
         _ritz_qr_enabled = choice.installed_default
@@ -55,7 +59,11 @@ def main():
 
         def tracked_check(*values, **options):
             quality = check(*values, **options)
-            if instances and (choice.metric_defect or choice.installed_default):
+            if (
+                not reference_active
+                and instances
+                and (choice.metric_defect or choice.installed_default)
+            ):
                 usage = (
                     instances[-1]._ritz_qr_usage
                     if choice.installed_default
@@ -68,20 +76,37 @@ def main():
 
         return (*result[:-1], tracked_check)
 
+    def tracked_reference(*args, **kwargs):
+        nonlocal reference_active
+        previous = reference_active
+        reference_active = True
+        try:
+            return reference(*args, **kwargs)
+        finally:
+            reference_active = previous
+
     with FEMReferenceCache(choice.reference_cache) as cache:
         try:
             warpack.BlockLOBPCG = Tracking
             compare_block.source_manifest = lambda *_: source_manifest(__file__)
             compare_block.prepare = tracked_prepare
+            compare_block.cupy_trials = tracked_reference
             sys.argv = [sys.argv[0]] + remainder
             compare_block.main()
         except SystemExit as caught:
             error = caught
         finally:
-            warpack.BlockLOBPCG, compare_block.source_manifest, compare_block.prepare, sys.argv = (
+            (
+                warpack.BlockLOBPCG,
+                compare_block.source_manifest,
+                compare_block.prepare,
+                compare_block.cupy_trials,
+                sys.argv,
+            ) = (
                 original,
                 manifest,
                 prepare,
+                reference,
                 argv,
             )
     if destination.out.exists():
@@ -107,7 +132,11 @@ def main():
             "during post-solve validation, outside compute timing."
             " With --wide-only, widths outside96..256 retain original QR with "
             "no added control arrays or graph nodes. Installed default additionally guards "
-            "Ada SM89, chunk4096, tol>=1e-11, image reuse and symmetric products."
+            "Ada SM89, chunk4096, tol>=1e-11, image reuse and symmetric products. "
+            "With --cupy, only the installed-default Warp policy is compared. "
+            "CuPy uses the supplied Warp preconditioner/base CG, so its adapter setup "
+            "excludes those shared factors and is not an independent total setup cost. "
+            "QR usage counters are attached only to Warp validation, never CuPy rows."
         )
         destination.out.write_text(json.dumps(report, indent=2) + "\n")
     if error is not None:

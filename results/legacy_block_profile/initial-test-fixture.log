@@ -1,0 +1,86 @@
+F..F..F........                                                          [100%]
+=================================== FAILURES ===================================
+_ test_static_and_active_steps_preserve_complete_solves_and_wrappers[12-False] _
+
+width = 12, active = False
+
+    @pytest.mark.parametrize(
+        "width,active", [(12, False), (12, True), (52, True), (104, False), (104, True)]
+    )
+    def test_static_and_active_steps_preserve_complete_solves_and_wrappers(width, active):
+>       solver, check = fixture(width, active)
+
+tests/test_legacy_block_profile.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_legacy_block_profile.py:30: in fixture
+    return create_solver(SimpleNamespace(**config))[:2]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+config = namespace(case='clamped_consistent', side=2, modes=6, width=12, initial_pool_width=None, steps=300, shift=0.01, fsai_w...first_whitening='default', compact_graphs=False, reference_cache='/run/openclaw/horde/warpack-fem-reference-cache-175')
+
+    def create_solver(config):
+        required = ("public_api", "batched_products", "batched_cg", "reuse_x_image")
+        if not all(getattr(config, name) for name in required) or config.preconditioner != "fsai":
+            raise ValueError("profile requires the public batched FSAI/CG composition with image reuse")
+        if config.active_search_bucket_size <= 0 or config.native_products:
+>           raise ValueError("profile requires active search and batched products")
+E           ValueError: profile requires active search and batched products
+
+benchmarks/experimental/profile_active_block.py:68: ValueError
+_ test_static_and_active_steps_preserve_complete_solves_and_wrappers[104-False] _
+
+width = 104, active = False
+
+    @pytest.mark.parametrize(
+        "width,active", [(12, False), (12, True), (52, True), (104, False), (104, True)]
+    )
+    def test_static_and_active_steps_preserve_complete_solves_and_wrappers(width, active):
+>       solver, check = fixture(width, active)
+
+tests/test_legacy_block_profile.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_legacy_block_profile.py:30: in fixture
+    return create_solver(SimpleNamespace(**config))[:2]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+config = namespace(case='clamped_consistent', side=5, modes=6, width=104, initial_pool_width=None, steps=300, shift=0.01, fsai_...first_whitening='default', compact_graphs=False, reference_cache='/run/openclaw/horde/warpack-fem-reference-cache-175')
+
+    def create_solver(config):
+        required = ("public_api", "batched_products", "batched_cg", "reuse_x_image")
+        if not all(getattr(config, name) for name in required) or config.preconditioner != "fsai":
+            raise ValueError("profile requires the public batched FSAI/CG composition with image reuse")
+        if config.active_search_bucket_size <= 0 or config.native_products:
+>           raise ValueError("profile requires active search and batched products")
+E           ValueError: profile requires active search and batched products
+
+benchmarks/experimental/profile_active_block.py:68: ValueError
+__________ test_branch_index_contract_precedes_instrumentation[False] __________
+
+active = False
+
+    @pytest.mark.parametrize("active", [False, True])
+    def test_branch_index_contract_precedes_instrumentation(active):
+>       solver, _ = fixture(12, active)
+
+tests/test_legacy_block_profile.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_legacy_block_profile.py:30: in fixture
+    return create_solver(SimpleNamespace(**config))[:2]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+config = namespace(case='clamped_consistent', side=2, modes=6, width=12, initial_pool_width=None, steps=300, shift=0.01, fsai_w...first_whitening='default', compact_graphs=False, reference_cache='/run/openclaw/horde/warpack-fem-reference-cache-175')
+
+    def create_solver(config):
+        required = ("public_api", "batched_products", "batched_cg", "reuse_x_image")
+        if not all(getattr(config, name) for name in required) or config.preconditioner != "fsai":
+            raise ValueError("profile requires the public batched FSAI/CG composition with image reuse")
+        if config.active_search_bucket_size <= 0 or config.native_products:
+>           raise ValueError("profile requires active search and batched products")
+E           ValueError: profile requires active search and batched products
+
+benchmarks/experimental/profile_active_block.py:68: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_legacy_block_profile.py::test_static_and_active_steps_preserve_complete_solves_and_wrappers[12-False]
+FAILED tests/test_legacy_block_profile.py::test_static_and_active_steps_preserve_complete_solves_and_wrappers[104-False]
+FAILED tests/test_legacy_block_profile.py::test_branch_index_contract_precedes_instrumentation[False]
+3 failed, 12 passed in 13.42s
