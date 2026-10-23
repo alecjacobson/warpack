@@ -1,0 +1,66 @@
+"""Direct triangular solve with an explicit physical-column tile width."""
+
+import functools
+
+import warp as wp
+
+from warpack import BlockLOBPCG
+from warpack import kernels as K
+
+
+@functools.lru_cache(None)
+def column_kernel(column_tile):
+    if column_tile not in (32, 64, 128):
+        raise ValueError("column_tile must be 32, 64 or 128")
+    cols = wp.constant(column_tile)
+
+    @wp.kernel(enable_backward=False, module="unique")
+    def compute(q: wp.array2d[wp.float64], factor: wp.array2d[wp.float64]):
+        block, lane = wp.tid()
+        for panel in range((q.shape[0] + 7) // 8):
+            product = wp.tile_zeros(shape=(8, cols), dtype=wp.float64)
+            for previous in range(panel):
+                a = wp.tile_load(factor, shape=(8, 8), offset=(panel * 8, previous * 8))
+                b = wp.tile_load(q, shape=(8, cols), offset=(previous * 8, block * cols))
+                wp.tile_matmul(a, b, product)
+            rhs = wp.tile_load(q, shape=(8, cols), offset=(panel * 8, block * cols))
+            residual = rhs - product
+            values = wp.tile_zeros(shape=wp.static(8 * cols), dtype=wp.float64, storage="shared")
+            wp.tile_assign(values, wp.tile_reshape(residual, shape=(wp.static(8 * cols),)))
+            for row in range(8):
+                absolute = panel * 8 + row
+                value = wp.tile_extract(values, row * cols + lane)
+                if absolute < q.shape[0]:
+                    for previous in range(row):
+                        value -= factor[absolute, panel * 8 + previous] * wp.tile_extract(
+                            values, previous * cols + lane
+                        )
+                    value /= factor[absolute, absolute]
+                wp.tile_scatter_masked(values, row * cols + lane, value, True)
+            wp.tile_store(
+                q, wp.tile_reshape(values, shape=(8, cols)), offset=(panel * 8, block * cols)
+            )
+            # Complete all global stores before this block loads the solved panel in
+            # the next iteration. Blocks never share physical columns.
+            wp.tile_scatter_masked(values, lane, wp.float64(0.0), True)
+
+    return compute
+
+
+class ColumnTriangularBlock(BlockLOBPCG):
+    def __init__(self, *args, column_tile=64, **kwargs):
+        self._column_tile = column_tile
+        self._column_kernel = column_kernel(column_tile)
+        super().__init__(*args, **kwargs)
+
+    def launch(self, kernel, shape, args):
+        if kernel is K.triangular:
+            wp.launch_tiled(
+                self._column_kernel,
+                dim=(args[0].shape[1] + self._column_tile - 1) // self._column_tile,
+                inputs=args,
+                block_dim=self._column_tile,
+                device=self.device,
+            )
+        else:
+            super().launch(kernel, shape, args)

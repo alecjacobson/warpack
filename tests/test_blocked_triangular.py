@@ -12,7 +12,7 @@ from tests.test_triangular_rotate import (
 
 
 @pytest.mark.parametrize("width", [7, 8, 9, 52, 104, 204])
-def test_equations_strides_and_replay(width):
+def test_equations_strides_and_replay(width, columns=32):
     n = 77
     rng = np.random.default_rng(1173)
     lower = np.tril(rng.normal(size=(width, width)) * 0.05, -1) + np.eye(width)
@@ -23,7 +23,12 @@ def test_equations_strides_and_replay(width):
     q.assign(rng.normal(size=(width, n)))
 
     def run():
-        wp.launch_tiled(blocked_triangular, dim=(n + 31) // 32, inputs=[q, factor], block_dim=32)
+        wp.launch_tiled(
+            blocked_triangular,
+            dim=(n + columns - 1) // columns,
+            inputs=[q, factor],
+            block_dim=columns,
+        )
 
     run()
     wp.synchronize()
@@ -53,7 +58,7 @@ def test_full_two_pass_stage(width, cached):
 
 
 @pytest.mark.parametrize("width", [7, 104, 204])
-def test_unused_upper_factor_triangle_is_never_read(width):
+def test_unused_upper_factor_triangle_is_never_read(width, columns=32):
     n = 67
     rng = np.random.default_rng(8173)
     lower = np.tril(rng.normal(size=(width, width)) * 0.05, -1) + np.eye(width)
@@ -62,7 +67,9 @@ def test_unused_upper_factor_triangle_is_never_read(width):
     factor = wp.array(poisoned, dtype=wp.float64)
     source = rng.normal(size=(width, n))
     q = wp.array(source, dtype=wp.float64)
-    wp.launch_tiled(blocked_triangular, dim=(n + 31) // 32, inputs=[q, factor], block_dim=32)
+    wp.launch_tiled(
+        blocked_triangular, dim=(n + columns - 1) // columns, inputs=[q, factor], block_dim=columns
+    )
     result = q.numpy()
     assert np.isfinite(result).all()
     assert la.norm(lower @ result - source) / la.norm(source) < 1e-13

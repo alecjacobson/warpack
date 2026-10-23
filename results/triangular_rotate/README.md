@@ -201,3 +201,57 @@ unread NaN-poisoned upper factor triangles, complete small FEM families with
 both history policies, and changed coupled mass/constraints/clustered modes.
 The original triangular path, both whitening passes and all stopping thresholds
 remain unchanged in the installed library.
+
+### Larger physical-column tiles and the copy-out race (#178)
+
+The first 64-column large-shape trial **failed accuracy** on every candidate
+output: M-orthogonality errors 0.0034–0.0061 and cached-image errors 0.0096–0.0127,
+despite status 0. The 12 serial controls passed. Its [rejected report](columns64-large-a1.json)
+exits nonzero and is not timing evidence. Earlier 42-case pinned/stock tests
+covered strided/odd storage but missed this larger dense, even-stride path.
+
+The post-store scratch write could race with Warp's vectorized shared-to-global
+copy: one thread may copy two doubles owned by different lanes. The scatter
+writes before its trailing barrier. Replace that scratch mutation with a
+masked-off scatter, which supplies a barrier without overwriting any entry.
+The [archived failing source](validation/columns-unfixed-source.txt) matches the
+original report hash. A [reduced identity-solve test](validation/copyout-reproducer.log)
+reproduces 512 corrupt entries out of 8,478,720 at 70,656 columns. The installed
+library's serial triangular kernel was never changed by this experiment.
+
+After the fix, **46 tests pass on both pinned and stock Warp**, including repeated
+changed identity solves at dense even shapes with 64/128 threads, original
+partial/strided shapes, unused NaN upper factor entries, coupled/scaled mass and
+both full QR passes. [Pinned checks](validation/columns-fixed-tests.log),
+[stock checks](validation/columns-fixed-stock-tests.log).
+
+All **192 fresh first/measured component outputs pass** after the fix, with
+clean occupancy and matched source/input/dependency identities. The timings
+below are exclusively the corrected implementation:
+
+| Physical columns | Rows | Width/input | Original stage ms | Corrected blocked stage ms |
+|---|---:|---|---:|---:|
+|64|34560|104/random|6.546|6.944|
+|64|34560|104/near_orthogonal|6.543|7.007|
+|64|34560|120/random|8.678|9.196|
+|64|34560|120/near_orthogonal|8.680|9.191|
+|64|34560|204/random|26.177|27.161|
+|64|34560|204/near_orthogonal|26.205|27.072|
+|64|70656|120/random|14.769|18.198|
+|64|70656|120/near_orthogonal|14.726|18.178|
+|128|34560|104/random|6.530|6.089|
+|128|34560|104/near_orthogonal|6.547|6.020|
+|128|34560|120/random|8.684|7.947|
+|128|34560|120/near_orthogonal|8.682|7.961|
+|128|34560|204/random|26.198|23.484|
+|128|34560|204/near_orthogonal|26.192|23.374|
+|128|70656|120/random|14.764|15.887|
+|128|70656|120/near_orthogonal|14.780|15.886|
+
+64-column tiles are slower throughout. 128-column tiles help the smaller matrix
+but still lose on 70,656 rows at width 120. Neither is promoted or sent to
+whole-solve runs. Fixed raw controls:
+[64/small](columns64-fixed-a1.json), [64/large](columns64-large-fixed-a1.json),
+[128/small](columns128-fixed-a1.json), [128/large](columns128-large-fixed-a1.json).
+Original reports without `fixed` remain archived; their implementation had the
+identified race, even where that particular run passed its physical checks.

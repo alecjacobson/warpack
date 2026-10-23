@@ -1,0 +1,47 @@
+..F
+=================================== FAILURES ===================================
+__________ test_identity_solve_survives_vectorized_copyout[70656-64] ___________
+
+n = 70656, columns = 64
+
+    @pytest.mark.parametrize("columns", [64, 128])
+    @pytest.mark.parametrize("n", [1024, 70656])
+    def test_identity_solve_survives_vectorized_copyout(n, columns):
+        width = 120
+        source = np.random.default_rng(178).normal(size=(width, n))
+        q = wp.array(source, dtype=wp.float64)
+        factor = wp.array(np.eye(width), dtype=wp.float64)
+        kernel = column_kernel(columns)
+    
+        def run():
+            wp.launch_tiled(
+                kernel, dim=(n + columns - 1) // columns, inputs=[q, factor], block_dim=columns
+            )
+    
+        run()
+        wp.synchronize()
+        with wp.ScopedCapture() as capture:
+            run()
+        for scale in [1.0, -0.75, 1.25, 1.0, 0.5]:
+            current = scale * source
+            q.assign(current)
+            wp.capture_launch(capture.graph)
+>           np.testing.assert_array_equal(q.numpy(), current)
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 512 / 8478720 (0.00604%)
+E           Max absolute difference among violations: 3.03049709
+E           Max relative difference among violations: 1.
+E            ACTUAL: array([[-0.104306, -0.618863,  0.035787, ..., -0.275571, -0.154044,
+E                    0.024052],
+E                  [-1.093901,  2.003343,  1.47888 , ..., -0.067506, -1.112875,...
+E            DESIRED: array([[-0.104306, -0.618863,  0.035787, ..., -0.275571, -0.154044,
+E                    0.024052],
+E                  [-1.093901,  2.003343,  1.47888 , ..., -0.067506, -1.112875,...
+
+tests/test_triangular_copyout.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_triangular_copyout.py::test_identity_solve_survives_vectorized_copyout[70656-64]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 1.39s
