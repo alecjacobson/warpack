@@ -1,0 +1,41 @@
+"""Stress allocator reuse around the unchanged captured mass-QR stage fixture."""
+import gc,inspect,json,sys
+import numpy as np
+import warp as wp
+from tests import test_triangular_rotate as stage
+from benchmarks.experimental.register_triangular import RegisterTriangularBlock
+from benchmarks.experimental.ritz_image_refresh import FreshRitzImageBlock
+
+original=stage.test_orthogonalization_with_changed_mass_scaling_and_cached_images
+source=inspect.getsource(original)
+replacement='''status_value = solver.status.numpy()[0]
+            if status_value:
+                diagnostic = dict(kind=kind, width=width, cached=cached, constructor=type(solver).__name__, status=int(status_value))
+                for field in ['gx', 'lx', 'xscale', 'sx']:
+                    array = getattr(solver, field).numpy()
+                    diagnostic[field] = dict(finite=bool(np.isfinite(array).all()), minimum=float(np.nanmin(array)), maximum=float(np.nanmax(array)))
+                    if field in ['gx', 'lx']:
+                        diagnostic[field]['diagonal'] = np.diag(array).tolist()
+                diagnostic['mass_matches'] = bool(np.array_equal(mass.values.numpy()[:len(m.data)], m.data))
+                print('ORTHOGONALIZATION_FAILURE ' + json.dumps(diagnostic), flush=True)
+            assert status_value == 0'''
+stage.__dict__['json']=json
+exec(compile(source.replace('assert solver.status.numpy()[0] == 0',replacement),str(__file__), 'exec'),stage.__dict__)
+wp.init();passed=failed=0
+for iteration in range(3):
+ for width in [96,104,120,204]:
+  n=3*width+7
+  for cached in [False,True]:
+   for candidate in [RegisterTriangularBlock,FreshRitzImageBlock,stage.AllSizes,stage.AllSizesLower]:
+    poison=[wp.full(shape,float('nan'),dtype=wp.float64,device='cuda:0') for shape in [(width,n),(3*width,n),(width,width),(width,width),(width,width)]]
+    wp.synchronize_device('cuda:0');del poison;gc.collect()
+    try:
+     stage.test_orthogonalization_with_changed_mass_scaling_and_cached_images(width,cached,candidate)
+     passed+=1
+    except AssertionError:
+     failed+=1
+     print('failed fixture',iteration,width,cached,candidate.__name__,flush=True)
+     if failed>=4:raise
+  print('completed',iteration,width,'passed',passed,'failed',failed,flush=True)
+print(json.dumps(dict(passed=passed,failed=failed)),flush=True)
+raise SystemExit(bool(failed))

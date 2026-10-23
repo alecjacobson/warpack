@@ -1,0 +1,21 @@
+import fcntl,hashlib,json,os,subprocess,sys,time
+from pathlib import Path
+root=Path.cwd()
+while True:
+ p=root/'build/projection-production-stock-tests.log'
+ last=(p.read_text().strip().splitlines() or [''])[-1] if p.exists() else ''
+ if 'failed' in last or 'error' in last:raise SystemExit('Stock regressions failed')
+ if '94 passed, 7 skipped' in last:break
+ time.sleep(10)
+assert '101 passed' in (root/'build/projection-production-focus-tests.log').read_text()
+assert hashlib.sha256((root/'build/current_fsai.py').read_bytes()).hexdigest()=='584e0fb277ae78d0f6e382b551898831680275396aacbcfb10e948961e141c8c'
+identity={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for folder in ['warpack','tests','benchmarks'] for p in (root/folder).rglob('*.py')}
+(root/'build/projection-full-source-identity.json').write_text(json.dumps(identity,indent=2)+'\n')
+env=os.environ|dict(PYTHONPATH='/run/openclaw/horde/warpack-fsai-promotion:'+str(root),WARP_CACHE_PATH='/run/openclaw/horde/warpack-current-kernel-cache',OPENBLAS_NUM_THREADS='4',OMP_NUM_THREADS='4',WARPACK_ANVIL_INPUTS='/run/openclaw/horde/warpack-anvil-inputs-142.npz')
+with open('/run/openclaw/horde/warpack-gpu-work.lock','a') as lock:
+ fcntl.flock(lock,fcntl.LOCK_EX)
+ target=root/'build/projection-production-full-tests.log';assert not target.exists()
+ with target.open('w') as output:
+  code=subprocess.call(['timeout','3600','taskset','-c','8-11',sys.executable,'-m','pytest','-q','--junitxml=build/projection-production-full.xml'],env=env,stdout=output,stderr=subprocess.STDOUT)
+ assert all(hashlib.sha256((root/name).read_bytes()).hexdigest()==digest for name,digest in identity.items()),'Sources changed during full regression'
+ raise SystemExit(code)

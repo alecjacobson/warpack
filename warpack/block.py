@@ -648,11 +648,17 @@ class BlockLOBPCG:
 
     def subtract(self, basis, coeff, target, scratch):
         if self.fused_updates:
-            from .block_products import subtract_projection
-
-            wp.launch_tiled(
+            from .block_products import (
+                _use_wide_projection,
                 subtract_projection,
-                dim=((target.shape[0] + 3) // 4, (self.n + 31) // 32),
+                wide_subtract_projection,
+            )
+
+            wide = _use_wide_projection(self)
+            rows = 8 if wide else 4
+            wp.launch_tiled(
+                wide_subtract_projection if wide else subtract_projection,
+                dim=((target.shape[0] + rows - 1) // rows, (self.n + 31) // 32),
                 inputs=[basis, coeff, target],
                 block_dim=128,
                 device=self.device,

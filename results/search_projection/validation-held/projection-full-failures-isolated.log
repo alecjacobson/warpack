@@ -1,0 +1,870 @@
+.........F......FFF...FF................F..F....F.FF......F.             [100%]
+=================================== FAILURES ===================================
+_____________________ test_full_two_pass_stage[False-120] ______________________
+
+width = 120, cached = False
+
+    @pytest.mark.parametrize("width", [52, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_full_two_pass_stage(width, cached):
+>       check_full_stage(width, cached, RegisterTriangularBlock)
+
+tests/test_register_triangular.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 120, cached = False
+candidate = <class 'benchmarks.experimental.register_triangular.RegisterTriangularBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module warpack.kernels 31967e5 load on device 'cuda:0' took 2.67 ms  (cached)
+Module packed_cholesky_kernel__locals__compute_40149db3 d6d4360 load on device 'cuda:0' took 1.89 ms  (cached)
+Module warpack._triangular 170adb5 load on device 'cuda:0' took 0.57 ms  (cached)
+__________________________ test_full_stage[False-104] __________________________
+
+width = 104, cached = False
+
+    @pytest.mark.parametrize("width", [24, 96, 104, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_full_stage(width, cached):
+>       check_stage(width, cached, FreshRitzImageBlock)
+
+tests/test_ritz_image_refresh.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 104, cached = False
+candidate = <class 'benchmarks.experimental.ritz_image_refresh.FreshRitzImageBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module packed_cholesky_kernel__locals__compute_8e6cb7f1 e257598 load on device 'cuda:0' took 0.99 ms  (cached)
+__________________________ test_full_stage[False-120] __________________________
+
+width = 120, cached = False
+
+    @pytest.mark.parametrize("width", [24, 96, 104, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_full_stage(width, cached):
+>       check_stage(width, cached, FreshRitzImageBlock)
+
+tests/test_ritz_image_refresh.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 120, cached = False
+candidate = <class 'benchmarks.experimental.ritz_image_refresh.FreshRitzImageBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+__________________________ test_full_stage[False-204] __________________________
+
+width = 204, cached = False
+
+    @pytest.mark.parametrize("width", [24, 96, 104, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_full_stage(width, cached):
+>       check_stage(width, cached, FreshRitzImageBlock)
+
+tests/test_ritz_image_refresh.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 204, cached = False
+candidate = <class 'benchmarks.experimental.ritz_image_refresh.FreshRitzImageBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+__________________________ test_full_stage[True-120] ___________________________
+
+width = 120, cached = True
+
+    @pytest.mark.parametrize("width", [24, 96, 104, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_full_stage(width, cached):
+>       check_stage(width, cached, FreshRitzImageBlock)
+
+tests/test_ritz_image_refresh.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 120, cached = True
+candidate = <class 'benchmarks.experimental.ritz_image_refresh.FreshRitzImageBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+__________________________ test_full_stage[True-204] ___________________________
+
+width = 204, cached = True
+
+    @pytest.mark.parametrize("width", [24, 96, 104, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_full_stage(width, cached):
+>       check_stage(width, cached, FreshRitzImageBlock)
+
+tests/test_ritz_image_refresh.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 204, cached = True
+candidate = <class 'benchmarks.experimental.ritz_image_refresh.FreshRitzImageBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+______________________ test_shared_full_stage[False-204] _______________________
+
+width = 204, cached = False
+
+    @pytest.mark.parametrize("width", [52, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_shared_full_stage(width, cached):
+>       original.check_full_stage(width, cached, SharedTriangularBlock)
+
+tests/test_shared_triangular.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 204, cached = False
+candidate = <class 'benchmarks.experimental.shared_triangular.SharedTriangularBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+_______________________ test_shared_full_stage[True-204] _______________________
+
+width = 204, cached = True
+
+    @pytest.mark.parametrize("width", [52, 120, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_shared_full_stage(width, cached):
+>       original.check_full_stage(width, cached, SharedTriangularBlock)
+
+tests/test_shared_triangular.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+width = 204, cached = True
+candidate = <class 'benchmarks.experimental.shared_triangular.SharedTriangularBlock'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+_ test_orthogonalization_with_changed_mass_scaling_and_cached_images[False-104-AllSizes] _
+
+width = 104, cached = False
+candidate = <class 'test_triangular_rotate.AllSizes'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+_ test_orthogonalization_with_changed_mass_scaling_and_cached_images[False-204-AllSizes] _
+
+width = 204, cached = False
+candidate = <class 'test_triangular_rotate.AllSizes'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+_ test_orthogonalization_with_changed_mass_scaling_and_cached_images[False-204-AllSizesLower] _
+
+width = 204, cached = False
+candidate = <class 'test_triangular_rotate.AllSizesLower'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+_ test_orthogonalization_with_changed_mass_scaling_and_cached_images[True-204-AllSizes] _
+
+width = 204, cached = True
+candidate = <class 'test_triangular_rotate.AllSizes'>
+
+    @pytest.mark.parametrize("candidate", [AllSizes, AllSizesLower])
+    @pytest.mark.parametrize("width", [8, 52, 104, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, cached, candidate):
+        n = 3 * width + 7
+        rng = np.random.default_rng(173)
+        source = rng.normal(size=(width, n))
+        diagonal = np.linspace(1, 4, n)
+        a = sp.diags(diagonal, format="csr")
+        mass_host = sp.diags(
+            [-0.1 * np.ones(n - 1), np.linspace(1, 2, n), -0.1 * np.ones(n - 1)],
+            [-1, 0, 1],
+            format="csr",
+        )
+        mass = matrix(mass_host)
+        solvers = []
+        graphs = []
+        for constructor in [BlockLOBPCG, candidate]:
+            solver = constructor(
+                SparseOperator(matrix(a)),
+                4,
+                width,
+                mass=SparseOperator(mass),
+                reuse_operator_images=cached,
+            )
+            solver._image_reuse_active = cached
+            solver.sx.assign(source)
+            if cached:
+                solver._image_x.assign(source * diagonal)
+            solver.orthogonalize_x()
+            wp.synchronize()
+            with wp.ScopedCapture() as capture:
+                solver.status.zero_()
+                solver.orthogonalize_x()
+            solvers.append(solver)
+            graphs.append(capture.graph)
+        for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:
+            current = source.copy()
+            m = mass_host if kind != "changed_mass" else 1.25 * mass_host
+            if kind == "scaled":
+                current *= np.geomspace(1e-60, 1e60, width)[:, None]
+            elif kind == "correlated":
+                current[1] = current[0] + 1e-3 * current[1]
+            elif kind == "equilibrated_mass":
+                d = np.geomspace(1e-6, 1e6, n)
+                m = (sp.diags(d) @ mass_host @ sp.diags(d)).tocsr()
+                m.sort_indices()
+                current /= d[None, :]
+            mass.values.assign(m.data)
+            outputs = []
+            for solver, graph in zip(solvers, graphs):
+                solver.sx.assign(current)
+                if cached:
+                    solver._image_x.assign(current * diagonal)
+                wp.capture_launch(graph)
+>               assert solver.status.numpy()[0] == 0
+E               assert np.int32(1) == 0
+
+tests/test_triangular_rotate.py:78: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_register_triangular.py::test_full_two_pass_stage[False-120]
+FAILED tests/test_ritz_image_refresh.py::test_full_stage[False-104] - assert ...
+FAILED tests/test_ritz_image_refresh.py::test_full_stage[False-120] - assert ...
+FAILED tests/test_ritz_image_refresh.py::test_full_stage[False-204] - assert ...
+FAILED tests/test_ritz_image_refresh.py::test_full_stage[True-120] - assert n...
+FAILED tests/test_ritz_image_refresh.py::test_full_stage[True-204] - assert n...
+FAILED tests/test_shared_triangular.py::test_shared_full_stage[False-204] - a...
+FAILED tests/test_shared_triangular.py::test_shared_full_stage[True-204] - as...
+FAILED tests/test_triangular_rotate.py::test_orthogonalization_with_changed_mass_scaling_and_cached_images[False-104-AllSizes]
+FAILED tests/test_triangular_rotate.py::test_orthogonalization_with_changed_mass_scaling_and_cached_images[False-204-AllSizes]
+FAILED tests/test_triangular_rotate.py::test_orthogonalization_with_changed_mass_scaling_and_cached_images[False-204-AllSizesLower]
+FAILED tests/test_triangular_rotate.py::test_orthogonalization_with_changed_mass_scaling_and_cached_images[True-204-AllSizes]
+12 failed, 48 passed in 17.52s

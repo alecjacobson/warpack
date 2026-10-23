@@ -11,7 +11,7 @@ from benchmarks.experimental import compare_block
 from benchmarks.experimental.projection_tiles import ProjectionBlock
 from benchmarks.source_provenance import source_manifest
 
-SETTINGS = {"original": 4, "r4": 4, "r8": 8, "r16": 16}
+SETTINGS = {"original": 4, "default": 8, "r4": 4, "r8": 8, "r16": 16}
 
 
 def main():
@@ -34,10 +34,11 @@ def main():
     if destination.out.exists():
         parser.error("require a new output path")
     original, manifest, argv = warpack.BlockLOBPCG, compare_block.source_manifest, sys.argv
-    base = original if choice.projection == "original" else ProjectionBlock
+    base = original if choice.projection in ("original", "default") else ProjectionBlock
     error = None
 
     class Tracking(base):
+        _wide_projection_enabled = choice.projection == "default"
         _projection_rows = SETTINGS[choice.projection]
 
         def __init__(self, *args, **kwargs):
@@ -63,7 +64,8 @@ def main():
         report["projection_rows"] = SETTINGS[choice.projection]
         report["independent_reference_cache"] = cache.records
         report["projection_scope"] = (
-            "Original four-row subtraction or benchmark-only 4/8/16-row output tiles. "
+            "Original four-row subtraction, installed guarded default, or benchmark-only "
+            "4/8/16-row output tiles. "
             "Inner tile 8, output columns 32 and 128 threads are fixed. Both projection "
             "passes, all installed QR/whitening/paired-rotation kernels, rank/stopping "
             "and physical gates are unchanged. Each worker owns its preconditioner; "

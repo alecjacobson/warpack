@@ -152,3 +152,30 @@ def _use_wide_paired_rotation(solver):
         and 24 <= solver.b <= 256
         and solver.n >= getattr(solver, "_wide_paired_rotation_minimum", 32768)
     )
+
+
+@wp.kernel(enable_backward=False)
+def wide_subtract_projection(
+    q: wp.array2d[wp.float64],
+    coeff: wp.array2d[wp.float64],
+    out: wp.array2d[wp.float64],
+):
+    i, j = wp.tid()
+    acc = wp.tile_zeros(shape=(8, 32), dtype=wp.float64)
+    for block in range((q.shape[0] + 7) // 8):
+        a = wp.tile_load(coeff, shape=(8, 8), offset=(i * 8, block * 8))
+        b = wp.tile_load(q, shape=(8, 32), offset=(block * 8, j * 32))
+        wp.tile_matmul(a, b, acc)
+    old = wp.tile_load(out, shape=(8, 32), offset=(i * 8, j * 32))
+    wp.tile_store(out, old - acc, offset=(i * 8, j * 32))
+
+
+def _use_wide_projection(solver):
+    """Static capture configuration; preserve the original unqualified path."""
+    return (
+        getattr(solver, "_wide_projection_enabled", True)
+        and solver.device.is_cuda
+        and solver.device.arch == 89
+        and 24 <= solver.b <= 256
+        and solver.n >= getattr(solver, "_wide_projection_minimum", 32768)
+    )

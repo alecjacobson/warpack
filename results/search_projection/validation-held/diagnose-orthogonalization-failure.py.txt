@@ -1,0 +1,23 @@
+"""Add failure context at the existing host assertion, without tracing replay."""
+import inspect,json,sys
+from pathlib import Path
+import numpy as np
+import pytest
+from tests import test_triangular_rotate as stage
+
+original=stage.test_orthogonalization_with_changed_mass_scaling_and_cached_images
+source=inspect.getsource(original)
+replacement='''status_value = solver.status.numpy()[0]
+            if status_value:
+                diagnostic = dict(kind=kind, width=width, cached=cached, constructor=type(solver).__name__, status=int(status_value))
+                for field in ['gx', 'lx', 'xscale', 'sx']:
+                    array = getattr(solver, field).numpy()
+                    diagnostic[field] = dict(finite=bool(np.isfinite(array).all()), minimum=float(np.nanmin(array)), maximum=float(np.nanmax(array)))
+                    if field in ['gx', 'lx']:
+                        diagnostic[field]['diagonal'] = np.diag(array).tolist()
+                print('ORTHOGONALIZATION_FAILURE ' + json.dumps(diagnostic), flush=True)
+            assert status_value == 0'''
+assert 'assert solver.status.numpy()[0] == 0' in source
+stage.__dict__['json']=json
+exec(compile(source.replace('assert solver.status.numpy()[0] == 0',replacement),str(Path(__file__)), 'exec'),stage.__dict__)
+raise SystemExit(pytest.main(sys.argv[1:]))

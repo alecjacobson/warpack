@@ -173,6 +173,7 @@ def capture_profile(solver, index=None):
             paired_ritz_rotation,
             subtract_projection,
             wide_paired_ritz_rotation,
+            wide_subtract_projection,
         )
 
         original_tiled = wp.launch_tiled
@@ -180,7 +181,7 @@ def capture_profile(solver, index=None):
         def instrument_tiled(kernel, *args, **kwargs):
             if kernel in (paired_ritz_rotation, wide_paired_ritz_rotation):
                 return events.wrap("paired_ritz_rotation", original_tiled)(kernel, *args, **kwargs)
-            if kernel is subtract_projection:
+            if kernel in (subtract_projection, wide_subtract_projection):
                 return events.wrap("subtract_projection", original_tiled)(kernel, *args, **kwargs)
             return original_tiled(kernel, *args, **kwargs)
 
