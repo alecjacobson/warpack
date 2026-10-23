@@ -255,3 +255,32 @@ whole-solve runs. Fixed raw controls:
 [128/small](columns128-fixed-a1.json), [128/large](columns128-large-fixed-a1.json).
 Original reports without `fixed` remain archived; their implementation had the
 identified race, even where that particular run passed its physical checks.
+
+### Full-column shared recurrence: rejected screen
+
+A separate one-warp-per-32-columns variant caches all earlier solved values in
+shared memory while retaining the original serial subtraction order. It forms no
+inverse, adds no global workspace and retains both complete QR passes. Independent
+kernel checks include exact equality with the original recurrence, strided/tail
+storage, NaN-poisoned unused upper factors, changed/scaled graph replays and
+coupled mass with cached images. **18 pinned tests pass**; these same 18 stock
+tests pass in the combined 32-case shared/register transcript.
+
+All **96 first/measured stage outputs pass**, with current source/input/dependency
+identities and clean occupancy. Nevertheless the candidate is consistently slower:
+
+| Rows | Width/input | Original stage ms | Shared stage ms |
+|---:|---|---:|---:|
+|34560|104/random|6.534|7.008|
+|34560|104/near_orthogonal|6.534|7.010|
+|34560|120/random|8.678|9.235|
+|34560|120/near_orthogonal|8.683|9.230|
+|34560|204/random|26.225|43.452|
+|34560|204/near_orthogonal|26.232|43.535|
+|70656|120/random|14.744|18.366|
+|70656|120/near_orthogonal|14.762|18.368|
+
+No whole-solve runs or promotion are justified. This screen does not establish
+a hardware occupancy explanation for the slowdown. [Smaller stage](shared-a1.json),
+[larger stage](shared-large-a1.json), [pinned tests](validation/shared-tests.log),
+[combined stock tests](validation/shared-register-stock-tests.log).
