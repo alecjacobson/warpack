@@ -66,6 +66,39 @@ remain necessary. The additional workspace is `8 * width²` bytes, reaching
 2 MiB at width 512. [External occupancy](isolated/factor-a2.occupancy.json)
 reports no competing GPU process throughout this worker.
 
+## Complete 200-mode FEM qualification
+
+The 34,560-DOF consistent-mass cantilever now passes all 200 requested modes
+with width 204, FSAI 32 and FP32-CG 25. The candidate and default workers have
+identical actual matrix/reference/start identities, transitive sources and
+dependencies; only the projected-factor selector changes. Both workers pass
+three measured Warp and three CuPy solves, with no observed GPU contention.
+
+| Factor | Warp construction + capture (s) | Warp warm median (s) | CuPy warm median (s) |
+| --- | ---: | ---: | ---: |
+| Current default (serial at 204) | 25.0774 | 15.6365 | 6.4890 |
+| Global-workspace candidate | 18.7342 | 11.2677 | 6.3294 |
+
+The candidate reduces complete Warp warm solve time by **27.9%**. It remains
+slower than this accepted CuPy comparator, so the broader projected-work gap
+stays open. Worst Warp original residuals are 6.81e-12/6.84e-12
+(default/candidate); requested-subspace errors are below 2.35e-11. All 200
+native counts, spectrum, mass-orthogonality and physical checks pass. The
+candidate's separate one-repeat accuracy screen also passes all 200 modes.
+
+Construction/capture is one instance per worker; warmup and validation are
+excluded from warm timing. CuPy uses the same supplied preconditioner, with
+additional adapter/upload costs 0.1040/0.1081 s, not standalone setup. Its native
+absolute tolerance is 1e-10 across 204 columns; Warp's normalized bound is 1e-11
+on the requested 200, in addition to common physical gates. Additional factor
+workspace is 332,928 bytes at this width.
+
+[Default](full/default-a1.json), [candidate](full/global-a1.json),
+[accuracy screen](full/global-accuracy-a1.json),
+[controlled comparison](full/comparison.json), and adjacent occupancy/summary
+records preserve the full evidence. Production promotion still requires
+dispatch/fallback integration tests and fresh public-default regression controls.
+
 ## Drivers
 
 - `benchmarks.experimental.global_cholesky_compare`: isolated factor controls,
