@@ -80,10 +80,10 @@ RHS calls. Unfinished truncated preconditioner solves are distinct from failed
 outer eigensolves. The [Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
 provides a tested configuration and the required runtime.
 
-Device-selected CG buckets share maximum-width RHS/output packing storage.
-Their upstream CG workspaces remain independent. This reduces memory without
-changing stopping tests or the public `for_width` behavior;
-[allocation controls](../results/cg_packing/README.md) quantify the savings.
+Device-selected CG buckets share maximum-width packing and adapter application
+storage. Upstream CG's internal workspaces and public `for_width` variants
+remain independent. This reduces memory without changing stopping tests;
+[allocation controls](../results/cg_adapter_storage/README.md) quantify the savings.
 
 For one-time ROM generation, `BlockLOBPCG(..., compact_projected_graphs=True)`
 reduces the graph construction work for wide projected solves. It records

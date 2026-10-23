@@ -74,7 +74,9 @@ class DeviceBucketedCG:
 
     Arrays keep fixed identities. Factors/working matrix are shared; packed
     RHS/output buffers share maximum-width storage across mutually exclusive
-    branches. Upstream CG workspaces remain distinct per bucket. Stats count
+    branches. Adapter input/output and sparse-application scratch also share
+    storage; upstream CG internal workspaces remain distinct per bucket. Public
+    for_width variants retain independent adapter storage. Stats count
     scheduled vector iterations, including padding within the selected bucket.
     `usage[:-1]` counts calls per bucket; `usage[-1]` sums active RHSs. Omitted
     rows receive zero correction, but remain in the outer Ritz basis. This is
@@ -83,6 +85,7 @@ class DeviceBucketedCG:
 
     requires_static_outer_capture = False
     _share_packing_storage = True
+    _share_adapter_storage = True
 
     def __init__(self, inverse, errors, tolerance, bucket_size=4):
         bucket_size = index(bucket_size)
@@ -116,7 +119,12 @@ class DeviceBucketedCG:
             rhs = wp.zeros((self.width, self.n), dtype=wp.float64, device=self.device)
             self._packing_storage = (rhs, wp.empty_like(rhs))
         for width in sizes:
-            state = inverse if width == self.width else inverse.for_width(width)
+            if width == self.width:
+                state = inverse
+            elif self._share_adapter_storage:
+                state = inverse._for_active_width(width)
+            else:
+                state = inverse.for_width(width)
             if self._packing_storage is None:
                 # Benchmark controls can retain the previous allocation policy.
                 rhs = wp.zeros((width, self.n), dtype=wp.float64, device=self.device)

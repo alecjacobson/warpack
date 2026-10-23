@@ -5,6 +5,7 @@ import functools
 import warp as wp
 
 from ._coalesced_fsai import csr_eight_rhs, transpose_axpby, transpose_rows
+from ._scratch import scratch
 
 
 @functools.lru_cache(None)
@@ -39,15 +40,17 @@ def bsr_eight_rhs(dtype):
 
 
 class CoalescedSparseApplication:
-    def __init__(self, matrix, width):
+    def __init__(self, matrix, width, _storage=None):
         if matrix.block_shape not in ((1, 1), (3, 3)) or matrix.shape[0] != matrix.shape[1]:
             raise ValueError("require square scalar or 3x3 BSR matrix")
         if matrix.row_counts is not None:
             raise ValueError("require compressed sparse rows")
         self.matrix, self.width = matrix, width
         self.n, self.device = matrix.shape[0], matrix.device
-        self.first = wp.empty((self.n, width), dtype=matrix.scalar_type, device=matrix.device)
-        self.second = wp.empty_like(self.first)
+        self.first, self.second = (
+            scratch(_storage, name, (self.n, width), matrix.scalar_type, matrix.device)
+            for name in ("matrix_first", "matrix_second")
+        )
 
     def matvec(self, x, y, z, alpha, beta):
         wp.launch_tiled(

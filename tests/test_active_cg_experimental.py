@@ -20,9 +20,18 @@ pytestmark = pytest.mark.skipif(
 @pytest.mark.parametrize("dtype", [wp.float32, wp.float64])
 @pytest.mark.parametrize("block", [1, 3])
 @pytest.mark.parametrize("in_place", [False, True])
-@pytest.mark.parametrize("layout", ["rows", "columns"])
+@pytest.mark.parametrize(
+    "matrix_layout, factor_layout, use_factor",
+    [
+        ("rows", "rows", False),
+        ("rows", "rows", True),
+        ("rows", "columns", True),
+        ("columns", "rows", True),
+        ("columns", "columns", True),
+    ],
+)
 def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
-    dtype, block, in_place, tmp_path, layout
+    dtype, block, in_place, tmp_path, matrix_layout, factor_layout, use_factor
 ):
     n, width = 45, 7
     a = sp.diags(
@@ -41,7 +50,7 @@ def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
         )
     values = wa.values.numpy().copy()
     tol = 1e-5 if dtype == wp.float32 else 1e-12
-    pre = linear.FSAI(wa, max_row_size=8, factor_dtype=wp.float32) if layout == "columns" else None
+    pre = linear.FSAI(wa, max_row_size=8, factor_dtype=wp.float32) if use_factor else None
     inverse = BatchedCGInverse(
         wa,
         width,
@@ -49,21 +58,55 @@ def test_active_bucket_reactivation_matrix_refresh_and_nested_graph(
         maxiter=50,
         working_dtype=dtype,
         preconditioner=pre,
-        fsai_layout=layout,
-        matrix_layout=layout,
+        fsai_layout=factor_layout,
+        matrix_layout=matrix_layout,
     )
     if inverse.requires_static_outer_capture:
         pytest.skip("upstream CG lacks preallocated loop control")
     errors = wp.zeros(width, dtype=wp.float64)
     solver = DeviceBucketedCG(inverse, errors, tolerance=1e-9, bucket_size=3)
-    # Packing uses two maximum-width allocations; upstream states stay independent.
+    # Packing and adapter scratch share backing; upstream internal CG storage
+    # and publicly requested for_width adapters retain independent buffers.
     rhs_store, out_store = solver._packing_storage
     assert rhs_store.shape == out_store.shape == (width, n)
     assert rhs_store.ptr != out_store.ptr
     assert {rhs.ptr for rhs in solver.rhs} == {rhs_store.ptr}
     assert {out.ptr for out in solver.outputs} == {out_store.ptr}
-    assert len({state.b.ptr for state in solver.states}) == len(solver.states)
-    assert len({state.x.ptr for state in solver.states}) == len(solver.states)
+    assert {state.b.ptr for state in solver.states} == {inverse.b.ptr}
+    assert {state.x.ptr for state in solver.states} == {inverse.x.ptr}
+    for attr in ("_r_and_z_buf", "_p_and_Ap"):
+        assert len({getattr(state.state, attr).ptr for state in solver.states}) == len(
+            solver.states
+        )
+    for attr in ("operator", "preconditioner"):
+        operations = [getattr(state, attr) for state in solver.states]
+        if operations[0] is None:
+            continue
+        if operations[0].coalesced is not None:
+            for name in ("first", "second"):
+                arrays = [getattr(op.coalesced, name) for op in operations]
+                assert len({array.ptr for array in arrays}) == 1
+                assert all(array.is_contiguous for array in arrays)
+        else:
+            for name in ("tmp", "out"):
+                arrays = [getattr(op, name, None) for op in operations]
+                if arrays[0] is not None:
+                    assert len({array.ptr for array in arrays}) == 1
+    independent = inverse.for_width(3)
+    assert independent.b.ptr != inverse.b.ptr and independent.x.ptr != inverse.x.ptr
+    if use_factor:
+        assert independent.single_preconditioner is inverse.single_preconditioner
+    for attr in ("operator", "preconditioner"):
+        public, original = getattr(independent, attr), getattr(inverse, attr)
+        if public is None:
+            continue
+        if public.coalesced is not None:
+            assert public.coalesced.first.ptr != original.coalesced.first.ptr
+            assert public.coalesced.second.ptr != original.coalesced.second.ptr
+        else:
+            assert public.tmp.ptr != original.tmp.ptr
+            if getattr(public, "out", None) is not None:
+                assert public.out.ptr != original.out.ptr
     x = wp.zeros((width, n), dtype=wp.float64)
     y = x if in_place else wp.empty_like(x)
     solver.apply(x, y)
@@ -182,3 +225,17 @@ def test_bucketed_eigensolver_keeps_complete_requested_space(metric, kind):
         assert la.norm(current @ vectors - (mass @ vectors) * out, axis=0).max() < 2e-8
         assert la.norm(vectors - wanted @ (wanted.T @ mass @ vectors)) < 1e-7
         wp.copy(starts, solver.x)
+
+
+def test_active_storage_sharing_preserves_custom_width_factory():
+    calls = []
+
+    class Custom(BatchedCGInverse):
+        def for_width(self, width):
+            calls.append(width)
+            return super().for_width(width)
+
+    base = Custom(matrix(sp.eye(12).tocsr()), 7, maxiter=2)
+    owner = DeviceBucketedCG(base, wp.zeros(7, dtype=wp.float64), 1e-9, bucket_size=3)
+    assert calls == [3, 6]
+    assert len({adapter.b.ptr for adapter in owner.states}) == 3

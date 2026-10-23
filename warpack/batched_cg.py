@@ -14,6 +14,7 @@ import warp as wp
 import warp.optim.linear as linear
 import warp.sparse as ws
 
+from ._scratch import scratch
 from .batched_sparse import BatchedSparseOperator
 from .batched_sparse import csr_block_product as product
 from .generalized import _cg_preallocates_loop_control
@@ -90,18 +91,18 @@ def bsr_product(dtype):
 class RepeatedOperator:
     """Same sparse operator on independent contiguous vector blocks."""
 
-    def __init__(self, matrix, width, offsets, layout="rows"):
+    def __init__(self, matrix, width, offsets, layout="rows", _storage=None):
         if layout not in ("rows", "columns"):
             raise ValueError("matrix layout must be rows or columns")
         self.coalesced = None
         if layout == "columns":
             from ._coalesced_operator import CoalescedSparseApplication
 
-            self.coalesced = CoalescedSparseApplication(matrix, width)
+            self.coalesced = CoalescedSparseApplication(matrix, width, _storage)
         self.matrix, self.width, self.n = matrix, width, matrix.shape[0]
         self.operator = BatchedSparseOperator(matrix) if matrix.scalar_type == wp.float64 else None
         self.tmp = (
-            wp.empty(width * self.n, dtype=matrix.scalar_type, device=matrix.device)
+            scratch(_storage, "matrix_tmp", width * self.n, matrix.scalar_type, matrix.device)
             if self.coalesced is None
             else None
         )
@@ -138,7 +139,17 @@ class RepeatedOperator:
 
 
 class RepeatedPreconditioner:
-    def __init__(self, preconditioner, width, n, offsets, device, dtype=wp.float64, layout="rows"):
+    def __init__(
+        self,
+        preconditioner,
+        width,
+        n,
+        offsets,
+        device,
+        dtype=wp.float64,
+        layout="rows",
+        _storage=None,
+    ):
         self.preconditioner, self.width, self.n = preconditioner, width, n
         self.coalesced = None
         if layout not in ("rows", "columns"):
@@ -146,11 +157,19 @@ class RepeatedPreconditioner:
         if layout == "columns":
             from ._coalesced_fsai import CoalescedFactorApplication
 
-            self.coalesced = CoalescedFactorApplication(preconditioner, width, n, device, dtype)
+            self.coalesced = CoalescedFactorApplication(
+                preconditioner, width, n, device, dtype, _storage
+            )
         self.tmp = (
-            wp.empty((width, n), dtype=dtype, device=device) if self.coalesced is None else None
+            scratch(_storage, "factor_tmp", (width, n), dtype, device)
+            if self.coalesced is None
+            else None
         )
-        self.out = wp.empty_like(self.tmp) if self.tmp is not None else None
+        self.out = (
+            scratch(_storage, "factor_out", (width, n), dtype, device)
+            if self.tmp is not None
+            else None
+        )
         self.linear = linear.LinearOperator(
             (width * n, width * n),
             dtype,
@@ -215,6 +234,7 @@ class BatchedCGPreconditioner:
         _working_matrix=None,
         fsai_layout="rows",
         matrix_layout="rows",
+        _storage=None,
     ):
         if not all(
             hasattr(linear.LinearOperator, attr) for attr in ("batch_offsets", "max_batch_length")
@@ -280,16 +300,27 @@ class BatchedCGPreconditioner:
             or working_matrix.row_counts is not None
         ):
             raise ValueError("incompatible shared working matrix")
-        self.operator = RepeatedOperator(working_matrix, width, self.offsets, matrix_layout)
+        self.operator = RepeatedOperator(
+            working_matrix, width, self.offsets, matrix_layout, _storage
+        )
         self.preconditioner = (
             RepeatedPreconditioner(
-                preconditioner, width, self.n, self.offsets, self.device, working_dtype, fsai_layout
+                preconditioner,
+                width,
+                self.n,
+                self.offsets,
+                self.device,
+                working_dtype,
+                fsai_layout,
+                _storage,
             )
             if preconditioner is not None
             else None
         )
-        self.b = wp.zeros(width * self.n, dtype=working_dtype, device=self.device)
-        self.x = wp.zeros_like(self.b)
+        self.b, self.x = (
+            scratch(_storage, name, width * self.n, working_dtype, self.device, zero=True)
+            for name in ("b", "x")
+        )
         self.stats = wp.zeros(4, dtype=wp.int32, device=self.device)
         self.state = linear.cg(
             self.operator.linear,
@@ -307,6 +338,27 @@ class BatchedCGPreconditioner:
 
     def for_width(self, width):
         """Independent CG workspaces sharing matrix topology/storage and factor."""
+        return self._for_width(width)
+
+    def _for_active_width(self, width):
+        # Respect custom public factories instead of bypassing their behavior.
+        if type(self).for_width is not BatchedCGPreconditioner.for_width:
+            return self.for_width(width)
+        storage = {"b": self.b, "x": self.x}
+        for prefix, operation in (("matrix", self.operator), ("factor", self.preconditioner)):
+            if operation is None:
+                continue
+            if operation.coalesced is not None:
+                for name in ("first", "second"):
+                    storage[f"{prefix}_{name}"] = getattr(operation.coalesced, name)
+            else:
+                for name in ("tmp", "out"):
+                    value = getattr(operation, name, None)
+                    if value is not None:
+                        storage[f"{prefix}_{name}"] = value
+        return self._for_width(width, storage)
+
+    def _for_width(self, width, storage=None):
         return BatchedCGPreconditioner(
             self.source_matrix,
             width,
@@ -318,6 +370,7 @@ class BatchedCGPreconditioner:
             _working_matrix=self.operator.matrix,
             fsai_layout=self.fsai_layout,
             matrix_layout=self.matrix_layout,
+            _storage=storage,
         )
 
     def reset_stats(self):

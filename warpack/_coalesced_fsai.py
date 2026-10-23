@@ -8,6 +8,8 @@ from typing import Any
 
 import warp as wp
 
+from ._scratch import scratch
+
 
 @wp.func
 def copy_value(value: Any):
@@ -96,13 +98,15 @@ def transpose_axpby(
 
 
 class CoalescedFactorApplication:
-    def __init__(self, preconditioner, width, n, device, dtype):
+    def __init__(self, preconditioner, width, n, device, dtype, _storage=None):
         self.preconditioner, self.width, self.n, self.device = preconditioner, width, n, device
         for factor in (preconditioner.G, preconditioner.GT):
             if factor.block_shape != (1, 1) or factor.shape != (n, n) or factor.device != device:
                 raise ValueError("require scalar FSAI factors on the working device")
-        self.first = wp.empty((n, width), dtype=dtype, device=device)
-        self.second = wp.empty_like(self.first)
+        self.first, self.second = (
+            scratch(_storage, name, (n, width), dtype, device)
+            for name in ("factor_first", "factor_second")
+        )
 
     def matvec(self, x, y, z, alpha, beta):
         rows = x.reshape((self.width, self.n))
