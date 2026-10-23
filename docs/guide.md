@@ -80,6 +80,13 @@ RHS calls. Unfinished truncated preconditioner solves are distinct from failed
 outer eigensolves. The [Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
 provides a tested configuration and the required runtime.
 
+For the tested 100/200-mode FEM configurations, `keep_history=False` reduces
+the projected work enough to outweigh additional outer iterations. It keeps all
+current Ritz vectors and compacts the R/P directions with the active residuals.
+[History-policy controls](../results/fem_100_modes/history-current/README.md)
+include setup, first solve, replay, CuPy comparisons and rigid/null-mode cases.
+The Anvil recipe retains `keep_history=True`; its workload favors that tradeoff.
+
 Device-selected CG buckets share maximum-width packing and adapter application
 storage. Upstream CG's internal workspaces and public `for_width` variants
 remain independent. This reduces memory without changing stopping tests;

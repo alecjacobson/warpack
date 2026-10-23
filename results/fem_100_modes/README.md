@@ -6,6 +6,10 @@ and an expanded ARPACK shift-invert reference. No external meshes are copied.
 Both native stopping and original requested-spectrum/subspace checks are
 required. The pinned upstream Warp FSAI/CG overlay is recorded in every worker.
 
+Current settings and comparisons: [compact search history](history-current/README.md),
+[fresh narrower CuPy controls](history-cupy/README.md), and
+[broader family qualification](history-families/README.md).
+
 Later follow-ups: [cooperative projected factors](../parallel_cholesky/README.md)
 and [free, disconnected and heterogeneous 100-mode cases](families-current/README.md).
 The original measurements below retain their historical implementation and
