@@ -1,0 +1,83 @@
+"""Controlled projected sweep-budget experiment for #170 (outside core)."""
+
+import warp as wp
+
+from warpack.projected import GlobalJacobi
+
+
+@wp.kernel
+def bounded_update(
+    h: wp.array2d[wp.float64],
+    sweeps: wp.array[wp.int32],
+    running: wp.array[wp.int32],
+    limit: int,
+):
+    block, lane = wp.tid()
+    n = h.shape[0]
+    off = wp.float64(0.0)
+    diagonal = wp.float64(0.0)
+    for entry in range(lane, n * n, 128):
+        i, j = entry // n, entry % n
+        value = wp.abs(h[i, j])
+        if not wp.isfinite(value):
+            off = wp.float64(wp.inf)
+        elif i == j:
+            diagonal = wp.max(diagonal, value)
+        else:
+            off = wp.max(off, value)
+    max_off = wp.tile_extract(wp.tile_max(wp.tile(off)), 0)
+    max_diagonal = wp.tile_extract(wp.tile_max(wp.tile(diagonal)), 0)
+    if lane == 0:
+        sweeps[0] += 1
+        running[0] = 0
+        if sweeps[0] < limit and (
+            not wp.isfinite(max_off) or max_off > wp.float64(2.0e-15) * max_diagonal
+        ):
+            running[0] = 1
+
+
+class BoundedJacobi(GlobalJacobi):
+    def __init__(self, h, v, cs, ss, partners, temp, vtemp, limit=60, resymmetrize=False):
+        if not 1 <= limit <= 120:
+            raise ValueError("sweep limit must be in 1..120")
+        super().__init__(h, v, cs, ss, partners, temp, vtemp)
+        self.limit = int(limit)
+        self.resymmetrize = bool(resymmetrize)
+
+    def _sweep(self):
+        from warpack import kernels as K
+
+        current_h, current_v = self.h, self.v
+        next_h, next_v = self.temp, self.vtemp
+        for r in range(self.n - 1):
+            wp.launch(
+                K.jacobi_pairs,
+                self.n // 2,
+                [current_h, self.cs, self.ss, self.partners, r],
+                device=self.device,
+            )
+            wp.launch(
+                K.jacobi_two_sided,
+                self.h.shape,
+                [current_h, current_v, next_h, next_v, self.cs, self.ss, self.partners],
+                device=self.device,
+            )
+            current_h, next_h = next_h, current_h
+            current_v, next_v = next_v, current_v
+        # Even projected dimensions have an odd number of rounds. Restore the
+        # public buffers once per sweep. Copy locations are fixed at setup;
+        # both copies execute on device inside the bounded convergence loop.
+        if current_h is not self.h:
+            wp.copy(self.h, current_h)
+            wp.copy(self.v, current_v)
+        if self.resymmetrize:
+            from warpack.block import symmetrize
+
+            wp.launch(symmetrize, self.h.shape, [self.h], device=self.device)
+        wp.launch_tiled(
+            bounded_update,
+            dim=1,
+            inputs=[self.h, self.sweeps, self.running, self.limit],
+            block_dim=128,
+            device=self.device,
+        )
