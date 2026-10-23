@@ -44,3 +44,9 @@ the dedicated large-dimension regressions.
 This supersedes the 2,445-pass symmetry-recovery baseline as current full-suite
 evidence. Performance controls are separate; this does not claim complete
 CuPy/Spectra conformance or closure of the other open issues.
+
+[Installed production controls](production/README.md) and
+[broader FEM families](families/README.md) now qualify **44 complete first/later
+outputs**, including ordinary and compact projected graphs. All source and
+input identities and native/independent gates were checked; all timing workers
+were uncontended. This completes #174 qualification without changing thresholds.

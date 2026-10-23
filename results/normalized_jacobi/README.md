@@ -57,3 +57,9 @@ The installed large projected path now includes this fix, shared with compact
 graphs. [Current validation](VALIDATION.md) records 2,566 full-suite passes,
 focused checks on both runtimes and exact-source wheel verification. The tables
 above remain prototype controls; no test threshold is loosened.
+
+[Installed-path controls](production/README.md) and [broader families](families/README.md)
+subsequently passed all 44 complete first/later outputs, including compact
+graphs, free/disconnected nullspaces and heterogeneous material. These are the
+current qualification of the core fix; the prototype table above is retained
+as historical evidence.
