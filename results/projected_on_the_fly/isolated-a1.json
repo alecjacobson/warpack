@@ -1,0 +1,1787 @@
+{
+  "arguments": {
+    "sizes": "32,48,64,72,104,128,208,312",
+    "variants": "default,scalar,tile16,tile32",
+    "batch": 5,
+    "repeats": 3,
+    "out": "/home/horde/projects/warpack/results/projected_on_the_fly/isolated-a1.json"
+  },
+  "rows": [
+    {
+      "n": 32,
+      "variant": "default",
+      "seconds": [
+        0.0008458852767944336,
+        0.0008455425500869751,
+        0.0008449085056781769
+      ],
+      "median_seconds": 0.0008455425500869751,
+      "warmup": {
+        "residual": 1.0517615481092985e-14,
+        "spectrum_error": 1.0373923942097462e-14,
+        "orthogonality": 9.769962616701378e-15,
+        "sweeps": null,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.0517615481092985e-14,
+          "spectrum_error": 1.0373923942097462e-14,
+          "orthogonality": 9.769962616701378e-15,
+          "sweeps": null,
+          "accepted": true
+        },
+        {
+          "residual": 1.0517615481092985e-14,
+          "spectrum_error": 1.0373923942097462e-14,
+          "orthogonality": 9.769962616701378e-15,
+          "sweeps": null,
+          "accepted": true
+        },
+        {
+          "residual": 1.0517615481092985e-14,
+          "spectrum_error": 1.0373923942097462e-14,
+          "orthogonality": 9.769962616701378e-15,
+          "sweeps": null,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 1,
+          "KERNEL": 2
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 1
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 32,
+      "variant": "scalar",
+      "seconds": [
+        0.0022711195051670074,
+        0.002270425111055374,
+        0.002270389348268509
+      ],
+      "median_seconds": 0.002270425111055374,
+      "warmup": {
+        "residual": 1.078263165092778e-14,
+        "spectrum_error": 1.0658141036401503e-14,
+        "orthogonality": 9.103828801926284e-15,
+        "sweeps": 10,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        },
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        },
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 37,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 32,
+      "variant": "tile16",
+      "seconds": [
+        0.0015872158110141754,
+        0.0015874214470386506,
+        0.0015873856842517852
+      ],
+      "median_seconds": 0.0015873856842517852,
+      "warmup": {
+        "residual": 1.078263165092778e-14,
+        "spectrum_error": 1.0658141036401503e-14,
+        "orthogonality": 9.103828801926284e-15,
+        "sweeps": 10,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        },
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        },
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 37,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 32,
+      "variant": "tile32",
+      "seconds": [
+        0.0020691312849521635,
+        0.002068086713552475,
+        0.002068106085062027
+      ],
+      "median_seconds": 0.002068106085062027,
+      "warmup": {
+        "residual": 1.078263165092778e-14,
+        "spectrum_error": 1.0658141036401503e-14,
+        "orthogonality": 9.103828801926284e-15,
+        "sweeps": 10,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        },
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        },
+        {
+          "residual": 1.078263165092778e-14,
+          "spectrum_error": 1.0658141036401503e-14,
+          "orthogonality": 9.103828801926284e-15,
+          "sweeps": 10,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 37,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 48,
+      "variant": "default",
+      "seconds": [
+        0.002475937455892563,
+        0.0024761244654655456,
+        0.00247676745057106
+      ],
+      "median_seconds": 0.0024761244654655456,
+      "warmup": {
+        "residual": 1.514742689854208e-14,
+        "spectrum_error": 1.5774048733874226e-14,
+        "orthogonality": 1.3988810110276972e-14,
+        "sweeps": 12,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 100,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 48,
+      "variant": "scalar",
+      "seconds": [
+        0.003991657495498657,
+        0.003991195559501648,
+        0.003990989923477173
+      ],
+      "median_seconds": 0.003991195559501648,
+      "warmup": {
+        "residual": 1.514742689854208e-14,
+        "spectrum_error": 1.5774048733874226e-14,
+        "orthogonality": 1.3988810110276972e-14,
+        "sweeps": 12,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 53,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 48,
+      "variant": "tile16",
+      "seconds": [
+        0.0028246261179447176,
+        0.0028250075876712797,
+        0.002824997901916504
+      ],
+      "median_seconds": 0.002824997901916504,
+      "warmup": {
+        "residual": 1.514742689854208e-14,
+        "spectrum_error": 1.5774048733874226e-14,
+        "orthogonality": 1.3988810110276972e-14,
+        "sweeps": 12,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 53,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 48,
+      "variant": "tile32",
+      "seconds": [
+        0.00377621129155159,
+        0.0037766896188259126,
+        0.0037764616310596464
+      ],
+      "median_seconds": 0.0037764616310596464,
+      "warmup": {
+        "residual": 1.514742689854208e-14,
+        "spectrum_error": 1.5774048733874226e-14,
+        "orthogonality": 1.3988810110276972e-14,
+        "sweeps": 12,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        },
+        {
+          "residual": 1.514742689854208e-14,
+          "spectrum_error": 1.5774048733874226e-14,
+          "orthogonality": 1.3988810110276972e-14,
+          "sweeps": 12,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 53,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 64,
+      "variant": "default",
+      "seconds": [
+        0.003580418974161148,
+        0.003579998016357422,
+        0.0035794712603092194
+      ],
+      "median_seconds": 0.003579998016357422,
+      "warmup": {
+        "residual": 2.0816147347119873e-14,
+        "spectrum_error": 2.0889956431346945e-14,
+        "orthogonality": 1.9761969838327786e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 132,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 64,
+      "variant": "scalar",
+      "seconds": [
+        0.005730939656496048,
+        0.005731014162302017,
+        0.005731312185525894
+      ],
+      "median_seconds": 0.005731014162302017,
+      "warmup": {
+        "residual": 2.0816147347119873e-14,
+        "spectrum_error": 2.0889956431346945e-14,
+        "orthogonality": 1.9761969838327786e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 69,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 64,
+      "variant": "tile16",
+      "seconds": [
+        0.004100441187620163,
+        0.004100670665502548,
+        0.004100580513477325
+      ],
+      "median_seconds": 0.004100580513477325,
+      "warmup": {
+        "residual": 2.0816147347119873e-14,
+        "spectrum_error": 2.0889956431346945e-14,
+        "orthogonality": 1.9761969838327786e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 69,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 64,
+      "variant": "tile32",
+      "seconds": [
+        0.005591107159852981,
+        0.005590754747390747,
+        0.0055911272764205934
+      ],
+      "median_seconds": 0.005591107159852981,
+      "warmup": {
+        "residual": 2.0816147347119873e-14,
+        "spectrum_error": 2.0889956431346945e-14,
+        "orthogonality": 1.9761969838327786e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.0816147347119873e-14,
+          "spectrum_error": 2.0889956431346945e-14,
+          "orthogonality": 1.9761969838327786e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 69,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 72,
+      "variant": "default",
+      "seconds": [
+        0.004094937443733215,
+        0.0040950804948806764,
+        0.004095669835805893
+      ],
+      "median_seconds": 0.0040950804948806764,
+      "warmup": {
+        "residual": 1.6484160947541695e-14,
+        "spectrum_error": 1.6200374375330283e-14,
+        "orthogonality": 1.887379141862766e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 148,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 72,
+      "variant": "scalar",
+      "seconds": [
+        0.006628383696079254,
+        0.0066289231181144714,
+        0.00662899985909462
+      ],
+      "median_seconds": 0.0066289231181144714,
+      "warmup": {
+        "residual": 1.6484160947541695e-14,
+        "spectrum_error": 1.6200374375330283e-14,
+        "orthogonality": 1.887379141862766e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 77,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 72,
+      "variant": "tile16",
+      "seconds": [
+        0.004666237533092499,
+        0.004665973782539368,
+        0.004666849970817566
+      ],
+      "median_seconds": 0.004666237533092499,
+      "warmup": {
+        "residual": 1.6484160947541695e-14,
+        "spectrum_error": 1.6200374375330283e-14,
+        "orthogonality": 1.887379141862766e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 77,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 72,
+      "variant": "tile32",
+      "seconds": [
+        0.00633896142244339,
+        0.006355777382850647,
+        0.006345655769109726
+      ],
+      "median_seconds": 0.006345655769109726,
+      "warmup": {
+        "residual": 1.6484160947541695e-14,
+        "spectrum_error": 1.6200374375330283e-14,
+        "orthogonality": 1.887379141862766e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 1.6484160947541695e-14,
+          "spectrum_error": 1.6200374375330283e-14,
+          "orthogonality": 1.887379141862766e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 77,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 104,
+      "variant": "default",
+      "seconds": [
+        0.0061567023396492,
+        0.006155872344970703,
+        0.0061558417975902556
+      ],
+      "median_seconds": 0.006155872344970703,
+      "warmup": {
+        "residual": 2.7865611304725955e-14,
+        "spectrum_error": 2.8279600883251987e-14,
+        "orthogonality": 3.219646771412954e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 212,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 104,
+      "variant": "scalar",
+      "seconds": [
+        0.01001875326037407,
+        0.010017292946577072,
+        0.010015664249658584
+      ],
+      "median_seconds": 0.010017292946577072,
+      "warmup": {
+        "residual": 2.7865611304725955e-14,
+        "spectrum_error": 2.8279600883251987e-14,
+        "orthogonality": 3.219646771412954e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 109,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 104,
+      "variant": "tile16",
+      "seconds": [
+        0.006950095295906067,
+        0.006949939578771591,
+        0.006949198991060257
+      ],
+      "median_seconds": 0.006949939578771591,
+      "warmup": {
+        "residual": 2.7865611304725955e-14,
+        "spectrum_error": 2.8279600883251987e-14,
+        "orthogonality": 3.219646771412954e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 109,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 104,
+      "variant": "tile32",
+      "seconds": [
+        0.00940687358379364,
+        0.009407096356153489,
+        0.009405026584863663
+      ],
+      "median_seconds": 0.00940687358379364,
+      "warmup": {
+        "residual": 2.7865611304725955e-14,
+        "spectrum_error": 2.8279600883251987e-14,
+        "orthogonality": 3.219646771412954e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 2.7865611304725955e-14,
+          "spectrum_error": 2.8279600883251987e-14,
+          "orthogonality": 3.219646771412954e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 109,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 128,
+      "variant": "default",
+      "seconds": [
+        0.007684288173913955,
+        0.007683558762073517,
+        0.007684676349163056
+      ],
+      "median_seconds": 0.007684288173913955,
+      "warmup": {
+        "residual": 3.7290713924694576e-14,
+        "spectrum_error": 3.737454790098127e-14,
+        "orthogonality": 4.085620730620576e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 260,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 128,
+      "variant": "scalar",
+      "seconds": [
+        0.01268339455127716,
+        0.012683167308568954,
+        0.012684879451990127
+      ],
+      "median_seconds": 0.01268339455127716,
+      "warmup": {
+        "residual": 3.7290713924694576e-14,
+        "spectrum_error": 3.737454790098127e-14,
+        "orthogonality": 4.085620730620576e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 133,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 128,
+      "variant": "tile16",
+      "seconds": [
+        0.008663354814052582,
+        0.008662782609462738,
+        0.008663203567266464
+      ],
+      "median_seconds": 0.008663203567266464,
+      "warmup": {
+        "residual": 3.7290713924694576e-14,
+        "spectrum_error": 3.737454790098127e-14,
+        "orthogonality": 4.085620730620576e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 133,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 128,
+      "variant": "tile32",
+      "seconds": [
+        0.012342575192451476,
+        0.011679751425981521,
+        0.011682732403278351
+      ],
+      "median_seconds": 0.011682732403278351,
+      "warmup": {
+        "residual": 3.7290713924694576e-14,
+        "spectrum_error": 3.737454790098127e-14,
+        "orthogonality": 4.085620730620576e-14,
+        "sweeps": 13,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        },
+        {
+          "residual": 3.7290713924694576e-14,
+          "spectrum_error": 3.737454790098127e-14,
+          "orthogonality": 4.085620730620576e-14,
+          "sweeps": 13,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 133,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "variant": "default",
+      "seconds": [
+        0.01739879846572876,
+        0.017400743812322615,
+        0.017399821430444717
+      ],
+      "median_seconds": 0.017399821430444717,
+      "warmup": {
+        "residual": 7.890608629859741e-14,
+        "spectrum_error": 7.87281351222191e-14,
+        "orthogonality": 8.526512829121202e-14,
+        "sweeps": 15,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 420,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "variant": "scalar",
+      "seconds": [
+        0.039335166662931444,
+        0.03929103538393974,
+        0.03935355916619301
+      ],
+      "median_seconds": 0.039335166662931444,
+      "warmup": {
+        "residual": 7.890608629859741e-14,
+        "spectrum_error": 7.87281351222191e-14,
+        "orthogonality": 8.526512829121202e-14,
+        "sweeps": 15,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 213,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "variant": "tile16",
+      "seconds": [
+        0.018158213794231416,
+        0.018157386034727097,
+        0.01815943941473961
+      ],
+      "median_seconds": 0.018158213794231416,
+      "warmup": {
+        "residual": 7.890608629859741e-14,
+        "spectrum_error": 7.87281351222191e-14,
+        "orthogonality": 8.526512829121202e-14,
+        "sweeps": 15,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 213,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 208,
+      "variant": "tile32",
+      "seconds": [
+        0.02231158912181854,
+        0.022313638031482695,
+        0.022311750799417496
+      ],
+      "median_seconds": 0.022311750799417496,
+      "warmup": {
+        "residual": 7.890608629859741e-14,
+        "spectrum_error": 7.87281351222191e-14,
+        "orthogonality": 8.526512829121202e-14,
+        "sweeps": 15,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        },
+        {
+          "residual": 7.890608629859741e-14,
+          "spectrum_error": 7.87281351222191e-14,
+          "orthogonality": 8.526512829121202e-14,
+          "sweeps": 15,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 213,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "variant": "default",
+      "seconds": [
+        0.03551580309867859,
+        0.03551776632666588,
+        0.03551536276936531
+      ],
+      "median_seconds": 0.03551580309867859,
+      "warmup": {
+        "residual": 1.385068249304584e-13,
+        "spectrum_error": 1.382716163789155e-13,
+        "orthogonality": 1.4277468096679513e-13,
+        "sweeps": 16,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 628,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "variant": "scalar",
+      "seconds": [
+        0.09444117918610573,
+        0.09444324225187302,
+        0.0944619543850422
+      ],
+      "median_seconds": 0.09444324225187302,
+      "warmup": {
+        "residual": 1.385068249304584e-13,
+        "spectrum_error": 1.382716163789155e-13,
+        "orthogonality": 1.4277468096679513e-13,
+        "sweeps": 16,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 317,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "variant": "tile16",
+      "seconds": [
+        0.034868981689214706,
+        0.034868130832910536,
+        0.03486820161342621
+      ],
+      "median_seconds": 0.03486820161342621,
+      "warmup": {
+        "residual": 1.385068249304584e-13,
+        "spectrum_error": 1.382716163789155e-13,
+        "orthogonality": 1.4277468096679513e-13,
+        "sweeps": 16,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 317,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    },
+    {
+      "n": 312,
+      "variant": "tile32",
+      "seconds": [
+        0.03770437464118004,
+        0.03772874623537063,
+        0.03771504908800125
+      ],
+      "median_seconds": 0.03771504908800125,
+      "warmup": {
+        "residual": 1.385068249304584e-13,
+        "spectrum_error": 1.382716163789155e-13,
+        "orthogonality": 1.4277468096679513e-13,
+        "sweeps": 16,
+        "accepted": true
+      },
+      "checks": [
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        },
+        {
+          "residual": 1.385068249304584e-13,
+          "spectrum_error": 1.382716163789155e-13,
+          "orthogonality": 1.4277468096679513e-13,
+          "sweeps": 16,
+          "accepted": true
+        }
+      ],
+      "graph": {
+        "node_types_including_conditional_body": {
+          "MEMCPY": 3,
+          "KERNEL": 317,
+          "MEMSET": 1,
+          "CONDITIONAL": 1
+        },
+        "memcpy_kinds": {
+          "DtoD (DEVICE to DEVICE)": 3
+        },
+        "method": "CUDA graph DOT inspection; not a CUDA API trace"
+      },
+      "accepted": true
+    }
+  ],
+  "source_sha256": {
+    "benchmarks/acceptance.py": "8b0f6efdf8408e3e91f972c70317a7994dee4ae1d0f8af079bda79fe54b685a3",
+    "benchmarks/applications/__init__.py": "a517d73e69ebb3dc905b95b63eac4e34625df802a48ed523516f1c030f388b0d",
+    "benchmarks/applications/compare.py": "a08b4704ba1caeb7558878d71bf416a600827fa8349ebfc2cd439c6848baea79",
+    "benchmarks/applications/diagonal_mass.py": "e617a6d21a5e97b2b8bb42f7f35a28822dce2632abb43d06f2921ac9ed9aa684",
+    "benchmarks/applications/problems.py": "15e5d47aecf81b772f79aeba0dd8c445071b03c0317ff73cc94ced78986a9ab8",
+    "benchmarks/applications/references.py": "8d66fee5dcca3c082747548826aeef601de1bd7e60e0208d8b43bbadca77213d",
+    "benchmarks/applications/runner.py": "1293eb027f38080c247e5e92d13016f6b7120927abdbd57fdeb40bfc2e8ca22a",
+    "benchmarks/audit_profile.py": "e718c8c407aca6ea39faf38681cb63f25243f2acf261648ddd387ff0913760ee",
+    "benchmarks/compare.py": "70218c8e5dcb12c1bac86de5757aa4407a1dfc791f54c48fb1fb3e267b95fc4f",
+    "benchmarks/dependency_provenance.py": "390309b2bf1d6dc5eec41960047eb5ae79a89aeee50c164df9811ecaf4f50e6e",
+    "benchmarks/experimental/jacobi_on_the_fly.py": "8de0f731b8442b68ba0076eb460dc1712459043b8e78a8f4317a71ef8bd6e269",
+    "benchmarks/experimental/jacobi_on_the_fly_compare.py": "aebb81ebac04646bbfd004b8ba4ecabfb925c81bea7589a4f3f108697f1bf0f0",
+    "benchmarks/source_provenance.py": "3267e866bbbc1c32957ad350e2889285e9703fd8279ddc884d9728bb71c41062",
+    "benchmarks/upstream/__init__.py": "efeb32afe41f0a6d8385b636de39cd4e9c6e8c8d7f2d45c84028391895705377",
+    "benchmarks/upstream/adapters.py": "d3f2f4eb10cf88d5067595b6db4badc3881cb6006b517dce0ba4e9f06abd245c",
+    "warpack/__init__.py": "63791263e42fba3880d005d7d32c8fc7bba1541e55e5903615092e7340edf035",
+    "warpack/_active_cg.py": "22de5741e7718a63bd5a184c5b33fa9d9fcc3f9195b7b8a05cae5c264a42d650",
+    "warpack/_block_search.py": "0a2f5e190cf36fa173ed47998774a7db9c984215897b5e34cb25d2eb52606fa2",
+    "warpack/_coalesced_fsai.py": "8ec706fef7c8bb20274e3b57d6dfda6db41c77c598de6661d4bcea696169bc6c",
+    "warpack/_coalesced_operator.py": "c12914049fb2dba837ce1526f20c1bdcc170d0680348e8256184f0e8e07686b3",
+    "warpack/arnoldi.py": "e2f2ed5819e33137c0b5894bcfa47577db97ccc0f9e812faa814c8cf715306b3",
+    "warpack/batched_cg.py": "38b5c7bb8320a682ee9aa6c64403dddc6adf78b20bbadf27232aacfde17f2f6c",
+    "warpack/batched_sparse.py": "9a5001834af25d46c1c9a4f139959032d4f9fd5f9592b654eb41972a63766b79",
+    "warpack/block.py": "9c13850750bf319944380c3f27ffd7cc76b3f118760dbfbd2626fc845495ba3f",
+    "warpack/block_products.py": "d1e93bfddd0883c1151687daa370ae0bac8ae552a22ac4f3109543e47d2ba7ed",
+    "warpack/completeness.py": "be3046a1a8543976dff41052ba43718fbc774f396271fbf63ca81cc29f417edf",
+    "warpack/constrained.py": "c5e563477149eddbc10b92d3f6a617e701798ee242393f6d421eb2e6093e8abf",
+    "warpack/constraints.py": "5776468993022f78ab4c7a3ec4b283b220ac045d2f322dc86d035a3a6cb59375",
+    "warpack/cudss_diagnostics.py": "3db7185fe3081a2c6257a551a0a195f366b045774f86793c06ceab2fd7d2a5b5",
+    "warpack/cudss_memory.py": "8e550cc5eaed81ea0baacb73d5e3c286f2dd56aa5fc422253f58ac75cb3fc5b2",
+    "warpack/general_checkpoint.py": "476472ec1d8d5f1a43f0f0bd7dbbf9c4d68321b04e66c4940de0e06e35f3d117",
+    "warpack/generalized.py": "de4c0813523759b17558b015a2a2eaadb7ac0cc76672ec6d071a0ef11fc726ea",
+    "warpack/generalized_krylov.py": "7caf129584e9ccc4f78bbf8d3f2cc94ea2ad3f6b9f0c63e0927e817f01932dcd",
+    "warpack/hermitian.py": "8b4d6157a3e0de500da6366e4496e3b543d50228c79fc3f57dcde56da744db09",
+    "warpack/iterative.py": "713611a525f7dd3f3de5734002c2f8520f6b5dc949cb4f6bd4017a445bf22720",
+    "warpack/kernels.py": "672734477dd6b6c9f194a1045dae22e8d52529b5a367b1c7ffd08b74ef5bbc74",
+    "warpack/krylov_kernels.py": "5b07bc663903926caea7efca4d6feb99af50ab4c70a8dcbece5f65ec104c357a",
+    "warpack/linalg_tiles.py": "ae1024bcbc936af02b935a3dbe7e76d13a8c1ba79c9ce4d40023cf1b1b5b4a4f",
+    "warpack/normal_svd.py": "bc37306bff8faa9eb45d3876b481a37d94c70302f7e945e4e3028de69a576a88",
+    "warpack/nullspace.py": "f941ca7d84cb9b4ce527c57c4d77290fd31af2c1b44ea14b04afd61231431988",
+    "warpack/pencil.py": "71673a90e24dab63912aad33d739ff9f09187306137d7e4fe396f20160077dda",
+    "warpack/projected.py": "da6b53fc810362849f524ceb45c44e0120bc29f2399f0d74f319f93bcebded13",
+    "warpack/schur.py": "59f362c5a575ff808ec5713ec3bf7fd5c6bbe5bb5d0c7be6ef8e0d398f8202ba",
+    "warpack/schur_fused.py": "337f90537912493d9625e25fe6d44a4440b18099f394e20705eb0f16f96ace1c",
+    "warpack/schur_tiled.py": "ea4e625c4ef3707d8eea2967e407a2fd18e7661cf6a87940fa7de15080a144ab",
+    "warpack/shift.py": "8c18077b2ef54318024edd93b583da8826c8a595c0f9e5969c67b6b71e4ff226",
+    "warpack/solver.py": "58f62d156207f0778123891f82a66c8d253bc722aafa2c6817fb7c4ec5406ca0",
+    "warpack/sparse_utils.py": "372d2fda1189eadac9d55a043a9a2e16a210691578475ba2a551e80cdf61402a",
+    "warpack/svd.py": "42daa5c51b1c9ef8c8a6ec51dcdc23aaf666e4bf8788dbebc650cdf874c23191",
+    "warpack/transforms.py": "f8204efdb5e6aaec1e9de255d0eb3c716e5389d54cd17f33eb95b59cbdbae9fb"
+  },
+  "dependency": {
+    "warp_version": "1.18.0",
+    "files": {
+      "warp/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/optim/linear.py",
+        "sha256": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f"
+      },
+      "warp/_src/optim/linear.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/linear.py",
+        "sha256": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18"
+      },
+      "warp/_src/optim/fsai.py": {
+        "path": "/run/openclaw/horde/warpack-fsai-promotion/warp/_src/optim/fsai.py",
+        "sha256": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest": {
+      "profile": "current",
+      "revision": "f339a9fc7f231afa3405f15da9d7a45ce3fc4bcf",
+      "sha256": {
+        "warp/_src/optim/linear.py": "1fe28335bafc86c6a35bdf962940ebff545d44f3e3818c76879f2e3919015e18",
+        "warp/optim/linear.py": "4eac35c139553d1ce187fb33808a2dec6ccfe768fae174da65a66146a7e5666f",
+        "warp/_src/optim/fsai.py": "8ef59b8b5ee4e008c9b40f622f004c850dd560c335dea0cb03c24a18364fa0c7"
+      }
+    },
+    "manifest_status": "verified",
+    "mismatches": []
+  },
+  "accepted": true,
+  "protocol": "Isolated complete projected eigensolves; input restored before every replay. All original equations, complete spectra and orthogonality checked after warmup and every measured batch at 1e-11. Setup/capture/reference excluded; no end-to-end speedup claim. Uncontended external occupancy is required for timing qualification."
+}
