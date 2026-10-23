@@ -26,10 +26,18 @@ def read_final_block(
 
 
 @pytest.mark.parametrize("adaptive", [False, True])
-def test_block_finalizer_sees_final_pairs_once_per_replay(adaptive, tmp_path):
+@pytest.mark.parametrize("search", [False, True])
+def test_block_finalizer_sees_final_pairs_once_per_replay(adaptive, tmp_path, search):
     a = matrix(np.diag(np.arange(1.0, 31.0)))
     original = wp.clone(a.values)
-    solver = BlockLOBPCG(SparseOperator(a), 3, width=6, tol=1e-10)
+    solver = BlockLOBPCG(
+        SparseOperator(a),
+        3,
+        width=6,
+        tol=1e-10,
+        reuse_operator_images=search,
+        search_bucket_size=2 if search else 0,
+    )
     output = wp.empty(3, dtype=wp.float64)
     state = wp.empty(2, dtype=wp.int32)
     calls = wp.zeros(1, dtype=wp.int32)
@@ -80,12 +88,21 @@ def prepare_block(
 
 
 @pytest.mark.parametrize("adaptive", [False, True])
-def test_initializer_precedes_normalization_and_finalizer(adaptive, tmp_path):
+@pytest.mark.parametrize("search", [False, True])
+def test_initializer_precedes_normalization_and_finalizer(adaptive, tmp_path, search):
     a = matrix(np.diag(np.arange(1.0, 31.0)))
     source = wp.array(np.eye(30)[:3].copy(), dtype=wp.float64)
     starts = wp.zeros_like(source)
     calls, final_calls = wp.zeros(1, dtype=wp.int32), wp.zeros(1, dtype=wp.int32)
-    solver = BlockLOBPCG(SparseOperator(a), 3, width=3, initial_vectors=starts, tol=1e-10)
+    solver = BlockLOBPCG(
+        SparseOperator(a),
+        3,
+        width=3,
+        initial_vectors=starts,
+        tol=1e-10,
+        reuse_operator_images=search,
+        search_bucket_size=1 if search else 0,
+    )
     output, state = wp.empty(3, dtype=wp.float64), wp.empty(2, dtype=wp.int32)
     recording = []
 
