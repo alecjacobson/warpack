@@ -108,3 +108,30 @@ its setup is not represented by the Warp setup column. These are controlled
 block-method experiments, not a replacement for the README's six-backend
 standalone setup/timing table. See [summary](anvil/summary.json) and the adjacent
 raw reports, logs and occupancy records for the full setup scopes and checks.
+
+## Multiblock global FP32 initializer: no wide-solve win
+
+The third variant uses the existing global round schedule in FP32, spreading
+updates across CUDA blocks rather than keeping the entire computation in one
+block. It stops the coarse solve at 2e-5 and retains the same FP64 recovery.
+All isolated warmup/replay accuracy and graph checks pass, with clean occupancy.
+Pinned and stock suites each pass 61 tests with six shared-capacity skips.
+
+| Dimension | Existing FP64 global, ms | Global-initialized mixed, ms | FP32 / FP64 finishing sweeps |
+| ---: | ---: | ---: | ---: |
+| 48 | 1.6459 | 1.5185 | 6 / 2 |
+| 72 | 2.5317 | 2.5157 | 7 / 2 |
+| 104 | 4.1949 | 3.8639 | 7 / 2 |
+| 128 | 5.3134 | 5.1368 | 7 / 2 |
+| 208 | 11.5535 | 12.3539 | 8 / 2 |
+| 312 | 21.9641 | 24.3474 | 8 / 2 |
+| 512 | 60.4650 | 59.4763 | 8 / 2 |
+
+The important 208/312-column wide-FEM region loses, and the tiny 512-column
+gain does not support further whole-solve qualification. No variant is
+promoted. This closes the current mixed-initializer evaluation; the broader
+projected-solver throughput issue #147 remains open. Small isolated gains do
+not justify adding default complexity without a useful complete-solve result.
+[Raw controls](global-initializer/jacobi-a1.json),
+[occupancy](global-initializer/jacobi-a1.occupancy.json),
+[pinned tests](global-tests.log), [stock tests](global-stock-tests.log).

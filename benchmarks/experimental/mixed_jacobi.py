@@ -6,6 +6,7 @@ and acceptance use FP64 data; this benchmark experiment changes no public API.
 
 import warp as wp
 
+from benchmarks.experimental.fp32_global_jacobi import GlobalFP32Jacobi
 from benchmarks.experimental.fp32_jacobi import FP32Jacobi
 from benchmarks.experimental.fp32_shared_jacobi import SharedFP32Jacobi
 from warpack import kernels as K
@@ -57,7 +58,7 @@ class MixedJacobi:
         self.n, self.device = h.shape[0], h.device
         if not self.device.is_cuda or not 2 <= self.n <= 512 or self.n % 2:
             raise ValueError("mixed Jacobi requires CUDA and an even dimension in 2..512")
-        if initializer not in ("persistent", "shared"):
+        if initializer not in ("persistent", "shared", "global"):
             raise ValueError("unknown mixed Jacobi initializer")
         self.h, self.v = h, v
         (
@@ -76,7 +77,11 @@ class MixedJacobi:
         def single():
             return wp.empty((self.n, self.n), dtype=wp.float32, device=self.device)
 
-        coarse_type = FP32Jacobi if initializer == "persistent" else SharedFP32Jacobi
+        coarse_type = {
+            "persistent": FP32Jacobi,
+            "shared": SharedFP32Jacobi,
+            "global": GlobalFP32Jacobi,
+        }[initializer]
         self.coarse = coarse_type(
             single(),
             single(),
@@ -129,3 +134,8 @@ class MixedJacobi:
 class MixedSharedJacobi(MixedJacobi):
     def __init__(self, h, v, cs, ss, partners, temp, vtemp):
         super().__init__(h, v, cs, ss, partners, temp, vtemp, initializer="shared")
+
+
+class MixedGlobalJacobi(MixedJacobi):
+    def __init__(self, h, v, cs, ss, partners, temp, vtemp):
+        super().__init__(h, v, cs, ss, partners, temp, vtemp, initializer="global")

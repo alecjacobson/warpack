@@ -17,7 +17,7 @@ def allocate(n, initializer="persistent"):
     return MixedJacobi(h, v, cs, ss, partners, temp, vtemp, initializer=initializer), stores
 
 
-@pytest.mark.parametrize("initializer", ["persistent", "shared"])
+@pytest.mark.parametrize("initializer", ["persistent", "shared", "global"])
 @pytest.mark.parametrize("n", [2, 48, 72, 104, 108, 128, 208])
 @pytest.mark.parametrize("kind", ["indefinite", "repeated", "rank_threshold"])
 def test_fp64_equation_spectrum_rank_and_changed_strided_replay(n, kind, initializer):
@@ -59,11 +59,11 @@ def test_fp64_equation_spectrum_rank_and_changed_strided_replay(n, kind, initial
             assert np.all(store.numpy()[:, n:] == 17)
         coarse = solver.coarse.h.numpy()
         off = coarse - np.diag(np.diag(coarse))
-        coarse_bound = 3e-5 if initializer == "shared" else 1e-6
+        coarse_bound = 3e-5 if initializer in ("shared", "global") else 1e-6
         assert np.max(abs(off)) <= coarse_bound * max(np.max(abs(np.diag(coarse))), 1)
 
 
-@pytest.mark.parametrize("initializer", ["persistent", "shared"])
+@pytest.mark.parametrize("initializer", ["persistent", "shared", "global"])
 def test_zero_nonfinite_status_and_graph_recovery(initializer):
     solver, _ = allocate(8, initializer)
     solver.h.assign(np.eye(8))
