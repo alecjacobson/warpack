@@ -1,0 +1,57 @@
+..F
+=================================== FAILURES ===================================
+____________ test_indefinite_factor_first_capture[symmetric-False] _____________
+
+mtype = 'symmetric', matching = False
+
+    @pytest.mark.parametrize(
+        "mtype,matching", [("symmetric", False), ("general", False), ("general", True)]
+    )
+    def test_indefinite_factor_first_capture(mtype, matching):
+        # CuDSS storage/pivoting options must not require a nonzero eager solve.
+        n = 64
+        a = np.diag(np.arange(n, dtype=float) - 31.5) + 0.1 * (np.eye(n, k=1) + np.eye(n, k=-1))
+        spectrum = np.linalg.eigvalsh(a)
+        expected = spectrum[spectrum > 0][:4]
+        inverse = CuDSSInverse(sparse(a), 1, mtype=mtype, matching=matching)
+        solver = KrylovSchur(inverse, 4, ncv=32, which="LA", tol=1e-11)
+        apply = inverse.apply
+        eager_calls = []
+    
+        def counted(x, y):
+            if not wp.get_stream().is_capturing:
+                eager_calls.append(1)
+            apply(x, y)
+    
+        inverse.apply = counted
+        try:
+>           graph = solver.capture(4, adaptive=False)
+
+tests/test_cudss_capture_setup.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warpack/solver.py:489: in capture
+    self.initialize()
+warpack/solver.py:730: in initialize
+    self.expand(j)
+warpack/solver.py:660: in expand
+    self.op.apply(self.views[j - 1], self.zviews[j - 1])
+tests/test_cudss_capture_setup.py:48: in counted
+    apply(x, y)
+warpack/solver.py:139: in apply
+    self.solver.solve(x=y, b=self._rhs)
+../../.local/lib/python3.10/site-packages/warp_cudss/solver.py:282: in solve
+    _check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+status = 5, call_name = 'cudssExecute(SOLVE)'
+
+    def _check(status, call_name):
+        if status != CUDSS_STATUS_SUCCESS:
+>           raise CudssError(status, call_name)
+E           warp_cudss._bindings.CudssError: cudssExecute(SOLVE) failed with status CUDSS_STATUS_EXECUTION_FAILED (5)
+
+../../.local/lib/python3.10/site-packages/warp_cudss/_bindings.py:197: CudssError
+=========================== short test summary info ============================
+FAILED tests/test_cudss_capture_setup.py::test_indefinite_factor_first_capture[symmetric-False]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 1.60s

@@ -1,0 +1,28 @@
+"""Isolated diagnostic: explicit diagonal pivot policy for cuDSS 1.0 indefinite types."""
+import ctypes as ct
+import hashlib
+import json
+from pathlib import Path
+import sys
+import pytest
+from warp_cudss import CudssSolver, _bindings as b
+
+lib = b.get_library()
+version=[]
+for key in range(3):
+    value=ct.c_int()
+    b._check(lib.cudssGetProperty(key,ct.byref(value)), 'cudssGetProperty')
+    version.append(value.value)
+assert version == [1,0,0], version
+print(json.dumps(dict(library=lib._name, sha256=hashlib.sha256(Path(lib._name).read_bytes()).hexdigest(), version=version, symmetric_indefinite_pivot='CUDSS_PIVOT_DIAGONAL=4', matching='unchanged AUTO except existing explicit general matching'), indent=2), flush=True)
+original=CudssSolver.__init__
+def init(self,*args,**kwargs):
+    original(self,*args,**kwargs)
+    if self.mtype in ('symmetric','hermitian'):
+        pivot=ct.c_int(4)
+        b._check(self._lib.cudssConfigSet(self._config,7,ct.byref(pivot),ct.sizeof(pivot)), 'cudssConfigSet(PIVOT_TYPE=DIAGONAL)')
+CudssSolver.__init__=init
+try:
+    raise SystemExit(pytest.main(sys.argv[1:]))
+finally:
+    CudssSolver.__init__=original

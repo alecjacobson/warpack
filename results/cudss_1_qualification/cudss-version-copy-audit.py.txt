@@ -1,0 +1,65 @@
+"""Read-only vendor graph inspection: no graph/node/payload modification."""
+import argparse,ctypes as ct,hashlib,json
+from pathlib import Path
+import numpy as np
+import warp as wp
+from warp_cudss import CudssSolver, _bindings as b
+from benchmarks.upstream.adapters import matrix
+from benchmarks.audit_profile import graph_summary
+from benchmarks.applications.cudss_scalar_probe import copies
+from warpack import CuDSSInverse
+
+parser=argparse.ArgumentParser()
+parser.add_argument('--version',required=True)
+parser.add_argument('--diagonal',action='store_true')
+parser.add_argument('--out',type=Path,required=True)
+args=parser.parse_args()
+assert not args.out.exists()
+lib=b.get_library()
+version=[]
+for key in range(3):
+    value=ct.c_int(); b._check(lib.cudssGetProperty(key,ct.byref(value)),'cudssGetProperty'); version.append(value.value)
+assert '.'.join(map(str,version))==args.version
+original=CudssSolver.__init__
+def init(self,*a,**kw):
+    original(self,*a,**kw)
+    if args.diagonal and self.mtype in ('symmetric','hermitian'):
+        value=ct.c_int(4)
+        b._check(self._lib.cudssConfigSet(self._config,7,ct.byref(value),ct.sizeof(value)), 'PIVOT_DIAGONAL')
+CudssSolver.__init__=init
+report=dict(runtime=version,library=lib._name,library_sha256=hashlib.sha256(Path(lib._name).read_bytes()).hexdigest(),diagonal_pivot=args.diagonal,cases=[])
+args.out.parent.mkdir(parents=True,exist_ok=True)
+try:
+    for kind in ('spd','symmetric','general'):
+        for width in (1,3):
+            n=64
+            diagonal=np.arange(1.,n+1) if kind=='spd' else np.arange(n)-31.5
+            a=np.diag(diagonal)+.1*np.eye(n,k=1)+(.07 if kind=='general' else .1)*np.eye(n,k=-1)
+            inv=CuDSSInverse(matrix(a),width,mtype=kind)
+            rhs=wp.zeros_like(inv.x); out=wp.empty_like(rhs)
+            inv.apply(rhs,out)
+            with wp.ScopedCapture() as capture: inv.apply(rhs,out)
+            try:
+                before=copies(capture.graph)
+                checks=[]
+                for seed in (7,19,7):
+                    source=np.random.default_rng(seed).normal(size=(width,n));rhs.assign(source)
+                    wp.capture_launch(capture.graph)
+                    result=out.numpy()
+                    residual=float(np.linalg.norm(result@a.T-source)/np.linalg.norm(source))
+                    assert np.isfinite(residual) and residual<1e-12
+                    np.testing.assert_allclose(result,np.linalg.solve(a,source.T).T,rtol=1e-12,atol=1e-12)
+                    np.testing.assert_array_equal(rhs.numpy(),source)
+                    checks.append(residual)
+                dot=args.out.with_suffix('.dot'); wp.capture_debug_dot_print(capture.graph,str(dot))
+                graph=graph_summary(dot); dot.unlink()
+                assert not graph['node_types_including_conditional_body'].get('HOST',0)
+                assert not any('DtoH' in name for name in graph['memcpy_kinds'])
+                report['cases'].append(dict(mtype=kind,width=width,residuals=checks,graph=graph,copies_before=before,copies_after=copies(capture.graph)))
+                args.out.write_text(json.dumps(report,indent=2)+'\n')
+            finally:
+                capture.graph=None
+                inv.close()
+finally:
+    CudssSolver.__init__=original
+print(json.dumps(dict(runtime=version,cases=len(report['cases']),accepted=True)))
