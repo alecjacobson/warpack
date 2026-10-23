@@ -2,8 +2,11 @@
 
 This experiment extends the [full-rank-only first-whitening certificate](../first_metric_certificate/README.md)
 to normalized search metrics with **exact zero padding**. Production dispatch
-is unchanged. Component and small complete-solve tests pass; large whole-solve
-cost/accuracy qualification is still required. There is no speed claim here.
+is unchanged. Component and small complete-solve tests pass. Subsequent [primary controls](whole/README.md)
+and [broader families](families/README.md) qualify **48 complete outputs** with
+roughly3.4–5.9% measured replay reductions on the wide FEM cases. The small
+Anvil path remains unchanged. A separate failed-normalization routing review
+finding (#176) must be resolved before core promotion.
 
 ## What is certified
 
@@ -62,3 +65,9 @@ attempt and application methods; its existing tests remain included. Existing
 historical timing reports continue to describe their original committed source,
 not this new padded variant. The benchmark driver explicitly selects
 `--first-whitening padded`; `certified` retains the earlier full-rank policy.
+
+The [retained #176 reproducer](validation/status-reproducer.log) confirms that
+a negative original Gram diagonal can normalize into apparent zero padding:
+outer failure remains1, but the original prototype records a fast-path use.
+Healthy changed-input replay recovers. This is a routing/diagnostic defect,
+not a falsely successful eigensolve; the strict regression tracks the fix.
