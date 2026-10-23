@@ -1,0 +1,71 @@
+"""Benchmark-only FP64 Gram output tiles and thread grouping (#180)."""
+
+import functools
+
+import warp as wp
+
+from warpack import BlockLOBPCG
+
+
+@functools.lru_cache(None)
+def gram_kernel(chunk, tile, symmetric):
+    if tile not in (8, 16, 32) or chunk < 32 or chunk % 32:
+        raise ValueError("require output tile8/16/32 and a positive multiple-of-32 chunk")
+    extent, blocks, stride = wp.constant(tile), wp.constant(chunk // 32), wp.constant(chunk)
+    mirror = wp.constant(bool(symmetric))
+
+    @wp.kernel(enable_backward=False, module="unique")
+    def compute(x: wp.array2d[wp.float64], y: wp.array2d[wp.float64], out: wp.array2d[wp.float64]):
+        i, j, piece = wp.tid()
+        if not mirror or i <= j:
+            acc = wp.tile_zeros(shape=(extent, extent), dtype=wp.float64)
+            for k in range(blocks):
+                a = wp.tile_load(
+                    x, shape=(extent, 32), offset=(i * extent, piece * stride + k * 32)
+                )
+                b = wp.tile_load(
+                    y, shape=(extent, 32), offset=(j * extent, piece * stride + k * 32)
+                )
+                wp.tile_matmul(a, wp.tile_transpose(b), acc)
+            wp.tile_atomic_add(out, acc, offset=(i * extent, j * extent))
+            if mirror and i != j:
+                wp.tile_atomic_add(out, wp.tile_transpose(acc), offset=(j * extent, i * extent))
+
+    return compute
+
+
+def gram(x, y, out, *, chunk=4096, tile=16, threads=128, symmetric=False):
+    if threads not in (64, 128, 256):
+        raise ValueError("require64/128/256 threads")
+    if x.shape[1] != y.shape[1] or out.shape != (x.shape[0], y.shape[0]):
+        raise ValueError("incompatible Gram shapes")
+    if symmetric and x.shape[0] != y.shape[0]:
+        raise ValueError("symmetric Gram must be square")
+    out.zero_()
+    wp.launch_tiled(
+        gram_kernel(chunk, tile, symmetric),
+        dim=(
+            (x.shape[0] + tile - 1) // tile,
+            (y.shape[0] + tile - 1) // tile,
+            (x.shape[1] + chunk - 1) // chunk,
+        ),
+        inputs=[x, y, out],
+        block_dim=threads,
+        device=x.device,
+    )
+
+
+class GramTileBlock(BlockLOBPCG):
+    _gram_output_tile = 16
+    _gram_threads = 128
+
+    def gram(self, x, y, out, symmetric=False):
+        gram(
+            x,
+            y,
+            out,
+            chunk=self.gram_chunk,
+            tile=self._gram_output_tile,
+            threads=self._gram_threads,
+            symmetric=symmetric and self.symmetric_products,
+        )

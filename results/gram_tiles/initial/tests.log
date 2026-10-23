@@ -1,0 +1,379 @@
+...................F.F.F.F.F.F                                           [100%]
+=================================== FAILURES ===================================
+__________________ test_complete_two_pass_stage[False-96-32] ___________________
+
+tile = 32, width = 96, cached = False
+
+    @pytest.mark.parametrize("tile", [16, 32])
+    @pytest.mark.parametrize("width", [96, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_complete_two_pass_stage(tile, width, cached):
+        class Candidate(GramTileBlock):
+            _gram_output_tile = tile
+    
+>       check_stage(width, cached, Candidate)
+
+tests/test_gram_tiles.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_triangular_rotate.py:52: in test_orthogonalization_with_changed_mass_scaling_and_cached_images
+    solver.orthogonalize_x()
+warpack/block.py:653: in orthogonalize_x
+    self.gram(self.sx, self.bx, self.gx, symmetric=True)
+benchmarks/experimental/gram_tiles.py:63: in gram
+    gram(
+benchmarks/experimental/gram_tiles.py:45: in gram
+    wp.launch_tiled(
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12089: in launch_tiled
+    return launch(*args, **kwargs)
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12007: in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <warp._src.context.Kernel object at 0x7f37363e6050>, device = 'cuda:0'
+hooks = <warp._src.context.KernelHooks object at 0x7f37363e5f90>
+adjoint = False
+
+    def _raise_cuda_launch_error(kernel: Kernel, device: Device, hooks: KernelHooks, adjoint: bool) -> None:
+        """Raise a RuntimeError describing a failed CUDA kernel launch.
+    
+        Call only on the failure path (``if wp_cuda_launch_kernel(...):``) so the
+        success path -- the overwhelming majority of launches -- never enters this
+        function. The seven call sites must keep the launch+raise inlined and in sync.
+    
+        A kernel whose dynamic shared memory could not be configured fails every launch, since
+        the same byte count goes to ``cuLaunchKernel``. The load-time warning fires only once
+        because hooks are cached, so this is the only diagnostic from the second launch onward.
+        """
+        direction = "backward" if adjoint else "forward"
+        shortfall = hooks.backward_smem_shortfall if adjoint else hooks.forward_smem_shortfall
+        if shortfall is not None:
+>           raise RuntimeError(
+                f"Error launching kernel: {kernel.key} on device {device}: the {direction} kernel requests "
+                f"{hooks.backward_smem_bytes if adjoint else hooks.forward_smem_bytes} bytes of dynamic shared "
+                f"memory, {shortfall}. {_SMEM_MITIGATION_MSG}"
+            )
+E           RuntimeError: Error launching kernel: gram_kernel__locals__compute on device cuda:0: the forward kernel requests 155648 bytes of dynamic shared memory, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves). Warp reserves shared memory for every tile expression in the kernel, including tiles that are no longer live. Reduce the number of tile expressions, shrink the tiles, or lower block_dim. See https://nvidia.github.io/warp/stable/user_guide/programming_model/tiles.html#tile-shared-memory-budget
+
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:11011: RuntimeError
+----------------------------- Captured stdout call -----------------------------
+Module gram_kernel__locals__compute_72b30740 6df1774 load on device 'cuda:0' took 7732.92 ms  (compiled)
+----------------------------- Captured stderr call -----------------------------
+Warp UserWarning: Failed to configure dynamic shared memory for kernel 'gram_kernel__locals__compute' (forward) on cuda:0: requests 155648 bytes, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves).
+Warp CUDA error 1: invalid argument (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+__________________ test_complete_two_pass_stage[False-204-32] __________________
+
+tile = 32, width = 204, cached = False
+
+    @pytest.mark.parametrize("tile", [16, 32])
+    @pytest.mark.parametrize("width", [96, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_complete_two_pass_stage(tile, width, cached):
+        class Candidate(GramTileBlock):
+            _gram_output_tile = tile
+    
+>       check_stage(width, cached, Candidate)
+
+tests/test_gram_tiles.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_triangular_rotate.py:52: in test_orthogonalization_with_changed_mass_scaling_and_cached_images
+    solver.orthogonalize_x()
+warpack/block.py:653: in orthogonalize_x
+    self.gram(self.sx, self.bx, self.gx, symmetric=True)
+benchmarks/experimental/gram_tiles.py:63: in gram
+    gram(
+benchmarks/experimental/gram_tiles.py:45: in gram
+    wp.launch_tiled(
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12089: in launch_tiled
+    return launch(*args, **kwargs)
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12007: in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <warp._src.context.Kernel object at 0x7f37363e6050>, device = 'cuda:0'
+hooks = <warp._src.context.KernelHooks object at 0x7f37363e5f90>
+adjoint = False
+
+    def _raise_cuda_launch_error(kernel: Kernel, device: Device, hooks: KernelHooks, adjoint: bool) -> None:
+        """Raise a RuntimeError describing a failed CUDA kernel launch.
+    
+        Call only on the failure path (``if wp_cuda_launch_kernel(...):``) so the
+        success path -- the overwhelming majority of launches -- never enters this
+        function. The seven call sites must keep the launch+raise inlined and in sync.
+    
+        A kernel whose dynamic shared memory could not be configured fails every launch, since
+        the same byte count goes to ``cuLaunchKernel``. The load-time warning fires only once
+        because hooks are cached, so this is the only diagnostic from the second launch onward.
+        """
+        direction = "backward" if adjoint else "forward"
+        shortfall = hooks.backward_smem_shortfall if adjoint else hooks.forward_smem_shortfall
+        if shortfall is not None:
+>           raise RuntimeError(
+                f"Error launching kernel: {kernel.key} on device {device}: the {direction} kernel requests "
+                f"{hooks.backward_smem_bytes if adjoint else hooks.forward_smem_bytes} bytes of dynamic shared "
+                f"memory, {shortfall}. {_SMEM_MITIGATION_MSG}"
+            )
+E           RuntimeError: Error launching kernel: gram_kernel__locals__compute on device cuda:0: the forward kernel requests 155648 bytes of dynamic shared memory, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves). Warp reserves shared memory for every tile expression in the kernel, including tiles that are no longer live. Reduce the number of tile expressions, shrink the tiles, or lower block_dim. See https://nvidia.github.io/warp/stable/user_guide/programming_model/tiles.html#tile-shared-memory-budget
+
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:11011: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+Warp CUDA error 1: invalid argument (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+___________________ test_complete_two_pass_stage[True-96-32] ___________________
+
+tile = 32, width = 96, cached = True
+
+    @pytest.mark.parametrize("tile", [16, 32])
+    @pytest.mark.parametrize("width", [96, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_complete_two_pass_stage(tile, width, cached):
+        class Candidate(GramTileBlock):
+            _gram_output_tile = tile
+    
+>       check_stage(width, cached, Candidate)
+
+tests/test_gram_tiles.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_triangular_rotate.py:52: in test_orthogonalization_with_changed_mass_scaling_and_cached_images
+    solver.orthogonalize_x()
+warpack/block.py:653: in orthogonalize_x
+    self.gram(self.sx, self.bx, self.gx, symmetric=True)
+benchmarks/experimental/gram_tiles.py:63: in gram
+    gram(
+benchmarks/experimental/gram_tiles.py:45: in gram
+    wp.launch_tiled(
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12089: in launch_tiled
+    return launch(*args, **kwargs)
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12007: in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <warp._src.context.Kernel object at 0x7f37363e6050>, device = 'cuda:0'
+hooks = <warp._src.context.KernelHooks object at 0x7f37363e5f90>
+adjoint = False
+
+    def _raise_cuda_launch_error(kernel: Kernel, device: Device, hooks: KernelHooks, adjoint: bool) -> None:
+        """Raise a RuntimeError describing a failed CUDA kernel launch.
+    
+        Call only on the failure path (``if wp_cuda_launch_kernel(...):``) so the
+        success path -- the overwhelming majority of launches -- never enters this
+        function. The seven call sites must keep the launch+raise inlined and in sync.
+    
+        A kernel whose dynamic shared memory could not be configured fails every launch, since
+        the same byte count goes to ``cuLaunchKernel``. The load-time warning fires only once
+        because hooks are cached, so this is the only diagnostic from the second launch onward.
+        """
+        direction = "backward" if adjoint else "forward"
+        shortfall = hooks.backward_smem_shortfall if adjoint else hooks.forward_smem_shortfall
+        if shortfall is not None:
+>           raise RuntimeError(
+                f"Error launching kernel: {kernel.key} on device {device}: the {direction} kernel requests "
+                f"{hooks.backward_smem_bytes if adjoint else hooks.forward_smem_bytes} bytes of dynamic shared "
+                f"memory, {shortfall}. {_SMEM_MITIGATION_MSG}"
+            )
+E           RuntimeError: Error launching kernel: gram_kernel__locals__compute on device cuda:0: the forward kernel requests 155648 bytes of dynamic shared memory, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves). Warp reserves shared memory for every tile expression in the kernel, including tiles that are no longer live. Reduce the number of tile expressions, shrink the tiles, or lower block_dim. See https://nvidia.github.io/warp/stable/user_guide/programming_model/tiles.html#tile-shared-memory-budget
+
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:11011: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+Warp CUDA error 1: invalid argument (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+__________________ test_complete_two_pass_stage[True-204-32] ___________________
+
+tile = 32, width = 204, cached = True
+
+    @pytest.mark.parametrize("tile", [16, 32])
+    @pytest.mark.parametrize("width", [96, 204])
+    @pytest.mark.parametrize("cached", [False, True])
+    def test_complete_two_pass_stage(tile, width, cached):
+        class Candidate(GramTileBlock):
+            _gram_output_tile = tile
+    
+>       check_stage(width, cached, Candidate)
+
+tests/test_gram_tiles.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_triangular_rotate.py:52: in test_orthogonalization_with_changed_mass_scaling_and_cached_images
+    solver.orthogonalize_x()
+warpack/block.py:653: in orthogonalize_x
+    self.gram(self.sx, self.bx, self.gx, symmetric=True)
+benchmarks/experimental/gram_tiles.py:63: in gram
+    gram(
+benchmarks/experimental/gram_tiles.py:45: in gram
+    wp.launch_tiled(
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12089: in launch_tiled
+    return launch(*args, **kwargs)
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12007: in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <warp._src.context.Kernel object at 0x7f37363e6050>, device = 'cuda:0'
+hooks = <warp._src.context.KernelHooks object at 0x7f37363e5f90>
+adjoint = False
+
+    def _raise_cuda_launch_error(kernel: Kernel, device: Device, hooks: KernelHooks, adjoint: bool) -> None:
+        """Raise a RuntimeError describing a failed CUDA kernel launch.
+    
+        Call only on the failure path (``if wp_cuda_launch_kernel(...):``) so the
+        success path -- the overwhelming majority of launches -- never enters this
+        function. The seven call sites must keep the launch+raise inlined and in sync.
+    
+        A kernel whose dynamic shared memory could not be configured fails every launch, since
+        the same byte count goes to ``cuLaunchKernel``. The load-time warning fires only once
+        because hooks are cached, so this is the only diagnostic from the second launch onward.
+        """
+        direction = "backward" if adjoint else "forward"
+        shortfall = hooks.backward_smem_shortfall if adjoint else hooks.forward_smem_shortfall
+        if shortfall is not None:
+>           raise RuntimeError(
+                f"Error launching kernel: {kernel.key} on device {device}: the {direction} kernel requests "
+                f"{hooks.backward_smem_bytes if adjoint else hooks.forward_smem_bytes} bytes of dynamic shared "
+                f"memory, {shortfall}. {_SMEM_MITIGATION_MSG}"
+            )
+E           RuntimeError: Error launching kernel: gram_kernel__locals__compute on device cuda:0: the forward kernel requests 155648 bytes of dynamic shared memory, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves). Warp reserves shared memory for every tile expression in the kernel, including tiles that are no longer live. Reduce the number of tile expressions, shrink the tiles, or lower block_dim. See https://nvidia.github.io/warp/stable/user_guide/programming_model/tiles.html#tile-shared-memory-budget
+
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:11011: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+Warp CUDA error 1: invalid argument (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+_____________ test_changed_coupled_constraints_clusters[False-32] ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f37363bfdf0>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-419/test_changed_coupled_constrain1')
+tile = 32, history = False
+
+    @pytest.mark.parametrize("tile", [16, 32])
+    @pytest.mark.parametrize("history", [False, True])
+    def test_changed_coupled_constraints_clusters(monkeypatch, tmp_path, tile, history):
+        class Candidate(GramTileBlock):
+            _gram_output_tile = tile
+    
+        monkeypatch.setattr(test_first_whitening, "AllSizeInstalledWhitening", Candidate)
+>       test_certified_whitening.test_coupled_mass_constraints_clusters_and_changed_problem(
+            tmp_path, "installed", history, problem_shape=(336, 20, 104)
+        )
+
+tests/test_gram_tiles.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_certified_whitening.py:208: in test_coupled_mass_constraints_clusters_and_changed_problem
+    graph = solver.capture(200)
+warpack/block.py:878: in capture
+    self.solve(1)
+warpack/block.py:851: in solve
+    self.initialize()
+warpack/block.py:806: in initialize
+    self.rayleigh_ritz()
+warpack/block.py:717: in rayleigh_ritz
+    self.project()
+warpack/block.py:640: in project
+    self.gram(self.s, self.bconstraints, self.projection)
+benchmarks/experimental/gram_tiles.py:63: in gram
+    gram(
+benchmarks/experimental/gram_tiles.py:45: in gram
+    wp.launch_tiled(
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12089: in launch_tiled
+    return launch(*args, **kwargs)
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12007: in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <warp._src.context.Kernel object at 0x7f37363e6050>, device = 'cuda:0'
+hooks = <warp._src.context.KernelHooks object at 0x7f37363e5f90>
+adjoint = False
+
+    def _raise_cuda_launch_error(kernel: Kernel, device: Device, hooks: KernelHooks, adjoint: bool) -> None:
+        """Raise a RuntimeError describing a failed CUDA kernel launch.
+    
+        Call only on the failure path (``if wp_cuda_launch_kernel(...):``) so the
+        success path -- the overwhelming majority of launches -- never enters this
+        function. The seven call sites must keep the launch+raise inlined and in sync.
+    
+        A kernel whose dynamic shared memory could not be configured fails every launch, since
+        the same byte count goes to ``cuLaunchKernel``. The load-time warning fires only once
+        because hooks are cached, so this is the only diagnostic from the second launch onward.
+        """
+        direction = "backward" if adjoint else "forward"
+        shortfall = hooks.backward_smem_shortfall if adjoint else hooks.forward_smem_shortfall
+        if shortfall is not None:
+>           raise RuntimeError(
+                f"Error launching kernel: {kernel.key} on device {device}: the {direction} kernel requests "
+                f"{hooks.backward_smem_bytes if adjoint else hooks.forward_smem_bytes} bytes of dynamic shared "
+                f"memory, {shortfall}. {_SMEM_MITIGATION_MSG}"
+            )
+E           RuntimeError: Error launching kernel: gram_kernel__locals__compute on device cuda:0: the forward kernel requests 155648 bytes of dynamic shared memory, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves). Warp reserves shared memory for every tile expression in the kernel, including tiles that are no longer live. Reduce the number of tile expressions, shrink the tiles, or lower block_dim. See https://nvidia.github.io/warp/stable/user_guide/programming_model/tiles.html#tile-shared-memory-budget
+
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:11011: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+Warp CUDA error 1: invalid argument (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+______________ test_changed_coupled_constraints_clusters[True-32] ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3735726fe0>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-419/test_changed_coupled_constrain3')
+tile = 32, history = True
+
+    @pytest.mark.parametrize("tile", [16, 32])
+    @pytest.mark.parametrize("history", [False, True])
+    def test_changed_coupled_constraints_clusters(monkeypatch, tmp_path, tile, history):
+        class Candidate(GramTileBlock):
+            _gram_output_tile = tile
+    
+        monkeypatch.setattr(test_first_whitening, "AllSizeInstalledWhitening", Candidate)
+>       test_certified_whitening.test_coupled_mass_constraints_clusters_and_changed_problem(
+            tmp_path, "installed", history, problem_shape=(336, 20, 104)
+        )
+
+tests/test_gram_tiles.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_certified_whitening.py:208: in test_coupled_mass_constraints_clusters_and_changed_problem
+    graph = solver.capture(200)
+warpack/block.py:878: in capture
+    self.solve(1)
+warpack/block.py:851: in solve
+    self.initialize()
+warpack/block.py:806: in initialize
+    self.rayleigh_ritz()
+warpack/block.py:717: in rayleigh_ritz
+    self.project()
+warpack/block.py:640: in project
+    self.gram(self.s, self.bconstraints, self.projection)
+benchmarks/experimental/gram_tiles.py:63: in gram
+    gram(
+benchmarks/experimental/gram_tiles.py:45: in gram
+    wp.launch_tiled(
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12089: in launch_tiled
+    return launch(*args, **kwargs)
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:12007: in launch
+    _raise_cuda_launch_error(kernel, device, hooks, False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <warp._src.context.Kernel object at 0x7f37363e6050>, device = 'cuda:0'
+hooks = <warp._src.context.KernelHooks object at 0x7f37363e5f90>
+adjoint = False
+
+    def _raise_cuda_launch_error(kernel: Kernel, device: Device, hooks: KernelHooks, adjoint: bool) -> None:
+        """Raise a RuntimeError describing a failed CUDA kernel launch.
+    
+        Call only on the failure path (``if wp_cuda_launch_kernel(...):``) so the
+        success path -- the overwhelming majority of launches -- never enters this
+        function. The seven call sites must keep the launch+raise inlined and in sync.
+    
+        A kernel whose dynamic shared memory could not be configured fails every launch, since
+        the same byte count goes to ``cuLaunchKernel``. The load-time warning fires only once
+        because hooks are cached, so this is the only diagnostic from the second launch onward.
+        """
+        direction = "backward" if adjoint else "forward"
+        shortfall = hooks.backward_smem_shortfall if adjoint else hooks.forward_smem_shortfall
+        if shortfall is not None:
+>           raise RuntimeError(
+                f"Error launching kernel: {kernel.key} on device {device}: the {direction} kernel requests "
+                f"{hooks.backward_smem_bytes if adjoint else hooks.forward_smem_bytes} bytes of dynamic shared "
+                f"memory, {shortfall}. {_SMEM_MITIGATION_MSG}"
+            )
+E           RuntimeError: Error launching kernel: gram_kernel__locals__compute on device cuda:0: the forward kernel requests 155648 bytes of dynamic shared memory, but only 100864 bytes are available at block_dim=128 (device limit 101376 bytes, minus 512 bytes of static shared memory this kernel reserves). Warp reserves shared memory for every tile expression in the kernel, including tiles that are no longer live. Reduce the number of tile expressions, shrink the tiles, or lower block_dim. See https://nvidia.github.io/warp/stable/user_guide/programming_model/tiles.html#tile-shared-memory-budget
+
+/run/openclaw/horde/warpack-fsai-promotion/warp/_src/context.py:11011: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+Warp CUDA error 1: invalid argument (in function wp_cuda_launch_kernel, /builds/omniverse/warp/warp/native/warp.cu:5718)
+=========================== short test summary info ============================
+FAILED tests/test_gram_tiles.py::test_complete_two_pass_stage[False-96-32] - ...
+FAILED tests/test_gram_tiles.py::test_complete_two_pass_stage[False-204-32]
+FAILED tests/test_gram_tiles.py::test_complete_two_pass_stage[True-96-32] - R...
+FAILED tests/test_gram_tiles.py::test_complete_two_pass_stage[True-204-32] - ...
+FAILED tests/test_gram_tiles.py::test_changed_coupled_constraints_clusters[False-32]
+FAILED tests/test_gram_tiles.py::test_changed_coupled_constraints_clusters[True-32]
+6 failed, 24 passed in 242.35s (0:04:02)
