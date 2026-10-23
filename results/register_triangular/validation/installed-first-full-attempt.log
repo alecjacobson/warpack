@@ -1,0 +1,1207 @@
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 17%]
+........................................................................ [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 24%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+..................................................................ssss.. [ 46%]
+........................................................................ [ 48%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 60%]
+...................................................................s..s. [ 63%]
+................s..s.................s..s............................... [ 65%]
+........................................................................ [ 68%]
+........................................................................ [ 70%]
+........................................................................ [ 72%]
+..........................FFFFFFFFFFFF.FF............................... [ 75%]
+........................................................................ [ 77%]
+........................................................................ [ 80%]
+........................................................................ [ 82%]
+.......................s................................................ [ 85%]
+........................................................................ [ 87%]
+........................................................................ [ 90%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+........................................................................ [ 99%]
+.......                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_production_factor_dispatch_and_capacity_fallback[4-True-100000-serial] __
+
+size = 4, cuda = True, shared = 100000, expected = 'serial'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7cceeebf0>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(4, 4)), <object object at 0x7fb7cccfc3f0>, <object object at 0x7fb7cccfc550>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[24-True-100000-serial] _
+
+size = 24, cuda = True, shared = 100000, expected = 'serial'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7cd38c190>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(24, 24)), <object object at 0x7fb7cccfd7a0>, <object object at 0x7fb7cccfd7c0>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[47-True-100000-serial] _
+
+size = 47, cuda = True, shared = 100000, expected = 'serial'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7cd05ac50>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(47, 47)), <object object at 0x7fb7cccfe940>, <object object at 0x7fb7cccfe950>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[48-True-100000-cooperative] _
+
+size = 48, cuda = True, shared = 100000, expected = 'cooperative'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccda3010>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(48, 48)), <object object at 0x7fb7cccffb10>, <object object at 0x7fb7cccffb90>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[104-True-49152-cooperative] _
+
+size = 104, cuda = True, shared = 49152, expected = 'cooperative'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccda1c90>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=49152), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(104, 104)), <object object at 0x7fb7cccfd2b0>, <object object at 0x7fb7cccfd300>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[128-True-100000-cooperative] _
+
+size = 128, cuda = True, shared = 100000, expected = 'cooperative'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccda36d0>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(128, 128)), <object object at 0x7fb7cccfe4d0>, <object object at 0x7fb7cccfe560>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[128-True-49152-serial] _
+
+size = 128, cuda = True, shared = 49152, expected = 'serial'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccda01f0>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=49152), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(128, 128)), <object object at 0x7fb7cccff700>, <object object at 0x7fb7cccff6b0>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[129-True-100000-global] _
+
+size = 129, cuda = True, shared = 100000, expected = 'global'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccd72350>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=<object object at 0x7fb7cccfcf20>)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(129, 129)), <object object at 0x7fb7cccfce80>, <object object at 0x7fb7cccfce30>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[204-True-49152-global] _
+
+size = 204, cuda = True, shared = 49152, expected = 'global'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccd72620>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=49152), _global_factor_workspace=<object object at 0x7fb7cccfe0e0>)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(204, 204)), <object object at 0x7fb7cccfe460>, <object object at 0x7fb7cccfe1f0>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[256-True-49152-global] _
+
+size = 256, cuda = True, shared = 49152, expected = 'global'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccd71930>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=49152), _global_factor_workspace=<object object at 0x7fb7cccff580>)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(256, 256)), <object object at 0x7fb7cccff130>, <object object at 0x7fb7cccff520>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[512-True-49152-global] _
+
+size = 512, cuda = True, shared = 49152, expected = 'global'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7cced75b0>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=49152), _global_factor_workspace=<object object at 0x7fb7cccfcbc0>)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(512, 512)), <object object at 0x7fb7cccfca50>, <object object at 0x7fb7cccfcc70>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[513-True-100000-serial] _
+
+size = 513, cuda = True, shared = 100000, expected = 'serial'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7cced7940>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=100000), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(513, 513)), <object object at 0x7fb7cccfdec0>, <object object at 0x7fb7cccfde50>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[104-True-44711-serial] _
+
+size = 104, cuda = True, shared = 44711, expected = 'serial'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccdc4b20>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=44711), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(104, 104)), <object object at 0x7fb7cccfef90>, <object object at 0x7fb7cccff110>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+_ test_production_factor_dispatch_and_capacity_fallback[104-True-44712-cooperative] _
+
+size = 104, cuda = True, shared = 44712, expected = 'cooperative'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb7ccea5870>
+
+    @pytest.mark.parametrize(
+        "size,cuda,shared,expected",
+        [
+            (4, True, 100000, "serial"),
+            (24, True, 100000, "serial"),
+            (47, True, 100000, "serial"),
+            (48, True, 100000, "cooperative"),
+            (104, True, 49152, "cooperative"),
+            (128, True, 100000, "cooperative"),
+            (128, True, 49152, "serial"),
+            (129, True, 100000, "global"),
+            (204, True, 49152, "global"),
+            (256, True, 49152, "global"),
+            (512, True, 49152, "global"),
+            (513, True, 100000, "serial"),
+            (204, False, None, "serial"),
+            (104, True, 44711, "serial"),
+            (104, True, 44712, "cooperative"),
+            (104, False, None, "serial"),
+        ],
+    )
+    def test_production_factor_dispatch_and_capacity_fallback(
+        size, cuda, shared, expected, monkeypatch
+    ):
+        # Static launch metadata can be tested without allocating a large eigensolver
+        # or requiring the test GPU to have the simulated capacity.
+        device = SimpleNamespace(is_cuda=cuda)
+        if shared is not None:
+            device.max_shared_memory_per_block = shared
+        work = object() if cuda and 129 <= size <= 512 else None
+        owner = SimpleNamespace(device=device, _global_factor_workspace=work)
+        arguments = [SimpleNamespace(shape=(size, size)), object(), object()]
+        calls = []
+        monkeypatch.setattr(wp, "launch", lambda *a, **kw: calls.append(("serial", a, kw)))
+        monkeypatch.setattr(
+            wp,
+            "launch_tiled",
+            lambda *a, **kw: calls.append(("global" if work is not None else "cooperative", a, kw)),
+        )
+        BlockLOBPCG.launch(owner, K.cholesky, 1, arguments)
+        assert len(calls) == 1 and calls[0][0] == expected
+        assert calls[0][2]["device"] is device
+        if expected == "cooperative":
+            assert calls[0][1][0] is packed_cholesky_kernel(size)
+            assert calls[0][2]["inputs"] is arguments
+            assert calls[0][2]["dim"] == 1 and calls[0][2]["block_dim"] == 128
+        elif expected == "global":
+            from warpack._projected_cholesky import global_cholesky
+    
+            assert calls[0][1][0] is global_cholesky
+            assert calls[0][2]["inputs"] == [*arguments, work]
+            assert calls[0][2]["dim"] == 1
+            assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
+        else:
+            assert calls[0][1] == (K.cholesky, 1, arguments)
+        # Other operations must continue through the original launch path.
+        calls.clear()
+>       BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
+
+tests/test_parallel_cholesky.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(device=namespace(is_cuda=True, max_shared_memory_per_block=44712), _global_factor_workspace=None)
+kernel = <warp._src.context.Kernel object at 0x7fb8c015c190>, shape = 3
+args = [namespace(shape=(104, 104)), <object object at 0x7fb7cccfc3d0>, <object object at 0x7fb7cccfccf0>]
+
+    def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+>           and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'arch'
+
+warpack/block.py:573: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[4-True-100000-serial]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[24-True-100000-serial]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[47-True-100000-serial]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[48-True-100000-cooperative]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[104-True-49152-cooperative]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[128-True-100000-cooperative]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[128-True-49152-serial]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[129-True-100000-global]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[204-True-49152-global]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[256-True-49152-global]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[512-True-49152-global]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[513-True-100000-serial]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[104-True-44711-serial]
+FAILED tests/test_parallel_cholesky.py::test_production_factor_dispatch_and_capacity_fallback[104-True-44712-cooperative]
+14 failed, 2934 passed, 11 skipped in 1001.89s (0:16:41)

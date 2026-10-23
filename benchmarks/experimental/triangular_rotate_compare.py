@@ -22,6 +22,11 @@ from benchmarks.upstream.adapters import matrix
 from warpack import BlockLOBPCG, SparseOperator
 
 
+class CanonicalTriangularBlock(BlockLOBPCG):
+    # Keep historical scalar controls explicit after installed specialization.
+    _register_triangular_enabled = False
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group()
@@ -49,13 +54,16 @@ def main():
     rows = []
     for b in widths:
         solvers = []
-        backends = [("triangular", BlockLOBPCG), ("inverse_rotate", TriangularRotateBlock)]
+        backends = [("triangular", CanonicalTriangularBlock), ("inverse_rotate", TriangularRotateBlock)]
         if args.lower_triangular:
             backends.append(("inverse_lower_rotate", LowerTriangularRotateBlock))
         if args.blocked_triangular:
-            backends = [("triangular", BlockLOBPCG), ("blocked_triangular", BlockedTriangularBlock)]
+            backends = [
+                ("triangular", CanonicalTriangularBlock),
+                ("blocked_triangular", BlockedTriangularBlock),
+            ]
         if args.block_sizes:
-            backends = [("triangular256", BlockLOBPCG)] + [
+            backends = [("triangular256", CanonicalTriangularBlock)] + [
                 (f"triangular{size}", partial(TriangularBlockSize, triangular_block_dim=size))
                 for size in [32, 64, 128, 512]
             ]

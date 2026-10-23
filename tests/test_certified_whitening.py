@@ -146,13 +146,15 @@ def test_complete_fem_spectrum_with_certified_second_pass(case, monkeypatch):
 
 @pytest.mark.parametrize("first_pass", [False, True, "padded", "installed"])
 @pytest.mark.parametrize("keep_history", [True, False])
-def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_pass, keep_history):
+def test_coupled_mass_constraints_clusters_and_changed_problem(
+    tmp_path, first_pass, keep_history, problem_shape=(80, 6, 16)
+):
     import scipy.sparse as sp
 
     from benchmarks.upstream.adapters import matrix
     from warpack import SparseOperator
 
-    n, k, width = 80, 6, 16
+    n, k, width = problem_shape
 
     def fixture(seed):
         rng = np.random.default_rng(seed)

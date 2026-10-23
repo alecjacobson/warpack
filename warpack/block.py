@@ -566,6 +566,20 @@ class BlockLOBPCG:
                 )
 
     def launch(self, kernel, shape, args):
+        if (
+            kernel is K.triangular
+            and getattr(self, "_register_triangular_enabled", True)
+            and self.device.is_cuda
+            and self.device.arch == 89
+            and 96 <= args[0].shape[0] <= 256
+        ):
+            # Interleave serial row recurrences to reuse earlier solved values.
+            # Keep both QR passes; no inverse or additional workspace is needed.
+            # Other widths/devices retain the established scalar application.
+            from ._triangular import register_triangular
+
+            wp.launch(register_triangular, shape, args, block_dim=256, device=self.device)
+            return
         if kernel is K.cholesky:
             size = args[0].shape[0]
             # Tiny factors are not a meaningful whole-solve cost (including

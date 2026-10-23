@@ -307,6 +307,13 @@ factor to CUDA widths 129–512 with a setup-time device workspace of
 qualified packed shared-memory path when capacity permits; other widths and
 non-CUDA devices retain the serial fallback. No allocation or host convergence
 decision is added to replay.
+On Ada GPUs, Ritz widths 96–256 also use a register-blocked triangular
+application, retaining each row's subtraction order and both complete QR passes.
+It adds no global workspace, inverse or replay synchronization. Other widths and
+architectures retain the scalar application. The [installed qualification](../results/register_triangular/VALIDATION.md)
+includes changed-input/failure recovery, clean-wheel replay and complete FEM
+controls; the smaller Anvil path is unchanged.
+
 For Ada CUDA devices, search metrics of size 96–512 use certified Cholesky
 whitening during capture. Both whitening passes remain. Each fast path must
 establish a fresh conservative spectral bound above the unchanged relative

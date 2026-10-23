@@ -185,10 +185,11 @@ def test_production_factor_dispatch_and_capacity_fallback(
         assert calls[0][2]["block_dim"] == (256 if size <= 256 else 512)
     else:
         assert calls[0][1] == (K.cholesky, 1, arguments)
-    # Other operations must continue through the original launch path.
+    # Unrelated operations must continue through the original launch path.
+    # Triangular application has its own independently tested specialization.
     calls.clear()
-    BlockLOBPCG.launch(owner, K.triangular, 3, arguments)
-    assert calls[0][0] == "serial" and calls[0][1] == (K.triangular, 3, arguments)
+    BlockLOBPCG.launch(owner, K.linear_residual, (3, 3), arguments)
+    assert calls[0][0] == "serial" and calls[0][1] == (K.linear_residual, (3, 3), arguments)
 
 
 def test_explicit_serial_benchmark_does_not_follow_new_default(monkeypatch):

@@ -12,6 +12,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--installed", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--size", type=int, default=320)
+    parser.add_argument("--width", type=int, default=52)
+    parser.add_argument("--modes", type=int, default=20)
+    parser.add_argument("--require-register-triangular", action="store_true")
     args = parser.parse_args()
     sys.meta_path.insert(0, RejectNonCore())
     import numpy as np
@@ -22,7 +26,7 @@ def main():
 
     assert Path(warpack.__file__).resolve().is_relative_to(args.installed.resolve())
     wp.init()
-    n, width, k = 320, 52, 20
+    n, width, k = args.size, args.width, args.modes
     indices = wp.array(list(range(n)), dtype=wp.int32, device="cuda:0")
     weights = 1.0 + np.arange(n) % 7 / 5.0
     spectrum = np.arange(n) // 2 + 1.0
@@ -93,9 +97,15 @@ def main():
         dot = args.installed.parent / f"first-whitening-{history}-{compact}.dot"
         wp.capture_debug_dot_print(graph, str(dot))
         assert not any(kind in dot.read_text() for kind in ("HOST", "HtoD", "DtoH"))
+        if args.require_register_triangular:
+            assert "register_triangular" in dot.read_text()
         dot.unlink()
     report = dict(
         installed=str(args.installed.resolve()),
+        size=n,
+        width=width,
+        modes=k,
+        require_register_triangular=args.require_register_triangular,
         replays=records,
         forbidden_imports=["benchmarks", "examples", "cupy", "scipy", "warp_cudss"],
     )

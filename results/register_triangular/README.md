@@ -1,6 +1,9 @@
 # Register-blocked triangular recurrence (#173)
 
-## Independent prototype qualification
+The guarded installed implementation is now covered by the
+[full-suite, wheel and fresh complete-solve qualification](VALIDATION.md).
+
+## Independent prototype qualification (28ee6ee)
 
 Eight interleaved serial right-hand-side rows reuse each earlier solved entry in
 registers. Every row retains the original subtraction order; there is no triangular
@@ -10,8 +13,9 @@ control. Both complete QR passes, initial scaling, cached AX updates and final M
 remain. All other kernels, settings and acceptance gates are identical.
 
 This is a different approach from the [rejected tiled/shared experiments](../triangular_rotate/README.md).
-The prototype remains separate from installed core. Promotion requires installed
-regression, package and performance qualification below.
+The independent prototype remains outside the installed package for reproducible
+controls. This section records its pre-promotion results at commit `28ee6ee`;
+installed regression, package and performance evidence is linked above.
 
 **14 pinned kernel/stage tests and 12 pinned FEM tests pass.** The kernel checks
 require bitwise equality with the original recurrence on widths 7–256, changed
