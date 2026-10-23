@@ -111,3 +111,28 @@ def test_installed_first_and_second_whitening_events_stay_outside_conditionals(k
             assert "metric_eigh" not in times
         assert all(np.isfinite(t) and t >= 0 for t in times.values())
         assert "possibly from an earlier step" in sample["metric_sweeps_scope"]
+
+
+def test_installed_ritz_qr_events_stay_outside_conditional_fallback(monkeypatch):
+    import warp as wp
+
+    from benchmarks.experimental import profile_active_block
+    from tests.test_installed_ritz_qr import QualifiedBlock
+
+    if not hasattr(linear, "FSAI") or wp.get_device().arch != 89:
+        pytest.skip("pinned FSAI and installed Ada reuse required")
+    monkeypatch.setattr(profile_active_block, "BlockLOBPCG", QualifiedBlock)
+    config = json.loads(Path("results/first_whitening/production/100-default-a1.json").read_text())[
+        "args"
+    ]
+    config.update(case="clamped_consistent", side=5, modes=6, width=104)
+    solver, check, _, _ = create_solver(SimpleNamespace(**config))
+    helpers = [branch._ritz_qr_reuse for branch in solver._search.buckets]
+    assert all(helper is not None for helper in helpers)
+    original = [helper.apply for helper in helpers]
+    result, _ = profile(solver, check, 300, [0, 1], 2)
+    assert result["before"]["accepted"] and result["after"]["accepted"]
+    assert [helper.apply for helper in helpers] == original
+    for sample in result["samples"]:
+        assert sample["events_ms"]["ritz_metric_qr"] > 0
+        assert all(np.isfinite(t) and t >= 0 for t in sample["events_ms"].values())

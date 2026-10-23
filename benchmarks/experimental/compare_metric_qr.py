@@ -20,12 +20,15 @@ def main():
     parser.add_argument("--reference-cache", type=Path, required=True)
     parser.add_argument("--compact-graphs", action="store_true")
     parser.add_argument("--wide-only", action="store_true")
+    parser.add_argument("--installed-default", action="store_true")
     choice, remainder = parser.parse_known_args()
     destination_parser = argparse.ArgumentParser(add_help=False)
     destination_parser.add_argument("--out", type=Path, required=True)
     destination, _ = destination_parser.parse_known_args(remainder)
     if "--public-api" not in remainder or "--cupy" in remainder:
         parser.error("this control requires the public Warp composition without a CuPy row")
+    if choice.installed_default and choice.metric_defect:
+        parser.error("--installed-default requires --metric-defect 0")
     original, manifest, prepare, argv = (
         warpack.BlockLOBPCG,
         compare_block.source_manifest,
@@ -37,6 +40,7 @@ def main():
     error = None
 
     class Tracking(base):
+        _ritz_qr_enabled = choice.installed_default
         _metric_reuse_tolerance = choice.metric_defect
         _metric_reuse_minimum = 96 if choice.wide_only else 1
         _metric_reuse_maximum = 256 if choice.wide_only else 2147483647
@@ -51,8 +55,12 @@ def main():
 
         def tracked_check(*values, **options):
             quality = check(*values, **options)
-            if instances and choice.metric_defect:
-                usage = instances[-1].metric_reuse_usage
+            if instances and (choice.metric_defect or choice.installed_default):
+                usage = (
+                    instances[-1]._ritz_qr_usage
+                    if choice.installed_default
+                    else instances[-1].metric_reuse_usage
+                )
                 quality["metric_qr_reuse_and_fallback"] = (
                     None if usage is None else usage.numpy().tolist()
                 )
@@ -83,10 +91,12 @@ def main():
             compact_graphs=choice.compact_graphs,
             reference_cache=str(choice.reference_cache),
             wide_only=choice.wide_only,
+            installed_default=choice.installed_default,
         )
         report["independent_reference_cache"] = cache.records
         report["metric_qr_scope"] = (
-            "Explicit complete two-pass QR control (metric-defect0) or benchmark-only "
+            "Explicit complete two-pass QR control (metric-defect 0), installed default "
+            "(--installed-default), or benchmark-only "
             "fresh computed-metric defect check. The latter reuses X and cached AX "
             "only after a finite device check, retaining fresh MX; other cases run "
             "the complete original QR. Computed-metric bounds do not certify "
@@ -96,7 +106,8 @@ def main():
             "verified CPU references are reused outside timing. Counters are read "
             "during post-solve validation, outside compute timing."
             " With --wide-only, widths outside96..256 retain original QR with "
-            "no added control arrays or graph nodes."
+            "no added control arrays or graph nodes. Installed default additionally guards "
+            "Ada SM89, chunk4096, tol>=1e-11, image reuse and symmetric products."
         )
         destination.out.write_text(json.dumps(report, indent=2) + "\n")
     if error is not None:

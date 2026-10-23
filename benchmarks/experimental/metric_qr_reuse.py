@@ -62,7 +62,7 @@ class MetricQRReuse:
         )
 
     def full_qr(self):
-        BlockLOBPCG.orthogonalize_x(self.owner)
+        BlockLOBPCG._orthogonalize_x_full(self.owner)
 
     def apply(self):
         owner = self.owner
@@ -84,6 +84,7 @@ class MetricQRReuse:
 
 
 class MetricQRReuseBlock(BlockLOBPCG):
+    _ritz_qr_enabled = False
     _metric_reuse_tolerance = 1e-13
     _metric_reuse_minimum = 1
     _metric_reuse_maximum = 2147483647

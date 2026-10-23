@@ -24,3 +24,5 @@ Nineteen focused tests pass on both pinned Warp and stock Warp 1.15 ([pinned](pi
 Reproduce with `python -m benchmarks.experimental.compare_metric_qr --metric-defect 0|1e-14|1e-13|1e-12 --reference-cache CACHE --public-api ...`. Exact remaining arguments, first and per-replay counters, physical qualities, source hashes and adjacent occupancy/logs are in [pilot](pilot/). Counters are read during post-solve validation, outside timing.
 
 The [wide-block follow-up](WIDE.md) passes all 64 complete outputs, including reverse-order, compact/history, rigid-nullspace and heterogeneous controls. Anvil retains the identical original graph.
+
+The [installed qualification](VALIDATION.md) now covers the guarded default, full/stock regression, isolated-wheel replays and fresh complete original/default controls. The pilot numerical source is preserved at `4d59b98`, and the wide prototype at `1b8b65a`; their as-run source hashes remain unchanged.

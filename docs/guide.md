@@ -308,7 +308,7 @@ qualified packed shared-memory path when capacity permits; other widths and
 non-CUDA devices retain the serial fallback. No allocation or host convergence
 decision is added to replay.
 On Ada GPUs, Ritz widths 96–256 also use a register-blocked triangular
-application, retaining each row's subtraction order and both complete QR passes.
+application, retaining each row's subtraction order when QR runs.
 It adds no global workspace, inverse or replay synchronization. Other widths and
 architectures retain the scalar application. The [installed qualification](../results/register_triangular/VALIDATION.md)
 includes changed-input/failure recovery, clean-wheel replay and complete FEM
@@ -316,9 +316,23 @@ controls; Anvil uses the original triangular kernel.
 
 With `gram_chunk=4096`, Ada devices use 16×16 FP64 Gram output tiles for block
 widths 24–256. This path adds no global workspace or replay synchronization;
-both full QR passes and all rank/stopping thresholds remain. Other settings
+the QR policy and all rank/stopping thresholds are independent of this tile choice. Other settings
 retain the original Gram implementation. The [Gram qualification](../results/gram_tiles/VALIDATION.md)
 records complete FEM comparisons and original-equation/replay checks.
+
+For Ada block widths 96–256, `gram_chunk=4096`, `tol >= 1e-11`, and both
+`reuse_operator_images=True` and `symmetric_products=True`, captured execution
+checks a fresh mass Gram before reorthogonalizing Ritz vectors. If the finite
+computed metric defect is at most `1e-13`, it retains the basis and cached
+operator images with a fresh mass image. Otherwise it runs both original QR
+passes. This uses owned Warp sparse/identity mass operators; custom operators,
+stricter tolerances, eager execution and other configurations retain full QR.
+The bound concerns the computed Gram, not exact-arithmetic mass products;
+original-equation stopping and rank thresholds remain unchanged. Mutually
+exclusive search branches share 24 bytes of control/counter values and add no
+dense workspace or replay host readback. The [QR reuse qualification](../results/metric_qr_reuse/VALIDATION.md)
+records complete physical/replay and packaging checks. Anvil's width 24 retains
+the original graph.
 
 For Ada CUDA devices, search metrics of size 96–512 use certified Cholesky
 whitening during capture. Both whitening passes remain. Each fast path must

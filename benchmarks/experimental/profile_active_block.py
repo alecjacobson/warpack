@@ -169,6 +169,7 @@ def capture_profile(solver, index):
             saved.append((obj, attribute, original))
             setattr(obj, attribute, events.wrap(label, original))
         for attribute, label in (
+            ("_ritz_qr_reuse", "ritz_metric_qr"),
             ("_first_whitener", "first_metric_whitening"),
             ("_second_whitener", "second_metric_whitening"),
         ):
@@ -176,7 +177,7 @@ def capture_profile(solver, index):
             if helper is not None:
                 original_helper = helper.apply
 
-                def conditional_whitening(*args, _apply=original_helper, **kwargs):
+                def conditional_helper(*args, _apply=original_helper, **kwargs):
                     # External CUDA event nodes cannot live inside conditional
                     # child graphs. Time the complete helper at its boundary.
                     events.suspended += 1
@@ -186,7 +187,7 @@ def capture_profile(solver, index):
                         events.suspended -= 1
 
                 saved.append((helper, "apply", original_helper))
-                helper.apply = events.wrap(label, conditional_whitening)
+                helper.apply = events.wrap(label, conditional_helper)
         original_launch = branch.launch
 
         def instrument_launch(kernel, shape, arguments):

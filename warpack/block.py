@@ -473,7 +473,24 @@ class BlockLOBPCG:
 
         self._configure_second_whitening()
         self._configure_first_whitening()
+        self._configure_ritz_qr_reuse()
         self._configure_compact_projected_graphs()
+
+    def _configure_ritz_qr_reuse(self):
+        from ._ritz_qr import MetricQRReuse, qualified
+
+        branches = [self] + ([] if self._search is None else self._search.buckets)
+        self._ritz_qr_usage = None
+        for branch in branches:
+            branch._ritz_qr_reuse = None
+        if qualified(self):
+            storage = [wp.zeros(1, dtype=wp.float64, device=self.device)] + [
+                wp.zeros(n, dtype=wp.int32, device=self.device) for n in (1, 1, 2)
+            ]
+            self._ritz_qr_usage = storage[-1]
+            # Search branches execute mutually exclusively; share 24 bytes.
+            for branch in branches:
+                branch._ritz_qr_reuse = MetricQRReuse(branch, storage, 1e-13)
 
     def _configure_compact_projected_graphs(self):
         if not self.compact_projected_graphs:
@@ -659,6 +676,12 @@ class BlockLOBPCG:
                     )
 
     def orthogonalize_x(self):
+        if self._ritz_qr_reuse is not None:
+            self._ritz_qr_reuse.apply()
+        else:
+            self._orthogonalize_x_full()
+
+    def _orthogonalize_x_full(self):
         for i in range(2):
             self.mass.apply(self.sx, self.bx)
             self.gram(self.sx, self.bx, self.gx, symmetric=True)
@@ -773,6 +796,8 @@ class BlockLOBPCG:
         self.finalize()
 
     def initialize(self, seed=42):
+        if self._ritz_qr_usage is not None:
+            self._ritz_qr_usage.zero_()
         if self._first_whitening_usage is not None:
             self._first_whitening_usage.zero_()
         if self._second_whitening_usage is not None:

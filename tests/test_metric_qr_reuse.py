@@ -49,11 +49,11 @@ def test_computed_defect_bound_and_nonfinite_detection():
 
 
 @pytest.mark.parametrize("tolerance", [1e-14, 1e-13, 1e-12])
-def test_reuse_fallback_and_failure_recovery_on_one_graph(tolerance):
+def test_reuse_fallback_and_failure_recovery_on_one_graph(tolerance, width=24):
     class Candidate(MetricQRReuseBlock):
         _metric_reuse_tolerance = tolerance
 
-    width, n = 24, 103
+    n = 4 * width + 7
     diagonal = np.linspace(1, 4, n)
     mass_diagonal = np.linspace(1, 2, n)
     mass = matrix(sp.diags(mass_diagonal, format="csr"))

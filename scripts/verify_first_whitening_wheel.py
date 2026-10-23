@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--require-register-triangular", action="store_true")
     parser.add_argument("--gram-chunk", type=int, default=256)
     parser.add_argument("--require-wide-gram", action="store_true")
+    parser.add_argument("--require-ritz-qr", action="store_true")
     args = parser.parse_args()
     sys.meta_path.insert(0, RejectNonCore())
     import numpy as np
@@ -85,8 +86,11 @@ def main():
             assert np.linalg.norm(vectors[:2]) < 1e-10
             assert np.linalg.norm(vectors[k + 2 :]) < 1e-7
             usage = solver._first_whitening_usage
+            qr_usage = solver._ritz_qr_usage
             if wp.get_device().arch == 89:
                 assert usage is not None and usage.numpy()[0] > 0
+            if args.require_ritz_qr:
+                assert qr_usage is not None and qr_usage.numpy()[0] > 0
             records.append(
                 dict(
                     keep_history=history,
@@ -95,6 +99,7 @@ def main():
                     max_original_residual=float(residual),
                     mass_orthogonality=float(orthogonality),
                     first_whitening_usage=None if usage is None else usage.numpy().tolist(),
+                    ritz_qr_usage=None if qr_usage is None else qr_usage.numpy().tolist(),
                 )
             )
         dot = args.installed.parent / f"first-whitening-{history}-{compact}.dot"
@@ -104,6 +109,8 @@ def main():
             assert "register_triangular" in dot.read_text()
         if args.require_wide_gram:
             assert "wide_gram_kernel__locals__compute" in dot.read_text()
+        if args.require_ritz_qr:
+            assert "metric_defect" in dot.read_text() and "choose_qr" in dot.read_text()
         dot.unlink()
     report = dict(
         installed=str(args.installed.resolve()),
@@ -113,6 +120,7 @@ def main():
         require_register_triangular=args.require_register_triangular,
         gram_chunk=args.gram_chunk,
         require_wide_gram=args.require_wide_gram,
+        require_ritz_qr=args.require_ritz_qr,
         replays=records,
         forbidden_imports=["benchmarks", "examples", "cupy", "scipy", "warp_cudss"],
     )
