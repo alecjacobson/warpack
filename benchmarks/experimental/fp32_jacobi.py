@@ -1,0 +1,148 @@
+"""FP32 complete-basis initializer for the mixed projected-solver experiment.
+
+Only a candidate basis is used; final values and rank decisions stay FP64.
+This static Warp implementation follows the tested persistent FP64 round order.
+"""
+
+import warp as wp
+
+
+@wp.func
+def pairs32(
+    h: wp.array2d[wp.float32],
+    cs: wp.array[wp.float32],
+    ss: wp.array[wp.float32],
+    partners: wp.array[wp.int32],
+    lane: int,
+    round: int,
+):
+    n = h.shape[0]
+    if lane < n // 2:
+        p = (round + lane) % (n - 1)
+        q = (round - lane + n - 1) % (n - 1)
+        if lane == 0:
+            q = n - 1
+        apq = h[p, q]
+        c, s = wp.float32(1.0), wp.float32(0.0)
+        if wp.abs(apq) > wp.float32(1.0e-7) * (wp.abs(h[p, p]) + wp.abs(h[q, q])):
+            tau = (h[q, q] - h[p, p]) / (wp.float32(2.0) * apq)
+            t = wp.float32(1.0) / (wp.abs(tau) + wp.sqrt(wp.float32(1.0) + tau * tau))
+            if tau < wp.float32(0.0):
+                t = -t
+            c = wp.float32(1.0) / wp.sqrt(wp.float32(1.0) + t * t)
+            s = t * c
+        cs[p] = c
+        cs[q] = c
+        ss[p] = s
+        ss[q] = -s
+        partners[p] = q
+        partners[q] = p
+
+
+@wp.func
+def update32(
+    h: wp.array2d[wp.float32],
+    v: wp.array2d[wp.float32],
+    out_h: wp.array2d[wp.float32],
+    out_v: wp.array2d[wp.float32],
+    c: wp.array[wp.float32],
+    s: wp.array[wp.float32],
+    p: wp.array[wp.int32],
+    i: int,
+    j: int,
+):
+    right_i = c[j] * h[i, j] - s[j] * h[i, p[j]]
+    right_p = c[j] * h[p[i], j] - s[j] * h[p[i], p[j]]
+    out_h[i, j] = c[i] * right_i - s[i] * right_p
+    out_v[i, j] = c[j] * v[i, j] - s[j] * v[i, p[j]]
+
+
+@wp.kernel(enable_backward=False)
+def persistent_jacobi32(
+    h: wp.array2d[wp.float32],
+    v: wp.array2d[wp.float32],
+    temp: wp.array2d[wp.float32],
+    vtemp: wp.array2d[wp.float32],
+    cs: wp.array[wp.float32],
+    ss: wp.array[wp.float32],
+    partners: wp.array[wp.int32],
+    sweeps: wp.array[wp.int32],
+):
+    block, lane = wp.tid()
+    n = h.shape[0]
+    barrier = wp.tile_zeros(shape=1, dtype=wp.int32, storage="shared")
+    for entry in range(lane, n * n, 256):
+        i, j = entry // n, entry % n
+        v[i, j] = wp.float32(0.0)
+        if i == j:
+            v[i, j] = wp.float32(1.0)
+        if i < j:
+            value = (h[i, j] + h[j, i]) * wp.float32(0.5)
+            h[i, j] = value
+            h[j, i] = value
+    wp.tile_scatter_masked(barrier, 0, 0, lane == 0)
+    for sweep in range(30):
+        for round in range(n - 1):
+            if round % 2 == 0:
+                pairs32(h, cs, ss, partners, lane, round)
+            else:
+                pairs32(temp, cs, ss, partners, lane, round)
+            wp.tile_scatter_masked(barrier, 0, round, lane == 0)
+            for entry in range(lane, n * n, 256):
+                i, j = entry // n, entry % n
+                if round % 2 == 0:
+                    update32(h, v, temp, vtemp, cs, ss, partners, i, j)
+                else:
+                    update32(temp, vtemp, h, v, cs, ss, partners, i, j)
+            wp.tile_scatter_masked(barrier, 0, round, lane == 0)
+        # Even n has an odd number of rounds; the final result is in temp.
+        off, diagonal = wp.float32(0.0), wp.float32(0.0)
+        for entry in range(lane, n * n, 256):
+            i, j = entry // n, entry % n
+            h[i, j] = temp[i, j]
+            v[i, j] = vtemp[i, j]
+            value = wp.abs(temp[i, j])
+            if not wp.isfinite(value):
+                off = wp.float32(wp.inf)
+            elif i == j:
+                diagonal = wp.max(diagonal, value)
+            else:
+                off = wp.max(off, value)
+        wp.tile_scatter_masked(barrier, 0, sweep, lane == 0)
+        max_off = wp.tile_extract(wp.tile_max(wp.tile(off)), 0)
+        max_diagonal = wp.tile_extract(wp.tile_max(wp.tile(diagonal)), 0)
+        if lane == 0:
+            sweeps[0] = sweep + 1
+        if wp.isfinite(max_off) and max_off <= wp.float32(2.0e-7) * max_diagonal:
+            break
+
+
+class FP32Jacobi:
+    """Preallocated FP32 complete-basis initializer for even n <=512."""
+
+    def __init__(self, h, v, cs, ss, partners, temp, vtemp):
+        n = h.shape[0]
+        if not h.device.is_cuda or n < 2 or n > 512 or n % 2:
+            raise ValueError("persistent Jacobi requires CUDA and an even dimension in 2..512")
+        self.h, self.v, self.cs, self.ss = h, v, cs, ss
+        self.partners, self.temp, self.vtemp = partners, temp, vtemp
+        self.device = h.device
+        self.sweeps = wp.zeros(1, dtype=wp.int32, device=self.device)
+
+    def apply(self):
+        wp.launch_tiled(
+            persistent_jacobi32,
+            dim=1,
+            inputs=[
+                self.h,
+                self.v,
+                self.temp,
+                self.vtemp,
+                self.cs,
+                self.ss,
+                self.partners,
+                self.sweeps,
+            ],
+            block_dim=256,
+            device=self.device,
+        )
