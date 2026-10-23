@@ -168,19 +168,25 @@ def capture_profile(solver, index):
             original = getattr(obj, attribute)
             saved.append((obj, attribute, original))
             setattr(obj, attribute, events.wrap(label, original))
-        helper = getattr(branch, "_second_whitener", None)
-        if helper is not None:
-            original_second = helper.apply
+        for attribute, label in (
+            ("_first_whitener", "first_metric_whitening"),
+            ("_second_whitener", "second_metric_whitening"),
+        ):
+            helper = getattr(branch, attribute, None)
+            if helper is not None:
+                original_helper = helper.apply
 
-            def conditional_second(*args, **kwargs):
-                events.suspended += 1
-                try:
-                    return original_second(*args, **kwargs)
-                finally:
-                    events.suspended -= 1
+                def conditional_whitening(*args, _apply=original_helper, **kwargs):
+                    # External CUDA event nodes cannot live inside conditional
+                    # child graphs. Time the complete helper at its boundary.
+                    events.suspended += 1
+                    try:
+                        return _apply(*args, **kwargs)
+                    finally:
+                        events.suspended -= 1
 
-            saved.append((helper, "apply", original_second))
-            helper.apply = events.wrap("second_metric_whitening", conditional_second)
+                saved.append((helper, "apply", original_helper))
+                helper.apply = events.wrap(label, conditional_whitening)
         original_launch = branch.launch
 
         def instrument_launch(kernel, shape, arguments):
@@ -261,7 +267,7 @@ def profile(solver, check, steps, checkpoints, repeats):
                     projected_sweeps=None
                     if branch.small._global_jacobi is None
                     else int(branch.small._global_jacobi.sweeps.numpy()[0]),
-                    metric_sweeps_scope="Last executed canonical metric solve; first pass when certified second whitening succeeds, second pass otherwise. metric_eigh events exclude conditional second-pass work; second_metric_whitening includes that entire stage.",
+                    metric_sweeps_scope="Last executed canonical metric solve, possibly from an earlier step when both certificates succeed. metric_eigh events exclude all conditional helper work; first_metric_whitening and second_metric_whitening each include their complete helper. These spans overlap enclosing whiten/stage events and must not be added.",
                     metric_sweeps=None
                     if branch.metric._global_jacobi is None
                     else int(branch.metric._global_jacobi.sweeps.numpy()[0]),

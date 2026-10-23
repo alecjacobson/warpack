@@ -69,3 +69,41 @@ def test_conditional_second_whitening_is_timed_outside_child_graphs(monkeypatch)
         assert sample["events_ms"]["second_metric_whitening"] > 0
         assert sample["events_ms"]["metric_eigh"] > 0
         assert all(np.isfinite(t) and t >= 0 for t in sample["events_ms"].values())
+
+
+@pytest.mark.parametrize("keep_history", [False, True])
+def test_installed_first_and_second_whitening_events_stay_outside_conditionals(keep_history):
+    import warp as wp
+
+    if not hasattr(linear, "FSAI") or wp.get_device().arch != 89:
+        pytest.skip("pinned FSAI and installed Ada certificate required")
+    config = json.loads(Path("results/first_whitening/production/100-default-a1.json").read_text())[
+        "args"
+    ]
+    config.update(
+        case="clamped_consistent",
+        side=3,
+        modes=6,
+        width=52,
+        active_search_keep_history=keep_history,
+    )
+    solver, check, _, _ = create_solver(SimpleNamespace(**config))
+    helpers = [
+        helper
+        for branch in solver._search.buckets
+        for helper in (branch._first_whitener, branch._second_whitener)
+        if helper is not None
+    ]
+    assert helpers
+    original = [helper.apply for helper in helpers]
+    result, _ = profile(solver, check, 300, [0, 1], 2)
+    assert result["before"]["accepted"] and result["after"]["accepted"]
+    assert [helper.apply for helper in helpers] == original
+    for sample in result["samples"]:
+        times = sample["events_ms"]
+        if sample["checkpoint"] == 0:
+            assert times["first_metric_whitening"] > 0
+            assert times["second_metric_whitening"] > 0
+            assert "metric_eigh" not in times
+        assert all(np.isfinite(t) and t >= 0 for t in times.values())
+        assert "possibly from an earlier step" in sample["metric_sweeps_scope"]
