@@ -42,6 +42,30 @@ and graph-residency check through width 512, but its
 [occupancy record](isolated/factor-a1.occupancy.json) shows contention. Its times
 are excluded from performance conclusions; uncontended qualification is pending.
 
+The subsequent [uncontended isolated control](isolated/factor-a2.json) passes
+all reconstruction/status and device-only graph checks. Medians below are
+microseconds per factor. Each backend has three measured captured batches;
+sizes below 256 use ten factors per batch, and sizes 256/512 use one long factor
+per batch. Actual counts are recorded per row. Setup and capture are excluded.
+
+| Width | Serial (µs) | Packed shared (µs) | Global workspace (µs) |
+| ---: | ---: | ---: | ---: |
+| 24 | 163.136 | 35.526 | 25.008 |
+| 48 | 878.683 | 79.754 | 60.018 |
+| 104 | 6708.715 | 235.126 | 197.733 |
+| 128 | 11849.260 | 326.024 | 285.381 |
+| 204 | 60386.988 | Not supported | 1107.102 |
+| 256 | 125150.505 | Not supported | 1905.691 |
+| 512 | 1031782.117 | Not supported | 9139.322 |
+
+At width 204, the global prototype reduces the isolated factor time by about
+55×. That is not a whole-eigensolve result. The small absolute differences
+against the packed implementation at widths 104/128 do not by themselves
+justify replacing the qualified existing path. Larger-mode full-solver controls
+remain necessary. The additional workspace is `8 * width²` bytes, reaching
+2 MiB at width 512. [External occupancy](isolated/factor-a2.occupancy.json)
+reports no competing GPU process throughout this worker.
+
 ## Drivers
 
 - `benchmarks.experimental.global_cholesky_compare`: isolated factor controls,

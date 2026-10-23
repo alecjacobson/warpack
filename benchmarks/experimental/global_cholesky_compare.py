@@ -20,15 +20,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sizes", default="24,48,104,128,204,256,512")
     parser.add_argument("--batch", type=int, default=10)
+    parser.add_argument(
+        "--large-batch", type=int, default=1, help="factors per batch at sizes >=256"
+    )
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     sizes = list(map(int, args.sizes.split(",")))
-    if min(args.batch, args.repeats) < 1 or any(not 1 <= n <= 512 for n in sizes):
+    if min(args.batch, args.large_batch, args.repeats) < 1 or any(not 1 <= n <= 512 for n in sizes):
         parser.error("positive repeats/batch and dimensions1..512 required")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     rows, skipped = [], []
     for n in sizes:
+        batch = args.large_batch if n >= 256 else args.batch
         rng = np.random.default_rng(1543)
         x = rng.normal(size=(n, n))
         original = x @ x.T + np.eye(n)
@@ -63,7 +67,7 @@ def main():
             run()
             wp.synchronize()
             with wp.ScopedCapture() as capture:
-                for _ in range(args.batch):
+                for _ in range(batch):
                     run()
             wp.capture_launch(capture.graph)
             wp.synchronize()
@@ -82,7 +86,7 @@ def main():
                 check["accepted"] = bool(
                     flag == 0 and check["positive"] and np.isfinite(residual) and residual < 1e-12
                 )
-                samples.append(seconds / args.batch)
+                samples.append(seconds / batch)
                 checks.append(check)
             dot = args.out.with_suffix(f".{n}-{backend}.dot")
             wp.capture_debug_dot_print(capture.graph, str(dot))
@@ -92,6 +96,7 @@ def main():
             assert all("DtoD" in kind for kind in graph["memcpy_kinds"])
             row = dict(
                 n=n,
+                factors_per_batch=batch,
                 backend=backend,
                 seconds=samples,
                 median_seconds=float(np.median(samples)),
@@ -109,7 +114,7 @@ def main():
         source_sha256=source_manifest(__file__),
         dependency=warp_dependencies(),
         accepted=all(r["accepted"] for r in rows),
-        protocol="Isolated factorization; warm captured batches of repeated factorizations of identical SPD input, with batch and repeat counts recorded in arguments. Setup/capture excluded. Status, positive diagonal and independent reconstructed matrix equation checked after every batch. External occupancy is required; not an end-to-end eigen timing.",
+        protocol="Isolated factorization; warm captured batches of identical SPD input, with actual factors_per_batch in each row and repeat count in arguments. Larger serial factors need fewer repetitions per batch to produce measurable durations. Setup/capture excluded. Status, positive diagonal and independent reconstructed matrix equation checked after every batch. External occupancy is required; not an end-to-end eigen timing.",
     )
     args.out.write_text(json.dumps(report, indent=2) + "\n")
     if not report["accepted"]:
