@@ -100,6 +100,8 @@ convergence tests. The default remains `False`: compact graphs can cost more
 per warmed replay, so repeated solves may favor the default. Only existing
 even-dimensional global projected solves of size 96–1024 change; the Anvil
 recipe and small/odd projected problems keep their established paths.
+Both global graph policies restore projected symmetry before testing convergence;
+[regressions](../results/projected_symmetry/VALIDATION.md) include repeated and null spectra.
 [Complete setup/capture/replay controls](../results/compact_jacobi/README.md)
 report the tradeoff separately from the main six-backend comparison.
 

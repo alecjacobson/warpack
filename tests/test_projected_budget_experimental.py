@@ -64,12 +64,10 @@ def test_nonfinite_is_bounded_and_next_replay_recovers(limit):
 
 @pytest.mark.parametrize("n", [48, 104, 208, 612])
 def test_early_convergence_preserves_original_arithmetic(n):
-    from warpack.projected import GlobalJacobi
-
     a = np.random.default_rng(170).normal(size=(n, n))
     a = (a + a.T) * 0.5
     results = []
-    for constructor in [GlobalJacobi, BoundedJacobi]:
+    for constructor in [partial(BoundedJacobi, limit=30), BoundedJacobi]:
         solver, _ = allocate(n, constructor=constructor)
         solver.h.assign(a)
         solver.apply()

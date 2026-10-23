@@ -115,6 +115,17 @@ def jacobi_kernel(size, block_dim=256):
 
 
 @wp.kernel
+def restore_symmetry(h: wp.array2d[wp.float64]):
+    # Jacobi assumes symmetry throughout its iteration. Roundoff skew can
+    # prevent convergence on repeated/null spectra even after many sweeps.
+    i, j = wp.tid()
+    if i < j:
+        value = (h[i, j] + h[j, i]) * wp.float64(0.5)
+        h[i, j] = value
+        h[j, i] = value
+
+
+@wp.kernel
 def global_jacobi_update(
     h: wp.array2d[wp.float64],
     sweeps: wp.array[wp.int32],
@@ -152,6 +163,8 @@ class GlobalJacobi:
     may synchronize/load modules, as for outer capture; replay never does.
     """
 
+    _restore_symmetry = True
+
     def __init__(self, h, v, cs, ss, partners, temp, vtemp):
         self.h, self.v = h, v
         self.cs, self.ss, self.partners = cs, ss, partners
@@ -187,6 +200,11 @@ class GlobalJacobi:
         if current_h is not self.h:
             wp.copy(self.h, current_h)
             wp.copy(self.v, current_v)
+        self._finish_sweep()
+
+    def _finish_sweep(self):
+        if self._restore_symmetry:
+            wp.launch(restore_symmetry, self.h.shape, [self.h], device=self.device)
         wp.launch_tiled(
             global_jacobi_update,
             dim=1,

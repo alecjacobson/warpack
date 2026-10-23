@@ -8,7 +8,7 @@ graph construction cost for additional device-loop overhead.
 import warp as wp
 
 from . import kernels as K
-from .projected import GlobalJacobi, global_jacobi_update
+from .projected import GlobalJacobi
 
 
 @wp.kernel
@@ -151,10 +151,4 @@ class CompactJacobi(GlobalJacobi):
         if current_h is not self.h:
             wp.copy(self.h, current_h)
             wp.copy(self.v, current_v)
-        wp.launch_tiled(
-            global_jacobi_update,
-            dim=1,
-            inputs=[self.h, self.sweeps, self.running],
-            block_dim=128,
-            device=self.device,
-        )
+        self._finish_sweep()

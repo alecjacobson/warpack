@@ -37,7 +37,9 @@ Fresh monitored component controls are in `components-*.json`. The indefinite
 worker passes both backends. The repeated/null worker remains rejected because
 of the old baseline miss at 612; no speed ratio uses that rejected worker.
 Complete-FEM controls are recorded separately in `fem/` (see below).
-No main-library behavior or six-backend Anvil table has changed in this experiment.
+The prototype did not change main-library behavior or the six-backend Anvil table.
+The subsequently qualified [production integration](production/README.md) is now
+covered by the current full-suite validation.
 
 Reproduce components with:
 
@@ -75,5 +77,5 @@ First-solve compute = setup + capture + validated first captured solve, with
 cached kernels and excluding mesh/reference work, imports and host validation.
 It is not total process wall time. Setup/capture are single observations per
 fresh worker and warm medians contain three solves. This does not replace the
-six-backend Anvil table or provide a new CuPy ratio. Production integration must
-retain the accuracy benefit and qualify both ordinary and compact graph paths.
+six-backend Anvil table or provide a new CuPy ratio. The [production controls](production/README.md) qualify both ordinary and compact
+graph paths with the same accuracy criteria.
