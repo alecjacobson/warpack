@@ -144,7 +144,7 @@ def test_complete_fem_spectrum_with_certified_second_pass(case, monkeypatch):
         assert solver.whitening_usage.numpy()[0] > 0
 
 
-@pytest.mark.parametrize("first_pass", [False, True])
+@pytest.mark.parametrize("first_pass", [False, True, "padded"])
 def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_pass):
     import scipy.sparse as sp
 
@@ -172,6 +172,11 @@ def test_coupled_mass_constraints_clusters_and_changed_problem(tmp_path, first_p
     solver_type = CertifiedWhiteningBlock
     if first_pass:
         from benchmarks.experimental.first_whitening import FirstWhiteningBlock
+
+        if first_pass == "padded":
+            from benchmarks.experimental.padded_first_whitening import PaddedFirstWhiteningBlock
+
+            FirstWhiteningBlock = PaddedFirstWhiteningBlock
 
         class FirstCertified(FirstWhiteningBlock):
             _first_metric_minimum = 2

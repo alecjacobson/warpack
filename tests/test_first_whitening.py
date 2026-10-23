@@ -11,6 +11,7 @@ from warp.optim import linear
 from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.compare_block import prepare
 from benchmarks.experimental.first_whitening import FirstWhiteningBlock
+from benchmarks.experimental.padded_first_whitening import PaddedFirstWhiteningBlock
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 from warpack.block import Identity
 
@@ -19,10 +20,15 @@ class AllSizeFirstWhitening(FirstWhiteningBlock):
     _first_metric_minimum = 2
 
 
+class AllSizePaddedWhitening(PaddedFirstWhiteningBlock):
+    _first_metric_minimum = 2
+
+
+@pytest.mark.parametrize("solver_type", [AllSizeFirstWhitening, AllSizePaddedWhitening])
 @pytest.mark.parametrize("width", [4, 24, 52, 104, 204])
-def test_first_pass_rank_scale_and_replay(width, tmp_path):
+def test_first_pass_rank_scale_and_replay(width, tmp_path, solver_type):
     n, m = 3 * width + 7, 2 * width
-    solver = AllSizeFirstWhitening(Identity(n, wp.get_device()), min(width, 4), width)
+    solver = solver_type(Identity(n, wp.get_device()), min(width, 4), width)
     basis = la.qr(np.random.default_rng(171).normal(size=(n, m)), mode="economic")[0].T.copy()
     solver.su.assign(basis)
     solver.whiten(solver.su, solver.u1, normalize=True)
@@ -39,7 +45,7 @@ def test_first_pass_rank_scale_and_replay(width, tmp_path):
             source *= np.geomspace(1e-80, 1e80, m)[:, None]
         elif kind == "partial":
             source[-3:] = 0
-            expected_rank, fast = m - 3, False
+            expected_rank, fast = m - 3, solver_type is AllSizePaddedWhitening
         elif kind == "dependent":
             source[1] = source[0] + 1e-8 * source[1]
             expected_rank, fast = m - 1, False
@@ -52,7 +58,9 @@ def test_first_pass_rank_scale_and_replay(width, tmp_path):
         assert solver.rank.numpy()[0] == expected_rank
         usage = solver._first_whitening_usage.numpy()
         np.testing.assert_array_equal(usage[:2], [int(fast), int(not fast)])
-        assert usage[2] == int(kind in ["partial", "zero"])
+        assert usage[2] == int(
+            kind == "zero" or (kind == "partial" and solver_type is AllSizeFirstWhitening)
+        )
         flags, output = solver.active_u.numpy().astype(bool), solver.u2.numpy()
         assert np.count_nonzero(flags) == expected_rank
         assert np.max(abs(output[~flags]), initial=0) == 0
@@ -120,11 +128,12 @@ def test_first_and_second_share_scratch_across_search_branches():
         assert certificate.image.ptr == solver._second_whitening_storage[0].ptr
 
 
+@pytest.mark.parametrize("solver_type", [FirstWhiteningBlock, PaddedFirstWhiteningBlock])
 @pytest.mark.parametrize(
     "case", ["clamped_consistent", "clamped_lumped", "free", "disconnected", "heterogeneous"]
 )
 @pytest.mark.parametrize("keep_history", [True, False])
-def test_fem_modes_and_nullspace_with_first_certificate(case, keep_history):
+def test_fem_modes_and_nullspace_with_first_certificate(case, keep_history, solver_type):
     if not (hasattr(linear, "FSAI") and hasattr(linear.LinearOperator, "batch_offsets")):
         pytest.skip("pinned upstream FSAI and batched CG required")
     args = SimpleNamespace(case=case, side=2, modes=30, shift=0.01)
@@ -142,7 +151,7 @@ def test_fem_modes_and_nullspace_with_first_certificate(case, keep_history):
         fsai_layout="columns",
         matrix_layout="columns",
     )
-    solver = FirstWhiteningBlock(
+    solver = solver_type(
         BatchedSparseOperator(a),
         k,
         width,

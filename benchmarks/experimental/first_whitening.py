@@ -55,12 +55,7 @@ class FirstWhitening:
         self.usage = usage
         wp.load_module(module=candidate.module, device=owner.device, block_dim=128)
 
-    def apply(self, owner, x, out):
-        owner.mass.apply(x, owner.bu)
-        owner.gram(x, owner.bu, owner.metric.g, symmetric=True)
-        owner.launch(scales, x.shape[0], [owner.metric.g, owner.scale, owner.status])
-        owner.launch(scale_rows, x.shape, [x, owner.scale])
-        owner.launch(normalize_gram, owner.metric.g.shape, [owner.metric.g, owner.scale])
+    def prepare_candidate(self, owner):
         wp.launch_tiled(
             candidate,
             dim=1,
@@ -69,15 +64,29 @@ class FirstWhitening:
             device=owner.device,
         )
 
+    def attempt(self, owner):
+        self.certificate.apply()
+        wp.launch(choose, 1, [self.certificate.accepted, self.flags], device=owner.device)
+
+    def fast(self, owner, x, out):
+        owner.active_u.fill_(1)
+        owner.rank.fill_(x.shape[0])
+        rotate(x, owner.transform, out)
+        wp.launch(record, 1, [self.flags, self.usage, True], device=owner.device)
+
+    def apply(self, owner, x, out):
+        owner.mass.apply(x, owner.bu)
+        owner.gram(x, owner.bu, owner.metric.g, symmetric=True)
+        owner.launch(scales, x.shape[0], [owner.metric.g, owner.scale, owner.status])
+        owner.launch(scale_rows, x.shape, [x, owner.scale])
+        owner.launch(normalize_gram, owner.metric.g.shape, [owner.metric.g, owner.scale])
+        self.prepare_candidate(owner)
+
         def attempt():
-            self.certificate.apply()
-            wp.launch(choose, 1, [self.certificate.accepted, self.flags], device=owner.device)
+            self.attempt(owner)
 
         def fast():
-            owner.active_u.fill_(1)
-            owner.rank.fill_(x.shape[0])
-            rotate(x, owner.transform, out)
-            wp.launch(record, 1, [self.flags, self.usage, True], device=owner.device)
+            self.fast(owner, x, out)
 
         def canonical():
             owner.metric.which = 1
@@ -107,6 +116,7 @@ class FirstWhitening:
 
 class FirstWhiteningBlock(BlockLOBPCG):
     _first_metric_minimum = 96
+    _first_whitener_type = FirstWhitening
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -127,7 +137,7 @@ class FirstWhiteningBlock(BlockLOBPCG):
                 )
             self._first_whitening_storage = storage
             for branch in eligible:
-                branch._first_whitener = FirstWhitening(
+                branch._first_whitener = self._first_whitener_type(
                     branch, storage, self._first_whitening_usage
                 )
 
