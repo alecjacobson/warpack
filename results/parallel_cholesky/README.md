@@ -61,8 +61,12 @@ validated reference cache. No large CPU factorization is rerun.
 | Same Anvil | Cooperative | 1.6750 | 1.6274 | 2.3875 |
 
 These are fresh within-study controls, not a replacement for the README's
-six-backend showcase. The paired source, dependency, matrix/reference/starting
-vector identities agree exactly. Setup is one construction plus capture per
+six-backend showcase. The paired source, dependency and fixture settings agree
+exactly. Anvil also records exact matrix/reference/starting-vector identities.
+The procedural wide case does not yet record those array fingerprints; its
+configured fixture is matched, but exact coefficient identity is not independently
+certified ([#156](https://github.com/alecjacobson/warpack/issues/156)).
+Setup is one construction plus capture per
 worker, excludes warmup, and is not a repeated setup median. It includes the
 preconditioner and solver workspaces. CuPy reuses that worker's preconditioner
 for a matched replay comparison, so this table makes no independent CuPy setup
@@ -128,8 +132,9 @@ a performance sample. Logs: [full suite](full-suite.log),
 The six CPU reciprocal-conditioning tests were added afterward and validated
 separately; they are not included in that full-suite count.
 
-Fresh production controls all pass, with matching source/dependency/input
-identities and uncontended external occupancy:
+Fresh production controls all pass, with matching source/dependency/fixture
+settings and uncontended external occupancy. Exact input fingerprints are
+recorded for Anvil only, with the same #156 limitation for procedural FEM:
 
 | Problem | Dispatch | Construction + capture (s) | Warp warm median (s) | CuPy warm median (s) |
 | --- | --- | ---: | ---: | ---: |

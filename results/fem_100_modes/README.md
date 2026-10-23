@@ -6,6 +6,11 @@ and an expanded ARPACK shift-invert reference. No external meshes are copied.
 Both native stopping and original requested-spectrum/subspace checks are
 required. The pinned upstream Warp FSAI/CG overlay is recorded in every worker.
 
+Later follow-ups: [cooperative projected factors](../parallel_cholesky/README.md)
+and [free, disconnected and heterogeneous 100-mode cases](families-current/README.md).
+The original measurements below retain their historical implementation and
+configuration; procedural input fingerprints are tracked separately in #156.
+
 ## Qualified replay comparison
 
 L40 / driver 570.158.01, Xeon Platinum 8362, four CPU threads on cores 8–11.
