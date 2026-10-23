@@ -26,12 +26,12 @@ implementation dependency must be rechecked when changing the Warp dependency.
 
 ## Correctness evidence
 
-The pinned overlay passes 27 tests: dimensions 1, 7, 48, 104, 128, 204, 256 and
+The prototype qualification passed 27 tests: dimensions 1, 7, 48, 104, 128, 204, 256 and
 512; scaled SPD matrices; strided input/output/workspace; three changed-input
 replays; independent reconstruction and SciPy/serial factors; early/late invalid
 pivots, sticky status and recovery; and complete coupled/free/heterogeneous FEM
 replays with the active branches sharing setup workspace. Stock Warp 1.15
-passes 24 direct tests and skips three upstream-FSAI-dependent FEM cases.
+passed 24 direct tests and skipped three upstream-FSAI-dependent FEM cases.
 
 These prototype tests do not establish a speedup. The isolated and complete
 FEM measurements below supply the performance evidence. Failed or contended
@@ -117,7 +117,7 @@ An additional [workspace ownership test](workspace-reuse-test.log) passes after
 the full-suite run: the benchmark override reuses the production workspace
 instead of allocating a duplicate. This additional test is not included in 2,083.
 
-The [stock Warp 1.15 check](stock-tests.log) passes 82 tests and skips 12 requiring
+The [stock Warp 1.15 check](production-stock-tests.log) passes 82 tests and skips 12 requiring
 the pinned upstream preconditioners. This run also includes the separate
 persistent-Jacobi prototype tests (#159), which remain benchmark-only.
 Full repository lint/format checks pass. Fresh public-default timing controls
