@@ -89,18 +89,6 @@ class CuDSSInverse:
         self.cooperative_refinement = bool(cooperative_refinement)
         self.mtype = mtype
         self.width = width
-        import os
-        from importlib.metadata import distribution
-
-        if "CUDSS_LIBRARY_PATH" not in os.environ:
-            try:
-                dist = distribution("nvidia-cudss-cu12")
-                for path in dist.files:
-                    if str(path).endswith("/libcudss.so.0"):
-                        os.environ["CUDSS_LIBRARY_PATH"] = str(dist.locate_file(path))
-                        break
-            except ModuleNotFoundError:
-                pass
         from warp_cudss import CudssSolver
 
         self.n, self.device = matrix.shape[0], matrix.device

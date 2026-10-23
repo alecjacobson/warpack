@@ -1,0 +1,837 @@
+FFFF.......FFFFFFFFF                                                     [100%]
+=================================== FAILURES ===================================
+___________________________ test_block_spd_solve[1] ____________________________
+
+device = 'cuda:0', br = 1
+
+    @pytest.mark.parametrize("br", [1, 3, 4])
+    def test_block_spd_solve(device, br):
+        rng = np.random.default_rng(2)
+        nb = 20
+        dtype = {1: wp.float64, 3: wp.mat33d, 4: wp.mat44d}[br]
+        A, dense = random_block_spd(rng, nb, br, dtype=dtype, device=device)
+    
+        n = nb * br
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype="spd")
+
+tests/test_block_solve.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+----------------------------- Captured stdout call -----------------------------
+Module _bsr_accumulate_triplet_values_5520c14c 2336fbe load on device 'cuda:0' took 0.44 ms  (cached)
+___________________________ test_block_spd_solve[3] ____________________________
+
+device = 'cuda:0', br = 3
+
+    @pytest.mark.parametrize("br", [1, 3, 4])
+    def test_block_spd_solve(device, br):
+        rng = np.random.default_rng(2)
+        nb = 20
+        dtype = {1: wp.float64, 3: wp.mat33d, 4: wp.mat44d}[br]
+        A, dense = random_block_spd(rng, nb, br, dtype=dtype, device=device)
+    
+        n = nb * br
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype="spd")
+
+tests/test_block_solve.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+___________________________ test_block_spd_solve[4] ____________________________
+
+device = 'cuda:0', br = 4
+
+    @pytest.mark.parametrize("br", [1, 3, 4])
+    def test_block_spd_solve(device, br):
+        rng = np.random.default_rng(2)
+        nb = 20
+        dtype = {1: wp.float64, 3: wp.mat33d, 4: wp.mat44d}[br]
+        A, dense = random_block_spd(rng, nb, br, dtype=dtype, device=device)
+    
+        n = nb * br
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype="spd")
+
+tests/test_block_solve.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+________________________ test_block_rhs_as_vector_array ________________________
+
+device = 'cuda:0'
+
+    def test_block_rhs_as_vector_array(device):
+        """x/b may be typed as vector arrays (e.g. wp.vec3d) matching the block layout."""
+        rng = np.random.default_rng(3)
+        nb, br = 12, 3
+        A, dense = random_block_spd(rng, nb, br, dtype=wp.mat33d, device=device)
+    
+        n = nb * br
+        b_np = rng.standard_normal(n)
+        b_vec = wp.array(b_np.reshape(nb, br), dtype=wp.vec3d, device=device)
+        x_vec = wp.zeros(nb, dtype=wp.vec3d, device=device)
+    
+>       warp_cudss.solve(A, b_vec, x_vec, mtype="spd")
+
+tests/test_block_solve.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+_________________________ test_matches_warp_cg_result __________________________
+
+device = 'cuda:0'
+
+    def test_matches_warp_cg_result(device):
+        """warp_cudss.solve should agree with warp.optim.linear.cg on the same SPD system,
+        demonstrating it can be swapped in directly."""
+        rng = np.random.default_rng(6)
+        n = 250
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+    
+        x_cg = wp.zeros(n, dtype=wp.float64, device=device)
+        linear.cg(A, b, x_cg, tol=1e-12, maxiter=10000)
+    
+        x_direct = wp.zeros(n, dtype=wp.float64, device=device)
+>       warp_cudss.solve(A, b, x_direct, mtype="spd")
+
+tests/test_matches_cg.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+----------------------------- Captured stdout call -----------------------------
+Module _create_tiled_dot_kernels__locals__block_dot_kernel_7cdd1072 cb8e22e load on device 'cuda:0' took 0.41 ms  (cached)
+Module _create_tiled_dot_kernels__locals__block_sum_kernel_85ad7d89 bba3435 load on device 'cuda:0' took 0.36 ms  (cached)
+Module warp.optim.linear 395da8b load on device 'cuda:0' took 0.67 ms  (cached)
+Module make_bsr_mv_kernel__locals__bsr_mv_kernel_f553f011 0fdd445 load on device 'cuda:0' took 0.33 ms  (cached)
+_____________________ test_solver_reuse_after_value_update _____________________
+
+device = 'cuda:0'
+
+    def test_solver_reuse_after_value_update(device):
+        """Same sparsity pattern, values change in place between solves (Newton-like loop)."""
+        rng = np.random.default_rng(4)
+        n = 150
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       solver = warp_cudss.solve(A, b, x, mtype="spd")
+
+tests/test_reuse_and_capture.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+____________________ test_graph_capture_refactor_and_solve _____________________
+
+device = 'cuda:0'
+
+    def test_graph_capture_refactor_and_solve(device):
+        rng = np.random.default_rng(5)
+        n = 300
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       solver = warp_cudss.CudssSolver(mtype="spd", device=device)
+
+tests/test_reuse_and_capture.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+__________________________ test_scalar_spd_solve[spd] __________________________
+
+device = 'cuda:0', mtype = 'spd'
+
+    @pytest.mark.parametrize("mtype", ["spd", "symmetric", "general"])
+    def test_scalar_spd_solve(device, mtype):
+        rng = np.random.default_rng(0)
+        n = 200
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype=mtype)
+
+tests/test_scalar_solve.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+_______________________ test_scalar_spd_solve[symmetric] _______________________
+
+device = 'cuda:0', mtype = 'symmetric'
+
+    @pytest.mark.parametrize("mtype", ["spd", "symmetric", "general"])
+    def test_scalar_spd_solve(device, mtype):
+        rng = np.random.default_rng(0)
+        n = 200
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype=mtype)
+
+tests/test_scalar_solve.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+________________________ test_scalar_spd_solve[general] ________________________
+
+device = 'cuda:0', mtype = 'general'
+
+    @pytest.mark.parametrize("mtype", ["spd", "symmetric", "general"])
+    def test_scalar_spd_solve(device, mtype):
+        rng = np.random.default_rng(0)
+        n = 200
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype=mtype)
+
+tests/test_scalar_solve.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+__________________________ test_scalar_general_solve ___________________________
+
+device = 'cuda:0'
+
+    def test_scalar_general_solve(device):
+        rng = np.random.default_rng(0)
+        n = 200
+        A, dense = random_sparse_general(rng, n, device=device)
+    
+        b_np = rng.standard_normal(n)
+        b = wp.array(b_np, dtype=wp.float64, device=device)
+        x = wp.zeros(n, dtype=wp.float64, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype="general")
+
+tests/test_scalar_solve.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+_____________________________ test_scalar_float32 ______________________________
+
+device = 'cuda:0'
+
+    def test_scalar_float32(device):
+        rng = np.random.default_rng(0)
+        n = 100
+        A, dense = random_sparse_spd(rng, n, dtype=wp.float32, device=device)
+    
+        b_np = rng.standard_normal(n).astype(np.float32)
+        b = wp.array(b_np, dtype=wp.float32, device=device)
+        x = wp.zeros(n, dtype=wp.float32, device=device)
+    
+>       warp_cudss.solve(A, b, x, mtype="spd")
+
+tests/test_scalar_solve.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:352: in solve
+    solver = CudssSolver(mtype=mtype, view=view, reordering=reordering, device=A.device)
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+----------------------------- Captured stdout call -----------------------------
+Module _bsr_accumulate_triplet_values_5520c14c 03bb33a load on device 'cuda:0' took 0.40 ms  (cached)
+_____________________________ test_multi_rhs_solve _____________________________
+
+device = 'cuda:0'
+
+    def test_multi_rhs_solve(device):
+        """Solving k right-hand sides at once (nrhs>1) matches k independent solves."""
+        rng = np.random.default_rng(1)
+        n, k = 150, 5
+        A, dense = random_sparse_spd(rng, n, device=device)
+    
+        B_np = rng.standard_normal((n, k))
+        # cuDSS dense matrices are column-major: stack the columns contiguously.
+        b = wp.array(B_np.flatten(order="F"), dtype=wp.float64, device=device)
+        x = wp.zeros(n * k, dtype=wp.float64, device=device)
+    
+>       solver = warp_cudss.CudssSolver(mtype="spd", device=device)
+
+tests/test_scalar_solve.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+warp_cudss/solver.py:100: in __init__
+    self._lib = get_library()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_library():
+        """Load once; an explicit library override must succeed without fallback.
+    
+        Selection is cached for the process lifetime. Changing the environment after
+        the first successful load does not replace the library under live objects.
+        """
+        global _lib
+        if _lib is not None:
+            return _lib
+    
+        last_error = None
+        lib = None
+        explicit = os.environ.get("CUDSS_LIBRARY_PATH")
+        if explicit:
+            try:
+                lib = ctypes.CDLL(explicit)
+            except OSError as error:
+                raise OSError(
+                    f"Could not load explicitly requested cuDSS library {explicit!r}: {error}"
+                ) from error
+        else:
+            for path in _candidate_paths():
+                try:
+                    lib = ctypes.CDLL(path)
+                    break
+                except OSError as error:
+                    last_error = error
+    
+        if lib is None:
+>           raise OSError(
+                "Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment "
+                "variable to the full path of the shared library, install the "
+                "'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to "
+                f"LD_LIBRARY_PATH. Last error: {last_error}"
+            )
+E           OSError: Could not locate libcudss.so.0. Set the CUDSS_LIBRARY_PATH environment variable to the full path of the shared library, install the 'nvidia-cudss-cu12' pip package, or add the cuDSS lib directory to LD_LIBRARY_PATH. Last error: libcudss.so: cannot open shared object file: No such file or directory
+
+warp_cudss/_bindings.py:256: OSError
+=========================== short test summary info ============================
+FAILED tests/test_block_solve.py::test_block_spd_solve[1] - OSError: Could no...
+FAILED tests/test_block_solve.py::test_block_spd_solve[3] - OSError: Could no...
+FAILED tests/test_block_solve.py::test_block_spd_solve[4] - OSError: Could no...
+FAILED tests/test_block_solve.py::test_block_rhs_as_vector_array - OSError: C...
+FAILED tests/test_matches_cg.py::test_matches_warp_cg_result - OSError: Could...
+FAILED tests/test_reuse_and_capture.py::test_solver_reuse_after_value_update
+FAILED tests/test_reuse_and_capture.py::test_graph_capture_refactor_and_solve
+FAILED tests/test_scalar_solve.py::test_scalar_spd_solve[spd] - OSError: Coul...
+FAILED tests/test_scalar_solve.py::test_scalar_spd_solve[symmetric] - OSError...
+FAILED tests/test_scalar_solve.py::test_scalar_spd_solve[general] - OSError: ...
+FAILED tests/test_scalar_solve.py::test_scalar_general_solve - OSError: Could...
+FAILED tests/test_scalar_solve.py::test_scalar_float32 - OSError: Could not l...
+FAILED tests/test_scalar_solve.py::test_multi_rhs_solve - OSError: Could not ...
+13 failed, 7 passed in 0.53s

@@ -1,0 +1,54 @@
+FF.....                                                                  [100%]
+=================================== FAILURES ===================================
+_______ test_failed_explicit_library_never_tries_discovery[No such file] _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f77980b1870>
+loader = (['/candidate/libcudss.so.1', 'fallback'], [<object object at 0x7f7797fc6230>])
+reason = 'No such file'
+
+    @pytest.mark.parametrize("reason", ["No such file", "libnvrtc.so.12: cannot open shared object"])
+    def test_failed_explicit_library_never_tries_discovery(monkeypatch, loader, reason):
+        calls, configured = loader
+        cause = OSError(reason)
+        monkeypatch.setenv("CUDSS_LIBRARY_PATH", "/candidate/libcudss.so.1")
+        monkeypatch.setattr(binding, "_candidate_paths", lambda: iter(["/candidate/libcudss.so.1", "fallback"]))
+    
+        def load(path):
+            calls.append(path)
+            if path == "/candidate/libcudss.so.1":
+                raise cause
+            return object()
+    
+        monkeypatch.setattr(binding.ctypes, "CDLL", load)
+>       with pytest.raises(OSError, match="explicitly requested cuDSS library") as caught:
+E       Failed: DID NOT RAISE OSError
+
+../warp-cudss-explicit-library/tests/test_library_loading.py:33: Failed
+_ test_failed_explicit_library_never_tries_discovery[libnvrtc.so.12: cannot open shared object] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f77980b0880>
+loader = (['/candidate/libcudss.so.1', 'fallback'], [<object object at 0x7f7797fc6290>])
+reason = 'libnvrtc.so.12: cannot open shared object'
+
+    @pytest.mark.parametrize("reason", ["No such file", "libnvrtc.so.12: cannot open shared object"])
+    def test_failed_explicit_library_never_tries_discovery(monkeypatch, loader, reason):
+        calls, configured = loader
+        cause = OSError(reason)
+        monkeypatch.setenv("CUDSS_LIBRARY_PATH", "/candidate/libcudss.so.1")
+        monkeypatch.setattr(binding, "_candidate_paths", lambda: iter(["/candidate/libcudss.so.1", "fallback"]))
+    
+        def load(path):
+            calls.append(path)
+            if path == "/candidate/libcudss.so.1":
+                raise cause
+            return object()
+    
+        monkeypatch.setattr(binding.ctypes, "CDLL", load)
+>       with pytest.raises(OSError, match="explicitly requested cuDSS library") as caught:
+E       Failed: DID NOT RAISE OSError
+
+../warp-cudss-explicit-library/tests/test_library_loading.py:33: Failed
+=========================== short test summary info ============================
+FAILED ../warp-cudss-explicit-library/tests/test_library_loading.py::test_failed_explicit_library_never_tries_discovery[No such file]
+FAILED ../warp-cudss-explicit-library/tests/test_library_loading.py::test_failed_explicit_library_never_tries_discovery[libnvrtc.so.12: cannot open shared object]
+2 failed, 5 passed in 0.43s

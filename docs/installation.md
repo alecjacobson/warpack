@@ -40,6 +40,15 @@ The cuDSS extra uses the CUDA 12 package and a pinned Git revision of
 It does not install or change a GPU driver. NumPy is a package dependency used
 by Warp's array interface; NumPy/SciPy/CuPy do not compute library eigenpairs.
 
+The current binding discovers both supported pip library layouts directly.
+To select a particular binary, set `CUDSS_LIBRARY_PATH` to its full path before
+the first cuDSS operation. An unloadable explicit path raises an error, including
+missing dependencies; it does not silently fall back to another binary. Library
+selection is cached for the process lifetime, so use a new process when changing
+it. Warpack does not set this environment variable on your behalf. cuDSS 1.0 is
+under [separate qualification](https://github.com/alecjacobson/warpack/issues/189);
+the supported binary remains 0.8.0.10.
+
 ## Fast block solves
 
 `BatchedCGPreconditioner` and the tuned Anvil example require the pinned upstream
