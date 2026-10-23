@@ -128,6 +128,38 @@ def test_only_cudss_vendor_upload_is_allowed():
         summarize(raw, occ)
 
 
+@pytest.mark.parametrize("backend", ["cg", "cudss", "arpack"])
+def test_reciprocal_requires_both_physical_equations_and_one_inverse(backend):
+    raw, occ = fixture(backend)
+    raw["formulation"] = "reciprocal"
+    raw["arguments"]["polish_steps"] = 1
+    for row in [raw["warmup"]] + raw["rows"]:
+        row["quality"]["inner"] = row["quality"]["inner"][:1]
+        row["quality"]["reciprocal_residual"] = 1e-10
+        row["krylov_physical_converged"] = 2
+        row["polish_iterations"] = 1
+    result = summarize(raw, occ) | dict(environment={"gpu": "same"})
+    assert result["worst_quality"]["reciprocal_residual"] == 1e-10
+    assert compare(result, result) == 1
+    other = copy.deepcopy(result)
+    other["formulation"] = "covariance"
+    with pytest.raises(ValueError, match="formulation"):
+        compare(result, other)
+    for field in ("residual", "reciprocal_residual"):
+        bad = copy.deepcopy(raw)
+        bad["warmup"]["quality"][field] = 1e-7
+        with pytest.raises(ValueError, match="physical"):
+            summarize(bad, occ)
+    if backend != "arpack":
+        bad = copy.deepcopy(raw)
+        bad["rows"][0]["polish_iterations"] = None
+        with pytest.raises(ValueError, match="stage metadata"):
+            summarize(bad, occ)
+        raw["warmup"]["quality"]["inner"] *= 2
+        with pytest.raises(ValueError, match="inner"):
+            summarize(raw, occ)
+
+
 def test_adaptive_guard_is_not_inferred_from_full_residual_count():
     raw, occ = fixture()
     for row in [raw["warmup"]] + raw["rows"]:

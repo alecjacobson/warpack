@@ -16,6 +16,11 @@ def summarize(raw, occupancy):
         raise ValueError("failed or contended worker")
     args = raw["arguments"]
     backend = args["backend"]
+    formulation = raw.get("formulation", "covariance")
+    if formulation not in ("covariance", "reciprocal"):
+        raise ValueError("invalid formulation")
+    inverse_count = 2 if formulation == "covariance" else 1
+    fields = FIELDS + (("reciprocal_residual",) if formulation == "reciprocal" else ())
     k = args["modes"]
     policy = raw.get("outer_capture")
     expected_policy = (
@@ -45,14 +50,26 @@ def summarize(raw, occupancy):
             if policy == "adaptive" and not guard:
                 raise ValueError("adaptive exploration guard incomplete")
         q = row["quality"]
+        if formulation == "reciprocal" and backend != "arpack":
+            polish = args.get("polish_steps")
+            initial_count = row.get("krylov_physical_converged")
+            if (
+                type(polish) is not int
+                or polish < 0
+                or type(initial_count) is not int
+                or not 0 <= initial_count <= k
+                or row.get("polish_iterations") != (polish if polish else None)
+                or (polish == 0 and initial_count != q["converged"])
+            ):
+                raise ValueError("invalid reciprocal stage metadata")
         if not q["accepted"] or q["status"] != 0 or q["converged"] != k or q["positive"] != k:
             raise ValueError("incomplete native/positive modes")
-        if any(not math.isfinite(q[f]) or not 0 <= q[f] < 1e-8 for f in FIELDS):
+        if any(not math.isfinite(q[f]) or not 0 <= q[f] < 1e-8 for f in fields):
             raise ValueError("invalid physical accuracy")
         if not math.isfinite(row["seconds"]) or row["seconds"] <= 0:
             raise ValueError("invalid replay timing")
         if backend == "cg":
-            if len(q["inner"]) != 2 or any(
+            if len(q["inner"]) != inverse_count or any(
                 s is None
                 or s["native"][2] != 0
                 or not math.isfinite(s["maxima"][1])
@@ -60,7 +77,7 @@ def summarize(raw, occupancy):
                 for s in q["inner"]
             ):
                 raise ValueError("incomplete or inaccurate inner solve")
-        elif q["inner"] != ([None, None] if backend == "cudss" else []):
+        elif q["inner"] != ([None] * inverse_count if backend == "cudss" else []):
             raise ValueError("unexpected inner metadata")
     setup = [raw[k] for k in ("assembly_seconds", "setup_seconds", "capture_seconds")]
     if any(not math.isfinite(x) or x < 0 for x in setup) or min(setup[:2]) <= 0:
@@ -88,6 +105,7 @@ def summarize(raw, occupancy):
         matrix_sha256=raw["matrix_sha256"],
         prior_sha256=raw["prior_sha256"],
         reference=raw["reference"],
+        formulation=formulation,
         outer_capture=policy,
         exploration_guard_met_all=None
         if policy == "arpack"
@@ -97,7 +115,7 @@ def summarize(raw, occupancy):
         median_seconds=statistics.median(r["seconds"] for r in raw["rows"]),
         seconds=[r["seconds"] for r in raw["rows"]],
         worst_quality={
-            f: max(r["quality"][f] for r in [raw["warmup"]] + raw["rows"]) for f in FIELDS
+            f: max(r["quality"][f] for r in [raw["warmup"]] + raw["rows"]) for f in fields
         },
     )
 
@@ -107,6 +125,8 @@ def compare(current, baseline, limit=1.25):
         raise ValueError("invalid regression limit")
     if signature(current["dependency"]) != signature(baseline["dependency"]):
         raise ValueError("incompatible dependency")
+    if current.get("formulation", "covariance") != baseline.get("formulation", "covariance"):
+        raise ValueError("incompatible formulation")
     for key in ("source_sha256", "matrix_sha256", "prior_sha256", "environment", "reference"):
         if current[key] != baseline[key]:
             raise ValueError("incompatible " + key)

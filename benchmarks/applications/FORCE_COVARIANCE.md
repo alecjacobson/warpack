@@ -64,7 +64,51 @@ as an adaptively completed solve. No exploration safeguard is disabled in core.
 | `S = F F.T`, few force columns | Solve `G = H^-1 F` once, then use [Gram reduction or weighted snapshot SVD](WEIGHTED_SNAPSHOT_SVD.md). Repeated implicit applications usually waste those solves. |
 | `S = M` | Ordinary elastic modes of `(H,M)` already give this basis; covariance eigenvalues are inverse squared elastic eigenvalues. The implicit case is a cross-check. |
 | Full-rank nonuniform prior | The implicit generalized covariance route handles sparse S without constructing C. |
-| Invertible S with cheap inverse | The reciprocal pencil `(H S^-1 H,M)` is another candidate, requesting the smallest eigenvalues. It squares stiffness conditioning and requires its own accuracy/performance qualification. |
+| Invertible S with cheap inverse | The [reciprocal recipe](#reciprocal-recipe) requests the smallest modes of `(H S^-1 H,M)`. It avoids mass solves but squares stiffness conditioning; both physical equations require validation. |
+
+## Reciprocal recipe
+
+`ForceReciprocalSolver` applies `Q = H S^-1 H` and `Q^-1 = H^-1 S H^-1`
+implicitly through the public shift-invert generalized solver. Only H needs an
+inverse backend. Covariance eigenvalues are recovered as `1 / mu` on device.
+Supply matching device sparse matrices S and its inverse; this route is intended
+for SPD priors with a cheap sparse inverse, such as a positive diagonal prior.
+It cannot replace the singular-prior covariance or snapshot routes.
+
+```python
+from benchmarks.applications.force_reciprocal import ForceReciprocalSolver
+
+driver = ForceReciprocalSolver(
+    H, M, S, S_inverse, k=20, backend="cg", ncv=64,
+    tol=1e-9, polish_steps=1,
+)
+try:
+    stages = driver.capture(cycles=4, adaptive=False)
+    driver.solve()  # Krylov, optional polishing, then reciprocal value recovery
+    values, modes = driver.eigenvalues, driver.eigenvectors
+    # driver.solver exposes FINAL physical status/count/residuals.
+    # driver.krylov retains the initial Krylov diagnostics and exploration count.
+finally:
+    wp.synchronize_device(H.device)
+    driver.close()
+```
+
+`capture()` returns the ordered graph tuple, rather than one graph representing
+the entire application. `solve()` replays them on the same stream without
+inter-stage synchronization. First uploads are completed during setup.
+With `polish_steps=1`, public `GeneralizedEigensolver` applies one block inverse
+iteration and metric Rayleigh–Ritz extraction to the Krylov vectors. It can
+remove high-frequency contamination amplified by Q. It does not discover
+missing modes; independent requested-spectrum checks remain necessary. The
+polishing stage always uses an explicit fixed budget and does not satisfy or
+replace the original Krylov exploration guard.
+
+[Large-case results and rejected controls](../../results/force_covariance/RECIPROCAL.md)
+show a modest cuDSS benefit without polishing, at the common `1e-8` physical
+gate. Pure Warp needs polishing on that fixture and does not improve replay
+time over implicit covariance. Optional `refinement_steps` uses existing
+`CGInverse` residual correction; it is slower there and defaults to zero.
+No installed solver arithmetic or stopping policy is changed by this recipe.
 
 Small tests check the complete requested subspace against dense generalized
 `eigh`, spectrum, M-orthogonality, expected captured energy, and operator
