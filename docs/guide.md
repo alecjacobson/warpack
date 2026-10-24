@@ -328,6 +328,11 @@ kernel. This adds no workspace, host readbacks or accuracy-policy changes.
 The [rotation qualification](../results/paired_rotation_tiles/VALIDATION.md)
 records whole-solver controls and installed-package checks.
 
+A candidate eight-row FP64 projection update is being qualified for the same
+Ada/n/width scope. Its [promotion report](../results/search_projection/VALIDATION.md)
+records a full-suite failure under investigation; this optimization is not yet
+promoted to main.
+
 For Ada block widths 96–256, `gram_chunk=4096`, `tol >= 1e-11`, and both
 `reuse_operator_images=True` and `symmetric_products=True`, captured execution
 checks a fresh mass Gram before reorthogonalizing Ritz vectors. If the finite

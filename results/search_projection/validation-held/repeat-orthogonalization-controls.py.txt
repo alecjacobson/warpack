@@ -1,0 +1,13 @@
+import fcntl,os,subprocess,sys
+from pathlib import Path
+root=Path.cwd()
+tests=['tests/test_register_triangular.py','tests/test_ritz_image_refresh.py','tests/test_shared_triangular.py','tests/test_triangular_rotate.py']
+with open('/run/openclaw/horde/warpack-gpu-work.lock','a') as lock:
+ fcntl.flock(lock,fcntl.LOCK_EX)
+ for repeat in range(1,4):
+  for variant,where in [('candidate',root),('main',Path('/run/openclaw/horde/warpack-projection-baseline'))]:
+   env=os.environ|dict(PYTHONPATH='/run/openclaw/horde/warpack-fsai-promotion:'+str(where),WARP_CACHE_PATH='/run/openclaw/horde/warpack-current-kernel-cache',OPENBLAS_NUM_THREADS='4',OMP_NUM_THREADS='4')
+   target=root/f'build/orthogonalization-{variant}-repeat{repeat}.log';assert not target.exists()
+   with target.open('w') as output:
+    code=subprocess.call(['taskset','-c','8-11',sys.executable,'-m','pytest','-q',*tests],cwd=where,env=env,stdout=output,stderr=subprocess.STDOUT)
+   print(variant,repeat,code,target.read_text().splitlines()[-1],flush=True)

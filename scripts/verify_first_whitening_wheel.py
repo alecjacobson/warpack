@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--require-wide-gram", action="store_true")
     parser.add_argument("--require-ritz-qr", action="store_true")
     parser.add_argument("--require-wide-paired-rotation", action="store_true")
+    parser.add_argument("--require-wide-projection", action="store_true")
     args = parser.parse_args()
     sys.meta_path.insert(0, RejectNonCore())
     import numpy as np
@@ -115,6 +116,8 @@ def main():
             assert "metric_defect" in dot.read_text() and "choose_qr" in dot.read_text()
         if args.require_wide_paired_rotation:
             assert "wide_paired_ritz_rotation" in dot.read_text()
+        if args.require_wide_projection:
+            assert "wide_subtract_projection" in dot.read_text()
         dot.unlink()
     report = dict(
         installed=str(args.installed.resolve()),
@@ -126,6 +129,7 @@ def main():
         require_wide_gram=args.require_wide_gram,
         require_ritz_qr=args.require_ritz_qr,
         require_wide_paired_rotation=args.require_wide_paired_rotation,
+        require_wide_projection=args.require_wide_projection,
         replays=records,
         forbidden_imports=["benchmarks", "examples", "cupy", "scipy", "warp_cudss"],
     )

@@ -1,0 +1,20 @@
+import json,sys
+from pathlib import Path
+import numpy as np
+import pytest
+
+name='test_orthogonalization_with_changed_mass_scaling_and_cached_images'
+def trace(frame,event,arg):
+ if event=='call':return trace if frame.f_code.co_name==name else None
+ if event=='exception' and arg[0] is AssertionError:
+  v=frame.f_locals;s=v.get('solver')
+  if s is not None:
+   data=dict(kind=v.get('kind'),width=v.get('width'),cached=v.get('cached'),constructor=type(s).__name__,status=s.status.numpy().tolist())
+   for key in ['gx','lx','xscale','sx']:
+    a=getattr(s,key).numpy();data[key]=dict(finite=bool(np.isfinite(a).all()),minimum=float(np.nanmin(a)),maximum=float(np.nanmax(a)))
+    if key in ['gx','lx']:data[key]['diagonal']=np.diag(a).tolist()
+   print('\nORTHOGONALIZATION_FAILURE '+json.dumps(data),flush=True)
+ return trace
+sys.settrace(trace)
+try:raise SystemExit(pytest.main(sys.argv[1:]))
+finally:sys.settrace(None)

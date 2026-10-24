@@ -56,7 +56,8 @@ def test_selected_control_and_restoration(monkeypatch, tmp_path, choice, compact
         driver.main()
     assert driver.warpack.BlockLOBPCG is DummyBlock
     assert driver.compare_block.source_manifest is manifest and sys.argv is argv
-    assert isinstance(instances[0], DummyCandidate) == (choice != "original")
+    assert isinstance(instances[0], DummyCandidate) == (choice not in ("original", "default"))
+    assert instances[0]._wide_projection_enabled == (choice == "default")
     assert instances[0].options == {"compact_projected_graphs": compact}
     actual = instances[0]._projection_rows
     assert actual == driver.SETTINGS[choice]
