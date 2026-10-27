@@ -17,7 +17,12 @@ import numpy as np
 import warp as wp
 import warp.optim.linear as linear
 
-from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
+from benchmarks.acceptance import (
+    add_diagnostic_argument,
+    assess_comparison,
+    require_accepted,
+    trial_contract_failures,
+)
 from benchmarks.cudss_provenance import cudss_dependencies, cudss_signature
 from warpack import CGInverse, CuDSSInverse
 
@@ -257,18 +262,8 @@ def run(
                 raise ValueError(method)
             row["setup_seconds"] = setup
             get = None
-        warmup, output = timed(solve)
-        row["warmup_seconds"] = warmup
-        samples = []
-        checks = []
-        cg_stats = []
-        competing = set()
-        for _ in range(repeats):
-            competing.update(other_gpu_processes())
-            if method.startswith("warp-cg"):
-                inverse.reset_stats()
-            elapsed, output = timed(solve)
-            competing.update(other_gpu_processes())
+
+        def validate_output(output):
             host_output = (
                 get()
                 if get is not None
@@ -319,6 +314,7 @@ def run(
                 core = solver.core
                 cycles = int(core.iterations.numpy()[0])
                 check.update(
+                    solver_status=int(core.status.numpy()[0]),
                     left_converged=int(solver.count_left.numpy()[0]),
                     right_converged=int(solver.count_right.numpy()[0]),
                     outer_iterations=cycles,
@@ -332,22 +328,47 @@ def run(
                 check["reported_max_residual"] = float(
                     max(solver.left_residuals.numpy().max(), solver.right_residuals.numpy().max())
                 )
+            if method.startswith("warp-cg"):
+                check["inner_solve_statistics"] = dict(
+                    zip(
+                        (
+                            "total_iterations",
+                            "max_iterations_per_rhs",
+                            "unconverged_rhs",
+                            "rhs_calls",
+                        ),
+                        map(int, inverse.stats.numpy()),
+                    )
+                )
+                check["inner_inverse_converged"] = (
+                    check["inner_solve_statistics"]["unconverged_rhs"] == 0
+                )
+            return check
+
+        if method.startswith("warp-cg"):
+            inverse.reset_stats()
+        warmup, output = timed(solve)
+        row["warmup_seconds"] = warmup
+        row["first_solve_quality"] = validate_output(output)
+        row["first_solve_accepted"] = not trial_contract_failures(row["first_solve_quality"])
+        row["first_solve_scope"] = (
+            "First solve after setup/capture; validation is outside compute timing"
+        )
+        samples = []
+        checks = []
+        cg_stats = []
+        competing = set()
+        for _ in range(repeats):
+            competing.update(other_gpu_processes())
+            if method.startswith("warp-cg"):
+                inverse.reset_stats()
+            elapsed, output = timed(solve)
+            competing.update(other_gpu_processes())
+            check = validate_output(output)
             samples.append(elapsed)
             checks.append(check)
             if method.startswith("warp-cg"):
-                cg_stats.append(
-                    dict(
-                        zip(
-                            (
-                                "total_iterations",
-                                "max_iterations_per_rhs",
-                                "unconverged_rhs",
-                                "rhs_calls",
-                            ),
-                            map(int, inverse.stats.numpy()),
-                        )
-                    )
-                )
+                cg_stats.append(check["inner_solve_statistics"])
         if cg_stats:
             row["cg_statistics"] = cg_stats
         row["cudss_used"] = uses_cudss
@@ -358,7 +379,9 @@ def run(
             samples_seconds=samples,
             solve_seconds=float(np.median(samples)),
             validation=checks,
-            accepted=all(c["accepted"] for c in checks),
+            accepted=bool(checks)
+            and row["first_solve_accepted"]
+            and all(not trial_contract_failures(c) for c in checks),
             other_gpu_processes=sorted(competing),
             timing_uncontended=not competing,
         )

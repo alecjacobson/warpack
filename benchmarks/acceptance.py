@@ -31,6 +31,22 @@ def add_diagnostic_argument(parser):
     )
 
 
+def trial_contract_failures(check):
+    """Apply declared physical/native gates to one recorded solve output."""
+    failures = []
+    if "accepted" in check and not check["accepted"]:
+        failures.append("trial physical acceptance")
+    for key in ("solver_full_count", "native_stopping_passed"):
+        if key in check and not check[key]:
+            failures.append(key)
+    for status in ("status", "solver_status"):
+        if check.get(status) is not None and check[status] != 0:
+            failures.append("trial " + status)
+    if check.get("inner_inverse_converged") is False:
+        failures.append("inner inverse convergence")
+    return failures
+
+
 def assess_comparison(report, rows, diagnostic=False):
     """Check recorded numerical/stopping contracts without rewriting old gates.
 
@@ -60,14 +76,15 @@ def assess_comparison(report, rows, diagnostic=False):
         if not checks:
             failures.append("no trial evidence")
         for check in checks or []:
-            if "accepted" in check and not check["accepted"]:
-                failures.append("trial physical acceptance")
-            for key in ("solver_full_count", "native_stopping_passed"):
-                if key in check and not check[key]:
-                    failures.append(key)
-            for status in ("status", "solver_status"):
-                if check.get(status) is not None and check[status] != 0:
-                    failures.append("trial " + status)
+            failures.extend(trial_contract_failures(check))
+        if "first_solve_quality" in row:
+            first = row["first_solve_quality"]
+            if not first:
+                failures.append("no first solve evidence")
+            else:
+                failures.extend("first solve: " + item for item in trial_contract_failures(first))
+        if row.get("first_solve_accepted") is False:
+            failures.append("first solve acceptance")
         # These statistics belong to actual inverse solves in application run(),
         # not the intentionally truncated block preconditioners handled in #84.
         if any(s.get("unconverged_rhs", 0) for s in row.get("cg_statistics", [])):

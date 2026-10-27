@@ -139,3 +139,29 @@ preserves the previous detailed experiment index. [Historical reports](../histor
 and the per-experiment pages retain earlier settings, unsuccessful approaches
 and source provenance. Current user-facing documentation should link to those
 reports rather than accumulate their chronological updates.
+
+## First-solve evidence in application comparisons
+
+The common `benchmarks.applications.compare.run` harness validates its first
+solve immediately after setup/capture, before timed repeats. The report retains
+`first_solve_quality`, `first_solve_accepted`, and the existing `warmup_seconds`.
+Physical residuals, orthogonality, requested spectrum/subspace, native status
+and eigenpair counts use the same validator as the repeat loop. CG inverse
+statistics are reset for each solve and must show no unconverged RHSs. Validation
+and host readback remain outside each compute timer. A failed first solve rejects
+the row while preserving the later samples; it does not trigger a retry.
+
+This covers callers of the common harness, including direct FEM comparisons.
+It does not retroactively certify historical reports without first-output
+evidence. Setup may itself initialize a graph under the documented upload
+protocol; “first solve” here means the first measured solve after setup, not a
+promise that CUDA has never launched that graph.
+
+The independent Anvil direct and complete block workers already gate their
+warmup/first output. Conformal, connection, reciprocal buckling, transformed
+pencil and several experimental workers still need migration, tracked in
+[#208](https://github.com/alecjacobson/warpack/issues/208). Their warm-replay-only
+reports must not be presented as first-use qualification. The small conformal
+fixture also has a strict native stopping floor tracked in
+[#209](https://github.com/alecjacobson/warpack/issues/209); passing physical
+accuracy alone does not override an incomplete native eigenpair count.
