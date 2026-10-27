@@ -9,8 +9,9 @@
 Add `warp.optim.eigen`, initially for real symmetric standard and generalized
 partial eigenproblems. Expose `KrylovSchur` and `LOBPCG` as public reusable
 solver states, with matching `krylov_schur` and `lobpcg` convenience functions
-and device-resident results. Reuse Warp's sparse matrices, linear operators, CG,
-GMRES and preconditioners. Keep all eigensolver arithmetic in Warp; allow an
+and Warp-array results on the selected CPU or CUDA device. Support both CPU and
+CUDA from the first public integration. Reuse Warp's sparse matrices, linear
+operators, CG, GMRES and preconditioners. Keep all eigensolver arithmetic in Warp; allow an
 optional cuDSS provider for sparse factorization and solves.
 
 The primary workflow is reduced-order model construction:
@@ -59,9 +60,24 @@ singular. A negative shift can make the shifted matrix SPD for semidefinite $K$.
 
 The initial contribution is not a full SciPy/ARPACK compatibility layer, a dense
 eigensolver API, a mesh assembly library, a distributed solver, or a promise of
-global spectral completeness from residuals alone. CUDA is the initial target.
-CPU execution must either pass a separately documented support matrix or reject
-the request explicitly; it must not invoke a hidden host numerical fallback.
+global spectral completeness from residuals alone. CPU and CUDA execution are
+required for the initial public solver algorithms, with the same mathematical
+contracts and frontend. CPU support is a release requirement, not an optional
+follow-up. Both paths use Warp numerical kernels; neither invokes a hidden
+NumPy, SciPy or other host numerical fallback.
+
+Choose execution from the operands' Warp device. GPU-specific tiled kernels,
+cooperative reductions and graph control flow need CPU-compatible Warp paths
+where their implementation cannot run on CPU. These may use different kernels
+while preserving selection, normalization, residual and failure semantics.
+Results and workspaces remain on the selected device. Here, device-resident
+arrays include Warp CPU arrays; the API does not implicitly convert either
+backend's results to NumPy or Python scalars.
+
+CUDA graph capture is a CUDA execution capability. The CPU path executes the
+same prepared solver eagerly and does not require graph emulation. Optional
+cuDSS remains CUDA-only; requesting that provider on CPU raises a clear backend
+error, while the pure-Warp solvers and inverse paths remain available on CPU.
 
 ## Current implementation and integration work
 
@@ -214,12 +230,15 @@ solver = eigen.LOBPCG(
 )
 solver.prepare()  # Allocation, compilation and warmup happen outside capture.
 
-with wp.ScopedCapture(device=K.device) as capture:
+if K.device.is_cuda:
+    with wp.ScopedCapture(device=K.device) as capture:
+        solver()
+    wp.capture_launch(capture.graph)
+else:
     solver()
 
-wp.capture_launch(capture.graph)
-values = solver.result.eigenvalues      # device array (20,)
-vectors = solver.result.eigenvectors    # device array (20, n), vectors are rows
+values = solver.result.eigenvalues      # Warp array (20,) on K.device
+vectors = solver.result.eigenvectors    # Warp array (20, n), vectors are rows
 ```
 
 `P` is caller-configured: for example an upstream block Jacobi or FSAI action,
@@ -330,10 +349,12 @@ solver is captured. They are responsible for their mathematical properties.
 ## Setup, capture and changing inputs
 
 Construction allocates shape-dependent buffers. `prepare()` compiles and warms
-kernels, prepares internal child graphs and validates backend capabilities.
+kernels, prepares internal child graphs on CUDA and validates backend capabilities.
 Both may allocate and synchronize, and are forbidden inside active capture.
-Once prepared, `solver()` must record into the caller's capture without nested
-standalone capture or allocation. There should be one internal preparation and
+CPU preparation must not create CUDA resources or require a CUDA device or driver.
+Calling a prepared CPU state executes its Warp kernels directly.
+On CUDA, the prepared `solver()` must record into the caller's capture without
+nested standalone capture or allocation. There should be one internal preparation and
 capture policy shared by all eigen algorithms.
 
 Replay must not read device convergence on the host, allocate according to
@@ -399,7 +420,7 @@ reinterpret them. A Warp namespace alone must not imply every Warp dtype works.
 
 | Precision | Initial status | Follow-up requirement |
 |---|---|---|
-| Real FP64 outer solve | Initial integration | Preserve original-residual and orthogonality gates |
+| Real FP64 outer solve | Initial integration on CPU and CUDA | Preserve original-residual and orthogonality gates on both devices |
 | FP32 inner preconditioning with FP64 outer solve | Explicit supported configuration for qualified preconditioners | Refresh casts on value changes, report work precision and validate final FP64 residuals |
 | Real FP32 outer solve | Deferred | Dtype-aware tolerances, reductions, projected solves, stagnation and conditioning coverage |
 | Complex128 outer solve | Exists in warpack, deferred from initial upstream API | Agree storage/conjugation conventions and consistent complex-dimensional workspace sizing |
@@ -508,6 +529,7 @@ remaining benchmark migration is tracked in
 
 | Coverage | Acceptance evidence |
 |---|---|
+| CPU and CUDA support | Run the initial public algorithms, selections and pure-Warp inverse/preconditioner paths on both devices; check original residuals and invariant subspaces rather than bitwise equality; exercise CPU-only CI without a CUDA driver |
 | Algebra and selection | Analytic diagonal/block problems and independent small dense references; requested spectrum, not just residuals; all implemented selection modes |
 | Generalized metrics | Diagonal and consistent SPD mass, indefinite stiffness, scaling, near-zero modes, noncommuting $K,M$ and mass orthogonality |
 | Multiplicity and deflation | Repeated/clustered modes, disconnected nullspaces, independent requested subspace, known rigid-mode exclusion and rank-deficient starts |
@@ -541,15 +563,20 @@ memory need separate checks. The large-FEM and Anvil paths must retain their
 optimized block operations and mixed preconditioning. No GPU is universally
 faster across every size, method and matrix family.
 
+Establish separate CPU correctness and performance baselines where current
+warpack lacks a qualified CPU path. Track CPU setup, solve time and memory on
+representative small and medium problems; do not apply a CUDA timing threshold
+to CPU execution. GPU performance specialization must retain a tested CPU path.
+
 ## Delivery milestones
 
 | Priority | Deliverable | Exit gate |
 |---|---|---|
-| P0 | Maintainer discussion and frontend contract | Agree namespace, state/results, row orientation, initial CUDA/FP64 scope, residual policy and optional backend boundary |
+| P0 | Maintainer discussion and frontend contract | Agree namespace, state/results, row orientation, required CPU and CUDA FP64 scope, residual policy and optional backend boundary |
 | P0 | Core operator/state integration | Scalar operator fallback plus qualified block fast path; prepare/call composition; device status; import and ownership tests |
-| P0 | Symmetric standard and SPD generalized algorithms | Krylov–Schur and LOBPCG migrated with fresh validation, accurate selection and matched performance |
+| P0 | Symmetric standard and SPD generalized algorithms | Krylov–Schur and LOBPCG supported on CPU and CUDA with fresh validation, accurate selection and device-specific performance baselines |
 | P0 | Optional inverse adapters and fast preconditioning | Upstream CG/GMRES/FSAI reuse; cuDSS provider qualification; first-use and update lifecycle tests; reproduce the fast Anvil path |
-| P0 | Initial upstream documentation and release qualification | Executable examples, support matrix, CPU rejection or qualification, packaging/license audit, graph issue disposition and before/after benchmark report |
+| P0 | Initial upstream documentation and release qualification | Executable CPU and CUDA examples, CPU-only CI and CUDA qualification, optional-provider support matrix, packaging/license audit, graph issue disposition and before/after benchmark report |
 | P1 | Real FP32 and implicit eigenvalue adjoints | Separate precision and Tape tests; no silent unsupported gradients in the initial release |
 | P1 | Constrained physical modes and isolated-eigenvector adjoints | KKT matrix-category tests, constraint residuals and backward bordered solves |
 | P2 | Complex Hermitian, general pencils, buckling/Cayley and SVD | Separate API reviews; resolve correctness gates for each advertised family |
