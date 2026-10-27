@@ -1,0 +1,247 @@
+{
+  "qualification": "case regression passed; full numerical suite plus final targeted checks documented separately",
+  "case": "clamped_consistent",
+  "n": 34560,
+  "workers_per_version": 3,
+  "replays_per_worker": 5,
+  "selection": {
+    "block-baseline-1": "block-baseline-1",
+    "direct-baseline-1": "direct-baseline-1",
+    "block-source-1": "block-source-1",
+    "direct-source-1": "direct-source-1",
+    "block-source-2": "block-source-2",
+    "direct-source-2": "direct-source-2",
+    "block-baseline-2": "block-baseline-2-retry1",
+    "direct-baseline-2": "direct-baseline-2",
+    "block-baseline-3": "block-baseline-3",
+    "direct-baseline-3": "direct-baseline-3",
+    "block-source-3": "block-source-3-retry1",
+    "direct-source-3": "direct-source-3"
+  },
+  "excluded_workers": [
+    "block-baseline-2",
+    "block-source-3"
+  ],
+  "comparisons": {
+    "block": {
+      "baseline": {
+        "replay_median_seconds": 1.9964928030967712,
+        "replay_range_seconds": [
+          1.988502647727728,
+          2.006609756499529
+        ],
+        "setup_samples_seconds": [
+          0.4338032118976116,
+          0.43336552381515503,
+          0.4289201498031616
+        ],
+        "capture_samples_seconds": [
+          1.4797129780054092,
+          1.4783302806317806,
+          1.4522459246218204
+        ],
+        "setup_capture_median_seconds": 1.9116958044469357,
+        "max_residual": 8.998006791205559e-12,
+        "max_spectrum_error": 1.2512213487525514e-13,
+        "max_requested_subspace_error": 4.440478387842338e-11,
+        "graphs": [
+          {
+            "node_types_including_conditional_body": {
+              "MEMSET": 709,
+              "MEMCPY": 323,
+              "KERNEL": 26556,
+              "CONDITIONAL": 273
+            },
+            "memcpy_kinds": {
+              "DtoD (DEVICE to DEVICE)": 323
+            },
+            "method": "CUDA graph DOT inspection; not a CUDA API trace"
+          },
+          {
+            "node_types_including_conditional_body": {
+              "MEMSET": 709,
+              "MEMCPY": 323,
+              "KERNEL": 26556,
+              "CONDITIONAL": 273
+            },
+            "memcpy_kinds": {
+              "DtoD (DEVICE to DEVICE)": 323
+            },
+            "method": "CUDA graph DOT inspection; not a CUDA API trace"
+          },
+          {
+            "node_types_including_conditional_body": {
+              "MEMSET": 709,
+              "MEMCPY": 323,
+              "KERNEL": 26556,
+              "CONDITIONAL": 273
+            },
+            "memcpy_kinds": {
+              "DtoD (DEVICE to DEVICE)": 323
+            },
+            "method": "CUDA graph DOT inspection; not a CUDA API trace"
+          }
+        ]
+      },
+      "source": {
+        "replay_median_seconds": 1.9957039393484592,
+        "replay_range_seconds": [
+          1.9774012044072151,
+          2.00844007357955
+        ],
+        "setup_samples_seconds": [
+          0.38230060786008835,
+          0.4035138189792633,
+          0.38578393310308456
+        ],
+        "capture_samples_seconds": [
+          1.4508878588676453,
+          1.4680046252906322,
+          1.4748450443148613
+        ],
+        "setup_capture_median_seconds": 1.8606289774179459,
+        "max_residual": 9.000753407591248e-12,
+        "max_spectrum_error": 1.1823875212257917e-13,
+        "max_requested_subspace_error": 4.4465795620972685e-11,
+        "graphs": [
+          {
+            "node_types_including_conditional_body": {
+              "MEMSET": 709,
+              "MEMCPY": 323,
+              "KERNEL": 26556,
+              "CONDITIONAL": 273
+            },
+            "memcpy_kinds": {
+              "DtoD (DEVICE to DEVICE)": 323
+            },
+            "method": "CUDA graph DOT inspection; not a CUDA API trace"
+          },
+          {
+            "node_types_including_conditional_body": {
+              "MEMSET": 709,
+              "MEMCPY": 323,
+              "KERNEL": 26556,
+              "CONDITIONAL": 273
+            },
+            "memcpy_kinds": {
+              "DtoD (DEVICE to DEVICE)": 323
+            },
+            "method": "CUDA graph DOT inspection; not a CUDA API trace"
+          },
+          {
+            "node_types_including_conditional_body": {
+              "MEMSET": 709,
+              "MEMCPY": 323,
+              "KERNEL": 26556,
+              "CONDITIONAL": 273
+            },
+            "memcpy_kinds": {
+              "DtoD (DEVICE to DEVICE)": 323
+            },
+            "method": "CUDA graph DOT inspection; not a CUDA API trace"
+          }
+        ]
+      },
+      "replay_change_percent": -0.03951247643309008,
+      "setup_capture_change_percent": -2.671284150449016
+    },
+    "direct": {
+      "baseline": {
+        "replay_median_seconds": 0.41035737097263336,
+        "replay_range_seconds": [
+          0.4100619778037071,
+          0.4108714610338211
+        ],
+        "setup_samples_seconds": [
+          0.4110635295510292,
+          0.4050874263048172,
+          0.40725724026560783
+        ],
+        "capture_samples_seconds": [
+          0.7901419885456562,
+          0.7986869737505913,
+          0.7824802696704865
+        ],
+        "setup_capture_median_seconds": 1.2012055180966854,
+        "max_residual": 8.520218716275622e-13,
+        "max_spectrum_error": 1.1024514634527804e-13,
+        "max_requested_subspace_error": 1.3452814062011845e-13,
+        "graphs": [
+          {
+            "host_nodes": 0,
+            "memcpy_kinds": {
+              "HtoD (HOST PAGEABLE to DEVICE)": 702,
+              "DtoD (DEVICE to DEVICE)": 1078
+            },
+            "method": "CUDA graph DOT including nested bodies; not an API trace"
+          },
+          {
+            "host_nodes": 0,
+            "memcpy_kinds": {
+              "HtoD (HOST PAGEABLE to DEVICE)": 702,
+              "DtoD (DEVICE to DEVICE)": 1078
+            },
+            "method": "CUDA graph DOT including nested bodies; not an API trace"
+          },
+          {
+            "host_nodes": 0,
+            "memcpy_kinds": {
+              "HtoD (HOST PAGEABLE to DEVICE)": 702,
+              "DtoD (DEVICE to DEVICE)": 1078
+            },
+            "method": "CUDA graph DOT including nested bodies; not an API trace"
+          }
+        ]
+      },
+      "source": {
+        "replay_median_seconds": 0.41043682396411896,
+        "replay_range_seconds": [
+          0.4102823957800865,
+          0.41066108271479607
+        ],
+        "setup_samples_seconds": [
+          0.4162433296442032,
+          0.40418075025081635,
+          0.40827975049614906
+        ],
+        "capture_samples_seconds": [
+          0.8037428855895996,
+          0.787472952157259,
+          0.7890979684889317
+        ],
+        "setup_capture_median_seconds": 1.1973777189850807,
+        "max_residual": 8.480104146674362e-13,
+        "max_spectrum_error": 1.1124434706744069e-13,
+        "max_requested_subspace_error": 1.3680839125525228e-13,
+        "graphs": [
+          {
+            "host_nodes": 0,
+            "memcpy_kinds": {
+              "HtoD (HOST PAGEABLE to DEVICE)": 702,
+              "DtoD (DEVICE to DEVICE)": 1078
+            },
+            "method": "CUDA graph DOT including nested bodies; not an API trace"
+          },
+          {
+            "host_nodes": 0,
+            "memcpy_kinds": {
+              "HtoD (HOST PAGEABLE to DEVICE)": 702,
+              "DtoD (DEVICE to DEVICE)": 1078
+            },
+            "method": "CUDA graph DOT including nested bodies; not an API trace"
+          },
+          {
+            "host_nodes": 0,
+            "memcpy_kinds": {
+              "HtoD (HOST PAGEABLE to DEVICE)": 702,
+              "DtoD (DEVICE to DEVICE)": 1078
+            },
+            "method": "CUDA graph DOT including nested bodies; not an API trace"
+          }
+        ]
+      },
+      "replay_change_percent": 0.0193619018703739,
+      "setup_capture_change_percent": -0.3186631308245924
+    }
+  }
+}

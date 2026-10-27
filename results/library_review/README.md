@@ -1,8 +1,14 @@
 # Library API, capture and separation review
 
 2026-10-27, supported main baseline `a1b739a`; L40, driver 570.158.01.
-This review excludes the held wide-projection candidate in PR #201. It does not
-resolve the intermittent mass-QR issue #198 or certify other GPUs/drivers.
+**Review complete for final runtime source `de24fb1`.** The full numerical suite
+passes after containing the QR fixture's first-upload ordering failure; final
+API, installed-wheel, stock-Warp and timing checks also pass. See
+[final qualification](#final-qualification) for exact scopes and measurements.
+
+The held wide-projection candidate in PR #201 was not promoted. Its separate
+qualification remains tracked in #198, and the upstream graph-upload issue #61
+remains open. This review does not certify other GPUs/drivers.
 
 ## Changes
 
@@ -59,9 +65,9 @@ layout, ownership, stream restrictions and composing solves inside caller graphs
 
 ## Regression evidence
 
-The initial complete regression failed; qualification remains held while the
-first-launch containment is checked. Completed timings and both failing and
-passing controls are below. No README timing row has been replaced.
+The initial complete regression failed. Its evidence, the diagnosis, setup
+containment and final qualification are all retained below. Earlier entries
+marked held describe that earlier checkpoint. No Anvil timing row was replaced.
 
 ### Completed checks (source `127fd97`)
 
@@ -160,6 +166,14 @@ stress (400 trials) also passed. Keep this sensitivity explicit. The older #61
 CUDA-only upload/memset reproducer is related evidence, not proof of an identical
 implementation defect.
 
+An [upstream report dated 2026-10-21](https://github.com/NVIDIA/warp/issues/2096#issuecomment-6311136266)
+independently checks this ordering on L40S/560.35.03 with Warp 1.15 and 1.18:
+capture on an idle device followed by pending eager work before first launch
+fails 5/5 times, while completing the first launch before that work passes 5/5.
+It concerns the older atomic/memset reproducer, not our input-copy kernel. This
+supports the setup ordering requirement without identifying a fixed driver
+release or proving all observed symptoms share one implementation defect.
+
 CUDA Compute Sanitizer 12.9.79 memcheck reports zero errors on two selected
 original QR fixtures (both pass under instrumentation). This does not rule out
 all races or establish a driver fix. NVIDIA's redist SHA256 was checked before
@@ -168,7 +182,66 @@ using the tool; it is not a project/runtime dependency.
 The shared fixture now completes its first graph launch at setup, before its
 changed-input uploads. All original six input/mass variants, status assertions,
 image equations, orthogonality and requested-subspace checks remain. The
-195-test stage group passes with this containment; the complete regression is
-in progress. The installed numerical code and matched timing configurations
-have not changed. Public documentation now distinguishes completion before
+195-test stage group passes with this containment; the full suite subsequently
+passed **3,519 tests with 11 skips** in 1,391.50 s. Numerical kernels and matched
+timing configurations have not changed. Public documentation now distinguishes completion before
 capture from completion of first launch; neither step is a per-iteration barrier.
+
+
+## Final qualification
+
+Final runtime source `de24fb1` differs from the full-suite checkpoint only in the
+private capture guard (also reject a tracked capture on another stream of the
+device) and removal of a trailing blank line in `_triangular.py`. The latter has
+an identical AST. Four new cross-stream cases fail before that guard fix and pass
+after it. Test/script formatting is also normalized. No numerical kernel changes,
+accuracy relaxation or new skip rule accompanies this follow-up.
+
+| Check | Final result |
+|---|---|
+| Complete pinned GPU suite, before the last metadata-only guard | 3,519 passed, 11 skipped |
+| Final pinned API/backend/projected-solver focused checks | 270 passed |
+| Final stock Warp 1.15 focused checks | 236 passed |
+| Final stock Warp mass-QR stage group | 195 passed |
+| Final installed-wheel cuDSS capture/pivot/stream checks | 26 passed |
+| Installed-wheel pure-Warp replay with forbidden-import checks | Pass on Warp 1.15 and pinned 1.18 |
+| Lint and formatting | Pass; 676 files formatted |
+
+Scopes overlap and their counts must not be added. The full suite contains 3,530
+cases; the last guard adds four cases, covered by both final focused environments.
+The final wheel audit verifies all **45** core modules against source and installed
+bytes (SHA256 `ec0b73a1ef74a8b06b6e516578ea4bacf8aa1b42c6568e6c0650eec71022e267`).
+
+The committed multi-size upload diagnostic reproduces **375/1,500** failures on
+pinned Warp and **394/1,500** on stock Warp. For each version, both synchronization
+after input upload and completing first launch during setup pass **1,500/1,500**
+controls. The sequence of allocations matters: the earlier isolated-size
+Warp/CuPy controls did not reproduce. This supports the documented containment,
+not an unconditional claim about the CUDA implementation defect or fixed drivers.
+
+The timing comparison was repeated on the final runtime source, using the same
+34,560-DOF FEM problem, settings and protocol as above. All 60 selected timed solves
+pass physical residual, orthogonality and requested-spectrum/subspace checks;
+their source hashes match the final installed wheel. Two additional workers met
+accuracy gates but overlapped foreign GPU processes. Both whole workers were
+excluded by the existing occupancy rule, retained in the evidence, and replaced
+after the GPU became idle. No numerical failure was retried away.
+
+| Solver / requested modes | Main replay (s) | Final replay (s) | Change | Main setup + capture (s) | Final setup + capture (s) |
+|---|---:|---:|---:|---:|---:|
+| Pure Warp BlockLOBPCG + FSAI/CG / 100 | 1.99649 | 1.99570 | -0.040% | 1.91170 | 1.86063 |
+| Warp generalized Krylov + cuDSS / 20 | 0.410357 | 0.410437 | +0.019% | 1.20121 | 1.19738 |
+
+Replay medians use 15 samples per version/backend; setup plus capture uses three
+worker sums. These different mode counts are not a comparison of backend speed.
+Maximum final relative residuals are 9.01e-12 (block) and 8.49e-13 (direct);
+maximum requested-subspace errors are 4.45e-11 and 1.37e-13. Recorded graph node
+and transfer counts match main. Both predeclared regression limits pass. cuDSS's
+strict device-only graph flag remains false due to vendor HtoD metadata copies.
+
+[Final measurements and every attempt](evidence/qualified/),
+[aggregate statistics and worker selection](evidence/qualified/summary.json),
+[source-difference audit](evidence/qualified-core-diff.json.gz) and
+[full passing log](evidence/full-prepared.log.gz) accompany the earlier failures.
+The README links this report and the execution contracts; its Anvil table remains
+attached to its original Anvil measurements.
