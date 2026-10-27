@@ -393,6 +393,10 @@ generic guarantees. Partial SVD nullspace recovery is also not established for
 arbitrary requested zero spaces.
 
 The graph-upload issue [#61](https://github.com/alecjacobson/warpack/issues/61)
-is contained by synchronizing warmup before capture; upstream resolution remains
-pending. This does not add per-replay synchronization. See the
+requires completing warmup before capture and the graph's first launch before
+queueing changed inputs on the affected stack. The latter also contains the
+partial-input failure found during #198; see the
+[setup example](library_contracts.md#graph-setup-and-synchronization).
+Upstream resolution remains pending. Subsequent replay does not add a host
+barrier. See the
 [issue tracker](https://github.com/alecjacobson/warpack/issues) for remaining work.

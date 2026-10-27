@@ -49,6 +49,24 @@ graph prepared during setup. Keep the setup synchronization: driver 570 has a
 tracked graph-upload failure with pending eager writes (#61). This workaround
 is not a synchronization between iterations or replay launches.
 
+On the affected driver stack, also complete the graph's first launch during
+setup, before enqueueing changed inputs or preceding simulation work:
+
+```python
+graph = solver.capture(100)
+wp.capture_launch(graph)
+wp.synchronize_device(solver.device)
+# Subsequent input updates and graph launches can stay on the ordered stream.
+```
+
+Warp instantiates/uploads a graph lazily on its first launch. Synchronizing only
+before recording does not protect a later first launch from pending uploads:
+the #198 diagnostic observed a mixture of old and new input values at the first
+graph node, and a kernel-only copy reproducer also fails without an eigensolver.
+This first solve is setup/first-use work and must be included when reporting
+end-to-end cost; repeated replay has no additional host barrier. The workaround
+does not establish a fixed driver-version boundary. See #61 for upstream status.
+
 Other explicit synchronization boundaries are:
 
 | Operation | Reason |

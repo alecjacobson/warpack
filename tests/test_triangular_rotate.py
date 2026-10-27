@@ -54,6 +54,13 @@ def test_orthogonalization_with_changed_mass_scaling_and_cached_images(width, ca
         with wp.ScopedCapture() as capture:
             solver.status.zero_()
             solver.orthogonalize_x()
+        # Complete lazy graph upload at setup, before the changed-input H2D
+        # copies below. Driver 570 can otherwise let the first graph observe a
+        # partial upload (#61/#198); the eigensolver-free diagnostic is in
+        # benchmarks/experimental/graph_input_upload.py. This does not add a
+        # host barrier between the numerical operations or subsequent replays.
+        wp.capture_launch(capture.graph)
+        wp.synchronize()
         solvers.append(solver)
         graphs.append(capture.graph)
     for kind in ["normal", "scaled", "correlated", "changed_mass", "equilibrated_mass", "normal"]:

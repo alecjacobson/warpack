@@ -59,9 +59,9 @@ layout, ownership, stream restrictions and composing solves inside caller graphs
 
 ## Regression evidence
 
-Validation and timing results are being collected; this report is not yet a
-completed qualification. Raw failures and interrupted attempts will be retained
-alongside final passing checks. No README timing row has been replaced.
+The initial complete regression failed; qualification remains held while the
+first-launch containment is checked. Completed timings and both failing and
+passing controls are below. No README timing row has been replaced.
 
 ### Completed checks (source `127fd97`)
 
@@ -125,3 +125,50 @@ post-failure states and every timing sample with source/dependency/occupancy
 records. [The manifest](evidence/manifest.json) hashes decompressed artifacts;
 [the timing summary](evidence/timing-summary.json) contains aggregate values.
 No Anvil README timing row has been replaced by these different FEM cases.
+
+### Mass-QR first-launch diagnosis and containment
+
+A subsequent unchanged-main run reproduced the wrong-subspace result again
+(194 passes, one failure). DOT exports show the expected serial node chain and
+separate solver allocations. Instrumenting the start of the QR graph with a
+device-to-device snapshot then reproduced a **status failure** in the unchanged
+main `BlockLOBPCG` path at width 120, on the first normal input:
+
+- The graph execution counter is one.
+- The first 14,080 values of its 44,040-value input match the newly assigned
+  source exactly. The remaining 29,960 values match the previous orthonormalized
+  warmup output to 1e-14. This is input-ordering corruption before QR arithmetic.
+- The original host source and all sparse mass arrays are correct. The second
+  solver has not yet launched its graph.
+
+The [input snapshot](evidence/state-probed-fixed-2-baseline/) and the uninstrumented
+[graph snapshots](evidence/state-dot-1-baseline/) are retained. Instrumentation
+changes the program, so its failure membership is not substituted for the full
+regression. An initial instrumentation attempt allocated in conditional capture
+and failed for that reason (10 failures); its log is also retained. The corrected
+instrumentation allocates only during eager setup.
+
+The eigensolver-free `copy-upload.py` sequence reproduces stale input values in
+310/1,500 trials (294 at size 126,276 and 16 at size 1,048,576). Each graph merely
+zeros a status word and copies input through a kernel. Synchronization after
+input upload passes 1,500/1,500; completing one graph launch during setup also
+passes 1,500/1,500. The latter adds no subsequent replay barrier. An isolated
+single-size reduction passed all 300 trials for each Warp/CuPy mode, so those
+controls do **not** establish a Warp-free reproduction of this particular input
+failure. An earlier first-node snapshot probe (600 trials) and direct fixture
+stress (400 trials) also passed. Keep this sensitivity explicit. The older #61
+CUDA-only upload/memset reproducer is related evidence, not proof of an identical
+implementation defect.
+
+CUDA Compute Sanitizer 12.9.79 memcheck reports zero errors on two selected
+original QR fixtures (both pass under instrumentation). This does not rule out
+all races or establish a driver fix. NVIDIA's redist SHA256 was checked before
+using the tool; it is not a project/runtime dependency.
+
+The shared fixture now completes its first graph launch at setup, before its
+changed-input uploads. All original six input/mass variants, status assertions,
+image equations, orthogonality and requested-subspace checks remain. The
+195-test stage group passes with this containment; the complete regression is
+in progress. The installed numerical code and matched timing configurations
+have not changed. Public documentation now distinguishes completion before
+capture from completion of first launch; neither step is a per-iteration barrier.
