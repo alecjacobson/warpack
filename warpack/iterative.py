@@ -58,6 +58,26 @@ class GMRESInverse:
     Default capture uses a fixed outer budget. ``adaptive_capture=True`` requires
     upstream preallocated loop control (tested on Warp 1.18, absent in 1.15).
     The solver itself, stopping decisions and residual checks execute on device.
+
+    Args:
+        matrix: Compressed square FP64 Warp BsrMatrix (scalar CSR or 3x3 BSR), on the solver
+            device. Indefinite and nonsymmetric matrices are permitted.
+        tol: Relative inner linear-solve tolerance; choose more strictly than the desired outer
+            accuracy.
+        maxiter: Positive upstream iteration budget; restarted GMRES may run up to restart-1
+            extra iterations.
+        restart: Positive Krylov restart dimension, clipped to n.
+        preconditioner: Optional fixed linear right preconditioner as an upstream Warp operator;
+            not a variable iterative action.
+        atol: Nonnegative absolute inner tolerance; default zero.
+        adaptive_capture: Opt into nested adaptive outer graphs; requires upstream preallocated
+            GMRES loop control.
+
+    Attributes:
+        stats: int32 device counters (4,): total iterations, maximum per RHS, failed fresh
+            residual checks, RHS calls.
+        residual_maxima: FP64 device array (2,): maximum fresh absolute and relative residual
+            norms.
     """
 
     def __init__(
@@ -109,10 +129,25 @@ class GMRESInverse:
         self.requires_static_outer_capture = not adaptive_capture
 
     def reset_stats(self):
+        """Reset cumulative device counters before the next measured solve; graph capturable.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.stats.zero_()
         self.residual_maxima.zero_()
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if x.shape != y.shape or len(x.shape) != 2 or x.shape[1] != self.n:
             raise ValueError("expected matching (RHS count, n) arrays")
         if x.dtype != wp.float64 or y.dtype != wp.float64:

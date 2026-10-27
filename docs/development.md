@@ -165,3 +165,24 @@ reports must not be presented as first-use qualification. The small conformal
 fixture also has a strict native stopping floor tracked in
 [#209](https://github.com/alecjacobson/warpack/issues/209); passing physical
 accuracy alone does not override an incomplete native eigenpair count.
+
+## Maintaining the API reference
+
+Public entry points are exported by `warpack.__all__`. Document their constructor
+parameters and output attributes in source docstrings, using Warp's
+`Args`, `Returns` and `Attributes` sections. Methods listed in
+`scripts/generate_api_docs.py` form the documented frontend; implementation
+stages not listed there are not promoted to public contracts.
+
+Run `python scripts/generate_api_docs.py` after changing public signatures or
+docstrings and commit the generated `docs/api/` pages. The generator checks all
+exports and every nonprivate parameter, and does not initialize CUDA or import
+optional comparison libraries. `python scripts/generate_api_docs.py --check`
+rejects missing/stale reference pages in the package CI job. It requires Warp,
+but no GPU or optional cuDSS backend.
+
+Keep usage recipes in `docs/guide.md`, execution rules in
+`docs/library_contracts.md`, and dated implementation/timing evidence in
+`results/` or `historical/`. Add runnable API examples under `examples/`, outside
+the installed package. `python -m examples.api_quickstart` checks small known
+spectra on a CUDA GPU; `--cudss` additionally checks the optional direct route.

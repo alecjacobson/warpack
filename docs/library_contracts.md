@@ -1,5 +1,7 @@
 # Library boundaries and execution contracts
 
+[Documentation](index.md) · [API reference](api/README.md)
+
 `warpack/` contains reusable solvers, operators, device kernels and the optional
 cuDSS integration. Public entry points are exported by `warpack.__init__`.
 Underscore modules and kernel implementation modules are internal; their tuning

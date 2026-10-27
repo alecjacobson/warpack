@@ -50,6 +50,16 @@ def saddle_point_matrix(stiffness, mass, constraints, shift=0.0):
     C r-by-n. This is setup (sparse structure/count synchronization is allowed),
     not a captured numeric update. Refactor after changing matrices or shift.
     C must have independent rows; H-shift*M must be nonsingular on ker(C).
+
+    Args:
+        stiffness: Full compressed scalar FP64 square Warp BsrMatrix H.
+        mass: Full compressed scalar FP64 SPD matrix M, same shape/device as H.
+        constraints: Compressed scalar FP64 Warp BsrMatrix C, shape (r, n), with independent
+            rows.
+        shift: Real sigma in the physical top-left block H-sigma*M.
+
+    Returns:
+        A scalar FP64 Warp BsrMatrix of shape (n+r, n+r). Assembly is setup work and may synchronize sparse counts; not graph capturable.
     """
     n = stiffness.shape[0]
     if stiffness.shape != (n, n) or mass.shape != (n, n):
@@ -272,6 +282,34 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
     inverse remains the caller's responsibility. cuDSS requires a fixed outer
     cycle budget.
     Owns no factors: release graphs before closing the caller-owned inverse.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+            Represents physical H.
+        mass: SPD mass/metric operator on the same device and dimension as operator. Must be SPD
+            on physical coordinates, not the augmented singular KKT mass.
+        constraints: Compressed scalar FP64 Warp BsrMatrix C of shape (r, n), with independent
+            rows.
+        inverse: Caller-owned one-RHS inverse of [[H-target*M, C.T], [C, 0]] on n+r coordinates.
+        k: Number of requested eigenpairs (positive integer).
+        ncv: Maximum basis dimension. None uses min(n, max(2*k, k+8)); require k < ncv <= n
+            after clipping.
+        tol: Positive tolerance for both equilibrium and row-normalized constraint residuals.
+        target: Real shift used in the KKT factorization.
+        initial_vector: Optional finite nonzero FP64 device array of shape (n,). Read on each
+            initialization; not modified.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
+        multipliers: FP64 device array (k, r) of Lagrange multiplier rows.
+        constraint_residuals: FP64 device array (k,) of maximum row-normalized constraint
+            violations.
     """
 
     def __init__(
@@ -354,6 +392,14 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
         )
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self._refresh_constraints()
         super().initialize(seed)
 
@@ -395,6 +441,11 @@ class ConstrainedKrylovSchur(GeneralizedKrylovSchur):
         )
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.copy(self.eigenvectors, self.retained, count=self.k * self.n)
         self.original.apply(self.eigenvectors, self.ax)
         self.mass.apply(self.eigenvectors, self.bx)

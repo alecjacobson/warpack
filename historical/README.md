@@ -2,6 +2,7 @@
 
 Earlier measurements, tuning trials, and validation audits are preserved here. For the current API, anvil showcase, and best recorded timings, see the [main README](../README.md). Commands in these pages run from the repository root; test counts and environment details describe their recorded runs.
 
+- [Library implementation and qualification notes](library-implementation-notes.md)
 - [v0.2.0 README and experiment index](https://github.com/alecjacobson/warpack/blob/v0.2.0/README.md)
 - [Rejected early Krylov exploration](adaptive-exploration-rejected.md)
 - [General-solver convergence-count replays](general-count-replays.md)

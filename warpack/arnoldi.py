@@ -42,9 +42,34 @@ def complex_csr_mv(
 
 
 class ComplexCSR(HermitianCSR):
-    """Complex CSR for a general square matrix, without a symmetry assumption."""
+    """Complex CSR for a general square matrix, without a symmetry assumption.
+
+    Args:
+        n: Complex matrix dimension (positive integer).
+        offsets: wp.int32 device array (n+1,) of valid CSR row offsets.
+        columns: wp.int32 device array (nnz,) of valid zero-based column indices.
+        values: wp.vec2d device array (nnz,) of real/imaginary pairs. All arrays must share a
+            device; provide the full matrix, not one triangle.
+
+    Attributes:
+        complex_n: Complex matrix dimension n.
+        n: Realified dimension 2*n.
+        device: Device shared by the borrowed CSR arrays.
+    """
 
     def apply_complex(self, x, y):
+        """Apply the complex operator to wp.vec2d device rows.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Inputs and outputs use wp.vec2d rows (width, complex_n) on the operator device. Use distinct buffers.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.launch(
             complex_csr_mv,
             x.shape,
@@ -283,6 +308,28 @@ class GeneralEigensolver:
     Fresh original-operator products still determine convergence.
     Solve and capture budgets must be positive integers; zero cycles cannot
     produce initialized Ritz vectors and are rejected before warmup.
+
+    Args:
+        operator: Complex operator exposing complex_n, device and apply_complex(x, y). Use
+            ComplexCSR for explicit sparse storage.
+        k: Number of requested eigenpairs (positive integer).
+        ncv: Complex Krylov dimension; None uses min(n, max(2*k+12, 32)); require k < ncv <= n.
+        which: LM/SM for magnitude, LR/SR for real part, LI/SI for imaginary part.
+        tol: Positive tolerance for the fresh standard residual ||A*x-lambda*x|| / max(1,
+            abs(lambda)).
+        initial_vector: Optional finite nonzero wp.vec2d device array of shape (n,). Read on
+            each initialization; not modified.
+        preserve_converged: Retain the best complete converged candidate during fixed-budget
+            solves. Adaptive graphs do not use this checkpoint.
+
+    Attributes:
+        eigenvalues: wp.vec2d device array (k,) of complex eigenvalues.
+        eigenvectors: wp.vec2d device array (k, n) of unit-norm right eigenvectors; generally
+            not orthogonal.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,): 0 no failure, 1 invalid start, 2 projected QR failure.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(
@@ -434,6 +481,14 @@ class GeneralEigensolver:
         wp.launch(scale_vector, self.n, [self.qrows[j], self.norm], device=self.device)
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if self._checkpoint is not None:
             self._checkpoint.reset()
         self.restart_index.fill_(-1)
@@ -464,6 +519,11 @@ class GeneralEigensolver:
         self._check_start(self.converged)
 
     def step(self):
+        """Advance one outer iteration or Krylov restart cycle using existing device state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         for j in range(self.keep - 1):
             self.op.apply_complex(self.views[j], self.zviews[j])
         for j in range(self.keep, self.m):
@@ -569,6 +629,11 @@ class GeneralEigensolver:
             self._checkpoint = GeneralCheckpoint(self)
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         values, order = self.ritz, self.order
         if self._checkpoint_enabled:
             values, order = self._checkpoint.restore(self)
@@ -609,6 +674,16 @@ class GeneralEigensolver:
             )
 
     def solve(self, iterations=20):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         iterations = integer_index(iterations)
         if iterations < 1:
             raise ValueError("General iteration needs at least one restart cycle")
@@ -622,6 +697,22 @@ class GeneralEigensolver:
         return self
 
     def capture(self, max_iterations=100, adaptive=None, finalizer=None):
+        """Prepare and record a reusable CUDA solve graph outside any active capture.
+
+        Args:
+            max_iterations: Positive maximum number of outer iterations/restart cycles recorded
+                in the graph.
+            adaptive: None selects the supported policy; True requests a device-controlled outer
+                loop; False records a fixed budget. True is rejected if any participating
+                operator requires static capture.
+            finalizer: Optional zero-argument callable recording preallocated device
+                postprocessing after the solve. Called during warmup and recording, not as a
+                Python replay callback.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
+        """
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")

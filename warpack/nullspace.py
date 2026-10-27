@@ -170,6 +170,42 @@ class NumericalNullspaceDiagnostics:
     no numerical host readback. Changed vector/operator values are recomputed
     on replay. Replacing buffers or changing scalar configuration needs a new
     diagnostic/capture. Do not share its scratch across concurrent streams.
+
+    Classification codes: 0 near zero, 1 positive guard, 2 ambiguous,
+    3 unconverged, 4 invalid data, 5 negative spectrum, 6 weak positive inside
+    the zero band. Flag constants are bit masks and may be combined.
+
+    Args:
+        operator: Real symmetric PSD operator.
+        vectors: Borrowed FP64 device rows (capacity, n), mass-orthonormal.
+        mass: Optional SPD real metric operator; None means identity.
+        mass_lower_bound: Positive lower spectral bound on M, as a scalar or FP64 device array
+            (1,). Required with a nonidentity mass; identity defaults to one.
+        zero_threshold: Nonnegative near-zero spectral band in eigenvalue units.
+        positive_threshold: Positive guard threshold greater than zero_threshold, in eigenvalue
+            units.
+        residual_tolerance: Positive normalized original-pencil residual tolerance.
+        orthogonality_tolerance: Positive entrywise mass-Gram tolerance, less than 1/capacity.
+        expected_nullity: Optional externally known nonnegative nullity for consistency
+            checking; not a computed certificate.
+
+    Attributes:
+        values: FP64 device array (capacity,), Rayleigh values.
+        residuals: FP64 device array (capacity,), physical residuals.
+        error_bounds: FP64 device array (capacity,), residual-based eigenvalue distance
+            estimates.
+        classification: int32 device array (capacity,), per-row classification.
+        numerical_count: int32 device array (1,), returned intervals wholly inside the zero
+            band.
+        ambiguous_count: int32 device array (1,), unclassified/unconverged/invalid rows.
+        weak_positive_count: int32 device array (1,), positive intervals inside the zero band.
+        positive_guard: FP64 device array (1,), smallest lower endpoint above the positive
+            threshold.
+        flags: int32 device array (1,), diagnostic bitmask; COMPLETENESS_UNVERIFIED is always
+            set.
+        suggested_capacity: int32 device array (1,), capacity hint only; never reallocates or
+            solves.
+        orthogonality_error: FP64 device array (1,), entrywise mass-Gram error.
     """
 
     COMPLETENESS_UNVERIFIED = 1
@@ -271,6 +307,11 @@ class NumericalNullspaceDiagnostics:
         ]
 
     def run(self):
+        """Evaluate current inputs and update device diagnostics; graph capturable.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         for x, ax, mx in self.views:
             self.operator.apply(x, ax)
             if self.mass is None:

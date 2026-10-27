@@ -106,6 +106,33 @@ class GeneralizedKrylovSchur(KrylovSchur):
     Default capture uses a fixed outer budget if the original operator, mass,
     or inverse advertises ``requires_static_outer_capture``. Explicit adaptive
     capture rejects such compositions before warmup or graph construction.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+        mass: SPD mass/metric operator on the same device and dimension as operator.
+        inverse: One-RHS inverse of A-target*M in shift-invert/cayley mode, or of M in regular
+            mode. Caller owns factors and updates.
+        k: Number of requested eigenpairs (positive integer).
+        ncv: Maximum basis dimension. None uses min(n, max(2*k, k+8)); require k < ncv <= n
+            after clipping.
+        tol: Positive tolerance for ||A*x-lambda*M*x|| / max(1, ||A*x||+abs(lambda)*||M*x||);
+            use B for the buckling metric. Residual convergence alone does not certify spectrum
+            completeness.
+        target: Real shift. Must match the supplied inverse; ignored for regular mode and
+            nonzero for cayley.
+        mode: One of shift-invert, regular, or cayley.
+        which: LM only in transformed modes; LM, LA, or SA in regular mode.
+        initial_vector: Optional finite nonzero FP64 device array of shape (n,). Read on each
+            initialization; not modified.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(
@@ -222,6 +249,14 @@ class GeneralizedKrylovSchur(KrylovSchur):
         self._orthogonalize_column(j, False)
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.recoveries.zero_()
         self.g.zero_()
         self.status.zero_()
@@ -252,6 +287,11 @@ class GeneralizedKrylovSchur(KrylovSchur):
         )
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.copy(self.eigenvectors, self.retained, count=self.k * self.n)
         self.original.apply(self.eigenvectors, self.ax)
         self.mass.apply(self.eigenvectors, self.bx)

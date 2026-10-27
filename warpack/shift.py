@@ -163,6 +163,22 @@ class ComplexShiftInverse:
     ``inner_restart`` optionally sets the realified GMRES Krylov width, clipped
     to ``2*n``. The default remains ``min(2*n,64)``. Increasing it can resolve
     restart stagnation but increases device workspace; it applies only to GMRES.
+
+    Args:
+        operator: ComplexCSR with explicit square complex sparse storage.
+        sigma: Finite real or complex shift; forms A-sigma*I internally.
+        backend: cudss for direct solves, or gmres for pure-Warp iterative solves.
+        inner_tol: Relative inner linear-solve tolerance; choose more strictly than the desired
+            outer accuracy. Used by gmres.
+        inner_maxiter: Inner GMRES iteration budget; used only by gmres.
+        inner_restart: Optional positive GMRES restart dimension, clipped to 2*n. None uses
+            min(2*n, 64); only valid with backend=gmres.
+
+    Attributes:
+        complex_n: Complex system size.
+        n: Realified system size 2*n.
+        device: Operator device.
+        inverse: Owned real sparse inverse backend; GMRES diagnostics are available here.
     """
 
     requires_static_outer_capture = True
@@ -283,7 +299,18 @@ class ComplexShiftInverse:
             )
 
     def apply(self, x, y):
-        """Apply to realified row vectors, as used by Hermitian Krylov."""
+        """Apply to realified row vectors, as used by Hermitian Krylov.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Realified inputs use FP64 rows (width, 2*complex_n): real components first, then imaginary components.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self._refresh()
         for j in range(x.shape[0]):
             wp.copy(self.rhs, x[j : j + 1])
@@ -291,6 +318,18 @@ class ComplexShiftInverse:
             wp.copy(y[j : j + 1], self.solution)
 
     def apply_complex(self, x, y):
+        """Apply the complex operator to wp.vec2d device rows.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Inputs and outputs use wp.vec2d rows (width, complex_n) on the operator device. Use distinct buffers.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self._refresh()
         for j in range(x.shape[0]):
             wp.launch(
@@ -308,6 +347,11 @@ class ComplexShiftInverse:
             )
 
     def close(self):
+        """Release owned resources after execution completes and external graph references are discarded.
+
+        Returns:
+            None. Do not replay graphs using released resources.
+        """
         if self.backend == "cudss":
             self.inverse.close()
 
@@ -348,6 +392,37 @@ class ShiftInvertEigensolver:
     This setting does not affect the Hermitian path.
     As with the direct Hermitian API, zero/nonfinite starts set ``status=1``;
     outputs must not be used unless ``status`` is zero.
+
+    Args:
+        operator: ComplexCSR containing A, including for real problems (zero imaginary
+            components).
+        k: Number of requested eigenpairs (positive integer).
+        sigma: Finite real or complex shift; returns modes nearest sigma.
+        ncv: Complex search dimension. The Hermitian path doubles this internally, unlike
+            HermitianEigensolver.ncv.
+        backend: cudss or gmres; this wrapper constructs and owns the shifted inverse.
+        tol: Positive tolerance for the original complex residual ||A*x-lambda*x|| / max(1,
+            abs(lambda)).
+        inner_tol: Relative inner linear-solve tolerance; choose more strictly than the desired
+            outer accuracy. Used by gmres.
+        inner_maxiter: Inner GMRES iteration budget; used only by gmres.
+        hermitian: Assert Hermitian symmetry and use the realified symmetric path; sigma must be
+            real.
+        initial_vector: Optional finite nonzero wp.vec2d device array of shape (n,). Read on
+            each initialization; not modified.
+        preserve_converged: Preserve complete converged sets for fixed general solves; unused by
+            the Hermitian path.
+        inner_restart: Optional GMRES restart dimension, clipped to 2*n; only valid with
+            backend=gmres.
+
+    Attributes:
+        eigenvalues: wp.vec2d device array (k,) of complex eigenvalues.
+        eigenvectors: wp.vec2d device array (k, n) of unit-norm right eigenvectors; generally
+            not orthogonal.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
     """
 
     def __init__(
@@ -427,6 +502,11 @@ class ShiftInvertEigensolver:
             )
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if self.hermitian:
             self.core.finalize()
         wp.launch(
@@ -471,16 +551,41 @@ class ShiftInvertEigensolver:
             self.core._check_start(self.converged)
 
     def solve(self, iterations=10):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         (self.core.real if self.hermitian else self.core).solve(iterations)
         self.finalize()
         return self
 
     def capture(self, iterations=10):
+        """Prepare and record a reusable CUDA solve graph outside any active capture.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
+        """
         core = self.core.real if self.hermitian else self.core
         self.graph = core.capture(iterations, adaptive=False, finalizer=self.finalize)
         return self.graph
 
     def close(self):
+        """Release owned resources after execution completes and external graph references are discarded.
+
+        Returns:
+            None. Do not replay graphs using released resources.
+        """
         self.graph = self.core.graph = None
         if self.hermitian:
             self.core.real.graph = None

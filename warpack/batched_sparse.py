@@ -97,9 +97,33 @@ class BatchedSparseOperator(SparseOperator):
     (width, n) arrays; strided views are supported. Shifted/signed operators
     use the base product.
     Sparse topology remains fixed during graph replay; values may be updated.
+
+    Args:
+        matrix: Compressed square FP64 Warp BsrMatrix (scalar CSR or 3x3 BSR), on the solver
+            device.
+        shift: Add shift*x to each output row; this is an additive diagonal shift, not the
+            shift-invert sigma convention.
+        sign: Multiply the matrix product by this real scalar: y = sign*A*x + shift*x.
+
+    Attributes:
+        n: Scalar matrix dimension.
+        device: Warp device inferred from matrix.
+        matrix: Borrowed Warp sparse matrix; maintain its storage lifetime.
     """
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        x and y are FP64 arrays of shape (width, n). Strided views are supported; their storage must not overlap.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         fp64_rows(x, y, self.n, self.device)
         a = self.matrix
         if a.values.dtype == wp.float64 and self.shift == 0 and self.sign == 1:

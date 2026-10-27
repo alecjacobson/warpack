@@ -1,5 +1,7 @@
 # Installation
 
+[Documentation](index.md) · [API reference](api/README.md)
+
 [Back to README](../README.md)
 
 warpack requires Python >=3.10, Warp >=1.15 and an NVIDIA CUDA GPU. Conditional
