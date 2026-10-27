@@ -15,10 +15,16 @@ def assert_native_matching(inverse, expected):
 
     value, size = ct.c_int(-1), ct.c_size_t()
     solver = inverse.solver
-    _check(solver._lib.cudssConfigGet(
-        solver._config, CUDSS_CONFIG_MATCHING_ALG, ct.byref(value),
-        ct.sizeof(value), ct.byref(size),
-    ), "cudssConfigGet(MATCHING_ALG)")
+    _check(
+        solver._lib.cudssConfigGet(
+            solver._config,
+            CUDSS_CONFIG_MATCHING_ALG,
+            ct.byref(value),
+            ct.sizeof(value),
+            ct.byref(size),
+        ),
+        "cudssConfigGet(MATCHING_ALG)",
+    )
     assert size.value == ct.sizeof(value)
     assert value.value == expected
 
@@ -47,8 +53,12 @@ def test_native_matching_and_changed_rhs_graph(mtype, matching, width):
             out.fill_(float("nan"))
             wp.capture_launch(captured.graph)
             result = out.numpy()
-            np.testing.assert_allclose(result, np.linalg.solve(a, values.T).T, rtol=1e-11, atol=1e-12)
-            residual = np.linalg.norm(result @ a.T - values, axis=1) / np.linalg.norm(values, axis=1)
+            np.testing.assert_allclose(
+                result, np.linalg.solve(a, values.T).T, rtol=1e-11, atol=1e-12
+            )
+            residual = np.linalg.norm(result @ a.T - values, axis=1) / np.linalg.norm(
+                values, axis=1
+            )
             assert residual.max() < 1e-12
             np.testing.assert_array_equal(rhs.numpy(), values)
     finally:
@@ -68,6 +78,8 @@ def test_native_matching_disabled_for_symmetric_indefinite_eager_solve():
         rhs = wp.array(values, dtype=wp.float64, device="cuda:0")
         out = wp.empty_like(rhs)
         inverse.apply(rhs, out)
-        np.testing.assert_allclose(out.numpy(), np.linalg.solve(a, values.T).T, rtol=1e-11, atol=1e-12)
+        np.testing.assert_allclose(
+            out.numpy(), np.linalg.solve(a, values.T).T, rtol=1e-11, atol=1e-12
+        )
     finally:
         inverse.close()

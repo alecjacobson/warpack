@@ -23,9 +23,17 @@ class NativeResources:
         def call(*args):
             self.calls.append(name)
             fail = (
-                (self.failure == "destroy" and name == "cudssDataDestroy" and self.calls.count(name) == 1)
+                (
+                    self.failure == "destroy"
+                    and name == "cudssDataDestroy"
+                    and self.calls.count(name) == 1
+                )
                 or (self.failure == "handler" and name == "cudssSetDeviceMemHandler")
-                or (self.failure == "create" and name == "cudssDataCreate" and self.calls.count(name) == 2)
+                or (
+                    self.failure == "create"
+                    and name == "cudssDataCreate"
+                    and self.calls.count(name) == 2
+                )
             )
             if name in ("cudssCreate", "cudssConfigCreate", "cudssDataCreate"):
                 if not fail or self.partial:
@@ -46,6 +54,7 @@ class NativeResources:
                     assert self.handler.device_free(None, None, 0, 1) == 0
                     self.callback_checks += 1
             return 4 if fail or (self.cleanup_error and name == "cudssConfigDestroy") else 0
+
         return call
 
 
@@ -62,7 +71,11 @@ def test_workspace_construction_failure_unwinds_all_owners(
     monkeypatch.setattr(implementation.wp, "get_device", lambda _: SimpleNamespace(is_cuda=True))
     monkeypatch.setattr(implementation.wp, "get_stream", lambda _: SimpleNamespace(cuda_stream=1))
     solver = implementation.CudssSolver()
-    message = {"destroy": "cudssDataDestroy", "handler": "allocator setup", "create": "cudssDataCreate"}[failure]
+    message = {
+        "destroy": "cudssDataDestroy",
+        "handler": "allocator setup",
+        "create": "cudssDataCreate",
+    }[failure]
     with pytest.raises(RuntimeError, match=message):
         memory.Workspace(solver)
     assert solver._closed

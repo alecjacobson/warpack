@@ -16,7 +16,15 @@ from pathlib import Path
 
 class RejectNonCore(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path, target=None):
-        if fullname.split(".")[0] in {"benchmarks", "examples", "tests", "scripts", "cupy", "scipy", "warp_cudss"}:
+        if fullname.split(".")[0] in {
+            "benchmarks",
+            "examples",
+            "tests",
+            "scripts",
+            "cupy",
+            "scipy",
+            "warp_cudss",
+        }:
             raise ImportError(f"Release smoke forbids non-core import: {fullname}")
         return None
 
