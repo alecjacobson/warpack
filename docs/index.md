@@ -46,3 +46,9 @@ a source checkout; add `--cudss` to exercise the direct inverse backend.
 contributor workflows. [Recorded validation](../results/library_review/README.md)
 and [historical experiments](../historical/README.md) retain measurements and
 implementation history separately from the user-facing API.
+
+## Design proposals
+
+[Integrating sparse eigensolvers into warp.optim](design/warp_optim_integration.md)
+proposes an upstream API, execution contracts and staged migration. It describes
+future interfaces, not the current Warp or warpack API.
