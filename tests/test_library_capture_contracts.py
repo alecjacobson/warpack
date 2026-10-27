@@ -56,22 +56,29 @@ def test_eager_integer_budget_replaces_replay_count(kind):
 
 
 @pytest.mark.parametrize("kind", ["symmetric", "krylov", "block", "general"])
-def test_nested_standalone_capture_rejected_without_poisoning_outer(kind, monkeypatch):
+@pytest.mark.parametrize("other_stream", [False, True])
+def test_nested_standalone_capture_rejected_without_poisoning_outer(
+    kind, other_stream, monkeypatch
+):
     solver = make_solver(kind)
     solver.solve(1)
     source = wp.array([7.0], dtype=wp.float64)
     output = wp.zeros_like(source)
+    stream = wp.Stream(solver.device) if other_stream else wp.get_stream(solver.device)
     wp.synchronize_device(solver.device)
 
     def forbidden(*args, **kwargs):
         raise AssertionError("nested capture reached warmup")
 
     monkeypatch.setattr(solver, "initialize", forbidden)
-    with wp.ScopedCapture(device=solver.device) as capture:
+    with wp.ScopedCapture(stream=stream) as capture:
         with pytest.raises(RuntimeError, match="already capturing"):
             solver.capture(2)
-        wp.copy(output, source)
-    for value in [9.0, 13.0]:
-        source.fill_(value)
-        wp.capture_launch(capture.graph)
-        np.testing.assert_array_equal(output.numpy(), [value])
+        wp.copy(output, source, stream=stream)
+    wp.capture_launch(capture.graph, stream=stream)
+    wp.synchronize_stream(stream)
+    with wp.ScopedStream(stream):
+        for value in [9.0, 13.0]:
+            source.fill_(value)
+            wp.capture_launch(capture.graph)
+            np.testing.assert_array_equal(output.numpy(), [value])

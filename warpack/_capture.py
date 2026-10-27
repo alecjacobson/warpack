@@ -14,9 +14,11 @@ def require_capture_setup(device):
     device = wp.get_device(device)
     if not device.is_cuda:
         raise ValueError("graph capture requires a CUDA device")
-    if wp.get_stream(device).is_capturing:
+    # Standalone setup synchronizes the device, so a Warp capture on another
+    # stream must also be rejected before warmup mutates solver state.
+    if device.is_capturing:
         raise RuntimeError(
-            "stream is already capturing; record solve() or initialize()/step()/finalize() "
+            "device is already capturing; record solve() or initialize()/step()/finalize() "
             "in the existing capture instead of calling capture()"
         )
 
