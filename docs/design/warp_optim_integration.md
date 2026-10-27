@@ -7,8 +7,9 @@
 ## Recommendation
 
 Add `warp.optim.eigen`, initially for real symmetric standard and generalized
-partial eigenproblems. Provide a small frontend, reusable solver state, and
-device-resident results. Reuse Warp's sparse matrices, linear operators, CG,
+partial eigenproblems. Expose `KrylovSchur` and `LOBPCG` as public reusable
+solver states, with matching `krylov_schur` and `lobpcg` convenience functions
+and device-resident results. Reuse Warp's sparse matrices, linear operators, CG,
 GMRES and preconditioners. Keep all eigensolver arithmetic in Warp; allow an
 optional cuDSS provider for sparse factorization and solves.
 
@@ -47,8 +48,8 @@ information without a host readback.
 | Largest generalized modes | Symmetric $K$, SPD $M$ | First stage: metric Krylov–Schur with supplied mass solve |
 | Equality-constrained physical modes, including skinning formulations | Symmetric physical Hessian, SPD physical mass, independent constraint rows; augmented mass singular | Follow-up: dedicated constrained frontend with KKT solve |
 | Connection or conformal operators with complex coefficients | Hermitian or general complex operator, possibly a generalized pencil | Follow-up after complex storage and result contracts are agreed |
-| Damped dynamics and other general pencils | Nonsymmetric $A,B$; regular pencil, possibly singular $B$ | Follow-up `eigs`; finite right eigenpairs, explicit selection and failure policy |
-| Snapshot/POD compression | Rectangular matrix; singular triplets | Follow-up `svds`, requiring forward and adjoint operator actions |
+| Damped dynamics and other general pencils | Nonsymmetric $A,B$; regular pencil, possibly singular $B$ | Follow-up general eigensolver state; finite right eigenpairs, explicit selection and failure policy |
+| Snapshot/POD compression | Rectangular matrix; singular triplets | Follow-up partial SVD state, requiring forward and adjoint operator actions |
 
 Smallest algebraic (`SA`) and smallest magnitude (`SM`) are different requests.
 They coincide for a positive semidefinite operator, but not for an indefinite
@@ -79,53 +80,113 @@ should be implementation policy. The fast Anvil configuration must remain
 reproducible through documented solver and preconditioner settings, with the
 necessary optimized dispatch covered by regression tests.
 
-The Warp API audit for this proposal uses upstream revision
-[`0c1ed78f`](https://github.com/NVIDIA/warp/tree/0c1ed78f7b4ee397534e5bd1cea632af618d900f).
-Its [linear module](https://github.com/NVIDIA/warp/blob/0c1ed78f7b4ee397534e5bd1cea632af618d900f/warp/_src/optim/linear.py)
-provides `LinearOperator`, `aslinearoperator`, preallocated iterative solver
-states, and `run=False` construction. The proposal follows those concepts;
-the eigenproblem-specific contracts below are new.
+## Alignment with Warp conventions
+
+The API audit uses upstream revision
+[`0c1ed78f`](https://github.com/NVIDIA/warp/tree/0c1ed78f7b4ee397534e5bd1cea632af618d900f),
+checked on 2026-10-27. Its public
+[`warp.optim.linear` exports](https://github.com/NVIDIA/warp/blob/0c1ed78f7b4ee397534e5bd1cea632af618d900f/warp/optim/linear.py#L10-L21)
+include algorithm-specific state classes **and** matching convenience functions.
+The nonconstructible `LinearSolverState` supplies their shared interface. Each
+function constructs its corresponding class, returning the state for
+`run=False` or invoking it for `run=True`. Instances execute through `__call__`.
+See the [state and CG implementation](https://github.com/NVIDIA/warp/blob/0c1ed78f7b4ee397534e5bd1cea632af618d900f/warp/_src/optim/linear.py#L1280-L1680).
+
+| Existing Warp API | Proposed eigen counterpart |
+|---|---|
+| `CG`, `CR`, `BiCGSTAB`, `GMRES` | Public `KrylovSchur`, `LOBPCG` states |
+| `cg`, `cr`, `bicgstab`, `gmres` | `krylov_schur`, `lobpcg` convenience functions |
+| Nonconstructible `LinearSolverState` | Nonconstructible `EigenSolverState` sharing lifecycle and result contracts |
+| `cg(..., run=False)` returns a `CG` | `lobpcg(..., run=False)` returns a `LOBPCG` |
+| Calling a preallocated state runs it | `result = solver()` executes a prepared eigen state |
+
+Warp also publicly exposes algorithm-specific
+[`Adam` and `SGD`](https://github.com/NVIDIA/warp/blob/0c1ed78f7b4ee397534e5bd1cea632af618d900f/warp/optim/__init__.py#L23-L26).
+These are evidence of current practice, not a written prohibition on generic
+frontends. The recommendation follows the closest existing subsystem: iterative
+linear solvers.
+
+**Revised decision:** expose the algorithms themselves. The earlier draft's
+`eigsh(method=...)` and constructible generic `EigenSolver` would have hidden
+public algorithm choices behind a dispatch layer. That is a weaker match for
+Warp and combines incompatible options in one signature: `ncv` versus block
+width, shifted inverse versus correction preconditioner, and a single starting
+vector versus a starting subspace. A small public API need not hide the algorithm.
+
+Do not add `eigsh` to the initial contribution. If users later need a SciPy-style
+adapter, layer it over the public states with documented dispatch and no separate
+implementation. It must not become the sole way to select or reuse an algorithm.
+The shared `EigenResult`, explicit `prepare()` step and device-only result default
+remain new eigen-specific proposals; they are not claimed to be existing Warp
+standards. Linear solvers instead accept the solution array from the caller and
+can return host or device diagnostics according to `check_every`. Review output
+ownership and capture preparation explicitly rather than copying that API only
+in name.
 
 ## Proposed frontend
 
 ### Entry points
 
-Initially export `eigsh`, `EigenSolver` and `EigenResult` from
-`warp.optim.eigen`. `EigenSolver` is the reusable state; `eigsh` constructs it
-and optionally runs it. Both use the same keyword contract:
+Initially export `KrylovSchur`, `LOBPCG`, `krylov_schur`, `lobpcg`,
+`EigenSolverState` and `EigenResult` from `warp.optim.eigen`. Concrete states
+are directly constructible; `EigenSolverState` is a common base, not a dispatcher.
+The convenience functions have these proposed signatures:
 
 ```python
-# Proposed signature, not an implementation.
-def eigsh(
-    A, k, *, M=None, which="LM", sigma=None,
-    OPinv=None, Minv=None, preconditioner=None,
-    X0=None, deflation=None, method="krylov-schur",
-    ncv=None, block_size=None, tol=None, atol=0.0,
+# Proposed signatures, not implementations.
+def krylov_schur(
+    A, k, *, mass=None, which="LM", sigma=None,
+    inverse=None, mass_inverse=None, initial_vector=None,
+    ncv=None, tol=None, atol=0.0, maxiter=100, run=True,
+): ...
+
+
+def lobpcg(
+    A, k, *, mass=None, preconditioner=None, initial_vectors=None,
+    deflation=None, block_size=None, tol=None, atol=0.0,
     maxiter=100, run=True,
 ): ...
 ```
 
-`EigenSolver(...)` has the same construction arguments except `run`, and does
-not run automatically. `eigsh(..., run=False)` returns that state;
-`eigsh(..., run=True)` prepares and solves, then returns `EigenResult` holding
-the storage owner alive. Neither path returns NumPy arrays or reads convergence
-to the host. This deliberately gives eigenproblems one structured result rather
-than reproducing every return variant of the linear solver API.
+`KrylovSchur(...)` and `LOBPCG(...)` have the arguments of their corresponding
+functions except `run`, and do not run automatically. For either function,
+`run=False` returns its concrete state; `run=True` constructs, prepares and calls
+that state, returning `EigenResult` with a reference that keeps storage alive.
+`solver()` returns the same result view exposed as `solver.result`. It does not
+allocate a new result on each invocation or read convergence to the host.
 
-| Argument | Contract |
+The public `KrylovSchur` covers both standard symmetric and SPD generalized
+problems, retaining the mass inner product when supplied. Its kernels and
+specialized workspaces may remain separate internally. `LOBPCG` is the block
+algorithm; no separate `BlockLOBPCG` alias is needed upstream. Neither class
+silently switches to the other algorithm.
+
+| Shared argument | Contract |
 |---|---|
-| `A`, `M` | Warp sparse matrix, supported Warp array, or `linear.LinearOperator`; `M=None` means identity. Both square with matching scalar dimensions, device and supported precision. Symmetry and SPD mass are mathematical preconditions. |
+| `A`, `mass` | Warp sparse matrix, supported Warp array, or `linear.LinearOperator`; `mass=None` means identity. Both square with matching scalar dimensions, device and supported precision. Symmetry and SPD mass are mathematical preconditions. Use `mass` to avoid confusing it with the preconditioner named `M` in Warp's linear solvers. |
 | `k` | Number of requested eigenpairs, `0 < k < n`. No implicit dense fallback for `k == n`. |
-| `method` | Explicit `"krylov-schur"` or `"lobpcg"`. No timing-based autotuning or silent algorithm changes. |
-| `which` | Without a shift, Krylov–Schur supports standard `LM`, `SM`, `LA`, `SA`, `BE`; generalized regular mode initially `LM`, `LA`, `SA`. LOBPCG initially accepts `SA` only. Unsupported combinations raise during setup. |
-| `sigma`, `OPinv` | A real shift and an action approximating $(A-\sigma M)^{-1}$. Both supplied together, Krylov–Schur only. Initially require `which="LM"`, meaning largest transformed magnitude, hence nearest physical eigenvalues to `sigma`. The inverse applies only the solve; the eigensolver applies `M`. |
-| `Minv` | Required for generalized regular Krylov–Schur when `M` is supplied, absent for LOBPCG and shift-invert. Applies $M^{-1}$. The algorithm retains the mass inner product. |
-| `preconditioner` | LOBPCG correction action, distinct from `OPinv`. May be an SPD approximate inverse or a documented inexact block solve. It need not equal $(A-\sigma M)^{-1}$. |
-| `X0` | Optional starting rows, copied into private workspace on each solve. One row for initial Krylov support, up to `block_size` independent rows for LOBPCG. Missing starts use a deterministic device generator. |
-| `deflation` | LOBPCG-only known invariant subspace, such as rigid modes. Copied and mass-orthonormalized into private storage; rank failure is reported. Arbitrary equality constraints are a different problem. |
-| `ncv`, `block_size` | Krylov search dimension (`k < ncv <= n`, default `min(n, max(2*k, k+8))`) or LOBPCG working block width (`k <= block_size`, `3*block_size <= n`, default `k`). Reject the parameter for the other method. |
 | `tol`, `atol` | Relative and absolute original-equation residual tolerances, defined below. FP64 default `tol=1e-8`, `atol=0`. These are proposed defaults, not a change to existing warpack defaults. |
-| `maxiter` | Fixed upper bound on outer iterations per solve; a restart cycle for Krylov–Schur, a block update for LOBPCG. Inner solve budgets belong to the inverse/preconditioner state. |
+| `maxiter` | Fixed upper bound on outer iterations per call; a restart cycle for Krylov–Schur, a block update for LOBPCG. Inner solve budgets belong to the inverse/preconditioner state. |
+
+| KrylovSchur argument | Contract |
+|---|---|
+| `which` | Without a shift, standard problems support `LM`, `SM`, `LA`, `SA`, `BE`; generalized regular mode initially supports `LM`, `LA`, `SA`. Unsupported combinations raise during setup. |
+| `sigma`, `inverse` | A real shift and an action approximating $(A-\sigma M)^{-1}$. Both supplied together. Initially require `which="LM"`, meaning largest transformed magnitude, hence nearest physical eigenvalues to `sigma`. The inverse applies only the solve; the eigensolver applies the mass matrix. |
+| `mass_inverse` | Required for generalized regular mode when `mass` is supplied; absent for shift-invert. Applies $M^{-1}$. The algorithm retains the mass inner product. |
+| `initial_vector` | Optional starting vector, a scalar array of shape `(n,)`, copied into private workspace on each call. The initial implementation accepts one start, not a block. If absent, use a deterministic device generator. |
+| `ncv` | Search dimension, `k < ncv <= n`; default `min(n, max(2*k, k+8))`. |
+
+| LOBPCG argument | Contract |
+|---|---|
+| `preconditioner` | Correction action, distinct from a shifted inverse. May be an SPD approximate inverse or a documented inexact block solve. It need not equal $(A-\sigma M)^{-1}$. |
+| `initial_vectors` | Optional independent starting rows, up to `block_size`, copied into private workspace on each call. Missing rows use a deterministic device generator. |
+| `deflation` | Known invariant subspace, such as rigid modes. Copied and mass-orthonormalized into private storage; rank failure is reported. Arbitrary equality constraints are a different problem. |
+| `block_size` | Working block width, `k <= block_size`, `3*block_size <= n`; default `k`. |
+
+Initially `LOBPCG` computes smallest algebraic modes only. Its signature does not
+accept `which`, `sigma`, `inverse`, `mass_inverse` or `ncv`; those are not ignored
+options. Largest-mode support can later add an explicit selection parameter with
+its own tests. In both algorithm contracts, mathematical $M$ denotes `mass`.
 
 Validate metadata and incompatible arguments before launching or altering state.
 Report numerical failures on the device. Do not synchronously scan a matrix to
@@ -146,15 +207,15 @@ eigensolver's output order.
 import warp as wp
 from warp.optim import eigen
 
-solver = eigen.eigsh(
-    K, k=20, M=M, which="SA", method="lobpcg",
-    block_size=24, preconditioner=P, X0=initial_modes,
-    deflation=rigid_modes, tol=1e-8, maxiter=200, run=False,
+solver = eigen.LOBPCG(
+    K, k=20, mass=M,
+    block_size=24, preconditioner=P, initial_vectors=initial_modes,
+    deflation=rigid_modes, tol=1e-8, maxiter=200,
 )
 solver.prepare()  # Allocation, compilation and warmup happen outside capture.
 
 with wp.ScopedCapture(device=K.device) as capture:
-    solver.solve()
+    solver()
 
 wp.capture_launch(capture.graph)
 values = solver.result.eigenvalues      # device array (20,)
@@ -173,14 +234,12 @@ than adding a second CG or FSAI implementation in the eigen module.
 # Assemble S and prepare its factorization or iterative state before this call.
 from warp.optim import eigen
 
-solver = eigen.eigsh(
-    K, k=20, M=M, sigma=sigma, OPinv=shifted_solve,
-    which="LM", method="krylov-schur", ncv=48,
-    tol=1e-9, maxiter=100, run=False,
+solver = eigen.KrylovSchur(
+    K, k=20, mass=M, sigma=sigma, inverse=shifted_solve,
+    which="LM", ncv=48, tol=1e-9, maxiter=100,
 )
 solver.prepare()
-solver.solve()
-result = solver.result
+result = solver()
 ```
 
 The same call accepts a cuDSS solve adapter or a Warp iterative solve adapter.
@@ -214,10 +273,11 @@ Represent the counters and status as `wp.int32` arrays of shape `(1,)` and the
 validity mask as `wp.bool` of shape `(k,)`. Expose host enum constants for device
 kernels to compare against; reading those constants does not read solver state.
 
-`solve()` resets state from `X0` and runs the configured budget, with an optional
-device-side early exit where supported. Warm starts are explicit copies into a
-separate `X0` buffer; they do not alias output workspace. The result is a view of
-state-owned buffers and is overwritten by the next solve. Retain state, graphs
+`solver()` resets state from the supplied `initial_vector` or `initial_vectors`
+and runs the configured budget, with an optional device-side early exit where
+supported. Warm starts are explicit copies into separate input storage; they do
+not alias output workspace. The result is a view of state-owned buffers and is
+overwritten by the next solve. Retain state, graphs
 and borrowed factors until all queued work completes. A state is not reentrant;
 concurrent solves require independent workspaces.
 
@@ -272,7 +332,7 @@ solver is captured. They are responsible for their mathematical properties.
 Construction allocates shape-dependent buffers. `prepare()` compiles and warms
 kernels, prepares internal child graphs and validates backend capabilities.
 Both may allocate and synchronize, and are forbidden inside active capture.
-Once prepared, `solve()` must record into the caller's capture without nested
+Once prepared, `solver()` must record into the caller's capture without nested
 standalone capture or allocation. There should be one internal preparation and
 capture policy shared by all eigen algorithms.
 
@@ -411,7 +471,7 @@ block operator improvements should be reusable outside eigenproblems.
 
 | Current warpack exports | Proposed destination |
 |---|---|
-| `KrylovSchur`, `GeneralizedKrylovSchur`, `BlockLOBPCG` | Algorithms behind `EigenSolver` |
+| `KrylovSchur`, `GeneralizedKrylovSchur`, `BlockLOBPCG` | Public `KrylovSchur` for standard/generalized problems and `LOBPCG` for the block method; common `EigenSolverState` and matching convenience functions |
 | `SymmetricEigensolver`, `GeneralizedEigensolver` | Retained warpack compatibility implementations; no new public upstream aliases |
 | `SparseOperator`, `BatchedSparseOperator` | Existing Warp operator interface plus private block adapters |
 | `CGInverse`, `GMRESInverse`, `BatchedCGPreconditioner` | Reusable adapters over upstream linear solver states; define their public home in a separate linear API review |
@@ -419,9 +479,9 @@ block operator improvements should be reusable outside eigenproblems.
 | `EigenpairEvaluation` | Common result finalization and explicit validation utilities |
 | `OrthogonalComplementOperator`, `MassOrthogonalComplementInverse` | Internal deflation machinery; expose reusable projection utilities only with an independent use case |
 | `ConstrainedKrylovSchur`, `independent_constraints`, `saddle_point_matrix` | Follow-up constrained API; generic constraint operations separated from application assembly |
-| `HermitianCSR`, `ComplexCSR`, `HermitianEigensolver`, `GeneralEigensolver`, `ComplexShiftInverse`, `ShiftInvertEigensolver`, `GeneralizedShiftInvertEigensolver` | Follow-up complex storage review, `eigsh` extension and `eigs` |
+| `HermitianCSR`, `ComplexCSR`, `HermitianEigensolver`, `GeneralEigensolver`, `ComplexShiftInverse`, `ShiftInvertEigensolver`, `GeneralizedShiftInvertEigensolver` | Follow-up complex storage review and explicit Hermitian/general solver states |
 | `BucklingEigensolver`, `CayleyEigensolver` | Follow-up explicit transformation policy with its own selection semantics |
-| `PartialSVD`, `NormalSVD` | Follow-up `svds`; normal-product conditioning tradeoff stays explicit |
+| `PartialSVD`, `NormalSVD` | Follow-up public partial SVD solver states; normal-product conditioning tradeoff stays explicit |
 | `NumericalNullspaceDiagnostics`, `LowestModeCertificate` | Optional diagnostic layer; distinguish supplied-span classification from completeness certification |
 
 Keep FEM, skinning energy assembly, mesh loading, rendering and application data
@@ -461,7 +521,7 @@ remaining benchmark migration is tracked in
 Keep upstream CuPy/Spectra suites as external compatibility evidence; unsupported
 tests remain classified rather than rewritten to pass. Known general selection
 failure [#104](https://github.com/alecjacobson/warpack/issues/104) gates a stable
-`eigs` contribution. Ill-scaled pencil recovery
+general eigensolver contribution. Ill-scaled pencil recovery
 [#123](https://github.com/alecjacobson/warpack/issues/123) constrains the advertised
 generalized support envelope. Do not make an upstream release depend on fixing
 unrelated bugs in competitor libraries; preserve those comparison failures.
@@ -486,7 +546,7 @@ faster across every size, method and matrix family.
 | Priority | Deliverable | Exit gate |
 |---|---|---|
 | P0 | Maintainer discussion and frontend contract | Agree namespace, state/results, row orientation, initial CUDA/FP64 scope, residual policy and optional backend boundary |
-| P0 | Core operator/state integration | Scalar operator fallback plus qualified block fast path; prepare/solve composition; device status; import and ownership tests |
+| P0 | Core operator/state integration | Scalar operator fallback plus qualified block fast path; prepare/call composition; device status; import and ownership tests |
 | P0 | Symmetric standard and SPD generalized algorithms | Krylov–Schur and LOBPCG migrated with fresh validation, accurate selection and matched performance |
 | P0 | Optional inverse adapters and fast preconditioning | Upstream CG/GMRES/FSAI reuse; cuDSS provider qualification; first-use and update lifecycle tests; reproduce the fast Anvil path |
 | P0 | Initial upstream documentation and release qualification | Executable examples, support matrix, CPU rejection or qualification, packaging/license audit, graph issue disposition and before/after benchmark report |
@@ -509,9 +569,10 @@ these contracts and a bounded initial implementation plan.
 1. **Namespace:** prefer `warp.optim.eigen` alongside `linear`. A later SVD API
    could share internals while using a separately agreed public name. Avoid a
    wholesale `warp.optim.warpack` namespace transplant.
-2. **State and results:** prefer `EigenSolver` plus `EigenResult`, with
-   `eigsh(..., run=False)` construction and device results by default. Confirm
-   whether Warp wants algorithm-specific public state classes instead.
+2. **State and results:** expose `KrylovSchur` and `LOBPCG` directly, with
+   matching functions and a shared nonconstructible `EigenSolverState`, following
+   Warp linear solver practice. Review the proposed `EigenResult` storage
+   ownership and device-only return policy separately; defer `eigsh` dispatch.
 3. **Block products:** prefer an optional common operator capability over a
    competing eigen-only operator hierarchy. Agree aliasing and transpose rules
    before extending `LinearOperator`.
