@@ -102,6 +102,34 @@ class CGInverse:
     when the upstream CG state preallocates loop control (tested on Warp 1.18).
     Older states, including stock Warp 1.15, reject the opt-in. The default
     preserves fixed outer capture for compatibility.
+
+    Args:
+        matrix: Compressed square FP64 Warp BsrMatrix (scalar CSR or 3x3 BSR), on the solver
+            device. It must be SPD.
+        tol: Relative inner linear-solve tolerance; choose more strictly than the desired outer
+            accuracy.
+        maxiter: Positive inner CG iteration budget per RHS.
+        preconditioner: None, an upstream Warp preconditioner name, or a prebuilt SPD Warp
+            linear operator/FSAI.
+        atol: Absolute inner tolerance. None preserves the upstream default (tol); 0.0 requests
+            relative-only stopping subject to the upstream numerical floor.
+        adaptive_capture: Opt into nested adaptive outer graphs; requires upstream preallocated
+            CG loop control.
+        verify_residuals: Recompute fresh original linear residuals and expose
+            fresh_stats/residual_maxima.
+        refinement_steps: Nonnegative fixed number of residual-correction solves; zero disables
+            correction.
+        refinement_tol: Relative CG tolerance for each correction, with zero absolute tolerance.
+
+    Attributes:
+        stats: int32 device counters (4,): total iterations, maximum iterations per RHS,
+            unconverged RHSs, RHS calls.
+        fresh_stats: Same layout using fresh residual checks, or None when
+            verify_residuals=False.
+        residual_maxima: FP64 device array (2,): maximum fresh absolute/relative residuals, or
+            None without auditing.
+        initial_stats: Native initial-solve counters, or None without refinement.
+        refinement_stats: Native correction-solve counters, or None without refinement.
     """
 
     requires_static_outer_capture = True
@@ -192,6 +220,11 @@ class CGInverse:
             self.refinement_stats = wp.zeros_like(self._refinement_stage)
 
     def reset_stats(self):
+        """Reset cumulative device counters before the next measured solve; graph capturable.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.stats.zero_()
         if self.refinement_steps:
             self.initial_stats.zero_()
@@ -201,6 +234,16 @@ class CGInverse:
             self.residual_maxima.zero_()
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if (
             x.ndim != 2
             or x.shape != y.shape
@@ -425,6 +468,31 @@ class GeneralizedEigensolver(SymmetricEigensolver):
     ``orthogonalization_recoveries`` stay on device. This safeguard does not
     guarantee recovery of rank-deficient blocks; inspect ``status`` as well as
     physical residuals and the requested spectrum.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+        mass: SPD mass/metric operator on the same device and dimension as operator.
+        inverse: Block inverse of A-target*M, or A when target is None. Must accept ncv RHSs;
+            caller owns its factors.
+        k: Number of requested eigenpairs (positive integer).
+        ncv: Block dimension; None uses min(n, max(2*k, k+8)); require k <= ncv <= n.
+        tol: Positive tolerance for ||A*x-lambda*M*x|| / max(1, ||A*x||+abs(lambda)*||M*x||);
+            use B for the buckling metric. Residual convergence alone does not certify spectrum
+            completeness.
+        which: Selection: LM/SM (largest/smallest magnitude), LA/SA (largest/smallest
+            algebraic), or BE (both ends).
+        target: Optional real shift; nearest original eigenvalues are selected when supplied.
+        initial_vectors: Optional independent FP64 device rows of shape (s, n), 1 <= s <= ncv.
+            Missing rows are randomized.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(
@@ -459,6 +527,14 @@ class GeneralizedEigensolver(SymmetricEigensolver):
         self.orthogonalization_recoveries = wp.zeros(1, dtype=wp.int32, device=self.device)
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.orthogonalization_recoveries.zero_()
         super().initialize(seed)
 
@@ -496,12 +572,22 @@ class GeneralizedEigensolver(SymmetricEigensolver):
             finish_qr2()
 
     def step(self):
+        """Advance one outer iteration or Krylov restart cycle using existing device state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.mass.apply(self.q, self.bq)
         self.iter_op.apply(self.bq, self.z)
         wp.copy(self.q, self.z)
         self.orthogonalize()
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.op.apply(self.q, self.z)
         self.gram(self.q, self.z)
         self.diagonalize()

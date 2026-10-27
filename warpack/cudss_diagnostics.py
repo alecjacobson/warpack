@@ -8,11 +8,20 @@ import warp as wp
 
 @dataclass(frozen=True)
 class InertiaResult:
-    """Numerical inertia snapshot; ``available`` excludes suspect factorizations.
+    """Numerical inertia snapshot; ``status == "available"`` excludes suspect factors.
 
     Counts are positive then negative. Zero pivots can be perturbed by cuDSS,
     so no zero count is inferred. A nonzero pivot counter is conservatively
     inconclusive even if its returned inertia happens to be correct.
+
+    Args:
+        status: Host string: available, unavailable, or inconclusive. Only status == available
+            permits using counts as qualified inertia.
+        positive: Positive eigenvalue count, or None if unavailable.
+        negative: Negative eigenvalue count, or None if unavailable; no zero count is inferred.
+        info: Native factorization information code, or None.
+        pivots: Native perturbed/zero pivot counter, or None.
+        reason: Human-readable explanation for unavailable or inconclusive metadata.
     """
 
     status: str

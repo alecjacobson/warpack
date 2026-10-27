@@ -29,6 +29,11 @@ class OrthogonalComplementOperator:
 
     The wrapped operator must accept one RHS at a time. Instances own scratch
     and must not be applied concurrently on independent streams.
+
+    Args:
+        operator: Real one-RHS operator exposing n, device and apply.
+        basis: Borrowed FP64 device rows (q, n), Euclidean-orthonormal; typically a known
+            nullspace.
     """
 
     def __init__(self, operator, basis):
@@ -46,7 +51,11 @@ class OrthogonalComplementOperator:
         self.dots = wp.zeros((basis.shape[0], 1), dtype=wp.float64, device=self.device)
 
     def reset_history(self):
-        """Forward an optional inverse-history reset; numerical buffers stay on device."""
+        """Forward an optional inverse-history reset; numerical buffers stay on device.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if hasattr(self.operator, "reset_history"):
             self.operator.reset_history()
 
@@ -62,6 +71,16 @@ class OrthogonalComplementOperator:
         wp.launch(subtract_projection, self.n, [self.basis, self.dots, vector], device=self.device)
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         for j in range(x.shape[0]):
             wp.copy(self.rhs, x[j : j + 1])
             self._project(self.rhs)
@@ -142,6 +161,19 @@ class MassOrthogonalComplementInverse:
     Application supports multiple RHSs and exact in-place input/output aliasing;
     other overlapping views are unsupported. Buffers are preallocated and must
     not be used concurrently on different streams. The basis must remain live.
+
+    Args:
+        inverse: Borrowed one-RHS real inverse. The wrapper serializes multiple RHSs through it.
+        mass: SPD mass/metric operator on the same device and dimension as operator.
+        basis: Borrowed independent FP64 device rows (q, n). Must be mass-orthonormal unless
+            normalize=True.
+        basis_tolerance: Positive finite tolerance for entrywise mass-Gram error.
+        normalize: Normalize an owned copy using device CholeskyQR at construction and
+            refresh().
+
+    Attributes:
+        basis_status: int32 device array (1,): 0 valid, 1 invalid basis. Invalid application
+            produces NaNs.
     """
 
     def __init__(self, inverse, mass, basis, basis_tolerance=1e-10, normalize=False):
@@ -189,7 +221,11 @@ class MassOrthogonalComplementInverse:
         )
 
     def refresh(self):
-        """Refresh the metric basis and its status, including optional normalization."""
+        """Refresh the metric basis and its status, including optional normalization.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.basis_status.zero_()
         rank = self.basis.shape[0]
         if self.normalize:
@@ -215,6 +251,11 @@ class MassOrthogonalComplementInverse:
         )
 
     def reset_history(self):
+        """Reset any wrapped inverse history on device before a new solve.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if hasattr(self.inverse, "reset_history"):
             self.inverse.reset_history()
 
@@ -235,6 +276,16 @@ class MassOrthogonalComplementInverse:
         )
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if x.ndim != 2 or x.shape[1] != self.n or x.shape != y.shape:
             raise ValueError("RHS/output must have matching shape (count, n)")
         if x.dtype != wp.float64 or y.dtype != wp.float64:
@@ -338,6 +389,13 @@ def independent_constraints(rows, tolerance=1e-10):
     the CSR shape; all rank decisions and numerical linear algebra run on device. It
     is not graph capturable. Changed rows require rebuilding the constraints
     and KKT factors. Verify dropped directions against the original rows.
+
+    Args:
+        rows: FP64 device array (p, n) of dense constraint rows.
+        tolerance: Relative row-QR cutoff after scaling nonzero input rows to unit norm.
+
+    Returns:
+        A scalar FP64 Warp BsrMatrix with independent orthonormal rows spanning the retained constraints. Setup reads integer rank/validity metadata to allocate its shape; not graph capturable.
     """
     import math
 

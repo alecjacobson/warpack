@@ -296,6 +296,51 @@ class BlockLOBPCG:
     The product/rotation tuning switches are opt-in. Existing Krylov defaults
     are unaffected. All numerical work here is FP64 Warp; a supplied inverse
     may independently use upstream CG or optional cuDSS.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+        k: Number of requested eigenpairs (positive integer).
+        width: Block width; None means k. Require k <= width and 3*width <= n.
+        mass: SPD mass/metric operator on the same device and dimension as operator. None means
+            identity.
+        preconditioner: Optional SPD preconditioning action: real row operator or upstream FP64
+            Warp LinearOperator/FSAI. None means identity.
+        initial_vectors: Optional independent FP64 device rows (s, n), 1 <= s <= width. Missing
+            rows are randomized.
+        constraints: Optional FP64 device rows (q, n) spanning a known invariant space to
+            exclude. Require q+width <= n. Rows must be mass-orthonormal unless normalized
+            internally.
+        tol: Positive tolerance for ||A*x-lambda*M*x|| / max(1, ||A*x||+abs(lambda)*||M*x||);
+            use B for the buckling metric. Residual convergence alone does not certify spectrum
+            completeness.
+        rank_tol: Relative search-space rank threshold, strictly between zero and one.
+        gram_chunk: Positive multiple of 256 controlling tiled Gram reductions.
+        symmetric_products: Exploit symmetric projected products; opt-in product implementation.
+        fused_updates: Fuse selected basis updates; opt-in implementation.
+        paired_rotation: Use paired tiled Ritz rotations where supported; opt-in implementation.
+        normalize_constraints: Normalize a private copy of constraints in the current mass
+            metric during initialization.
+        initial_perturbation: Nonnegative relative random perturbation of supplied start rows;
+            zero disables it.
+        reuse_operator_images: Carry operator images through basis transformations to reduce
+            products.
+        search_bucket_size: Nonnegative search-width bucket size. Zero disables bucketing;
+            positive values require reuse_operator_images=True.
+        keep_history: Retain all history rows in the active search; False compacts history with
+            selected directions.
+        preconditioner_bucket_size: Nonnegative RHS bucket size for BatchedCGPreconditioner;
+            zero disables bucketing.
+        compact_projected_graphs: Record supported global projected solves in compact device-
+            loop graphs; trades setup cost against warm replay cost.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(
@@ -803,6 +848,14 @@ class BlockLOBPCG:
         self.finalize()
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if self._ritz_qr_usage is not None:
             self._ritz_qr_usage.zero_()
         if self._first_whitening_usage is not None:
@@ -853,6 +906,11 @@ class BlockLOBPCG:
             self._search.usage.zero_()
 
     def step(self):
+        """Advance one outer iteration or Krylov restart cycle using existing device state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if self._search is not None:
             self._search.step()
             return
@@ -868,6 +926,11 @@ class BlockLOBPCG:
             self._image_reuse_active = False
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.op.apply(self.x, self.ax)
         self.mass.apply(self.x, self.bx)
         self.launch(residual_block, self.r.shape, [self.ax, self.bx, self.values, self.r])
@@ -887,7 +950,15 @@ class BlockLOBPCG:
         )
 
     def solve(self, steps=100):
-        """Run an explicit fixed budget; use capture() for adaptive device stopping."""
+        """Run an explicit fixed budget; use capture() for adaptive device stopping.
+
+        Args:
+            steps: Nonnegative fixed number of block iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         steps = integer_index(steps)
         if steps < 0:
             raise ValueError("steps must be nonnegative")
@@ -904,6 +975,23 @@ class BlockLOBPCG:
         warmed eagerly before capture. They do not execute as Python callbacks
         during replay. The initializer runs before initialization (including
         mass orthonormalization); the finalizer runs after the solve.
+
+        Args:
+            max_iterations: Positive maximum number of outer iterations/restart cycles recorded
+                in the graph.
+            adaptive: None selects the supported policy; True requests a device-controlled outer
+                loop; False records a fixed budget. True is rejected if any participating
+                operator requires static capture.
+            finalizer: Optional zero-argument callable recording preallocated device
+                postprocessing after the solve. Called during warmup and recording, not as a
+                Python replay callback.
+            initializer: Optional zero-argument callable recording preallocated device input
+                preparation before initialization. Called during warmup and recording, not as a
+                Python replay callback.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
         """
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:

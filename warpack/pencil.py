@@ -146,6 +146,31 @@ class GeneralizedShiftInvertEigensolver:
     uses current values; rebuild cuDSS factors and graphs after value changes.
     ``close()`` releases this solver's graphs but never closes the borrowed
     inverse. No host numerical decisions are made by solve or replay.
+
+    Args:
+        operator: A as a complex row operator exposing complex_n, device and apply_complex.
+        mass: B under the same complex protocol; may be singular or nonsymmetric. The pencil
+            must be regular.
+        inverse: Caller-owned complex inverse of A-sigma*B. May be ComplexShiftInverse on an
+            explicitly assembled shifted matrix with sigma=0.
+        k: Number of requested eigenpairs (positive integer).
+        sigma: Finite shift matching the supplied inverse; used to recover original eigenvalues.
+        ncv: Complex Krylov dimension; require k < ncv <= n; None uses min(n, max(2*k+12, 32)).
+        tol: Positive tolerance for ||A*x-lambda*B*x|| / (||A*x|| + max(1,abs(lambda))*||B*x||).
+            Invalid denominators are rejected.
+        initial_vector: Optional finite nonzero wp.vec2d device array of shape (n,). Read on
+            each initialization; not modified.
+        preserve_converged: Preserve complete converged candidates using both transformed and
+            original-pencil checks.
+
+    Attributes:
+        eigenvalues: wp.vec2d device array (k,) of complex eigenvalues.
+        eigenvectors: wp.vec2d device array (k, n) of unit-norm right eigenvectors; generally
+            not orthogonal.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,): 0 no failure, 1 invalid start, 2 projected QR failure.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(
@@ -205,6 +230,11 @@ class GeneralizedShiftInvertEigensolver:
         self.graph = None
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.evaluation.evaluate(self.eigenvectors, self.core.eigenvalues, self.evaluation.order)
         self.converged.zero_()
         wp.launch(
@@ -216,13 +246,40 @@ class GeneralizedShiftInvertEigensolver:
         self.core._check_start(self.converged)
 
     def solve(self, iterations=20):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         self.core.solve(iterations)
         self.finalize()
         return self
 
     def capture(self, iterations=20):
+        """Prepare and record a reusable CUDA solve graph outside any active capture.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
+        """
         self.graph = self.core.capture(iterations, adaptive=False, finalizer=self.finalize)
         return self.graph
 
     def close(self):
+        """Release owned resources after execution completes and external graph references are discarded.
+
+        Only this solver's graph references are cleared. The borrowed inverse is not closed.
+
+        Returns:
+            None. Do not replay graphs using released resources.
+        """
         self.graph = self.core.graph = None

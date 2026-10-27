@@ -105,6 +105,31 @@ class LowestModeCertificate:
     existing device storage. Changing vectors/values/nullspace values needs
     only run(). Topology/buffer identities and upper_bound are fixed. Do not
     mutate inputs concurrently or use one instance on concurrent streams.
+
+    Args:
+        stiffness: Compressed scalar FP64 symmetric Warp BsrMatrix K.
+        vectors: Borrowed FP64 physical rows (k, n), jointly mass-orthonormal with nullspace.
+        values: Borrowed FP64 device array (k,) of original-pencil eigenvalues.
+        upper_bound: Fixed real gap location above every requested mode; not found
+            automatically.
+        mass: Optional compressed scalar FP64 SPD Warp BsrMatrix M; None means identity.
+        nullspace: Optional FP64 device rows (q, n) of known mass-orthonormal zero modes,
+            excluded from vectors.
+        backend: cudss for a setup inertia query, or None for residual/independence checks
+            without certification.
+        residual_tolerance: Positive tolerance for normalized original-pencil residuals.
+        orthogonality_tolerance: Positive entrywise tolerance for the combined basis mass-Gram
+            matrix.
+        gap_tolerance: Positive relative separation tolerance at upper_bound.
+
+    Attributes:
+        certified: int32 device array (1,), one only when all numerical coverage checks pass.
+        flags: int32 device array (1,), bitmask described above.
+        residuals: FP64 device array (k+q,), original-pencil residuals for returned and known
+            null modes.
+        orthogonality_error: FP64 device array (1,), combined mass-Gram error.
+        gap_margin: FP64 device array (1,), tested subspace gap margin.
+        inertia: Host InertiaResult from the latest setup count query.
     """
 
     COUNT_UNAVAILABLE = 1
@@ -191,7 +216,12 @@ class LowestModeCertificate:
         self.refresh_count()
 
     def refresh_count(self):
-        """Refactor the current pencil and replace count metadata outside capture."""
+        """Refactor the current pencil and replace count metadata outside capture.
+
+        Returns:
+            The new InertiaResult host snapshot. Device count metadata is updated
+            in place; this synchronizing setup method is not graph capturable.
+        """
         if wp.get_stream(self.device).is_capturing:
             raise RuntimeError("refresh_count is setup work and cannot run during capture")
         self.certified.zero_()
@@ -215,6 +245,11 @@ class LowestModeCertificate:
         return self.inertia
 
     def run(self):
+        """Evaluate current inputs and update device diagnostics; graph capturable.
+
+        Returns:
+            The certified device array (int32, shape (1,)); no implicit host readback.
+        """
         if self.q:
             wp.copy(self.rows, self.nullspace, count=self.q * self.n)
         wp.copy(self.rows, self.vectors, dest_offset=self.q * self.n, count=self.k * self.n)

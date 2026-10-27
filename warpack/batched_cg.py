@@ -218,6 +218,29 @@ class BatchedCGPreconditioner:
     including graph replay. Sparse topology and captured buffer identities
     must remain fixed. Updating/rebuilding a supplied factor is the caller's
     responsibility; the working matrix itself must never silently remain old.
+
+    Args:
+        matrix: Compressed square FP64 Warp BsrMatrix (scalar CSR or 3x3 BSR), on the solver
+            device. Must be SPD.
+        width: Positive fixed number of RHSs; must match BlockLOBPCG.width.
+        tol: Nonnegative relative per-RHS stopping tolerance.
+        maxiter: Positive per-batch CG iteration limit; truncation is allowed for
+            preconditioning.
+        preconditioner: Optional prebuilt upstream operator in working_dtype, or FSAI with
+            exposed factors. Must match matrix shape/device; names are not accepted here.
+        atol: Nonnegative absolute per-RHS tolerance; default zero.
+        working_dtype: wp.float64 or wp.float32 for inner arithmetic. Public input/output rows
+            remain FP64.
+        fsai_layout: rows or columns; columns requires upstream FSAI factors and uses packed
+            factor products.
+        matrix_layout: rows or columns; selects row storage or packed/coalesced working
+            products.
+
+    Attributes:
+        width: Configured RHS count.
+        stats: int32 device counters (4,): scheduled vector iterations, maximum batch
+            iterations, unconverged RHSs, RHS calls. Scheduled work includes masked converged
+            rows.
     """
 
     requires_static_outer_capture = True
@@ -337,7 +360,15 @@ class BatchedCGPreconditioner:
         self.requires_static_outer_capture = not _cg_preallocates_loop_control(self.state)
 
     def for_width(self, width):
-        """Independent CG workspaces sharing matrix topology/storage and factor."""
+        """Independent CG workspaces sharing matrix topology/storage and factor.
+
+        Args:
+            width: Positive RHS count for the new adapter.
+
+        Returns:
+            A BatchedCGPreconditioner with independent CG workspaces. Shared resources must not
+            be used concurrently.
+        """
         return self._for_width(width)
 
     def _for_active_width(self, width):
@@ -374,10 +405,19 @@ class BatchedCGPreconditioner:
         )
 
     def reset_stats(self):
+        """Reset cumulative device counters before the next measured solve; graph capturable.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.stats.zero_()
 
     def refresh(self):
-        """Refresh the reduced-precision copy using current source values on device."""
+        """Refresh the reduced-precision copy using current source values on device.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if self.working_dtype != self.source_matrix.scalar_type:
             source, target = self.source_matrix.values, self.operator.matrix.values
             # Copy live capacity common to both matrices. Extra allocator
@@ -385,6 +425,16 @@ class BatchedCGPreconditioner:
             wp.launch(cast, min(source.size, target.size), [source, target], device=self.device)
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if x.shape != (self.width, self.n) or y.shape != x.shape:
             raise ValueError("RHS arrays must match the configured (width,n) shape")
         if (

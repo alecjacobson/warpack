@@ -329,6 +329,27 @@ class PartialSVD:
     current device values are lifted and normalized at every initialization;
     the source is unchanged. Zero/nonfinite starts set status=1 and clear both
     accepted-triplet counts. Changed valid starts recover on the same graph.
+
+    Args:
+        matrix: Compressed rectangular scalar FP64 Warp BsrMatrix of shape (m, n). Complex
+            values and 3x3 blocks are not supported.
+        k: Number of largest singular triplets; 1 <= k <= min(m,n).
+        ncv: Augmented basis width; default min(m+n, max(4*k, 48)); require k < ncv <= m+n.
+        tol: Positive tolerance for each original singular-vector equation, normalized by max(1,
+            singular_value).
+        initial_vector: Optional finite nonzero FP64 device array (min(m,n),), lifted from the
+            smaller side on each initialization.
+
+    Attributes:
+        singular_values: FP64 device array (k,), largest singular values in descending order.
+        u: FP64 device array (k, m) of left singular-vector rows.
+        v: FP64 device array (k, n) of right singular-vector rows.
+        left_residuals: FP64 device array (k,) for A*v-s*u.
+        right_residuals: FP64 device array (k,) for A.T*u-s*v.
+        count_left: int32 device array (1,), left equations passing tol.
+        count_right: int32 device array (1,), right equations passing tol.
+        status: int32 device array (1,), zero means no numerical failure; check both counts as
+            well.
     """
 
     def __init__(self, matrix, k, ncv=None, tol=1.0e-10, initial_vector=None):
@@ -369,6 +390,11 @@ class PartialSVD:
         )
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.launch(
             split_vectors,
             self.core.eigenvectors.shape,
@@ -459,10 +485,30 @@ class PartialSVD:
                 self.start_state.check(self.status, count)
 
     def capture(self, max_iterations=100):
+        """Prepare and record a reusable CUDA solve graph outside any active capture.
+
+        Args:
+            max_iterations: Positive maximum number of outer iterations/restart cycles recorded
+                in the graph.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
+        """
         self.graph = self.core.capture(max_iterations, finalizer=self.finalize)
         return self.graph
 
     def solve(self, iterations=30):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         self.core.solve(iterations)
         self.finalize()
         return self

@@ -48,6 +48,27 @@ class CayleyEigensolver(GeneralizedEigensolver):
 
     Supply an inverse of A-sigma B. Nonzero sigma is required.
     Returned eigenvalues/residuals refer to the original generalized problem.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+        mass: SPD mass/metric operator on the same device and dimension as operator.
+        inverse: Caller-owned block inverse of A-sigma*M accepting ncv RHSs.
+        k: Number of requested eigenpairs (positive integer).
+        sigma: Nonzero real shift matching the supplied inverse.
+        ncv: Block width; None uses min(n, max(2*k, k+8)); require k <= ncv <= n.
+        tol: Positive tolerance for ||A*x-lambda*M*x|| / max(1, ||A*x||+abs(lambda)*||M*x||);
+            use B for the buckling metric. Residual convergence alone does not certify spectrum
+            completeness.
+
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(self, operator, mass, inverse, k, sigma, ncv=None, tol=1.0e-9):
@@ -58,6 +79,11 @@ class CayleyEigensolver(GeneralizedEigensolver):
         self.rhs = wp.empty_like(self.q)
 
     def step(self):
+        """Advance one outer iteration or Krylov restart cycle using existing device state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.op.apply(self.q, self.z)
         self.mass.apply(self.q, self.bq)
         wp.launch(
@@ -100,6 +126,27 @@ class BucklingEigensolver:
     A-orthonormal. This selection is not identical to nearest physical lambda.
     ``method="krylov"`` uses mass-orthogonal restarted Krylov iteration and
     requires a one-RHS inverse. The default block method uses ncv RHSs.
+
+    Args:
+        operator: Real SPD operator A.
+        mass: Real symmetric operator B, possibly indefinite; same dimension/device as A.
+        inverse: Caller-owned inverse of A-sigma*B. One RHS for method=krylov; ncv RHSs for
+            method=block.
+        k: Number of requested eigenpairs (positive integer).
+        sigma: Nonzero real buckling shift matching the supplied inverse.
+        ncv: Iteration subspace width; default min(n, max(2*k, k+8)). Krylov requires ncv > k.
+        tol: Positive tolerance for ||A*x-lambda*M*x|| / max(1, ||A*x||+abs(lambda)*||M*x||);
+            use B for the buckling metric. Residual convergence alone does not certify spectrum
+            completeness.
+        method: block (default) or krylov; selects the transformed outer iteration.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        core: Underlying solver; inspect core.status and core.iterations. There is no top-level
+            status attribute.
     """
 
     def __init__(self, operator, mass, inverse, k, sigma, ncv=None, tol=1.0e-9, method="block"):
@@ -137,6 +184,11 @@ class BucklingEigensolver:
         self.converged = wp.zeros(1, dtype=wp.int32, device=self.device)
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.launch(reciprocal, self.k, [self.core.eigenvalues, self.values], device=self.device)
         wp.launch(identity_order, self.k, [self.order], device=self.device)
         self.a.apply(self.eigenvectors, self.ax)
@@ -166,10 +218,30 @@ class BucklingEigensolver:
         )
 
     def solve(self, iterations=50):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         self.core.solve(iterations)
         self.finalize()
         return self
 
     def capture(self, iterations=50):
+        """Prepare and record a reusable CUDA solve graph outside any active capture.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
+        """
         self.graph = self.core.capture(iterations, adaptive=False, finalizer=self.finalize)
         return self.graph

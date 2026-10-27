@@ -9,7 +9,8 @@ cuDSS backend for sparse direct solves. Solves can be captured and replayed as
 CUDA graphs.
 
 [Release v0.2.0](https://github.com/alecjacobson/warpack/releases/tag/v0.2.0)
-· [User guide](docs/guide.md)
+· [Documentation](docs/index.md)
+· [API reference](docs/api/README.md)
 · [Examples](#examples)
 · [Issues](https://github.com/alecjacobson/warpack/issues)
 
@@ -115,22 +116,22 @@ linear equality constraints use `ConstrainedKrylovSchur`. See
 
 | Problem | API | Main requirement |
 |---|---|---|
-| Lowest symmetric FEM modes | `BlockLOBPCG` | Symmetric K, SPD M; optional preconditioner and known invariant constraints |
-| Standard symmetric eigenpairs | `KrylovSchur` | LM / LA / SA / SM / BE selection |
-| Generalized or interior symmetric modes | `GeneralizedKrylovSchur` | SPD metric (e.g. mass); supply a metric inverse or shifted inverse |
-| Symmetric block inverse iteration | `SymmetricEigensolver`, `GeneralizedEigensolver` | Supply an iteration operator that amplifies the desired modes |
-| Equality-constrained / skinning modes | `ConstrainedKrylovSchur` | SPD physical mass, independent constraints, KKT inverse |
-| Complex Hermitian eigenpairs | `HermitianEigensolver` | Complex FP64 data |
-| General real/complex eigenpairs | `GeneralEigensolver`, `ShiftInvertEigensolver` | See the requested-spectrum limitation below |
-| Generalized nonsymmetric pencils | `GeneralizedShiftInvertEigensolver` | Regular pencil; finite nearest right modes; singular B is permitted |
-| Buckling and Cayley transforms | `BucklingEigensolver`, `CayleyEigensolver` | Transform-specific definiteness and selection rules |
-| Real partial SVD / POD | `PartialSVD`, `NormalSVD` | `NormalSVD` targets resolved largest nonzero triplets and squares conditioning |
+| Lowest symmetric FEM modes | [`BlockLOBPCG`](docs/api/symmetric.md#blocklobpcg) | Symmetric K, SPD M; optional preconditioner and known invariant constraints |
+| Standard symmetric eigenpairs | [`KrylovSchur`](docs/api/symmetric.md#krylovschur) | LM / LA / SA / SM / BE selection |
+| Generalized or interior symmetric modes | [`GeneralizedKrylovSchur`](docs/api/symmetric.md#generalizedkrylovschur) | SPD metric (e.g. mass); supply a metric inverse or shifted inverse |
+| Symmetric block inverse iteration | [`SymmetricEigensolver`](docs/api/symmetric.md#symmetriceigensolver), [`GeneralizedEigensolver`](docs/api/symmetric.md#generalizedeigensolver) | Supply an iteration operator that amplifies the desired modes |
+| Equality-constrained / skinning modes | [`ConstrainedKrylovSchur`](docs/api/constraints.md#constrainedkrylovschur) | SPD physical mass, independent constraints, KKT inverse |
+| Complex Hermitian eigenpairs | [`HermitianEigensolver`](docs/api/complex.md#hermitianeigensolver) | Complex FP64 data |
+| General real/complex eigenpairs | [`GeneralEigensolver`](docs/api/complex.md#generaleigensolver), [`ShiftInvertEigensolver`](docs/api/complex.md#shiftinverteigensolver) | See the requested-spectrum limitation below |
+| Generalized nonsymmetric pencils | [`GeneralizedShiftInvertEigensolver`](docs/api/complex.md#generalizedshiftinverteigensolver) | Regular pencil; finite nearest right modes; singular B is permitted |
+| Buckling and Cayley transforms | [`BucklingEigensolver`](docs/api/symmetric.md#bucklingeigensolver), [`CayleyEigensolver`](docs/api/symmetric.md#cayleyeigensolver) | Transform-specific definiteness and selection rules |
+| Real partial SVD / POD | [`PartialSVD`](docs/api/svd.md#partialsvd), [`NormalSVD`](docs/api/svd.md#normalsvd) | [`NormalSVD`](docs/api/svd.md#normalsvd) targets resolved largest nonzero triplets and squares conditioning |
 
-Inverse backends are `CuDSSInverse`, `CGInverse` for SPD systems and
-`GMRESInverse` for indefinite/nonsymmetric systems. For fast block iteration,
-`BatchedCGPreconditioner` and `BatchedSparseOperator` share work across RHSs.
+Inverse backends are [`CuDSSInverse`](docs/api/operators.md#cudssinverse), [`CGInverse`](docs/api/operators.md#cginverse) for SPD systems and
+[`GMRESInverse`](docs/api/operators.md#gmresinverse) for indefinite/nonsymmetric systems. For fast block iteration,
+[`BatchedCGPreconditioner`](docs/api/operators.md#batchedcgpreconditioner) and [`BatchedSparseOperator`](docs/api/operators.md#batchedsparseoperator) share work across RHSs.
 Truncated CG is a preconditioner, not an exact shift-invert operator.
-[Solver usage and contracts →](docs/guide.md)
+[Solver usage](docs/guide.md) · [Complete API reference](docs/api/README.md)
 
 ## Graph replay and results
 
@@ -143,8 +144,10 @@ the pure-Warp replay performs no host numerical decisions or residual readbacks.
   Topology changes require new setup. Maintain inverse factors and preconditioners
   consistently with the updated matrices.
 - Each solver owns mutable scratch; do not use the same instance concurrently.
-- Check **both** `status == 0` and `converged == k`, plus the residuals appropriate
-  to the original problem. A fixed budget can expire without convergence.
+- Check the [status and convergence fields for your solver](docs/guide.md#results-and-acceptance),
+  plus original-problem residuals. Most eigensolvers require both `status == 0`
+  and `converged == k`; Hermitian, buckling and SVD wrappers expose different fields.
+  A fixed budget can expire without convergence.
 - A small residual does not establish that every requested mode was found.
   Warm starts need particular care after mode crossings.
 
@@ -159,6 +162,7 @@ from the installed library.
 
 | Example | What it shows |
 |---|---|
+| [`python -m examples.api_quickstart`](examples/api_quickstart.py) | Small standard/generalized, Hermitian and SVD examples with known answers; stock Warp, optional cuDSS |
 | [`python -m examples.block_reuse`](examples/block_reuse.py) | Consistent-mass elastic bar; reuse computed modes after changing stiffness; stock Warp |
 | [`python -m examples.anvil_block`](examples/anvil_block.py) | First 20 elastic Anvil modes with the fast pure-Warp configuration; requires the pinned overlay |
 | [Skinning modes](benchmarks/applications/SKINNING.md) | Rig constraints and the physical-space KKT formulation |

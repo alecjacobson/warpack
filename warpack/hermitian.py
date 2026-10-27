@@ -104,7 +104,20 @@ def accept_value(
 
 
 class HermitianCSR:
-    """Device complex CSR; values use wp.vec2d(real, imaginary)."""
+    """Device complex CSR; values use wp.vec2d(real, imaginary).
+
+    Args:
+        n: Complex matrix dimension (positive integer).
+        offsets: wp.int32 device array (n+1,) of valid CSR row offsets.
+        columns: wp.int32 device array (nnz,) of valid zero-based column indices.
+        values: wp.vec2d device array (nnz,) of real/imaginary pairs. All arrays must share a
+            device; provide the full matrix, not one triangle.
+
+    Attributes:
+        complex_n: Complex matrix dimension n.
+        n: Realified dimension 2*n.
+        device: Device shared by the borrowed CSR arrays.
+    """
 
     def __init__(self, n, offsets, columns, values):
         if values.dtype != wp.vec2d or offsets.dtype != wp.int32 or columns.dtype != wp.int32:
@@ -119,6 +132,18 @@ class HermitianCSR:
         self.offsets, self.columns, self.values = offsets, columns, values
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Realified inputs use FP64 rows (width, 2*complex_n): real components first, then imaginary components.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.launch(
             realified_mv,
             (x.shape[0], self.complex_n),
@@ -224,6 +249,27 @@ class HermitianEigensolver:
     of shape ``(n,)`` on the operator device. Initialization reads its current
     contents without modifying them, including on replay. Zero or nonfinite
     starts set ``real.status`` to 1; outputs must not be used in that case.
+
+    Args:
+        operator: HermitianCSR or compatible realified Hermitian operator. Hermitian symmetry is
+            a caller precondition.
+        k: Number of complex eigenpairs, 1 <= k < n.
+        ncv: REALIFIED basis dimension, not complex width. None uses min(2*n, max(4*k+16, 32));
+            require 2*k < ncv <= 2*n.
+        which: Selection: LM/SM (largest/smallest magnitude), LA/SA (largest/smallest
+            algebraic), or BE (both ends).
+        tol: Positive standard-problem residual tolerance for the realified solve.
+        initial_vector: Optional finite nonzero wp.vec2d device array of shape (n,). Read on
+            each initialization; not modified.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of real eigenvalues.
+        eigenvectors: wp.vec2d device array (k, n) of complex rows.
+        count: int32 device array (1,), number of independent complex vectors recovered; not a
+            residual count.
+        real: Realified solver. Inspect real.status, real.converged (out of 2*k) and
+            independently check complex residuals; this wrapper has no top-level
+            status/converged/residuals attributes.
     """
 
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
@@ -252,6 +298,11 @@ class HermitianEigensolver:
         self.count = wp.zeros(1, dtype=wp.int32, device=self.device)
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.eigenvectors.zero_()
         self.count.zero_()
         self.eigenvalues.zero_()
@@ -299,10 +350,30 @@ class HermitianEigensolver:
             )
 
     def solve(self, iterations=50):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         self.real.solve(iterations)
         self.finalize()
         return self
 
     def capture(self, max_iterations=100):
+        """Prepare and record a reusable CUDA solve graph outside any active capture.
+
+        Args:
+            max_iterations: Positive maximum number of outer iterations/restart cycles recorded
+                in the graph.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
+        """
         self.graph = self.real.capture(max_iterations, finalizer=self.finalize)
         return self.graph

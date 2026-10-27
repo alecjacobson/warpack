@@ -1,35 +1,45 @@
 # Solver guide
 
-[Installation](installation.md) · [Examples](../README.md#examples) · [Validation](development.md)
+[Documentation](index.md) · [API reference](api/README.md) · [Installation](installation.md)
 
 ## Data and operators
 
-`SparseOperator` accepts compact square FP64 `warp.sparse.BsrMatrix` storage
-with scalar blocks (CSR) or 3×3 blocks. Compress mutable sparse rows before
-constructing the operator. `BatchedSparseOperator` has the same contract and
-shares matrix reads across RHS rows. Operator inputs and outputs are distinct
-FP64 arrays of shape `(width, n)` on the same device.
+Import frontend classes and functions from `warpack`. Real vector blocks are
+`wp.float64` arrays with **one vector per row**, on the operator's device.
+`SparseOperator` and `BatchedSparseOperator` wrap compact square scalar CSR or
+3×3 BSR matrices from `warp.sparse`. They accept strided vector rows but require
+nonoverlapping input/output buffers. `SparseOperator(A, shift=s, sign=t)` applies
+`t*A*x + s*x`; its additive shift is distinct from a shift-invert target.
 
-Complex paths use `HermitianCSR` or `ComplexCSR`, storing scalar values as
-`wp.vec2d(real, imaginary)`; `SparseOperator` itself is real. Solver instances
-own their scratch and retain references to operators and inputs. Application
-matrix assembly belongs in caller code; [`examples/problems/`](../examples/problems/README.md)
-contains the checkout-only FEM, mesh and skinning helpers.
+Complex scalar CSR uses `wp.vec2d(real, imaginary)` values and `wp.int32`
+indices. `HermitianCSR` exposes a realified operator; `ComplexCSR` also exposes
+`apply_complex`. Supply the full sparse matrix, not one triangle. See the
+[operator reference](api/operators.md) for storage and inverse contracts.
+
+For a custom real operator, provide `n`, `device`, and `apply(x, y)` operating
+on FP64 rows `(width, n)`. Preallocate its workspace, overwrite every output
+entry, and make the application graph capturable. Complex operators use
+`complex_n`, `device`, and `apply_complex(x, y)` on `wp.vec2d` rows. A supplied
+operator's symmetry, definiteness and mathematical validity are caller
+preconditions; metadata validation is not a numerical proof of those properties.
+
+Application assembly belongs in caller code. Checkout-only FEM, mesh and
+skinning helpers live in [examples/problems](../examples/problems/README.md),
+outside the installed `warpack` package.
 
 ## Generalized low modes
 
-`BlockLOBPCG` targets the smallest algebraic eigenvalues of `Kx = λMx`, with
-symmetric K and SPD M. Omit `mass` for identity M. Use an SPD preconditioner
-appropriate to the problem; the bar example uses a diagonal approximation,
-while the fast Anvil example uses truncated upstream CG with FSAI.
+For symmetric `K` and SPD `M`, use
+[`BlockLOBPCG`](api/symmetric.md#blocklobpcg) to obtain the smallest algebraic
+modes of `K*x = lambda*M*x`. Omit `mass` for identity. An SPD preconditioning
+action is optional. With assembled compact device matrices and `n >= 72`:
 
 ```python
 import warp as wp
 from warp.optim import linear
 from warpack import BlockLOBPCG, SparseOperator
 
-# K and M are assembled, compact device matrices; n >= 72.
-block = BlockLOBPCG(
+solver = BlockLOBPCG(
     SparseOperator(K),
     k=20,
     width=24,
@@ -37,107 +47,44 @@ block = BlockLOBPCG(
     preconditioner=linear.preconditioner(K, ptype="diag"),
     tol=1e-8,
 )
-graph = block.capture(200)
+graph = solver.capture(200)
 wp.capture_launch(graph)
+# Device outputs; vectors are rows of shape (20, n).
+values, vectors = solver.eigenvalues, solver.eigenvectors
 ```
 
-`width >= k` and `3*width <= n` are required. Outputs are device arrays:
-`eigenvalues` has shape `(k,)`, and `eigenvectors` has shape `(k,n)` with vectors
-stored as rows. `residuals`, `converged`, `iterations` and `status` provide
-acceptance information. Eigenvectors are M-orthonormal. The residual is
-`||Kx−λMx||₂ / max(1, ||Kx||₂ + |λ| ||Mx||₂)`.
+`width` defaults to `k`; require `1 <= k <= width` and `3*width <= n`.
+`solve(steps=...)` runs a fixed budget and returns the solver instance.
+`capture(max_iterations=...)` can use device-controlled stopping and returns a
+graph. Neither operation implicitly returns host arrays.
 
 Supply `initial_vectors` with 1–`width` independent FP64 rows to reuse a computed
-basis. Missing rows get random initialization. `initial_perturbation=1e-3`, for
-example, adds seeded exploration relative to each supplied row's norm; the
-default is zero. Keep separate start storage if copying the previous result
-into the next solve. [`examples/block_reuse.py`](../examples/block_reuse.py)
-shows this after changing stiffness.
+basis. Missing rows are randomized. Optional `initial_perturbation` adds seeded
+exploration relative to each supplied row's norm. Keep separate start storage
+when copying prior outputs. The [reuse example](../examples/block_reuse.py)
+shows stiffness changes with fixed storage.
 
-An exact previous invariant space can omit newly lower modes after crossings,
-even with zero residuals. Perturbation helps exploration but is not a proof of
-requested-spectrum completeness. Validate complete clusters and subspaces
-when repeated modes matter. The optional
-[`LowestModeCertificate`](completeness.md) checks coverage below a supplied gap
-using an extra cuDSS factorization and capturable Warp verification.
+`constraints` excludes a **known invariant space**, such as rigid-body modes.
+Its rows must be M-orthonormal, or use `normalize_constraints=True` to normalize
+a private copy. Independent rigid spaces are needed for disconnected bodies.
+General linear equality constraints use
+[`ConstrainedKrylovSchur`](api/constraints.md#constrainedkrylovschur) with SPD
+physical mass and a KKT inverse; an augmented singular mass is not passed to
+`BlockLOBPCG`. See the [skinning formulation](../benchmarks/applications/SKINNING.md).
 
-`constraints` excludes a **known invariant space**, such as the six rigid
-motions of a connected free body. Supply its basis as device rows. Optional
-`normalize_constraints=True` normalizes a private copy in the current mass
-metric. Independent rigid spaces are needed for disconnected bodies. General
-linear equality constraints instead use `ConstrainedKrylovSchur`; see the
-[skinning formulation](../benchmarks/applications/SKINNING.md).
-
-For fast block solves, the public options `reuse_operator_images`,
-`search_bucket_size`, `keep_history` and `preconditioner_bucket_size` control
-cached products and preallocated device-selected workspaces. Their defaults
-preserve the base algorithm. `BatchedCGPreconditioner.width` must match the
-outer block width. It calls upstream CG with independent RHS coefficients and
-stopping tests. FP32 working matrix values refresh from the FP64 source on
-each application; factor updates remain caller-managed. Its `stats` counts
-scheduled vector iterations, maximum batch iterations, unconverged RHSs and
-RHS calls. Unfinished truncated preconditioner solves are distinct from failed
-outer eigensolves. The [Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
-provides a tested configuration and the required runtime.
-
-For the tested 100/200-mode FEM configurations, `keep_history=False` reduces
-the projected work enough to outweigh additional outer iterations. It keeps all
-current Ritz vectors and compacts the R/P directions with the active residuals.
-[History-policy controls](../results/fem_100_modes/history-current/README.md)
-include setup, first solve, replay, CuPy comparisons and rigid/null-mode cases.
-The Anvil recipe retains `keep_history=True`; its workload favors that tradeoff.
-
-Device-selected CG buckets share maximum-width packing and adapter application
-storage. Upstream CG's internal workspaces and public `for_width` variants
-remain independent. This reduces memory without changing stopping tests;
-[allocation controls](../results/cg_adapter_storage/README.md) quantify the savings.
-
-Active-search capture directly records all branch kernels for built-in
-`SparseOperator`, `BatchedSparseOperator` and `Identity` applications. This avoids
-an extra numerical solve of every branch during preparation. Custom stiffness
-or mass operators (including subclasses and instance overrides) retain eager
-per-width preparation. The initial eager solve and synchronization before
-capture remain. [Preparation controls](../results/capture_preparation/production/README.md)
-report the first-solve benefit; replay arithmetic is unchanged.
-
-For one-time ROM generation, `BlockLOBPCG(..., compact_projected_graphs=True)`
-reduces the graph construction work for wide projected solves. It records
-16 Jacobi rounds per device-loop iteration, preserving FP64 rotation order and
-convergence tests. The default remains `False`: compact graphs can cost more
-per warmed replay, so repeated solves may favor the default. Only existing
-even-dimensional global projected solves of size 96–1024 change; the Anvil
-recipe and small/odd projected problems keep their established paths.
-Both global graph policies restore projected symmetry before testing convergence;
-[regressions](../results/projected_symmetry/VALIDATION.md) include repeated and null spectra.
-For projected dimensions ≥256, a final device kernel normalizes eigenvector
-columns to contain accumulated length drift. Eigenvalues and convergence tests
-are unchanged; [validation](../results/normalized_jacobi/VALIDATION.md) includes
-the large repeated/null regression and both graph policies.
-On Ada GPUs, even global projections of size 256–1024 reuse each 2×2 output
-block within a Jacobi round. Both graph policies retain the original FP64
-expressions and rotation order; [validation](../results/paired_jacobi/VALIDATION.md)
-includes bit-identical legacy controls. Smaller projections keep their existing
-update because reduced parallelism offsets the reuse there.
-[Complete setup/capture/replay controls](../results/compact_jacobi/README.md)
-report the tradeoff separately from the main six-backend comparison.
-
-The current pinned FSAI supports `reuse_pattern=True` and captured `update()`.
-After changing matrix values at stable storage addresses, enqueue the update
-before the solve on the same stream. Check `update_status` after replay:
-a failed refit preserves the preceding factor, which is not a valid replacement
-for a successful update of the changed problem. Fixed topology and factor
-storage are required for replay. `defer_pattern=True` selects supports on its
-first update; Warpack accepts the resulting padded factors, but initializer
-warmup can trigger that first selection before capture. Regularized refits are
-an explicit upstream option, not enabled by Warpack's examples.
-
-Upstream FSAI setup can consume much more device memory than its stored factors.
-The [current dependency qualification](../results/fsai_setup_regression/README.md)
-reduces this cost with packed workspace and scalar BSR entry access. The older
-[row-size comparison](../results/fsai_memory/README.md) remains useful context;
-neither report qualifies smaller-memory GPUs or makes a peak-memory guarantee.
+For fast block preconditioning, use
+[`BatchedCGPreconditioner`](api/operators.md#batchedcgpreconditioner) with the
+[pinned upstream runtime](installation.md#fast-block-solves). Truncated CG is
+an approximate preconditioning action, not an exact shift-invert operator.
+Its width must match the block width. Advanced product, graph and bucket
+options are documented individually in the reference; use the
+[Anvil recipe](releases/v0.2.0.md#install-and-reproduce-the-fast-anvil-solve)
+for that measured configuration.
 
 ## Standard symmetric eigenpairs
+
+Use [`KrylovSchur`](api/symmetric.md#krylovschur) for a standard symmetric
+problem and a selected spectrum end:
 
 ```python
 from warpack import KrylovSchur, SparseOperator
@@ -147,36 +94,23 @@ graph = solver.capture(100)
 wp.capture_launch(graph)
 ```
 
-Selection codes are `LM`/`SM` for largest/smallest magnitude, `LA`/`SA` for
-largest/smallest algebraic, and `BE` for both ends. Small-magnitude targets are
-generally better approached through shift-invert than untransformed Krylov.
-For unit-norm vectors, the standard symmetric residual is
-`||Ax−λx||₂ / max(1, |λ|)`. This differs from the generalized normalization.
-
-Krylov residuals formed from cached operator images are estimates. Near the
-precision floor, independently recompute the original equation using
-`EigenpairEvaluation(op, solver.eigenvectors, eigenvalues=solver.eigenvalues)`.
-Use `rhs_width=1` for operators accepting one RHS at a time. Omit `eigenvalues`
-to recompute Rayleigh values. This diagnostic has its own count and does not
-change Krylov stopping. It can be recorded as a capture finalizer.
+`LM`/`SM` select largest/smallest magnitude, `LA`/`SA` largest/smallest algebraic,
+and `BE` both ends. Require `k < ncv <= n`. Small-magnitude or interior modes
+usually call for an inverse transformation. `SymmetricEigensolver` is a separate
+block inverse-iteration API; its `which` parameter alone does not make an
+untransformed partial block iteration target arbitrary spectrum ends.
 
 ## Shift-invert and sparse inverse backends
 
-For an interior target `sigma`, assemble `Kshift = K−sigma*M` and supply its
-inverse. `GeneralizedKrylovSchur` selects the nearest original eigenvalues with
-its default shift-invert `which="LM"` and the matching `target`:
+[`GeneralizedKrylovSchur`](api/symmetric.md#generalizedkrylovschur) uses the SPD
+mass inner product. For modes nearest a real `sigma`, assemble `Kshift=K-sigma*M`
+and supply a **one-RHS** inverse of that exact shifted matrix:
 
 ```python
 from warpack import CuDSSInverse, GeneralizedKrylovSchur, SparseOperator
 
 sigma = 7.3
-inverse = CuDSSInverse(
-    Kshift,
-    width=1,
-    mtype="general",
-    matching=True,
-    refinement_steps=1,
-)
+inverse = CuDSSInverse(Kshift, width=1, mtype="general", matching=True, refinement_steps=1)
 solver = GeneralizedKrylovSchur(
     SparseOperator(K),
     SparseOperator(M),
@@ -188,215 +122,141 @@ solver = GeneralizedKrylovSchur(
 )
 graph = solver.capture(40, adaptive=False)
 wp.capture_launch(graph)
+# Keep inverse, solver and graph alive until execution has completed.
 ```
 
-cuDSS matching/scaling and factorization run during setup. Residual corrections
-compute `b−Ax` and the update in Warp, using cuDSS only for the sparse solve.
-Choose the factor type and correction budget for the shifted system; inspect
-fresh original-problem residuals rather than relying solely on transformed
-convergence. See the [factorization guidance](../benchmarks/upstream/MATCHING.md).
+The caller assembles the shifted matrix and selects its factor type. Use
+`CGInverse` for SPD shifted systems or `GMRESInverse` for indefinite/general
+systems to stay pure Warp. An interior shift need not leave the matrix SPD.
+Inner tolerances generally must be stricter than outer tolerances; check inner
+statistics and fresh original residuals. `CGInverse(atol=0.0)` avoids an absolute
+tolerance dominating small RHSs, subject to upstream numerical floors.
 
-For a pure-Warp inverse, use `CGInverse` on SPD systems or `GMRESInverse` on
-indefinite/nonsymmetric systems. Both call upstream Warp iterative solvers.
-GMRES takes a fixed linear right preconditioner; CG needs SPD preconditioning.
-Do not apply CG to an indefinite interior shifted matrix. These inverse
-applications generally need tighter accuracy than the outer eigensolver.
+For largest generalized modes, supply an inverse of `M` and set
+`mode="regular", which="LA"`. Do not pass `M^-1*K` to a Euclidean symmetric
+solver: it is self-adjoint in the M metric. `mode="cayley"` and
+[`BucklingEigensolver`](api/symmetric.md#bucklingeigensolver) have different
+transformed ordering rules; neither should be assumed to select ordinary
+nearest-shift modes.
 
-`CGInverse(..., verify_residuals=True)` exposes fresh residual failures in
-`fresh_stats` and maxima in `residual_maxima`, separately from upstream recursive
-`stats`. Optional `refinement_steps` and `refinement_tol` add fresh-residual
-corrections. `GMRESInverse.stats` includes fresh inner failures. Check inner
-and outer diagnostics together for inverse-based solves. This contract differs
-from deliberately truncated CG inside preconditioned block iteration.
-
-For largest generalized modes of `A x = lambda B x`, supply an inverse of B
-and set `mode="regular", which="LA"`. B must be SPD, but need not represent
-physical mass: it can be a regularization metric. Warpack preserves the B
-inner product; `B^-1 A` is generally not symmetric in the Euclidean metric.
-The [spectral surface reconstruction example](../benchmarks/applications/SPECTRAL_SURFACE.md)
-shows this composition with both cuDSS and pure-Warp inverses. For a few
-dominant modes, it also demonstrates `BlockLOBPCG` on `-A` with metric B and
-truncated FSAI/CG preconditioning, recovering positive eigenvalues on device.
+cuDSS constructors own native factors. After changing matrix values, rebuild
+those factors and dependent graphs unless an explicitly supported update path
+is used. Iterative preconditioner validity remains caller-managed. Finish graph
+execution and discard graph references before closing owned native resources.
+See [ownership and streams](library_contracts.md#arrays-and-ownership).
 
 ## Other problem families
 
-- `HermitianEigensolver` handles complex Hermitian standard problems.
-  `ShiftInvertEigensolver(..., hermitian=True)` handles Hermitian shift-invert
-  with a real shift. General complex shift-invert can use cuDSS or Warp GMRES.
-- `GeneralizedShiftInvertEigensolver` applies `(A−sigma*B)^−1 B` for a regular
-  pencil, including nonsymmetric or singular B. It returns finite nearest
-  **right** modes with fresh original-equation counts. It does not form `B^-1 A`.
-  See the [generalized-pencil guide](../benchmarks/applications/GENERALIZED_PENCILS.md).
-- `BucklingEigensolver` and `CayleyEigensolver` use transform-specific selection
-  rules. Ordinary nearest-shift selection is not interchangeable with buckling
-  load-factor ordering. See [transforms](../benchmarks/upstream/TRANSFORMS.md).
-- `PartialSVD` uses an augmented symmetric formulation for real matrices.
-  `NormalSVD` targets resolved largest nonzero singular triplets through normal
-  products. Normal equations square conditioning; unresolved requested values
-  are rejected. See [POD examples](../benchmarks/applications/POD.md) and the
-  [normal-product API](../benchmarks/upstream/NORMAL_SVD.md).
-- `NumericalNullspaceDiagnostics` distinguishes returned near-zero modes,
-  ambiguous weak positives, invalid data and capacity limits. It does not
-  certify an unknown nullspace dimension or Betti number.
+| Problem | Entry point and contract |
+|---|---|
+| Complex Hermitian standard | [HermitianEigensolver](api/complex.md#hermitianeigensolver); `ncv` counts **realified** dimensions |
+| General real/complex standard | [GeneralEigensolver](api/complex.md#generaleigensolver); real data uses zero imaginary components; `ncv` counts complex dimensions |
+| Complex/Hermitian interior | [ShiftInvertEigensolver](api/complex.md#shiftinverteigensolver); creates an owned shifted inverse; its `ncv` counts complex dimensions even with `hermitian=True` |
+| Nonsymmetric generalized | [GeneralizedShiftInvertEigensolver](api/complex.md#generalizedshiftinverteigensolver); regular pencil, finite right modes, possibly singular B; borrowed shifted inverse |
+| Real partial SVD | [PartialSVD](api/svd.md#partialsvd); augmented symmetric formulation |
+| Resolved largest nonzero singular triplets | [NormalSVD](api/svd.md#normalsvd); normal products square conditioning; no requested null singular bases |
+
+All these APIs expose device arrays. General right eigenvectors need not be
+orthogonal; generalized symmetric vectors use their metric; singular vectors
+are Euclidean-orthonormal on each side. See the
+[runnable examples](../examples/api_quickstart.py) and each reference page for
+exact signatures and output shapes.
+
+## Results and acceptance
+
+Outputs are overwritten on each solve/replay. Copy them into separate storage
+if they must survive a later solve. Explicit `.numpy()` calls transfer data and
+synchronize; perform them outside graph capture.
+
+| API | Device fields to inspect |
+|---|---|
+| BlockLOBPCG, symmetric/generalized Krylov and block solvers, Cayley, GeneralEigensolver, both shift-invert wrappers | `status[0] == 0`, `converged[0] == k`, and original-problem residuals |
+| HermitianEigensolver | `real.status[0] == 0`, `real.converged[0] == 2*k`, `count[0] == k`; independently check complex residuals |
+| BucklingEigensolver | `core.status[0] == 0`, `converged[0] == k`, original buckling residuals |
+| PartialSVD, NormalSVD | `status[0] == 0`, `count_left[0] == count_right[0] == k`, both residual arrays |
+| ConstrainedKrylovSchur | `status[0] == 0`, `converged[0] == k`, equilibrium and `constraint_residuals` |
+
+Zero status alone means no recorded numerical failure; a budget can expire with
+an incomplete count. These tests do not prove global spectrum completeness.
+For repeated eigenvalues, compare invariant spaces rather than individual
+vector signs. An exact invariant warm start can miss newly lower modes after
+crossings. [`LowestModeCertificate`](completeness.md) provides an optional
+numerical coverage check below a supplied gap, using an extra cuDSS setup query.
+[`NumericalNullspaceDiagnostics`](api/diagnostics.md#numericalnullspacediagnostics)
+classifies supplied near-zero directions; it does not prove a Betti number.
+
+Residual conventions differ:
+
+| Problem | Normalized equation residual |
+|---|---|
+| Standard unit-norm eigenvector | `||A*x-lambda*x|| / max(1, abs(lambda))` |
+| Symmetric generalized | `||A*x-lambda*M*x|| / max(1, ||A*x|| + abs(lambda)*||M*x||)` |
+| Generalized nonsymmetric pencil | `||A*x-lambda*B*x|| / (||A*x|| + max(1,abs(lambda))*||B*x||)`; invalid denominators are rejected |
+| SVD | Each of `||A*v-s*u||` and `||A.T*u-s*v||`, divided by `max(1,s)` |
+
+Krylov cached-product residuals can be optimistic near the precision floor.
+[`EigenpairEvaluation`](api/diagnostics.md#eigenpairevaluation) reapplies a real
+standard operator to the returned unit-norm vectors. Supply `eigenvalues` to
+check the returned pairs; omitting them recomputes Rayleigh values. Use
+`rhs_width=1` for one-RHS operators. This diagnostic does not change solver
+stopping. Generalized and constrained equations need their corresponding
+physical checks, not this standard-problem diagnostic.
 
 ## Graph replay
 
-`capture()` performs standalone setup and must be called outside an existing
-capture. It rejects nested capture before warmup mutates solver state. For
-composition, warm the solver first, then record `solve()` or the available
-`initialize()` / `step()` / `finalize()` methods in the caller's capture.
-See [execution contracts](library_contracts.md) for ownership and synchronization
-boundaries.
+Construct and call `capture()` outside active capture. It allocates/prepares
+workspaces, compiles, warms and synchronizes as needed. Launch the returned
+graph with `wp.capture_launch`. On the affected CUDA stack, complete its first
+launch during setup before queueing changed input values:
 
-Capture is a setup operation: it warms kernels, allocates workspaces and may
-synchronize. Ordinary compatible paths use device-controlled conditional loops.
-cuDSS uses fixed outer capture. `CGInverse` and `GMRESInverse` also default to
-fixed outer capture for compatibility; opt-in `adaptive_capture=True` requires
-upstream preallocated loop storage, as in the pinned fast environment.
-`capture(..., adaptive=False)` explicitly requests a fixed budget.
+```python
+graph = solver.capture(100)
+wp.capture_launch(graph)
+wp.synchronize_device(solver.device)
+# Now enqueue fixed-address input updates and subsequent launches on the stream.
+wp.capture_launch(graph)
+```
 
-On CUDA drivers 12.3+, built-in `KrylovSchur` directly using `CuDSSInverse`
-prepares capture with one inverse application instead of a full eigensolve.
-Warp kernels load while the graph is recorded. Custom solvers/operators,
-finalizers and older drivers retain full warmup. Results are valid after
-launching the returned graph; capture itself is not a completed solve.
+This setup workaround is described in the
+[execution contract](library_contracts.md#graph-setup-and-synchronization).
+Subsequent pure-Warp replay has no host convergence decision. cuDSS currently
+records small vendor HtoD metadata copies and requires fixed outer capture.
+CG/GMRES inverses also default to fixed outer capture; their opt-in adaptive
+mode needs the qualified upstream preallocated-loop runtime.
 
-Every replay initializes a new solve from current input values. Keep topology,
-array identities and resource lifetimes fixed. Matrix values, constraints and
-supplied starts can change; update the associated inverse factors when needed.
-The caller owns preconditioner validity. Stale preconditioning may still be
-useful for nearby SPD problems, but it is not the updated exact inverse.
-For FEM material edits, reserve the full structural sparsity: entries that are
-zero through cancellation can become nonzero even on an unchanged mesh. If
-they were omitted from storage, updating values alone is insufficient.
+Methods accepting `adaptive=None` choose a compatible policy. Not every wrapper
+accepts that keyword: use its documented `capture` signature. Budgets count
+outer iterations/restarts, not individual operator applications or inner CG
+steps. `solve()` uses a fixed budget. For caller-owned capture, warm first and
+record `solve()` or supported `initialize()` / `step()` / `finalize()` stages;
+do not nest standalone `capture()`.
 
-Keep the solver, input buffers and factors alive until graph execution finishes.
-Instances and shared-width CG variants own mutable scratch and cannot be used
-concurrently. Destroy graphs before closing their inverse backend. Never replay
-against released factors.
+Where supported, `finalizer=callback` records device postprocessing.
+`BlockLOBPCG` also accepts `initializer=callback` before initialization.
+Callbacks run eagerly during setup/warmup and recording, not as Python callbacks
+on replay. Use preallocated device buffers and retain their owners.
 
-`capture(..., finalizer=callback)` records device postprocessing during setup;
-the callback is not a host callback during replay. Preallocate its outputs.
-`BlockLOBPCG.capture(..., initializer=callback)` similarly records device input
-preparation before initialization and mass orthonormalization. For example,
-use it to prolongate a computed coarse basis into `initial_vectors`. Both
-callbacks execute eagerly for warmup and again to record operations; they must
-use preallocated device buffers and keep all referenced resources alive. This
-allows transfer and refinement in one graph without nesting a graph launch.
-Explicit `.numpy()` reads and caller synchronization belong outside the graph.
-The pure-Warp replay has no host numerical decisions. cuDSS currently includes
-small vendor HtoD metadata copies; [the audit](../benchmarks/applications/CUDSS_GRAPH.md)
-distinguishes these from application synchronization.
-
-Accept a result only when status, requested counts and relevant original
-residual/orthogonality checks pass. `status == 0` alone does not mean convergence.
-A successful residual count is not a global requested-spectrum certificate.
-
-The [FEM reuse example and measured comparison](../results/fem_public_starts/README.md)
-show computed starts for related material configurations, including the setup
-costs and the fixed-address replay contract. The
-[shape-change qualification](../results/fem_shapes/README.md) additionally updates
-K and M together, exercises upstream FSAI refits at fixed storage addresses, and
-checks mode crossings and complete repeated clusters. For an opt-in response to
-a rejected warm start, see the [bounded recovery example](completeness.md#opt-in-recovery-after-a-rejected-warm-start).
-The [coarse-to-fine example](../results/fem_hierarchy/README.md) transfers computed
-tetrahedral modes with the device initializer hook and includes the cost of
-building and solving the coarse problem. Such starts need not improve total time.
-The [100-mode FEM comparison](../results/fem_100_modes/README.md) records complete
-requested-space checks, native stopping differences and the remaining wide-block
-replay gap against CuPy.
-The [projected-factor follow-up](../results/parallel_cholesky/README.md) measures
-a faster pure-Warp Cholesky path for wide blocks, while retaining the existing
-small-block path used by Anvil. CuPy's iteration variability remains explicit.
-The [200-mode qualification](../results/global_cholesky/README.md) extends that
-factor to CUDA widths 129–512 with a setup-time device workspace of
-`8 * width**2` bytes, shared by active-search branches. Widths 48–128 retain the
-qualified packed shared-memory path when capacity permits; other widths and
-non-CUDA devices retain the serial fallback. No allocation or host convergence
-decision is added to replay.
-On Ada GPUs, Ritz widths 96–256 also use a register-blocked triangular
-application, retaining each row's subtraction order when QR runs.
-It adds no global workspace, inverse or replay synchronization. Other widths and
-architectures retain the scalar application. The [installed qualification](../results/register_triangular/VALIDATION.md)
-includes changed-input/failure recovery, clean-wheel replay and complete FEM
-controls; Anvil uses the original triangular kernel.
-
-With `gram_chunk=4096`, Ada devices use 16×16 FP64 Gram output tiles for block
-widths 24–256. This path adds no global workspace or replay synchronization;
-the QR policy and all rank/stopping thresholds are independent of this tile choice. Other settings
-retain the original Gram implementation. The [Gram qualification](../results/gram_tiles/VALIDATION.md)
-records complete FEM comparisons and original-equation/replay checks.
-
-With `paired_rotation=True`, Ada SM89 devices use eight output rows per FP64
-Ritz-rotation tile for `n >= 32768` and block widths 24–256. The inner tile stays
-eight columns wide; separate bounded basis views preserve both the updated
-vectors and search directions. Other configurations retain the four-row
-kernel. This adds no workspace, host readbacks or accuracy-policy changes.
-The [rotation qualification](../results/paired_rotation_tiles/VALIDATION.md)
-records whole-solver controls and installed-package checks.
-
-For Ada block widths 96–256, `gram_chunk=4096`, `tol >= 1e-11`, and both
-`reuse_operator_images=True` and `symmetric_products=True`, captured execution
-checks a fresh mass Gram before reorthogonalizing Ritz vectors. If the finite
-computed metric defect is at most `1e-13`, it retains the basis and cached
-operator images with a fresh mass image. Otherwise it runs both original QR
-passes. This uses owned Warp sparse/identity mass operators; custom operators,
-stricter tolerances, eager execution and other configurations retain full QR.
-The bound concerns the computed Gram, not exact-arithmetic mass products;
-original-equation stopping and rank thresholds remain unchanged. Mutually
-exclusive search branches share 24 bytes of control/counter values and add no
-dense workspace or replay host readback. The [QR reuse qualification](../results/metric_qr_reuse/VALIDATION.md)
-records complete physical/replay and packaging checks. Anvil's width 24 retains
-full Ritz-basis QR.
-
-For Ada CUDA devices, search metrics of size 96–512 use certified Cholesky
-whitening during capture. Both whitening passes remain. Each fast path must
-establish a fresh conservative spectral bound above the unchanged relative
-rank threshold; uncertain or failed attempts use canonical rank revelation on
-device. The first pass also handles exact zero padding: an auxiliary identity
-helps certify the active block, but its added directions never become physical
-modes. Failed normalization retains the original failure status and canonical
-fallback.
-
-Both passes share three FP64 square scratch arrays across mutually exclusive
-search branches (`24 * metric_size**2` bytes for the largest eligible metric,
-plus small flags). The first pass adds no dense workspace, host numerical
-decision, or transfer. Smaller metrics, other architectures and eager solves
-retain canonical whitening. See the [first-pass qualification](../results/first_whitening/VALIDATION.md)
-and [second-pass qualification](../results/certified_whitening/README.md).
-The [coarse accuracy/width follow-up](../results/fem_hierarchy_tuning/README.md)
-measures that tradeoff while holding final fine-grid accuracy fixed.
-
-For force-aware ROMs, the [low-rank covariance example](../results/force_dual/README.md)
-solves sparse stiffness responses with cuDSS or pure-Warp CG, forms a small
-symmetric Gram problem and lifts its dominant modes into physical coordinates.
-It accepts singular force covariances without inverting them; physical stiffness
-and mass remain SPD. This is an application recipe outside the solver core.
-For diagonal mass, the [weighted snapshot SVD recipe](../benchmarks/applications/WEIGHTED_SNAPSHOT_SVD.md)
-avoids forming the Gram matrix and tests weak positive singular directions.
+Keep input storage, sparse topology, operators, solver, graph and factors alive
+and fixed. Values can change between replays; update dependent inverses and
+preconditioners consistently. Reserve structural entries that may become
+nonzero. Scratch is mutable: do not execute one instance, or shared inverse
+resources, concurrently. cuDSS construction/application/capture must use its
+construction stream; cross-stream replay requires caller ordering.
 
 ## Limitations
 
-The library has representative application and upstream-test coverage, not full
-SciPy/CuPy/Spectra API parity. General eigensolver computation is FP64/complex128;
-FP32 factor/inner-CG support does not imply FP32/complex64 outer eigensolvers.
-Complex SVD, public left modes and infinite eigenmodes are unsupported.
-Arbitrary singular mass is not accepted by the SPD generalized solvers; the
-regular-pencil and constrained formulations have separate contracts.
+The current API primarily supports FP64 and complex128. FP32 inner CG does not
+imply FP32 outer eigensolvers. Complex SVD, public left/infinite modes and
+arbitrary singular mass in SPD-metric solvers are unsupported.
 
-Compact nonsymmetric searches can return a full residual count while missing
-the requested extremal set ([#104](https://github.com/alecjacobson/warpack/issues/104)).
-Some ill-scaled generalized pencils miss strict original-equation tolerances
-([#123](https://github.com/alecjacobson/warpack/issues/123)). Wider validated
-profiles and mechanics-specific recovery examples are documented, but are not
-generic guarantees. Partial SVD nullspace recovery is also not established for
-arbitrary requested zero spaces.
+General nonsymmetric requested-spectrum coverage has a known
+[#104 gap](https://github.com/alecjacobson/warpack/issues/104), and ill-scaled
+generalized pencils have [strict residual limitations](https://github.com/alecjacobson/warpack/issues/123).
+The small reciprocal conformal fixture has a
+[native stopping floor](https://github.com/alecjacobson/warpack/issues/209).
+The [graph-upload issue](https://github.com/alecjacobson/warpack/issues/61)
+remains open. Representative tests and recorded comparisons are not full
+SciPy/CuPy/Spectra API parity or guarantees for every matrix.
 
-The graph-upload issue [#61](https://github.com/alecjacobson/warpack/issues/61)
-requires completing warmup before capture and the graph's first launch before
-queueing changed inputs on the affected stack. The latter also contains the
-partial-input failure found during #198; see the
-[setup example](library_contracts.md#graph-setup-and-synchronization).
-Upstream resolution remains pending. Subsequent replay does not add a host
-barrier. See the
-[issue tracker](https://github.com/alecjacobson/warpack/issues) for remaining work.
+Optimization history and hardware-specific implementation notes are preserved
+in [historical documentation](../historical/library-implementation-notes.md).

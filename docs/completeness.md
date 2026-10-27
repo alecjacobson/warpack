@@ -1,5 +1,7 @@
 # Optional lowest-mode completeness checks
 
+[Documentation](index.md) · [API reference](api/README.md)
+
 Small residuals do not establish that an eigensolver found every requested low
 mode. It can return exact higher modes while omitting a repeated or newly lower
 one. `LowestModeCertificate` combines numerical inertia with independent checks

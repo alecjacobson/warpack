@@ -18,6 +18,18 @@ class SparseOperator:
     ``apply(x, y)`` accepts FP64 arrays of shape ``(width, n)`` on the matrix
     device, including strided views. Input and output storage must not overlap.
     Sparse topology remains fixed during graph replay; values may be updated.
+
+    Args:
+        matrix: Compressed square FP64 Warp BsrMatrix (scalar CSR or 3x3 BSR), on the solver
+            device.
+        shift: Add shift*x to each output row; this is an additive diagonal shift, not the
+            shift-invert sigma convention.
+        sign: Multiply the matrix product by this real scalar: y = sign*A*x + shift*x.
+
+    Attributes:
+        n: Scalar matrix dimension.
+        device: Warp device inferred from matrix.
+        matrix: Borrowed Warp sparse matrix; maintain its storage lifetime.
     """
 
     def __init__(self, matrix, shift=0.0, sign=1.0):
@@ -36,6 +48,18 @@ class SparseOperator:
         self.shift, self.sign = shift, sign
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        x and y are FP64 arrays of shape (width, n). Strided views are supported; their storage must not overlap.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         fp64_rows(x, y, self.n, self.device)
         a = self.matrix
         if a.values.dtype == wp.float64 and a.nnz / a.nrow > 64:
@@ -76,6 +100,30 @@ class CuDSSInverse:
     on the same Warp stream: the native handle and workspace are stream-bound.
     Graph replay may use a caller-ordered stream after capture has completed;
     instances and their scratch must never execute concurrently.
+
+    Args:
+        matrix: Square FP64 Warp BsrMatrix for the already-shifted system. Construction factors
+            its current values.
+        width: Positive number of RHS rows fixed at construction; applications must use this
+            exact width.
+        mtype: cuDSS matrix type: spd for SPD, symmetric for real symmetric indefinite, or
+            general for general factors. Supply full matrix storage; the binding handles native
+            triangular representation.
+        refinement_steps: Nonnegative fixed Warp residual-correction budget. None chooses zero
+            for SPD/HPD or matching, otherwise one.
+        reordering: Native cuDSS reordering name. default uses its default; colamd/btf_colamd
+            require general factors for the qualified global-pivot route.
+        matching: Enable native matching/scaling for general factors only; incompatible with
+            colamd/btf_colamd. False explicitly disables matching.
+        cooperative_refinement: Evaluate Warp correction products cooperatively across each
+            sparse row.
+
+    Attributes:
+        n: Scalar system dimension.
+        device: Construction device.
+        width: Fixed RHS count.
+        x: FP64 device workspace (width, n), available as application output.
+        b: FP64 device workspace (width, n), available as application input.
     """
 
     requires_static_outer_capture = True
@@ -144,6 +192,18 @@ class CuDSSInverse:
             raise
 
     def apply(self, x, y):
+        """Apply the operator to device rows, writing into the supplied output.
+
+        Args:
+            x: Input device rows of the dtype and shape required by this operator.
+            y: Output device rows, matching x. Follow the class-specific aliasing rules; do not
+                assume overlapping views are supported.
+
+        Requires contiguous FP64 arrays of shape (width, n), with width fixed at construction. Exact in-place use is supported. Use the construction stream.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         fp64_rows(x, y, self.n, self.device, width=self.width, contiguous=True)
         if wp.get_stream(self.device).cuda_stream != self.workspace.stream.cuda_stream:
             raise RuntimeError("cuDSS apply/capture must use the construction stream")
@@ -173,12 +233,21 @@ class CuDSSInverse:
 
         Only qualified symmetric-indefinite factors can return available
         inertia. See InertiaResult and LowestModeCertificate for limitations.
+
+        Returns:
+            An InertiaResult host snapshot; this call synchronizes and is never part of solver
+            replay.
         """
         from .cudss_diagnostics import query_inertia
 
         return query_inertia(self)
 
     def close(self):
+        """Release owned resources after execution completes and external graph references are discarded.
+
+        Returns:
+            None. Do not replay graphs using released resources.
+        """
         self.solver.release()
 
 
@@ -198,6 +267,31 @@ class SymmetricEigensolver:
     reuse an updated starting subspace. The combined block must have full row
     rank; inspect ``status`` after replay. A starting subspace does not certify
     that all requested eigenvalues have been found.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+        k: Number of requested eigenpairs (positive integer).
+        ncv: Block dimension; None uses min(n, max(2*k, k+8)). Require k <= ncv <= n after
+            clipping.
+        which: Selection: LM/SM (largest/smallest magnitude), LA/SA (largest/smallest
+            algebraic), or BE (both ends).
+        iteration_operator: Optional block operator that amplifies the desired modes, such as a
+            shifted inverse. Must accept ncv RHSs. For partial untransformed block iteration
+            only LM is supported; use KrylovSchur for other selections.
+        tol: Positive tolerance for ||A*x-lambda*x|| / max(1, abs(lambda)), with unit-norm x.
+        target: Optional original-spectrum target; when supplied, nearest-target ordering
+            overrides which.
+        initial_vectors: Optional independent FP64 device rows of shape (s, n), 1 <= s <= ncv.
+            Missing rows are randomized.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(
@@ -411,6 +505,14 @@ class SymmetricEigensolver:
             wp.launch(K.triangular, self.n, [self.q, self.l], device=self.device)
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.status.zero_()
         if self.initial_vectors is None or self.initial_vectors.shape[0] < self.m:
             wp.launch(K.random_block, self.q.shape, [self.q, seed], device=self.device)
@@ -419,11 +521,21 @@ class SymmetricEigensolver:
         self.orthogonalize()
 
     def step(self):
+        """Advance one outer iteration or Krylov restart cycle using existing device state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.iter_op.apply(self.q, self.z)
         wp.copy(self.q, self.z)
         self.orthogonalize()
 
     def finalize(self):
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.op.apply(self.q, self.z)
         self.gram(self.q, self.z)
         self.diagonalize()
@@ -454,6 +566,17 @@ class SymmetricEigensolver:
         )
 
     def solve(self, iterations=50, seed=42):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         iterations = integer_index(iterations)
         if iterations < 0:
             raise ValueError("iterations must be nonnegative")
@@ -484,6 +607,20 @@ class SymmetricEigensolver:
         to the host. `iterations`, `converged`, and `status` remain on device.
         Default outer capture respects restrictions declared by both the
         iteration and physical operators, plus a subclass's mass operator.
+
+        Args:
+            max_iterations: Positive maximum number of outer iterations/restart cycles recorded
+                in the graph.
+            adaptive: None selects the supported policy; True requests a device-controlled outer
+                loop; False records a fixed budget. True is rejected if any participating
+                operator requires static capture.
+            finalizer: Optional zero-argument callable recording preallocated device
+                postprocessing after the solve. Called during warmup and recording, not as a
+                Python replay callback.
+
+        Returns:
+            A warp.Graph. Launch it with wp.capture_launch(graph); capture itself does not
+            produce a completed result.
         """
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
@@ -544,6 +681,27 @@ class KrylovSchur(SymmetricEigensolver):
     the operator. ``EigenpairEvaluation(..., eigenvalues=solver.eigenvalues)``
     checks the returned pairs with fresh products; use ``rhs_width=1`` for a
     one-RHS inverse. This optional final check does not alter iteration stopping.
+
+    Args:
+        operator: Real symmetric operator exposing n, device and apply(x, y) on FP64 row arrays.
+        k: Number of requested eigenpairs (positive integer).
+        ncv: Maximum basis dimension. None uses min(n, max(2*k, k+8)); require k < ncv <= n
+            after clipping.
+        which: Selection: LM/SM (largest/smallest magnitude), LA/SA (largest/smallest
+            algebraic), or BE (both ends).
+        tol: Positive tolerance for ||A*x-lambda*x|| / max(1, abs(lambda)); cached-product
+            residuals are estimates.
+        initial_vector: Optional finite nonzero FP64 device array of shape (n,). Read on each
+            initialization; not modified.
+
+    Attributes:
+        eigenvalues: FP64 device array (k,) of original-problem eigenvalues.
+        eigenvectors: FP64 device array (k, n); one eigenvector per row.
+        residuals: FP64 device array (k,) of normalized eigenpair residuals.
+        converged: int32 device array (1,); number of residual-passing requested pairs.
+        status: int32 device array (1,); zero means no recorded numerical failure, not
+            convergence.
+        iterations: int32 device array (1,); executed outer iterations/restart cycles.
     """
 
     def __init__(self, operator, k, ncv=None, which="LM", tol=1.0e-9, initial_vector=None):
@@ -586,6 +744,17 @@ class KrylovSchur(SymmetricEigensolver):
         self.zviews = [self.z[j : j + 1] for j in range(self.m)]
 
     def solve(self, iterations=50, seed=42):
+        """Initialize and execute a fixed iteration budget, updating device outputs.
+
+        Args:
+            iterations: Fixed number of outer iterations/restart cycles, not inner sparse-solver
+                iterations.
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            This solver instance. This is not a host tuple of eigenvalues and eigenvectors;
+            outputs remain device arrays.
+        """
         iterations = integer_index(iterations)
         if iterations < 1:
             raise ValueError("Krylov iteration needs at least one restart cycle")
@@ -730,6 +899,14 @@ class KrylovSchur(SymmetricEigensolver):
         )
 
     def initialize(self, seed=42):
+        """Initialize the iteration from current input values and supplied or seeded starts.
+
+        Args:
+            seed: Integer seed used for generated start directions.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         self.recoveries.zero_()
         self.g.zero_()
         self.status.zero_()
@@ -750,6 +927,11 @@ class KrylovSchur(SymmetricEigensolver):
             self.expand(j)
 
     def step(self):
+        """Advance one outer iteration or Krylov restart cycle using existing device state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         for j in range(self.keep, self.m):
             self.expand(j)
         self.op.apply(self.views[-1], self.zviews[-1])
@@ -814,6 +996,11 @@ class KrylovSchur(SymmetricEigensolver):
     def finalize(self):
         # The retained rows already are Ritz vectors. Remaining old basis rows
         # must not be included in a second projection after the restart.
+        """Update the documented device outputs from the current iteration state.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         wp.copy(self.eigenvectors, self.retained, count=self.k * self.n)
         wp.copy(self.ax, self.retained_ax, count=self.k * self.n)
         self.norms.zero_()
@@ -854,6 +1041,21 @@ class EigenpairEvaluation:
     All work remains on device and can be recorded as a capture finalizer.
     This independent check does not change the eigensolver's stopping rule or
     cached residual estimates. Input array identities/topology must stay fixed.
+
+    Args:
+        operator: Real standard-problem operator; vectors must have unit Euclidean norm.
+        vectors: Borrowed FP64 device row array (k, n).
+        tol: Positive tolerance for ||A*x-lambda*x|| / max(1, abs(lambda)).
+        eigenvalues: Optional borrowed FP64 device array (k,); None recomputes Rayleigh values
+            instead of checking supplied values.
+        rhs_width: Optional positive fixed operator application width dividing k; use 1 for a
+            one-RHS inverse.
+
+    Attributes:
+        values: FP64 device array (k,), checked values or recomputed Rayleigh values.
+        residuals: FP64 device array (k,), fresh standard-problem residuals.
+        converged: int32 device array (1,), number of passing supplied pairs; does not modify
+            solver stopping.
     """
 
     def __init__(self, operator, vectors, tol=1.0e-9, *, eigenvalues=None, rhs_width=None):
@@ -883,6 +1085,11 @@ class EigenpairEvaluation:
         self.converged = wp.zeros(1, dtype=wp.int32, device=self.device)
 
     def run(self):
+        """Evaluate current inputs and update device diagnostics; graph capturable.
+
+        Returns:
+            None. Results are written to the documented device arrays.
+        """
         if self.rhs_width is None:
             self.op.apply(self.vectors, self.ax)
         else:
