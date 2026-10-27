@@ -9,7 +9,7 @@ import warp as wp
 from benchmarks.applications.connection import make_connection_case
 from benchmarks.applications.connection_warp import ConnectionEigensolver
 from benchmarks.applications.runner import accuracy
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import complex_matrix, matrix, output
 from warpack import CGInverse
 

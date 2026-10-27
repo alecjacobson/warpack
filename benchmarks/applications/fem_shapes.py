@@ -16,7 +16,7 @@ import numpy as np
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG

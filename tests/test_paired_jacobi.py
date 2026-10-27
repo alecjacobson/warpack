@@ -95,7 +95,7 @@ def test_complete_solver_exact_control_and_independent_accuracy(n, kind):
 )
 @pytest.mark.parametrize("n", [104, 408])
 def test_nonfinite_bounded_loop_and_changed_input_recovery(n, tmp_path, constructor):
-    from benchmarks.audit_profile import graph_summary
+    from benchmarks.graph_audit import graph_summary
 
     rng = np.random.default_rng(172 + n)
     a = rng.normal(size=(n, n))

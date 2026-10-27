@@ -10,7 +10,7 @@ from warp.optim import linear
 from benchmarks.applications.fem_hierarchy import beam_problem
 from benchmarks.applications.force_covariance import dense_reference
 from benchmarks.applications.force_reciprocal import ForceReciprocalSolver
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 
 

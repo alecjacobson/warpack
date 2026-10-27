@@ -18,7 +18,7 @@ from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.applications.interior_fem import NAMES, make_interior_case
 from benchmarks.applications.negative_foundation import make_negative_foundation
 from benchmarks.applications.runner import accuracy, warp_output
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import CuDSSInverse, GeneralizedKrylovSchur, GMRESInverse, SparseOperator
 

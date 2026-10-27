@@ -14,15 +14,13 @@ import os
 import time
 from pathlib import Path
 
-import cupy as cp
-import cupyx.scipy.sparse.linalg as csl
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 import warp.optim.linear as linear
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.validate_dragon_meshes import mode_quality
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 from warpack import CGInverse, CuDSSInverse, KrylovSchur
@@ -64,6 +62,9 @@ def validate(sa, vectors, reference):
 
 
 def main():
+    import cupy as cp
+    import cupyx.scipy.sparse.linalg as csl
+
     p = argparse.ArgumentParser()
     p.add_argument("--part", choices=["direct", "pcg"], default="direct")
     p.add_argument("--repeats", type=int, default=3)

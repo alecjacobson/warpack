@@ -6,10 +6,8 @@ import importlib.util
 import json
 import time
 
-import cupy as cp
 import numpy as np
 import warp as wp
-from cupyx.scipy import sparse as cs
 
 from benchmarks.runtime import warp_runtime_hashes
 from warpack import GeneralEigensolver, KrylovSchur, SparseOperator
@@ -38,6 +36,9 @@ class StartedGeneral(GeneralEigensolver):
 
 
 def main():
+    import cupy as cp
+    from cupyx.scipy import sparse as cs
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--case")
     parser.add_argument("--out", default="results/upstream_benchmarks.json")

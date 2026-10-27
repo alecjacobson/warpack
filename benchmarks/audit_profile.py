@@ -5,33 +5,15 @@ restart and include event-node overhead. Inputs are produced by compare.py.
 """
 
 import argparse
-import collections
 import json
-import re
 import time
 from pathlib import Path
 
-import cupy as cp
-import cupyx.scipy.sparse as csp
-import cupyx.scipy.sparse.linalg as csl
-import cupyx.scipy.sparse.linalg._eigen as cupy_eigen
 import numpy as np
-import scipy.io
 import warp as wp
 
-from benchmarks.compare import quality, wp_matrix
+from benchmarks.graph_audit import graph_summary
 from warpack import KrylovSchur, SparseOperator
-
-
-def graph_summary(path):
-    text = Path(path).read_text()
-    return {
-        "node_types_including_conditional_body": dict(
-            collections.Counter(re.findall(r'label="\{\s*([A-Z_]+)', text))
-        ),
-        "memcpy_kinds": dict(collections.Counter(re.findall(r"\| \{kind \| ([^}]+)", text))),
-        "method": "CUDA graph DOT inspection; not a CUDA API trace",
-    }
 
 
 def replay_timing(graph, repeats=5):
@@ -117,6 +99,14 @@ def profile_restart(s):
 
 
 def main():
+    import cupy as cp
+    import cupyx.scipy.sparse as csp
+    import cupyx.scipy.sparse.linalg as csl
+    import cupyx.scipy.sparse.linalg._eigen as cupy_eigen
+    import scipy.io
+
+    from benchmarks.compare import quality, wp_matrix
+
     p = argparse.ArgumentParser()
     p.add_argument("--matrix", default="build/heterogeneous_laplacian_125000.mtx")
     p.add_argument("--out", default="results/audit_profile.json")

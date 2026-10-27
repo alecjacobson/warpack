@@ -218,14 +218,15 @@ Validation checks original equations, requested eigenvalues and invariant
 subspaces, mass orthogonality, repeated/null modes, changed-input replay and
 graph residency. Reference libraries are used outside library computation.
 
-The [latest passing validation checkpoint](results/paired_rotation_tiles/VALIDATION.md)
-records **3,384 distinct passing tests and 11 remaining skips** across a full run
-and a historical-fixture supplement, with separate stock-Warp and isolated-wheel
-checks. This includes the memory, graph-preparation and projected-solve regressions.
+The [library review and validation](results/library_review/README.md) records
+**3,519 passing tests and 11 skips** in the full GPU suite, followed by focused
+checks of the final API, stock Warp and installed wheels. It also compares accuracy and
+performance against unchanged main and audits runtime dependencies and graphs.
 The [v0.2.0 release report](results/release_v0_2_0/README.md) includes clean-wheel
 replay checks and the release review. This is not full upstream conformance.
-An [intermittent captured mass-QR stage regression](https://github.com/alecjacobson/warpack/issues/198)
-is under investigation; the next projection optimization has not been promoted.
+For affected CUDA stacks, complete the graph's first launch during setup before
+queueing changed inputs; see the [execution contract](docs/library_contracts.md#graph-setup-and-synchronization)
+and the open [upstream graph-upload issue](https://github.com/NVIDIA/warp/issues/2096).
 
 [Run tests and comparisons](docs/development.md)
 · [CuPy coverage](benchmarks/upstream/CUPY_REFRESH.md)

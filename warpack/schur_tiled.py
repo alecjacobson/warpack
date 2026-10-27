@@ -10,6 +10,7 @@ from functools import lru_cache
 
 import warp as wp
 
+from ._capture import capture_scope
 from .hermitian import cdot, cmul, norm2
 from .schur import cabs, cdiv, conj, csqrt
 
@@ -396,8 +397,7 @@ class TiledSchur:
     def prepare_qr(self):
         # The supported 570 driver needs pending setup writes completed before
         # graph upload; this is setup-only, as in the production capture paths.
-        wp.synchronize_device(self.device)
-        with wp.ScopedCapture(device=self.device) as capture:
+        with capture_scope(self.device) as capture:
             wp.capture_while(self.running, self.qr_step)
         self.eager_qr = capture.graph
 

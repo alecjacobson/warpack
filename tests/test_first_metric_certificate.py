@@ -5,8 +5,8 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.first_metric_certificate import FirstMetricCertificate
+from benchmarks.graph_audit import graph_summary
 
 
 def correlation(n):

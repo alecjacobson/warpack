@@ -7,8 +7,8 @@ import pytest
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.compare_block import FEM_CASES, prepare
+from benchmarks.graph_audit import graph_summary
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 
 

@@ -12,12 +12,12 @@ import warp as wp
 from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.anvil_inputs import array_identity, matrix_identity
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.blocked_triangular import BlockedTriangularBlock
 from benchmarks.experimental.lower_triangular_rotate import LowerTriangularRotateBlock
 from benchmarks.experimental.triangular_block_size import TriangularBlockSize
 from benchmarks.experimental.triangular_rotate import TriangularRotateBlock
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import BlockLOBPCG, SparseOperator

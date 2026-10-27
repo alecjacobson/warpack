@@ -39,4 +39,3 @@ def register_triangular(q: wp.array2d[wp.float64], factor: wp.array2d[wp.float64
             absolute = panel * 8 + row
             if absolute < q.shape[0]:
                 q[absolute, column] = rhs[row]
-

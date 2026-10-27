@@ -8,6 +8,7 @@ from operator import index as integer_index
 
 import warp as wp
 
+from ._capture import capture_scope, require_capture_setup
 from .general_checkpoint import GeneralCheckpoint
 from .hermitian import (
     HermitianCSR,
@@ -624,6 +625,7 @@ class GeneralEigensolver:
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")
+        require_capture_setup(self.device)
         if adaptive is None:
             adaptive = not getattr(self.op, "requires_static_outer_capture", False)
         if adaptive and getattr(self.op, "requires_static_outer_capture", False):
@@ -634,7 +636,6 @@ class GeneralEigensolver:
         self.finalize()
         if finalizer is not None:
             finalizer()
-        wp.synchronize_device(self.device)
 
         def body():
             self.step()
@@ -653,7 +654,7 @@ class GeneralEigensolver:
                 device=self.device,
             )
 
-        with wp.ScopedCapture(device=self.device) as cap:
+        with capture_scope(self.device) as cap:
             self.initialize()
             self.iterations.zero_()
             self.running.fill_(1)

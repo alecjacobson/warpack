@@ -14,7 +14,7 @@ import numpy as np
 import warp as wp
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.runtime import complete_warp_fingerprint, warp_runtime_hashes
 from benchmarks.upstream.adapters import output
 

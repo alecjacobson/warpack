@@ -13,6 +13,7 @@ import warp as wp
 
 from . import kernels as K
 from . import linalg_tiles as T
+from ._capture import capture_scope, require_capture_setup
 from .constraints import MassOrthogonalComplementInverse
 from .generalized import generalized_residual
 from .solver import SymmetricEigensolver
@@ -907,6 +908,7 @@ class BlockLOBPCG:
         max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")
+        require_capture_setup(self.device)
         static_only = any(
             getattr(op, "requires_static_outer_capture", False)
             for op in (self.op, self.mass, self.preconditioner)
@@ -922,7 +924,6 @@ class BlockLOBPCG:
             self._search.warm()
         if finalizer is not None:
             finalizer()
-        wp.synchronize_device(self.device)
 
         def body():
             self.step()
@@ -939,7 +940,7 @@ class BlockLOBPCG:
                 ],
             )
 
-        with wp.ScopedCapture(device=self.device) as capture:
+        with capture_scope(self.device) as capture:
             if initializer is not None:
                 initializer()
             self.initialize()

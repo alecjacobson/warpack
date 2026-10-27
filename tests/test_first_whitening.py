@@ -8,10 +8,10 @@ import scipy.linalg as la
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.compare_block import prepare
 from benchmarks.experimental.first_whitening import FirstWhiteningBlock
 from benchmarks.experimental.padded_first_whitening import PaddedFirstWhiteningBlock
+from benchmarks.graph_audit import graph_summary
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 from warpack.block import Identity
 

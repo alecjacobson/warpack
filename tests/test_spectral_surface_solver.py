@@ -8,7 +8,7 @@ from warp.optim import linear
 from benchmarks.applications.runner import accuracy
 from benchmarks.applications.spectral_surface import surface_pencil
 from benchmarks.applications.spectral_surface_compare import SurfaceSolver, problem
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 
 
 @pytest.mark.parametrize("backend", ["cg", "cudss"])

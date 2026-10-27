@@ -4,6 +4,8 @@ import functools
 
 import warp as wp
 
+from ._capture import capture_scope
+
 
 @wp.func
 def pair_left(i: int, r: int, n: int):
@@ -282,8 +284,7 @@ class GlobalJacobi:
             wp.load_module(module=global_jacobi_update.module, device=self.device, block_dim=128)
             # Keep setup graph upload behind pending initialization on drivers
             # affected by #61. No synchronization is performed on later calls.
-            wp.synchronize_device(self.device)
-            with wp.ScopedCapture(device=self.device) as capture:
+            with capture_scope(self.device) as capture:
                 self._capture()
             self.graph = capture.graph
         wp.capture_launch(self.graph)

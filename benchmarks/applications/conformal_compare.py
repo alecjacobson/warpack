@@ -19,7 +19,7 @@ from benchmarks.acceptance import (
     errors_below_tolerance,
     require_accepted,
 )
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.runtime import warp_runtime_hashes
 
 from . import conformal_backends as backends

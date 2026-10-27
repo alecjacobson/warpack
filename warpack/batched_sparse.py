@@ -4,6 +4,7 @@ from typing import Any
 
 import warp as wp
 
+from ._validation import fp64_rows
 from .solver import SparseOperator
 
 
@@ -93,11 +94,13 @@ class BatchedSparseOperator(SparseOperator):
     """FP64 CSR/3×3 BSR products sharing reads across adjacent RHS rows.
 
     Same constructor/contract as SparseOperator; inputs and outputs are distinct
-    contiguous (width, n) arrays. Shifted/signed operators use the base product.
+    (width, n) arrays; strided views are supported. Shifted/signed operators
+    use the base product.
     Sparse topology remains fixed during graph replay; values may be updated.
     """
 
     def apply(self, x, y):
+        fp64_rows(x, y, self.n, self.device)
         a = self.matrix
         if a.values.dtype == wp.float64 and self.shift == 0 and self.sign == 1:
             csr_block_product(a, x, y)

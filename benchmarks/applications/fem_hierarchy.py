@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 
 from .fem_cases import beam_mesh, elastic_matrices, reference
 from .fem_shapes import ShapeReplay, elapsed

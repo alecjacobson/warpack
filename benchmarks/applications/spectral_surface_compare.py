@@ -17,9 +17,9 @@ import scipy.sparse.linalg as sla
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.spectral_surface_block import SurfaceBlockSolver
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import CGInverse, CuDSSInverse, GeneralizedKrylovSchur, SparseOperator
 

@@ -11,8 +11,12 @@ from warpack import CuDSSInverse
 
 @pytest.mark.parametrize(
     "mtype,matching,expected,corrections",
-    [("spd", False, 0, 0), ("symmetric", False, 0, 1),
-     ("general", False, 0, 1), ("general", True, 5, 0)],
+    [
+        ("spd", False, 0, 0),
+        ("symmetric", False, 0, 1),
+        ("general", False, 0, 1),
+        ("general", True, 5, 0),
+    ],
 )
 @pytest.mark.parametrize("native_status", [0, 4])
 def test_explicit_matching_policy_precedes_analysis(

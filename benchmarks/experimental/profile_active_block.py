@@ -16,10 +16,10 @@ import numpy as np
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.block_inputs import initial_block
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.compare_block import prepare
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 from warpack import block as implementation

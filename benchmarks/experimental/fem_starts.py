@@ -15,8 +15,8 @@ import warp.sparse as ws
 from benchmarks.applications.compare import other_gpu_processes, run, timed
 from benchmarks.applications.fem_cases import elastic_matrices, make_fem_case, reference
 from benchmarks.applications.runner import accuracy
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import SparseOperator
 

@@ -17,7 +17,7 @@ def create(constructor, n):
 @pytest.mark.parametrize("n", [104, 612, 1024])
 @pytest.mark.parametrize("kind", ["indefinite", "repeated_null"])
 def test_column_norm_recovery_and_independent_full_basis(n, kind, tmp_path):
-    from benchmarks.audit_profile import graph_summary
+    from benchmarks.graph_audit import graph_summary
 
     rng = np.random.default_rng(159)
     a = rng.normal(size=(n, n))

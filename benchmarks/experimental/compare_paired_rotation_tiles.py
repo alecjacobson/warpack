@@ -10,9 +10,9 @@ import warp as wp
 from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.anvil_inputs import array_identity
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.paired_rotation_tiles import rotation
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from warpack.block_products import paired_ritz_rotation
 

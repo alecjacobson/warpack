@@ -5,7 +5,7 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from tests.test_compact_jacobi import allocate
 from warpack._compact_jacobi import CompactJacobi
 from warpack.projected import GlobalJacobi

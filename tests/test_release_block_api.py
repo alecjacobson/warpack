@@ -8,7 +8,7 @@ import scipy.linalg as la
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner, BatchedSparseOperator, BlockLOBPCG
 

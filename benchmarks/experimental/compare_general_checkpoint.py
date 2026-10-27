@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.general_checkpoint import CheckpointGeneral
+from benchmarks.graph_audit import graph_summary
 from benchmarks.runtime import warp_runtime_hashes
 from benchmarks.upstream.adapters import complex_matrix, output
 from benchmarks.upstream.check_general_references import read

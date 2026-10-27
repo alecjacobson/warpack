@@ -17,10 +17,10 @@ from benchmarks.anvil_inputs import array_identity, matrix_identity
 from benchmarks.applications.damped import quality
 from benchmarks.applications.damped_backends import initial, warp_setup
 from benchmarks.applications.damped_pencil import consistent_chain
-from benchmarks.audit_profile import graph_summary
 from benchmarks.cudss_provenance import cudss_dependencies
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.pencil_assembled_reference import assembled_reference
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import output
 from warpack import shift

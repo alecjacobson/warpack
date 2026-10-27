@@ -32,8 +32,14 @@ def test_explicit_control_and_restoration(monkeypatch, tmp_path, choice, compact
     monkeypatch.setattr(driver.compare_block, "main", compare)
     original_manifest = driver.compare_block.source_manifest
     argv = [
-        "compare", "--triangular", choice, "--public-api", "--out", str(destination),
-        "--reference-cache", str(tmp_path / "cache"),
+        "compare",
+        "--triangular",
+        choice,
+        "--public-api",
+        "--out",
+        str(destination),
+        "--reference-cache",
+        str(tmp_path / "cache"),
     ]
     if compact:
         argv.append("--compact-graphs")

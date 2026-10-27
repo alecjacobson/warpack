@@ -7,12 +7,12 @@ import pytest
 import scipy.linalg as la
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.paired_jacobi_runtime import (
     RuntimePairedCompact,
     RuntimePairedJacobi,
     update,
 )
+from benchmarks.graph_audit import graph_summary
 from tests.test_compact_jacobi import allocate
 from warpack import kernels as K
 from warpack._compact_jacobi import CompactJacobi

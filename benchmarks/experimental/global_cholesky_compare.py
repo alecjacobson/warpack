@@ -8,9 +8,9 @@ import numpy as np
 import warp as wp
 
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.global_cholesky import global_cholesky
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from warpack import kernels as K
 from warpack._projected_cholesky import packed_cholesky_kernel

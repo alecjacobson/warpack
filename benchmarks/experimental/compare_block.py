@@ -19,9 +19,9 @@ from benchmarks.applications.compare import other_gpu_processes, timed
 from benchmarks.applications.fem_cases import make_fem_case
 from benchmarks.applications.hodge import make_hodge_case
 from benchmarks.applications.runner import accuracy
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.block_lobpcg import BlockLOBPCG, UpstreamPreconditioner
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import CGInverse, SparseOperator

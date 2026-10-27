@@ -11,9 +11,9 @@ import warp as wp
 import warp.sparse as ws
 
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.batched_cg import RepeatedOperator
 from benchmarks.experimental.coalesced_operator import CoalescedSparseApplication
+from benchmarks.graph_audit import graph_summary
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 
 
