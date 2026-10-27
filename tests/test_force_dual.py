@@ -8,7 +8,7 @@ from warp.optim import linear
 
 from benchmarks.applications.fem_hierarchy import beam_problem
 from benchmarks.applications.force_dual import SnapshotROM, localized_forces, reference
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 
 

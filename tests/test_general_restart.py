@@ -5,7 +5,7 @@ import pytest
 import warp as wp
 from scipy.optimize import linear_sum_assignment
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import complex_matrix, output
 from warpack import GeneralEigensolver
 

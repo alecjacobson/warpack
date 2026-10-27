@@ -1,15 +1,25 @@
 """Reusable, graph-capturable symmetric block eigensolver."""
 
 import math
+from operator import index as integer_index
 
 import warp as wp
 
 from . import kernels as K
 from . import krylov_kernels as KR
 from . import linalg_tiles as KT
+from ._capture import capture_scope, require_capture_setup
+from ._validation import fp64_rows
 
 
 class SparseOperator:
+    """FP64 scalar CSR or 3x3 BSR operator on row-major vector blocks.
+
+    ``apply(x, y)`` accepts FP64 arrays of shape ``(width, n)`` on the matrix
+    device, including strided views. Input and output storage must not overlap.
+    Sparse topology remains fixed during graph replay; values may be updated.
+    """
+
     def __init__(self, matrix, shift=0.0, sign=1.0):
         if matrix.shape[0] < 1 or matrix.shape[0] != matrix.shape[1]:
             raise ValueError("operator must be square")
@@ -26,6 +36,7 @@ class SparseOperator:
         self.shift, self.sign = shift, sign
 
     def apply(self, x, y):
+        fp64_rows(x, y, self.n, self.device)
         a = self.matrix
         if a.values.dtype == wp.float64 and a.nnz / a.nrow > 64:
             wp.launch_tiled(
@@ -61,7 +72,10 @@ class CuDSSInverse:
     existing factors. Check original residuals for the chosen configuration.
     ``cooperative_refinement=True`` evaluates correction products with a warp
     per CSR row; useful for KKT matrices with a few very long constraint rows.
-    The default retains the thread-per-row product.
+    The default retains the thread-per-row product. Construct, apply and capture
+    on the same Warp stream: the native handle and workspace are stream-bound.
+    Graph replay may use a caller-ordered stream after capture has completed;
+    instances and their scratch must never execute concurrently.
     """
 
     requires_static_outer_capture = True
@@ -130,8 +144,9 @@ class CuDSSInverse:
             raise
 
     def apply(self, x, y):
-        if x.shape != (self.width, self.n) or y.shape != x.shape:
-            raise ValueError("cuDSS RHS shape must match the width used at setup")
+        fp64_rows(x, y, self.n, self.device, width=self.width, contiguous=True)
+        if wp.get_stream(self.device).cuda_stream != self.workspace.stream.cuda_stream:
+            raise RuntimeError("cuDSS apply/capture must use the construction stream")
         if not self.refinement_steps:
             self.solver.solve(x=y, b=x)
             return
@@ -439,12 +454,14 @@ class SymmetricEigensolver:
         )
 
     def solve(self, iterations=50, seed=42):
+        iterations = integer_index(iterations)
         if iterations < 0:
             raise ValueError("iterations must be nonnegative")
         self.initialize(seed)
         for _ in range(iterations):
             self.step()
         self.finalize()
+        self.iterations.fill_(iterations)
         return self
 
     def _update_loop(self, max_iterations):
@@ -468,8 +485,10 @@ class SymmetricEigensolver:
         Default outer capture respects restrictions declared by both the
         iteration and physical operators, plus a subclass's mass operator.
         """
+        max_iterations = integer_index(max_iterations)
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")
+        require_capture_setup(self.device)
         static_only = any(
             getattr(op, "requires_static_outer_capture", False)
             for op in (self.iter_op, self.op, getattr(self, "mass", None))
@@ -479,14 +498,13 @@ class SymmetricEigensolver:
         if adaptive and static_only:
             raise ValueError("This operator backend requires adaptive=False for the outer graph")
         self._prepare_capture(finalizer)
-        wp.synchronize_device(self.device)
 
         def body():
             self.step()
             self.finalize()
             self._update_loop(max_iterations)
 
-        with wp.ScopedCapture(device=self.device) as capture:
+        with capture_scope(self.device) as capture:
             self.initialize()
             self.iterations.zero_()
             self.running.fill_(1)
@@ -568,6 +586,7 @@ class KrylovSchur(SymmetricEigensolver):
         self.zviews = [self.z[j : j + 1] for j in range(self.m)]
 
     def solve(self, iterations=50, seed=42):
+        iterations = integer_index(iterations)
         if iterations < 1:
             raise ValueError("Krylov iteration needs at least one restart cycle")
         return super().solve(iterations, seed)

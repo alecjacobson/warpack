@@ -8,9 +8,9 @@ import numpy as np
 import warp as wp
 
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.jacobi_on_the_fly import OnTheFlyJacobi
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 from warpack import SparseOperator, SymmetricEigensolver

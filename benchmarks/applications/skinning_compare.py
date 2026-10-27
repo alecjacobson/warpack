@@ -15,8 +15,8 @@ import scipy.sparse.linalg as sla
 import warp as wp
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
-from benchmarks.audit_profile import graph_summary
 from benchmarks.cudss_provenance import cudss_dependencies
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import ConstrainedKrylovSchur, CuDSSInverse, SparseOperator, saddle_point_matrix
 

@@ -241,6 +241,13 @@ truncated FSAI/CG preconditioning, recovering positive eigenvalues on device.
 
 ## Graph replay
 
+`capture()` performs standalone setup and must be called outside an existing
+capture. It rejects nested capture before warmup mutates solver state. For
+composition, warm the solver first, then record `solve()` or the available
+`initialize()` / `step()` / `finalize()` methods in the caller's capture.
+See [execution contracts](library_contracts.md) for ownership and synchronization
+boundaries.
+
 Capture is a setup operation: it warms kernels, allocates workspaces and may
 synchronize. Ordinary compatible paths use device-controlled conditional loops.
 cuDSS uses fixed outer capture. `CGInverse` and `GMRESInverse` also default to

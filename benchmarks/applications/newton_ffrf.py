@@ -25,7 +25,7 @@ import warp.optim.linear as linear
 import warp.sparse as ws
 
 from benchmarks.applications.fem_cases import rigid_modes
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from examples.problems.elasticity import rigid_body_basis
 from warpack import (

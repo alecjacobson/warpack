@@ -17,7 +17,7 @@ from benchmarks.applications.newton_ffrf import (
     lattice,
     upstream,
 )
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 
 
 @pytest.mark.parametrize("boundary", ["free", "fixed"])

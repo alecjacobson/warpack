@@ -6,7 +6,7 @@ import scipy.sparse as sp
 import warp as wp
 import warp.sparse as ws
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack._coalesced_operator import CoalescedSparseApplication
 

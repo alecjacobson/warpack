@@ -6,7 +6,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import CGInverse
 

@@ -14,8 +14,8 @@ import warp as wp
 import warp.optim.linear as linear
 
 from benchmarks.anvil import clocked, validate
-from benchmarks.audit_profile import graph_summary
 from benchmarks.cg_recycling import FreshKrylovSchur, WarmCGInverse
+from benchmarks.graph_audit import graph_summary
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh, rigid_body_basis
 from warpack import CGInverse, CuDSSInverse, KrylovSchur, OrthogonalComplementOperator
 

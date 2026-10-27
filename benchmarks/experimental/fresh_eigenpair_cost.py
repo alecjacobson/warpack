@@ -12,7 +12,7 @@ import warp as wp
 
 from benchmarks.acceptance import errors_below_tolerance
 from benchmarks.applications.compare import other_gpu_processes, timed
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import CuDSSInverse, EigenpairEvaluation, KrylovSchur, SparseOperator
 

@@ -10,9 +10,9 @@ import warp as wp
 
 from benchmarks.anvil_inputs import array_identity
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
 from benchmarks.experimental.mixed_jacobi import MixedJacobi
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from warpack.projected import GlobalJacobi
 

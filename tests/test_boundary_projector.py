@@ -6,8 +6,8 @@ import warp as wp
 
 from benchmarks.applications.conformal import boundary_reference, make_conformal_case, metrics
 from benchmarks.applications.conformal_warp import ConformalEigensolver
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.boundary_projector import CenteredBoundary, ShiftedConformal
+from benchmarks.graph_audit import graph_summary
 
 
 @pytest.mark.parametrize("side,pin", [(8, 0), (8, 27), (70, 0)])

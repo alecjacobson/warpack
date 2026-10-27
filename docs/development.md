@@ -1,5 +1,7 @@
 # Testing and benchmarking
 
+See [library boundaries and execution contracts](library_contracts.md) for runtime, test, and benchmark separation.
+
 [Back to README](../README.md) · [Installation](installation.md)
 
 ## Local tests

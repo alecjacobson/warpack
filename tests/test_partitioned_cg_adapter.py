@@ -6,8 +6,8 @@ import scipy.sparse as sp
 import warp as wp
 from warp.optim import linear
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.batched_cg import CapturedActiveCG, CapturedPartitionedCG
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import BatchedCGPreconditioner
 

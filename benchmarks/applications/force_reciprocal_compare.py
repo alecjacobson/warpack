@@ -13,8 +13,8 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as sla
 import warp as wp
 
-from benchmarks.audit_profile import graph_summary
 from benchmarks.dependency_provenance import warp_dependencies
+from benchmarks.graph_audit import graph_summary
 from benchmarks.source_provenance import source_manifest
 from benchmarks.upstream.adapters import matrix
 

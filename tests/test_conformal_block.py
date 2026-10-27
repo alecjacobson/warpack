@@ -6,8 +6,8 @@ import warp as wp
 import warp.optim.linear as linear
 
 from benchmarks.applications.conformal import boundary_reference, make_conformal_case, metrics
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.conformal_block import ConformalBlockEigensolver
+from benchmarks.graph_audit import graph_summary
 
 supported = hasattr(linear, "FSAI") and hasattr(linear.LinearOperator, "batch_offsets")
 requires_upstream = pytest.mark.skipif(

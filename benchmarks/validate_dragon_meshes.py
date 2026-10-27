@@ -10,8 +10,6 @@ import json
 import time
 from pathlib import Path
 
-import cupy as cp
-import cupyx.scipy.sparse.linalg as csl
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as sla
@@ -69,6 +67,9 @@ def agreement(reference, other, ref_values, other_values):
 
 
 def validate(mesh, out):
+    import cupy as cp
+    import cupyx.scipy.sparse.linalg as csl
+
     x, t = read_mesh(mesh)
     x = (x - x.mean(0)) / np.ptp(x, axis=0).max()
     h, _, mass = assemble_rest(x, t)

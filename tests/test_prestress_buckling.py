@@ -72,7 +72,7 @@ def test_invalid_or_past_first_factor_shift_rejected(shift):
 def test_captured_signed_tet_buckling(sign, method, tmp_path):
     import warp as wp
 
-    from benchmarks.audit_profile import graph_summary
+    from benchmarks.graph_audit import graph_summary
     from benchmarks.upstream.adapters import matrix
     from warpack import BucklingEigensolver, CGInverse, CuDSSInverse, SparseOperator
 

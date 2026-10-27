@@ -14,8 +14,8 @@ from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, re
 from benchmarks.applications.compare import other_gpu_processes, run, timed
 from benchmarks.applications.negative_foundation import make_negative_foundation
 from benchmarks.applications.runner import accuracy
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.largest_block import LargestBlock, upper_shifted_matrix
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 
 

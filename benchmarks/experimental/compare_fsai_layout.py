@@ -11,8 +11,8 @@ import warp as wp
 import warp.optim.linear as linear
 
 from benchmarks.applications.compare import timed
-from benchmarks.audit_profile import graph_summary
 from benchmarks.experimental.batched_cg import RepeatedPreconditioner
+from benchmarks.graph_audit import graph_summary
 from examples.problems.elasticity import assemble_rest, mass_normalized, read_mesh
 
 

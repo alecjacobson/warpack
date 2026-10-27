@@ -15,7 +15,7 @@ from benchmarks.applications.compare import other_gpu_processes, run, timed
 from benchmarks.applications.pod_compare import snapshots
 from benchmarks.applications.problems import make_problem
 from benchmarks.applications.runner import accuracy
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import NormalSVD
 from warpack.normal_svd import _FullNormalCore

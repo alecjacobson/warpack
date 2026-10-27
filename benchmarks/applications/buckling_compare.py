@@ -15,7 +15,7 @@ import warp.optim.linear as linear
 import warp.sparse as ws
 
 from benchmarks.acceptance import add_diagnostic_argument, assess_comparison, require_accepted
-from benchmarks.audit_profile import graph_summary
+from benchmarks.graph_audit import graph_summary
 from benchmarks.upstream.adapters import matrix
 from warpack import BucklingEigensolver, CGInverse, CuDSSInverse, SparseOperator
 
