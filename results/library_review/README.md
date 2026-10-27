@@ -62,3 +62,66 @@ layout, ownership, stream restrictions and composing solves inside caller graphs
 Validation and timing results are being collected; this report is not yet a
 completed qualification. Raw failures and interrupted attempts will be retained
 alongside final passing checks. No README timing row has been replaced.
+
+### Completed checks (source `127fd97`)
+
+- Pinned Warp 1.18/FSAI full suite: **3,511 passed, 11 skipped, 8 failed** in
+  1,867.66 s. All eight failures are the shared mass-QR fixture tracked in #198.
+  This is a failed full regression, not a passing qualification. No new API,
+  stream or separation test failed. An earlier deliberately interrupted run
+  (1,677 passes, 30 skips) is retained separately and is not counted as complete.
+- Stock Warp 1.15 focused regression: **232 passed** (173.86 s).
+- Installed-wheel cuDSS capture/pivot/stream checks: **26 passed** (66.30 s).
+- Installed-wheel pure-Warp smoke passed with both stock and pinned Warp while
+  imports of comparison libraries and source-tree helpers were blocked. The
+  audit verified all 45 installed modules byte-for-byte against source;
+  wheel SHA256 `55206be388eb30b0c4fcd53fe694e4d6a0e7a70924d75af12284b8ea5be17585`.
+- All 3,528 tests collected with CuPy blocked before the two final stream tests
+  were added; final pinned collection contains 3,530 tests. Hosted package/lint
+  checks pass. No numerical tolerance or existing skip condition was relaxed.
+
+Unchanged main `a1b739a` also fails the focused 195-test stage group: one run
+returned 194 passes and a subspace error of 0.2273; a later fresh process again
+returned 194 passes and a subspace error of 0.6098. Both outputs in the latter
+case are mass-orthonormal, but the first has relative distance 0.08163 from the
+input row-space. The second output is correct to 9.52e-16. Actual device mass
+values, columns and offsets exactly match the host reference. This establishes
+an existing correctness failure on main, not its root cause or equivalence to
+all eight full-suite status failures. Passing intervening 195-test runs do not
+resolve it. State snapshots are collected only after the original assertion
+fails; the diagnostic plugin adds no pre-assertion synchronization.
+
+### Matched FEM timing regression
+
+Procedural clamped consistent-mass elasticity, 34,560 DOFs, 1,413,566 stiffness
+nonzeros; identical input fingerprints/settings on main and this branch. Three
+fresh workers per version, alternating order, five timed replays per worker.
+Every worker builds its own GPU factors/preconditioner; only the independently
+computed CPU reference is cached. GPU occupancy monitoring accepts all workers.
+The existing kernel cache is shared, so setup is not a cold-JIT comparison.
+
+| Solver / requested modes | Main replay (s) | Review replay (s) | Change | Main setup + capture (s) | Review setup + capture (s) |
+|---|---:|---:|---:|---:|---:|
+| Pure Warp BlockLOBPCG + FSAI/CG / 100 | 1.99860 | 1.99323 | -0.27% | 1.87818 | 1.86746 |
+| Warp generalized Krylov + cuDSS / 20 | 0.410379 | 0.410599 | +0.054% | 1.20965 | 1.19760 |
+
+Replay entries are medians of 15 samples; setup + capture is the median of
+three worker sums. Raw records also separate setup, recording and first launch.
+The two rows request different mode counts and are **not** a direct backend
+speed comparison. All 60 timed solves pass physical residual, orthogonality and
+requested-spectrum/subspace checks. Review maximum relative residuals are
+9.08e-12 (100-mode block) and 8.51e-13 (20-mode direct). The predeclared limits of
+10% replay regression and 25% setup-plus-capture regression both pass.
+
+Recorded graph counts match main exactly. Pure Warp records 323 device-to-device
+copies, no host copies and no host nodes. cuDSS records 702 host-to-device
+metadata copies and 1,078 device-to-device copies, with no host nodes or
+device-to-host copies. Its strict device-only contract consequently remains
+false (#29/#189); this review does not disguise vendor copies as a passing
+contract. Timing/accuracy of these cases does not override the full-suite hold.
+
+[Raw evidence](evidence/) includes complete failed logs/JUnit, passing checks,
+post-failure states and every timing sample with source/dependency/occupancy
+records. [The manifest](evidence/manifest.json) hashes decompressed artifacts;
+[the timing summary](evidence/timing-summary.json) contains aggregate values.
+No Anvil README timing row has been replaced by these different FEM cases.
