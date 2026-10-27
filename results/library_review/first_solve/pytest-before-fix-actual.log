@@ -1,0 +1,321 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+___________ test_first_warp_output_is_independently_gated[physical] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f26bbc95360>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-31/test_first_warp_output_is_inde0')
+failure = 'physical'
+
+    @pytest.mark.parametrize("failure", ["physical", "count", "status", "inner", None])
+    def test_first_warp_output_is_independently_gated(monkeypatch, tmp_path, failure):
+        """Inject first-only failures at the device-output boundary of the real reporter."""
+        p = make_problem("A", 31)
+        values, vectors = la.eigh(p.a.toarray(), p.b.toarray())
+        state = dict(launches=0, resets=0)
+    
+        def array(first, later):
+            return SimpleNamespace(numpy=lambda: np.asarray(first if state["launches"] == 1 else later))
+    
+        solver = SimpleNamespace(
+            capture=lambda steps: object(),
+            converged=array([p.k - (failure == "count")], [p.k]),
+            status=array([3 if failure == "status" else 0], [0]),
+            iterations=array([2], [2]),
+            residuals=array([0.0], [0.0]),
+        )
+    
+        def launch(graph):
+            state["launches"] += 1
+    
+        def reset():
+            state["resets"] += 1
+    
+        inverse = SimpleNamespace(
+            stats=array([31, 31, int(failure == "inner"), 1], [31, 31, 0, 1]),
+            reset_stats=reset,
+        )
+    
+        def output(problem, solver):
+            # Wrong requested spectrum with small physical residual and exact orthogonality.
+            selected = (
+                slice(-p.k, None) if failure == "physical" and state["launches"] == 1 else slice(p.k)
+            )
+            return values[selected], vectors[:, selected], None
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "timed", lambda fn: (1.0, fn()))
+        monkeypatch.setattr(compare, "other_gpu_processes", lambda: [])
+        monkeypatch.setattr(compare, "warp_setup", lambda *a, **k: (solver, inverse))
+        monkeypatch.setattr(compare, "warp_output", output)
+        monkeypatch.setattr(compare.wp, "capture_launch", launch)
+        monkeypatch.setattr(
+            compare.wp,
+            "capture_debug_dot_print",
+            lambda graph, path: Path(path).write_text("digraph {}"),
+        )
+        row = compare.run("A", p.n, "warp-cg", problem=p, repeats=2)
+>       first = row["first_solve_quality"]
+E       KeyError: 'first_solve_quality'
+
+/run/openclaw/horde/warpack-review/evidence/first-solve/test_before_fix.py:65: KeyError
+_____________ test_first_warp_output_is_independently_gated[count] _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f26bb963190>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-31/test_first_warp_output_is_inde1')
+failure = 'count'
+
+    @pytest.mark.parametrize("failure", ["physical", "count", "status", "inner", None])
+    def test_first_warp_output_is_independently_gated(monkeypatch, tmp_path, failure):
+        """Inject first-only failures at the device-output boundary of the real reporter."""
+        p = make_problem("A", 31)
+        values, vectors = la.eigh(p.a.toarray(), p.b.toarray())
+        state = dict(launches=0, resets=0)
+    
+        def array(first, later):
+            return SimpleNamespace(numpy=lambda: np.asarray(first if state["launches"] == 1 else later))
+    
+        solver = SimpleNamespace(
+            capture=lambda steps: object(),
+            converged=array([p.k - (failure == "count")], [p.k]),
+            status=array([3 if failure == "status" else 0], [0]),
+            iterations=array([2], [2]),
+            residuals=array([0.0], [0.0]),
+        )
+    
+        def launch(graph):
+            state["launches"] += 1
+    
+        def reset():
+            state["resets"] += 1
+    
+        inverse = SimpleNamespace(
+            stats=array([31, 31, int(failure == "inner"), 1], [31, 31, 0, 1]),
+            reset_stats=reset,
+        )
+    
+        def output(problem, solver):
+            # Wrong requested spectrum with small physical residual and exact orthogonality.
+            selected = (
+                slice(-p.k, None) if failure == "physical" and state["launches"] == 1 else slice(p.k)
+            )
+            return values[selected], vectors[:, selected], None
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "timed", lambda fn: (1.0, fn()))
+        monkeypatch.setattr(compare, "other_gpu_processes", lambda: [])
+        monkeypatch.setattr(compare, "warp_setup", lambda *a, **k: (solver, inverse))
+        monkeypatch.setattr(compare, "warp_output", output)
+        monkeypatch.setattr(compare.wp, "capture_launch", launch)
+        monkeypatch.setattr(
+            compare.wp,
+            "capture_debug_dot_print",
+            lambda graph, path: Path(path).write_text("digraph {}"),
+        )
+        row = compare.run("A", p.n, "warp-cg", problem=p, repeats=2)
+>       first = row["first_solve_quality"]
+E       KeyError: 'first_solve_quality'
+
+/run/openclaw/horde/warpack-review/evidence/first-solve/test_before_fix.py:65: KeyError
+____________ test_first_warp_output_is_independently_gated[status] _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f26d8757f40>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-31/test_first_warp_output_is_inde2')
+failure = 'status'
+
+    @pytest.mark.parametrize("failure", ["physical", "count", "status", "inner", None])
+    def test_first_warp_output_is_independently_gated(monkeypatch, tmp_path, failure):
+        """Inject first-only failures at the device-output boundary of the real reporter."""
+        p = make_problem("A", 31)
+        values, vectors = la.eigh(p.a.toarray(), p.b.toarray())
+        state = dict(launches=0, resets=0)
+    
+        def array(first, later):
+            return SimpleNamespace(numpy=lambda: np.asarray(first if state["launches"] == 1 else later))
+    
+        solver = SimpleNamespace(
+            capture=lambda steps: object(),
+            converged=array([p.k - (failure == "count")], [p.k]),
+            status=array([3 if failure == "status" else 0], [0]),
+            iterations=array([2], [2]),
+            residuals=array([0.0], [0.0]),
+        )
+    
+        def launch(graph):
+            state["launches"] += 1
+    
+        def reset():
+            state["resets"] += 1
+    
+        inverse = SimpleNamespace(
+            stats=array([31, 31, int(failure == "inner"), 1], [31, 31, 0, 1]),
+            reset_stats=reset,
+        )
+    
+        def output(problem, solver):
+            # Wrong requested spectrum with small physical residual and exact orthogonality.
+            selected = (
+                slice(-p.k, None) if failure == "physical" and state["launches"] == 1 else slice(p.k)
+            )
+            return values[selected], vectors[:, selected], None
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "timed", lambda fn: (1.0, fn()))
+        monkeypatch.setattr(compare, "other_gpu_processes", lambda: [])
+        monkeypatch.setattr(compare, "warp_setup", lambda *a, **k: (solver, inverse))
+        monkeypatch.setattr(compare, "warp_output", output)
+        monkeypatch.setattr(compare.wp, "capture_launch", launch)
+        monkeypatch.setattr(
+            compare.wp,
+            "capture_debug_dot_print",
+            lambda graph, path: Path(path).write_text("digraph {}"),
+        )
+        row = compare.run("A", p.n, "warp-cg", problem=p, repeats=2)
+>       first = row["first_solve_quality"]
+E       KeyError: 'first_solve_quality'
+
+/run/openclaw/horde/warpack-review/evidence/first-solve/test_before_fix.py:65: KeyError
+_____________ test_first_warp_output_is_independently_gated[inner] _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f26bb94f9d0>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-31/test_first_warp_output_is_inde3')
+failure = 'inner'
+
+    @pytest.mark.parametrize("failure", ["physical", "count", "status", "inner", None])
+    def test_first_warp_output_is_independently_gated(monkeypatch, tmp_path, failure):
+        """Inject first-only failures at the device-output boundary of the real reporter."""
+        p = make_problem("A", 31)
+        values, vectors = la.eigh(p.a.toarray(), p.b.toarray())
+        state = dict(launches=0, resets=0)
+    
+        def array(first, later):
+            return SimpleNamespace(numpy=lambda: np.asarray(first if state["launches"] == 1 else later))
+    
+        solver = SimpleNamespace(
+            capture=lambda steps: object(),
+            converged=array([p.k - (failure == "count")], [p.k]),
+            status=array([3 if failure == "status" else 0], [0]),
+            iterations=array([2], [2]),
+            residuals=array([0.0], [0.0]),
+        )
+    
+        def launch(graph):
+            state["launches"] += 1
+    
+        def reset():
+            state["resets"] += 1
+    
+        inverse = SimpleNamespace(
+            stats=array([31, 31, int(failure == "inner"), 1], [31, 31, 0, 1]),
+            reset_stats=reset,
+        )
+    
+        def output(problem, solver):
+            # Wrong requested spectrum with small physical residual and exact orthogonality.
+            selected = (
+                slice(-p.k, None) if failure == "physical" and state["launches"] == 1 else slice(p.k)
+            )
+            return values[selected], vectors[:, selected], None
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "timed", lambda fn: (1.0, fn()))
+        monkeypatch.setattr(compare, "other_gpu_processes", lambda: [])
+        monkeypatch.setattr(compare, "warp_setup", lambda *a, **k: (solver, inverse))
+        monkeypatch.setattr(compare, "warp_output", output)
+        monkeypatch.setattr(compare.wp, "capture_launch", launch)
+        monkeypatch.setattr(
+            compare.wp,
+            "capture_debug_dot_print",
+            lambda graph, path: Path(path).write_text("digraph {}"),
+        )
+        row = compare.run("A", p.n, "warp-cg", problem=p, repeats=2)
+>       first = row["first_solve_quality"]
+E       KeyError: 'first_solve_quality'
+
+/run/openclaw/horde/warpack-review/evidence/first-solve/test_before_fix.py:65: KeyError
+_____________ test_first_warp_output_is_independently_gated[None] ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f26bb95ad40>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-31/test_first_warp_output_is_inde4')
+failure = None
+
+    @pytest.mark.parametrize("failure", ["physical", "count", "status", "inner", None])
+    def test_first_warp_output_is_independently_gated(monkeypatch, tmp_path, failure):
+        """Inject first-only failures at the device-output boundary of the real reporter."""
+        p = make_problem("A", 31)
+        values, vectors = la.eigh(p.a.toarray(), p.b.toarray())
+        state = dict(launches=0, resets=0)
+    
+        def array(first, later):
+            return SimpleNamespace(numpy=lambda: np.asarray(first if state["launches"] == 1 else later))
+    
+        solver = SimpleNamespace(
+            capture=lambda steps: object(),
+            converged=array([p.k - (failure == "count")], [p.k]),
+            status=array([3 if failure == "status" else 0], [0]),
+            iterations=array([2], [2]),
+            residuals=array([0.0], [0.0]),
+        )
+    
+        def launch(graph):
+            state["launches"] += 1
+    
+        def reset():
+            state["resets"] += 1
+    
+        inverse = SimpleNamespace(
+            stats=array([31, 31, int(failure == "inner"), 1], [31, 31, 0, 1]),
+            reset_stats=reset,
+        )
+    
+        def output(problem, solver):
+            # Wrong requested spectrum with small physical residual and exact orthogonality.
+            selected = (
+                slice(-p.k, None) if failure == "physical" and state["launches"] == 1 else slice(p.k)
+            )
+            return values[selected], vectors[:, selected], None
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "timed", lambda fn: (1.0, fn()))
+        monkeypatch.setattr(compare, "other_gpu_processes", lambda: [])
+        monkeypatch.setattr(compare, "warp_setup", lambda *a, **k: (solver, inverse))
+        monkeypatch.setattr(compare, "warp_output", output)
+        monkeypatch.setattr(compare.wp, "capture_launch", launch)
+        monkeypatch.setattr(
+            compare.wp,
+            "capture_debug_dot_print",
+            lambda graph, path: Path(path).write_text("digraph {}"),
+        )
+        row = compare.run("A", p.n, "warp-cg", problem=p, repeats=2)
+>       first = row["first_solve_quality"]
+E       KeyError: 'first_solve_quality'
+
+/run/openclaw/horde/warpack-review/evidence/first-solve/test_before_fix.py:65: KeyError
+_____________________ test_first_reference_output_is_gated _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f26d8757730>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-31/test_first_reference_output_is0')
+
+    def test_first_reference_output_is_gated(monkeypatch, tmp_path):
+        p = make_problem("A", 31)
+        values, vectors = la.eigh(p.a.toarray(), p.b.toarray())
+        outputs = iter(
+            [(values[-p.k :], vectors[:, -p.k :], None)]
+            + [(values[: p.k], vectors[:, : p.k], None)] * 2
+        )
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "timed", lambda fn: (1.0, fn()))
+        monkeypatch.setattr(compare, "other_gpu_processes", lambda: [])
+        monkeypatch.setattr(compare, "scipy_setup", lambda *a, **k: lambda: next(outputs))
+        row = compare.run("A", p.n, "scipy", problem=p, repeats=2)
+>       assert not row["first_solve_accepted"]
+E       KeyError: 'first_solve_accepted'
+
+/run/openclaw/horde/warpack-review/evidence/first-solve/test_before_fix.py:98: KeyError
+=========================== short test summary info ============================
+FAILED ../evidence/first-solve/test_before_fix.py::test_first_warp_output_is_independently_gated[physical]
+FAILED ../evidence/first-solve/test_before_fix.py::test_first_warp_output_is_independently_gated[count]
+FAILED ../evidence/first-solve/test_before_fix.py::test_first_warp_output_is_independently_gated[status]
+FAILED ../evidence/first-solve/test_before_fix.py::test_first_warp_output_is_independently_gated[inner]
+FAILED ../evidence/first-solve/test_before_fix.py::test_first_warp_output_is_independently_gated[None]
+FAILED ../evidence/first-solve/test_before_fix.py::test_first_reference_output_is_gated
+6 failed, 11 deselected in 0.90s

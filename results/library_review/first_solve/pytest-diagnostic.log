@@ -1,0 +1,162 @@
+..........F                                                              [100%]
+=================================== FAILURES ===================================
+________ test_changed_input_first_output_after_setup_protocol[warp-cg] _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7efc68599240>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-29/test_changed_input_first_outpu1')
+method = 'warp-cg'
+
+    @pytest.mark.parametrize("method", ["warp", "warp-cg"])
+    def test_changed_input_first_output_after_setup_protocol(monkeypatch, tmp_path, method):
+        """Establish graph upload during setup, then change the start before first measured use."""
+        setup = compare.warp_setup
+        seen = []
+    
+        def with_updated_start(p, *args, **kwargs):
+            solver, inverse = setup(p, *args, **kwargs)
+            start = wp.array(np.ones(p.n), dtype=wp.float64, device=solver.device)
+            solver.initial_vector = start
+            capture = solver.capture
+    
+            def captured(steps):
+                graph = capture(steps)
+                wp.capture_launch(graph)
+                wp.synchronize_device(solver.device)
+                replacement = wp.array(
+                    np.random.default_rng(817).normal(size=p.n), dtype=wp.float64, device=solver.device
+                )
+                wp.copy(start, replacement)
+                seen.append((start, replacement))
+                return graph
+    
+            solver.capture = captured
+            return solver, inverse
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "warp_setup", with_updated_start)
+        row = compare.run("A", 80, method, repeats=1, steps=40)
+>       assert row["accepted"], json.dumps(row, indent=2)
+E       AssertionError: {
+E           "api_class": "A",
+E           "requested_size": 80,
+E           "problem": "bar_A",
+E           "n": 80,
+E           "columns": 80,
+E           "nnz": 238,
+E           "mass_nnz": 238,
+E           "k": 4,
+E           "ncv": 32,
+E           "method": "warp-cg",
+E           "matrix_sha256": "dd493da0847bc3e63d7a49189cfa2b923116d9154597cc54034141ca2bfd2c63",
+E           "notes": "P1 clamped axial FEM; non-diagonal consistent mass",
+E           "target": [
+E             -1.0,
+E             0.0
+E           ],
+E           "seed": 2026,
+E           "outer_cycles": 40,
+E           "cg_preconditioner": "upstream diagonal",
+E           "cg_block_size": 1,
+E           "cg_tolerance": 1e-13,
+E           "cg_absolute_tolerance": null,
+E           "cg_maxiter": 10000,
+E           "start": "Warp seed 42; same start restored on every replay",
+E           "iteration_method": "GeneralizedKrylovSchur",
+E           "cudss_refinement_steps": null,
+E           "cg_refinement_steps": null,
+E           "cg_refinement_tol": null,
+E           "cudss_reordering": null,
+E           "cudss_matching": null,
+E           "cudss_mtype": null,
+E           "setup_seconds": 0.010613776743412018,
+E           "capture_seconds": 7.372054282575846,
+E           "graph_audit": {
+E             "host_nodes": 0,
+E             "memcpy_kinds": {
+E               "DtoD (DEVICE to DEVICE)": 4070
+E             },
+E             "method": "CUDA graph DOT including nested bodies; not an API trace"
+E           },
+E           "warmup_seconds": 1.000039342790842,
+E           "first_solve_quality": {
+E             "accepted": true,
+E             "residual": 5.3433763957853304e-11,
+E             "max_absolute_residual": 3.9500611115350637e-11,
+E             "orthogonality": 1.0436096431476471e-14,
+E             "spectrum_error": 3.779160360506864e-15,
+E             "outer_iterations": 40,
+E             "breakdown_recoveries": 29,
+E             "solver_status": 0,
+E             "reported_converged": 3,
+E             "solver_full_count": false,
+E             "reported_max_residual": 5.342199527942921e-11,
+E             "inner_solve_statistics": {
+E               "total_iterations": 53999,
+E               "max_iterations_per_rhs": 80,
+E               "unconverged_rhs": 0,
+E               "rhs_calls": 1007
+E             },
+E             "inner_inverse_converged": true
+E           },
+E           "first_solve_accepted": false,
+E           "first_solve_scope": "First captured solve (or first reference solve); validation is outside compute timing",
+E           "cg_statistics": [
+E             {
+E               "total_iterations": 53999,
+E               "max_iterations_per_rhs": 80,
+E               "unconverged_rhs": 0,
+E               "rhs_calls": 1007
+E             }
+E           ],
+E           "cudss_used": false,
+E           "cudss_dependency": null,
+E           "samples_seconds": [
+E             1.0001365281641483
+E           ],
+E           "solve_seconds": 1.0001365281641483,
+E           "validation": [
+E             {
+E               "accepted": true,
+E               "residual": 5.3433763957853304e-11,
+E               "max_absolute_residual": 3.9500611115350637e-11,
+E               "orthogonality": 1.0436096431476471e-14,
+E               "spectrum_error": 3.779160360506864e-15,
+E               "outer_iterations": 40,
+E               "breakdown_recoveries": 29,
+E               "solver_status": 0,
+E               "reported_converged": 3,
+E               "solver_full_count": false,
+E               "reported_max_residual": 5.342199527942921e-11,
+E               "inner_solve_statistics": {
+E                 "total_iterations": 53999,
+E                 "max_iterations_per_rhs": 80,
+E                 "unconverged_rhs": 0,
+E                 "rhs_calls": 1007
+E               },
+E               "inner_inverse_converged": true
+E             }
+E           ],
+E           "accepted": false,
+E           "other_gpu_processes": [],
+E           "timing_uncontended": true,
+E           "reported_converged": 3,
+E           "status": 0,
+E           "device_only_graph": true,
+E           "outcome": "failed",
+E           "contract_accepted": false
+E         }
+E       assert False
+
+/run/openclaw/horde/warpack-review/source/tests/test_application_first_solve.py:143: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module _bsr_get_diag_kernel_7a6beb6f a1fa5c4 load on device 'cuda:0' took 0.57 ms  (cached)
+Module _extract_inverse_diagonal_scalar_7b168f8f 72ab56c load on device 'cuda:0' took 0.40 ms  (cached)
+Module _create_tiled_dot_kernels__locals__block_dot_kernel_7cdd1072 cb8e22e load on device 'cuda:0' took 0.46 ms  (cached)
+Module _create_tiled_dot_kernels__locals__block_sum_kernel_85ad7d89 bba3435 load on device 'cuda:0' took 0.44 ms  (cached)
+Module warp.optim.linear 395da8b load on device 'cuda:0' took 0.75 ms  (cached)
+Module make_bsr_mv_kernel__locals__bsr_mv_kernel_f553f011 0fdd445 load on device 'cuda:0' took 0.38 ms  (cached)
+Module _diag_mv_kernel_cf66d25c 634075a load on device 'cuda:0' took 0.60 ms  (cached)
+Module _create_update_condition_kernel__locals___update_condition_bba29a29 0492586 load on device 'cuda:0' took 0.44 ms  (cached)
+=========================== short test summary info ============================
+FAILED tests/test_application_first_solve.py::test_changed_input_first_output_after_setup_protocol[warp-cg]
+1 failed, 10 passed, 6 deselected in 36.80s

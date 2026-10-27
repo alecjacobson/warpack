@@ -6,6 +6,10 @@ passes after containing the QR fixture's first-upload ordering failure; final
 API, installed-wheel, stock-Warp and timing checks also pass. See
 [final qualification](#final-qualification) for exact scopes and measurements.
 
+The common benchmark first-output follow-up is documented in
+[first-solve acceptance](first_solve/README.md), including its rejected
+conformal evidence and remaining independent-worker scope.
+
 The held wide-projection candidate in PR #201 was not promoted. Its separate
 qualification remains tracked in #198, and the upstream graph-upload issue #61
 remains open. This review does not certify other GPUs/drivers.

@@ -1,0 +1,71 @@
+........................................................................ [ 79%]
+.............F....F                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_actual_application_first_output_and_replay[F] ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3724008460>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-28/test_actual_application_first_5')
+api_class = 'F'
+
+    @pytest.mark.parametrize("api_class", list("ABCDEFGHI"))
+    def test_actual_application_first_output_and_replay(monkeypatch, tmp_path, api_class):
+        monkeypatch.chdir(tmp_path)
+        row = compare.run(api_class, 80, "warp", repeats=1, steps=100 if api_class in "DG" else 40)
+>       assert row["accepted"], row
+E       AssertionError: {'api_class': 'F', 'requested_size': 80, 'problem': 'spectral_conformal', 'n': 72, ...}
+E       assert False
+
+/run/openclaw/horde/warpack-review/source/tests/test_application_first_solve.py:107: AssertionError
+________ test_changed_input_first_output_after_setup_protocol[warp-cg] _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3700028ca0>
+tmp_path = PosixPath('/run/openclaw/horde/pytest-of-horde/pytest-28/test_changed_input_first_outpu1')
+method = 'warp-cg'
+
+    @pytest.mark.parametrize("method", ["warp", "warp-cg"])
+    def test_changed_input_first_output_after_setup_protocol(monkeypatch, tmp_path, method):
+        """Establish graph upload during setup, then change the start before first measured use."""
+        setup = compare.warp_setup
+        seen = []
+    
+        def with_updated_start(p, *args, **kwargs):
+            solver, inverse = setup(p, *args, **kwargs)
+            start = wp.array(np.ones(p.n), dtype=wp.float64, device=solver.device)
+            solver.initial_vector = start
+            capture = solver.capture
+    
+            def captured(steps):
+                graph = capture(steps)
+                wp.capture_launch(graph)
+                wp.synchronize_device(solver.device)
+                replacement = wp.array(
+                    np.random.default_rng(817).normal(size=p.n), dtype=wp.float64, device=solver.device
+                )
+                wp.copy(start, replacement)
+                seen.append(start.numpy())
+                return graph
+    
+            solver.capture = captured
+            return solver, inverse
+    
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(compare, "warp_setup", with_updated_start)
+        row = compare.run("A", 80, method, repeats=1, steps=40)
+>       assert row["accepted"], row
+E       AssertionError: {'api_class': 'A', 'requested_size': 80, 'problem': 'bar_A', 'n': 80, ...}
+E       assert False
+
+/run/openclaw/horde/warpack-review/source/tests/test_application_first_solve.py:142: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Module _bsr_get_diag_kernel_7a6beb6f a1fa5c4 load on device 'cuda:0' took 0.59 ms  (cached)
+Module _extract_inverse_diagonal_scalar_7b168f8f 72ab56c load on device 'cuda:0' took 0.43 ms  (cached)
+Module _create_tiled_dot_kernels__locals__block_dot_kernel_7cdd1072 cb8e22e load on device 'cuda:0' took 0.45 ms  (cached)
+Module _create_tiled_dot_kernels__locals__block_sum_kernel_85ad7d89 bba3435 load on device 'cuda:0' took 0.43 ms  (cached)
+Module warp.optim.linear 395da8b load on device 'cuda:0' took 0.77 ms  (cached)
+Module make_bsr_mv_kernel__locals__bsr_mv_kernel_f553f011 0fdd445 load on device 'cuda:0' took 0.38 ms  (cached)
+Module _diag_mv_kernel_cf66d25c 634075a load on device 'cuda:0' took 0.61 ms  (cached)
+Module _create_update_condition_kernel__locals___update_condition_bba29a29 0492586 load on device 'cuda:0' took 0.44 ms  (cached)
+=========================== short test summary info ============================
+FAILED tests/test_application_first_solve.py::test_actual_application_first_output_and_replay[F]
+FAILED tests/test_application_first_solve.py::test_changed_input_first_output_after_setup_protocol[warp-cg]
+2 failed, 89 passed in 37.36s

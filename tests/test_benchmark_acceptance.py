@@ -154,3 +154,37 @@ def test_inclusive_error_vector_rejects_invalid_measurement(position, invalid):
 def test_inclusive_error_vector_preserves_equality_and_rejects_missing_evidence():
     assert errors_below_tolerance([0.0, 1e-12], 1e-12, inclusive=True)
     assert not errors_below_tolerance([], 1e-12, inclusive=True)
+
+
+@pytest.mark.parametrize(
+    "first",
+    [
+        None,
+        {},
+        dict(accepted=False),
+        dict(accepted=True, solver_full_count=False),
+        dict(accepted=True, native_stopping_passed=False),
+        dict(accepted=True, solver_status=3),
+        dict(accepted=True, inner_inverse_converged=False),
+    ],
+)
+def test_first_failure_overrides_success_flags_and_later_evidence(first):
+    row = dict(
+        accepted=True,
+        first_solve_accepted=True,
+        first_solve_quality=first,
+        validation=[dict(accepted=True)],
+    )
+    report = {}
+    assert not assess_comparison(report, [row])
+    with pytest.raises(SystemExit):
+        require_accepted(report)
+    assert row["validation"] == [dict(accepted=True)]
+    assert row["first_solve_quality"] == first
+
+
+def test_historical_warm_evidence_is_not_retroactively_certified_for_first_use():
+    row = dict(accepted=True, validation=[dict(accepted=True)])
+    assert assess_comparison({}, [row])
+    assert "first_solve_quality" not in row
+    assert "first_solve_accepted" not in row
