@@ -1,6 +1,6 @@
 # Proposal to integrate sparse eigensolvers into warp.optim
 
-**Status:** Draft for discussion. **Date:** 2026-10-27.
+**Status:** Draft for discussion. **Updated:** 2026-10-29.
 
 [Documentation](../index.md) · [Current API](../api/README.md) · [Current execution contracts](../library_contracts.md)
 
@@ -13,6 +13,13 @@ and Warp-array results on the selected CPU or CUDA device. Support both CPU and
 CUDA from the first public integration. Reuse Warp's sparse matrices, linear
 operators, CG, GMRES and preconditioners. Keep all eigensolver arithmetic in Warp; allow an
 optional cuDSS provider for sparse factorization and solves.
+
+`warp.optim.eigen` will not construct problem matrices. Callers provide assembled
+matrices or matrix-free operators; examples and tests will use `warp.fem` for
+matrix construction as much as possible. Include a reusable stateful linear
+system solver abstraction in `warp.optim.linear`, so eigen routines can borrow
+pure-Warp or optional cuDSS solve state through the same contract. Pure Warp is
+the default numerical backend.
 
 The primary workflow is reduced-order model construction:
 
@@ -78,6 +85,34 @@ CUDA graph capture is a CUDA execution capability. The CPU path executes the
 same prepared solver eagerly and does not require graph emulation. Optional
 cuDSS remains CUDA-only; requesting that provider on CPU raises a clear backend
 error, while the pure-Warp solvers and inverse paths remain available on CPU.
+
+### Matrix construction belongs to the caller
+
+The eigen module consumes matrices and operators; it does not assemble stiffness,
+mass, shifted, constraint/KKT or application-specific matrices. In particular,
+the caller supplies the system $S=K-\sigma M$ to a linear solver before passing
+that solver into an eigen routine. Omitting a mass matrix uses an identity action,
+not an assembled identity matrix. A matrix-free composition may apply a shift
+without materializing it. A direct solver may require an explicit matrix, which
+the caller must supply.
+
+This boundary concerns problem matrices. Internal Gram and projected Ritz
+matrices, basis storage and numerical workspace remain part of the eigensolver.
+Backend storage conversion and factorization belong to the linear solver; they
+do not authorize application matrix assembly inside `warp.optim.eigen`.
+
+Examples and tests should use `warp.fem` as much as possible to assemble their
+stiffness and mass matrices, including procedural elasticity and Laplacian cases,
+consistent and lumped mass, and boundary conditions. Keep assembly in example
+drivers or test fixtures, with reusable assembly functionality in `warp.fem`
+and sparse operations in `warp.sparse`. The eigen implementation must not depend
+on `warp.fem`, mesh loaders or application assembly helpers.
+
+Retain directly constructed diagonal/block fixtures and independent small dense
+references where they isolate selection, multiplicity or failure behavior better
+than a FEM problem. Using `warp.fem` for realistic fixtures must not make it the
+sole accuracy oracle. Exercise representative FEM assembly-to-solve workflows on
+both CPU and CUDA, and report assembly cost separately from solver setup.
 
 ## Current implementation and integration work
 
@@ -187,8 +222,8 @@ silently switches to the other algorithm.
 | KrylovSchur argument | Contract |
 |---|---|
 | `which` | Without a shift, standard problems support `LM`, `SM`, `LA`, `SA`, `BE`; generalized regular mode initially supports `LM`, `LA`, `SA`. Unsupported combinations raise during setup. |
-| `sigma`, `inverse` | A real shift and an action approximating $(A-\sigma M)^{-1}$. Both supplied together. Initially require `which="LM"`, meaning largest transformed magnitude, hence nearest physical eigenvalues to `sigma`. The inverse applies only the solve; the eigensolver applies the mass matrix. |
-| `mass_inverse` | Required for generalized regular mode when `mass` is supplied; absent for shift-invert. Applies $M^{-1}$. The algorithm retains the mass inner product. |
+| `sigma`, `inverse` | A real shift and a borrowed `linear.LinearSystemSolver` bound to the caller-supplied $A-\sigma M$ system, or a compatible inverse action. Both supplied together. Initially require `which="LM"`, meaning largest transformed magnitude, hence nearest physical eigenvalues to `sigma`. The inverse applies only the solve; the eigensolver applies the mass matrix. |
+| `mass_inverse` | Required for generalized regular mode when `mass` is supplied; absent for shift-invert. A borrowed linear system solver bound to the mass matrix, or compatible action applying $M^{-1}$. The algorithm retains the mass inner product. |
 | `initial_vector` | Optional starting vector, a scalar array of shape `(n,)`, copied into private workspace on each call. The initial implementation accepts one start, not a block. If absent, use a deterministic device generator. |
 | `ncv` | Search dimension, `k < ncv <= n`; default `min(n, max(2*k, k+8))`. |
 
@@ -219,7 +254,7 @@ eigensolver's output order.
 ### Generalized low modes
 
 ```python
-# Proposed API. K and M are already assembled device matrices.
+# Proposed API. The example driver assembles K and M using warp.fem.
 import warp as wp
 from warp.optim import eigen
 
@@ -249,9 +284,13 @@ than adding a second CG or FSAI implementation in the eigen module.
 ### Shift-invert with an explicit backend
 
 ```python
-# Proposed API. shifted_solve solves S y = x, where S = K - sigma*M.
-# Assemble S and prepare its factorization or iterative state before this call.
-from warp.optim import eigen
+# Proposed API, including the new matrix-bound linear solver construction.
+# The driver uses warp.fem for K and M and warp.sparse to form S=K-sigma*M.
+# This example assumes S is SPD; use GMRES for a general/indefinite system.
+from warp.optim import eigen, linear
+
+shifted_solve = linear.CG(S, tol=1e-11, atol=0.0, maxiter=1000, check_every=0)
+shifted_solve.prepare(nrhs=1)
 
 solver = eigen.KrylovSchur(
     K, k=20, mass=M, sigma=sigma, inverse=shifted_solve,
@@ -261,7 +300,22 @@ solver.prepare()
 result = solver()
 ```
 
-The same call accepts a cuDSS solve adapter or a Warp iterative solve adapter.
+The default path above is pure Warp on CPU or CUDA. For an explicit optional
+direct solve on CUDA, replace only the linear solver construction:
+
+```python
+# Proposed optional provider; S is already assembled on CUDA.
+shifted_solve = linear.CuDSS(S, matrix_type="spd")
+shifted_solve.prepare(nrhs=1)
+# Pass this state as inverse=shifted_solve to the same KrylovSchur constructor.
+```
+
+Matrix-bound construction without `b` and `x`, `prepare(nrhs=...)`, and
+`linear.CuDSS` are proposed additions, not existing Warp API calls. The initial
+implementation must preserve the existing `CG(A, b, x, ...)` and callable-state
+interfaces while adding the reusable system-solve contract below.
+
+The same eigen call accepts either state.
 The frontend does not choose a sparse factorization, assemble the shift, or
 invoke a vendor package implicitly. CG is only valid for an SPD shifted matrix;
 an interior shift can require GMRES or an appropriate direct factorization.
@@ -388,13 +442,70 @@ application and capture streams; permit cross-stream replay only with establishe
 ordering and tested provider support. Closing an owned resource while captured
 work can still reference it is an error.
 
-## Optional cuDSS provider
+## Stateful linear system solvers
+
+Add a common `LinearSystemSolver` contract in `warp.optim.linear` for a prepared
+system $A x=b$ with changing right-hand sides. It owns or retains reusable
+workspace, iterative/preconditioner state or direct factors, and binds to a
+caller-supplied matrix or operator. It is useful to eigen routines and other
+clients; it does not belong in `warp.optim.eigen`.
+
+Extend or adapt the existing `LinearSolverState`, `CG` and `GMRES` implementations
+to satisfy this contract, preserving their current interfaces. Do not implement
+a second CG or GMRES. Expose an optional `CuDSS` state satisfying the same
+contract. Whether `LinearSystemSolver` is a base class or a protocol is an
+implementation review decision; consumers must not require one concrete solver
+class or test for the presence of cuDSS.
+
+| Member | Proposed contract |
+|---|---|
+| System metadata | Bound operator, scalar shape, dtype, device, prepared RHS count and capability metadata; no numerical host readback to discover them |
+| `prepare(nrhs=1)` | Allocate and warm state outside capture; prepare native analysis/factors when needed. Pure-Warp implementations work on CPU and CUDA. Provider-specific factorization settings remain on the concrete state. |
+| `solve(rhs, out)` | Solve the bound system into caller-owned storage and return reusable device diagnostics. For one RHS, arrays have shape `(n,)`; block solves use `(nrhs,n)` rows. Use fixed prepared layouts, reject unsupported aliasing, and overwrite `out` without consuming an uninitialized initial guess. |
+| Device diagnostics | Per-RHS status, iteration counts and residual information with documented freshness; reset on each call. No implicit host exception based on convergence. Numerical failures can propagate to the eigen result on the device. |
+| `update_values()` | Explicitly refresh state after changes to the bound matrix values. Refactor or refresh dependent preconditioners as supported; otherwise require reconstruction. Report any need to reprepare/recapture through setup metadata, never silently reuse stale factors. |
+| Lifetime | Caller owns the passed state. Eigen routines borrow it and do not close it. Retain it through graph completion; do not share mutable scratch between concurrent solves. Resource release is explicit for native state. |
+
+The matrix-bound construction mode is the proposed extension that allows
+`CG(A, ...)` or `GMRES(A, ...)` to be prepared before the first RHS is known.
+`solve(rhs, out)` complements their existing bound-RHS callable interface.
+Preserve existing constructor and return behavior for existing callers rather
+than globally changing the meaning of `LinearSolverState`.
+
+The default backend is pure Warp. Use CG when the caller knows the system is
+SPD; use GMRES for a general system. Any convenience factory must also default
+to pure Warp and must not select cuDSS merely because it is installed. Request
+the direct solver explicitly. Matrix-free operators work with iterative states;
+the cuDSS state requires compatible assembled sparse storage.
+
+Eigen routines use `solve` through an internal inverse-action adapter that
+supplies their prepared RHS/output buffers. `inverse` supplies the shifted solve;
+`mass_inverse` supplies the mass solve. The eigensolver itself applies any mass
+product required by the spectral transformation. A block solve can also provide
+a LOBPCG preconditioning action with explicitly chosen inner tolerances and
+budgets. This does not imply that a truncated iterative solve is an exact linear
+inverse or that it has the same failure policy as a preconditioning application.
+
+An iterative state resets its initial guess by default. A warm-start policy must
+be explicit because history-dependent inverse errors can affect the outer
+algorithm. Validate final eigenpairs against the original equations regardless
+of backend. Multiple RHSs refer to one shared system, not independent matrices;
+shared factors and optimized block products should be reusable across them.
+
+All solver states expose the same CPU eager/CUDA capture composition rules where
+their backend is supported. Preparation and value updates are setup operations;
+after preparation, `solve` allocates no workspace and performs no host convergence
+checks during CUDA replay. Graphs retain stable buffer and factor addresses.
+Any unsupported update invalidates the dependent preparation/graph explicitly.
+
+### Optional cuDSS provider
 
 Keep cuDSS behind the inverse-action interface, with lazy optional imports and
-an explicit provider installation. Factorization and solve belong to a reusable
-linear-solve adapter, not to the eigensolver algorithm. The initial integration
-can keep that adapter in `warp-cuDSS`; moving it into Warp is a separate backend
-maintenance and packaging decision.
+an explicit provider installation. The public stateful solve abstraction and
+thin `linear.CuDSS` adapter are included in this proposal. Native bindings may
+remain in the optional `warp-cuDSS` provider; bundling the native dependency in
+Warp is a separate packaging decision. Neither importing the linear/eigen modules
+nor constructing a pure-Warp state requires cuDSS.
 
 The adapter owns symbolic analysis, numerical factorization, native workspace,
 solve status and any supported refactor lifecycle. Warp owns RHS assembly,
@@ -478,9 +589,11 @@ Use Warp's public forwarding-module convention and private implementation tree:
 
 ```text
 warp/optim/eigen.py                  public exports
+warp/optim/linear.py                 shared stateful system-solve contract and exports
 warp/_src/optim/eigen/               frontend, state, operators, algorithms, kernels
+warp/_src/optim/                     reusable iterative states and optional direct adapter
 warp/tests/                         focused eigen correctness and graph tests
-warp/examples/optim/                small procedural modal example
+warp/examples/optim/                procedural modal example assembled with warp.fem
 asv/                                performance benchmarks in Warp's harness
 docs/                               API reference, guide, support matrix
 ```
@@ -495,18 +608,19 @@ block operator improvements should be reusable outside eigenproblems.
 | `KrylovSchur`, `GeneralizedKrylovSchur`, `BlockLOBPCG` | Public `KrylovSchur` for standard/generalized problems and `LOBPCG` for the block method; common `EigenSolverState` and matching convenience functions |
 | `SymmetricEigensolver`, `GeneralizedEigensolver` | Retained warpack compatibility implementations; no new public upstream aliases |
 | `SparseOperator`, `BatchedSparseOperator` | Existing Warp operator interface plus private block adapters |
-| `CGInverse`, `GMRESInverse`, `BatchedCGPreconditioner` | Reusable adapters over upstream linear solver states; define their public home in a separate linear API review |
-| `CuDSSInverse`, `InertiaResult` | Optional provider and its explicit diagnostics |
+| `CGInverse`, `GMRESInverse`, `BatchedCGPreconditioner` | Shared `warp.optim.linear` system-solve contract implemented using upstream iterative states; private eigen inverse/preconditioning adapters |
+| `CuDSSInverse`, `InertiaResult` | Optional `linear.CuDSS` state and provider-specific diagnostics behind the common system-solve contract |
 | `EigenpairEvaluation` | Common result finalization and explicit validation utilities |
 | `OrthogonalComplementOperator`, `MassOrthogonalComplementInverse` | Internal deflation machinery; expose reusable projection utilities only with an independent use case |
-| `ConstrainedKrylovSchur`, `independent_constraints`, `saddle_point_matrix` | Follow-up constrained API; generic constraint operations separated from application assembly |
+| `ConstrainedKrylovSchur`, `independent_constraints`, `saddle_point_matrix` | Follow-up constrained solve/diagnostics API consumes caller-supplied systems; KKT construction stays in caller code using warp.fem/warp.sparse or separate assembly helpers, outside eigen |
 | `HermitianCSR`, `ComplexCSR`, `HermitianEigensolver`, `GeneralEigensolver`, `ComplexShiftInverse`, `ShiftInvertEigensolver`, `GeneralizedShiftInvertEigensolver` | Follow-up complex storage review and explicit Hermitian/general solver states |
 | `BucklingEigensolver`, `CayleyEigensolver` | Follow-up explicit transformation policy with its own selection semantics |
 | `PartialSVD`, `NormalSVD` | Follow-up public partial SVD solver states; normal-product conditioning tradeoff stays explicit |
 | `NumericalNullspaceDiagnostics`, `LowestModeCertificate` | Optional diagnostic layer; distinguish supplied-span classification from completeness certification |
 
-Keep FEM, skinning energy assembly, mesh loading, rendering and application data
-outside runtime source. CuPy/SciPy/Spectra adapters, external suite translations,
+Keep FEM and skinning energy assembly, mesh loading, rendering and application
+data outside `warp.optim.eigen`; use `warp.fem` from examples and tests wherever
+possible. CuPy/SciPy/Spectra adapters, external suite translations,
 timing workers and archived experiments remain in the warpack comparison project.
 Move small independent regression fixtures into upstream tests, with provenance
 and licensing reviewed. No test or comparison imports from the installed module.
@@ -530,10 +644,12 @@ remaining benchmark migration is tracked in
 | Coverage | Acceptance evidence |
 |---|---|
 | CPU and CUDA support | Run the initial public algorithms, selections and pure-Warp inverse/preconditioner paths on both devices; check original residuals and invariant subspaces rather than bitwise equality; exercise CPU-only CI without a CUDA driver |
+| Assembly boundary | Assemble representative elasticity/Laplacian fixtures with warp.fem on CPU and CUDA; keep analytic fixtures and independent references; check that eigen source does not import FEM or application matrix-construction helpers |
 | Algebra and selection | Analytic diagonal/block problems and independent small dense references; requested spectrum, not just residuals; all implemented selection modes |
 | Generalized metrics | Diagonal and consistent SPD mass, indefinite stiffness, scaling, near-zero modes, noncommuting $K,M$ and mass orthogonality |
 | Multiplicity and deflation | Repeated/clustered modes, disconnected nullspaces, independent requested subspace, known rigid-mode exclusion and rank-deficient starts |
 | Backends | Same matrices and accuracy gates for iterative and cuDSS inverses; deliberate inner failure; SPD versus indefinite shifts |
+| Reusable linear state | Pass different concrete solver states to the same eigen call; repeat RHS/block solves, update matrix values, check status reset and factor lifetime, exercise pure-Warp operation without cuDSS installed, and regression-test existing linear APIs |
 | Sparse and operator interfaces | Scalar and qualified block storage, matrix-free products, overlap/stride rejection, dtype/device errors, no runtime test imports |
 | Lifecycle and capture | First solve, warm solve, changed values and starts, stale factor prevention through documented update workflow, reset after failure, stream ownership, eager/captured agreement |
 | Device execution | Graph-node inspection plus CUDA API tracing for unexpected allocations, synchronizations and transfers; no host numerical decisions in replay |
@@ -548,7 +664,7 @@ general eigensolver contribution. Ill-scaled pencil recovery
 generalized support envelope. Do not make an upstream release depend on fixing
 unrelated bugs in competitor libraries; preserve those comparison failures.
 
-Report compilation, matrix conversion, preconditioner/factor setup, graph
+Report application assembly, compilation, matrix conversion, preconditioner/factor setup, graph
 preparation including first upload, first accepted solve, repeated solve and
 peak memory separately. For a caller deciding total cost, also give the sum for
 one solve and for repeated solves. Charge each backend its complete setup cost
@@ -574,9 +690,10 @@ to CPU execution. GPU performance specialization must retain a tested CPU path.
 |---|---|---|
 | P0 | Maintainer discussion and frontend contract | Agree namespace, state/results, row orientation, required CPU and CUDA FP64 scope, residual policy and optional backend boundary |
 | P0 | Core operator/state integration | Scalar operator fallback plus qualified block fast path; prepare/call composition; device status; import and ownership tests |
+| P0 | Shared linear system solver abstraction | Matrix-bound iterative states in warp.optim.linear, caller-owned RHS/output solves, update/lifetime contracts, backwards compatibility and default pure-Warp operation |
 | P0 | Symmetric standard and SPD generalized algorithms | Krylov–Schur and LOBPCG supported on CPU and CUDA with fresh validation, accurate selection and device-specific performance baselines |
-| P0 | Optional inverse adapters and fast preconditioning | Upstream CG/GMRES/FSAI reuse; cuDSS provider qualification; first-use and update lifecycle tests; reproduce the fast Anvil path |
-| P0 | Initial upstream documentation and release qualification | Executable CPU and CUDA examples, CPU-only CI and CUDA qualification, optional-provider support matrix, packaging/license audit, graph issue disposition and before/after benchmark report |
+| P0 | Optional inverse adapters and fast preconditioning | Upstream CG/GMRES/FSAI reuse through the shared linear contract; optional cuDSS state qualification; first-use and update lifecycle tests; reproduce the fast Anvil path |
+| P0 | Initial upstream documentation and release qualification | Executable CPU and CUDA examples using warp.fem assembly, CPU-only CI and CUDA qualification, assembly boundary checks, optional-provider support matrix, packaging/license audit, graph issue disposition and before/after benchmark report |
 | P1 | Real FP32 and implicit eigenvalue adjoints | Separate precision and Tape tests; no silent unsupported gradients in the initial release |
 | P1 | Constrained physical modes and isolated-eigenvector adjoints | KKT matrix-category tests, constraint residuals and backward bordered solves |
 | P2 | Complex Hermitian, general pencils, buckling/Cayley and SVD | Separate API reviews; resolve correctness gates for each advertised family |
@@ -609,6 +726,12 @@ these contracts and a bounded initial implementation plan.
 5. **Precision and Tape:** permit an explicitly forward-only FP64 first stage,
    with unsupported differentiation rejected. Agree whether FP32 or a first
    eigenvalue adjoint is a prerequisite for the first public upstream release.
-6. **cuDSS placement:** start with an optional external provider. Bringing its
-   native dependency into Warp requires a separate packaging and support decision.
+6. **Linear solve state and cuDSS:** include the common stateful system-solve
+   abstraction in `warp.optim.linear`, adapting existing iterative states and
+   adding an explicit optional cuDSS state. Pure Warp is the default; native
+   cuDSS packaging remains optional. Review the common protocol, matrix-bound
+   construction and backwards compatibility with existing linear solver calls.
+7. **Matrix construction:** `warp.optim.eigen` consumes caller-provided matrices
+   and operators. Use `warp.fem` as much as possible in examples and test fixtures;
+   keep shifted/KKT construction and all application assembly outside eigen.
 
